@@ -1,0 +1,34 @@
+---
+config:
+  layout: elk
+---
+graph TD
+    asset_compatibility_rules --> asset_models
+    asset_compatibility_rules --> users
+    asset_model_ancestors --> asset_models
+    asset_models --> users
+    assets --> asset_models
+    assets --> users
+    digital_asset_models --> asset_models
+    digital_assets --> assets
+    digital_assets --> digital_asset_models
+    next_procedure_templates --> parent_procedure_templates
+    next_procedure_templates --> procedure_templates
+    next_procedure_templates --> users
+    parent_procedure_templates --> procedure_templates
+    parent_procedure_templates --> users
+    physical_asset_models --> asset_models
+    physical_assets --> assets
+    physical_assets --> physical_asset_models
+    procedure_asset_models --> asset_model_ancestors
+    procedure_asset_models --> asset_models
+    procedure_asset_models --> procedure_template_asset_models
+    procedure_asset_models --> procedure_templates
+    procedure_asset_models --> procedures
+    procedure_template_asset_models --> asset_models
+    procedure_template_asset_models --> procedure_templates
+    procedure_templates --> users
+    procedures --> next_procedure_templates
+    procedures --> parent_procedure_templates
+    procedures --> procedure_templates
+    procedures --> users
