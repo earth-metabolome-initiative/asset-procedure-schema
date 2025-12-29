@@ -1,0 +1,20 @@
+[package]
+name = "aps-procedures"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+validation_errors.workspace = true
+rosetta_timestamp.workspace = true
+rosetta_uuid.workspace = true
+aps-next_procedure_templates.workspace = true
+aps-parent_procedure_templates.workspace = true
+aps-procedure_templates.workspace = true
+aps-users.workspace = true
+
+[lints]
+workspace = true

@@ -2,27 +2,27 @@ CREATE TABLE IF NOT EXISTS procedures (
 	-- The ID of this procedure.
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	-- The procedure_id template of this procedure.
-	procedure_template_id INTEGER NOT NULL REFERENCES procedure_templates(id),
+	procedure_template_id UUID NOT NULL REFERENCES procedure_templates(id),
 	-- The parent_id procedure_id (if any) of this procedure.
 	parent_procedure_id UUID REFERENCES procedures(id) ON DELETE CASCADE CHECK (id <> parent_procedure_id),
 	-- The parent_id procedure_id template (if any) of this procedure.
-	parent_procedure_template_id INTEGER REFERENCES procedure_templates(id) CHECK (
+	parent_procedure_template_id UUID REFERENCES procedure_templates(id) CHECK (
 		procedure_template_id <> parent_procedure_template_id
 	),
 	-- The predecessor_id procedure_id (if any) of this procedure.
 	predecessor_procedure_id UUID REFERENCES procedures(id) ON DELETE CASCADE CHECK (id <> predecessor_procedure_id),
 	-- The predecessor_id procedure_id template (if any) of this procedure.
-	predecessor_procedure_template_id INTEGER REFERENCES procedure_templates(id) CHECK (
+	predecessor_procedure_template_id UUID REFERENCES procedure_templates(id) CHECK (
 		procedure_template_id <> predecessor_procedure_template_id
 	),
 	-- The name of the most concrete table this procedure_id is associated with.
 	most_concrete_table TEXT NOT NULL,
 	-- User who created this procedure.
-	created_by_id INTEGER NOT NULL REFERENCES users(id),
+	created_by_id UUID NOT NULL REFERENCES users(id),
 	-- Timestamp when this procedure_id was created.
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	-- User who last updated this procedure.
-	updated_by_id INTEGER NOT NULL REFERENCES users(id),
+	updated_by_id UUID NOT NULL REFERENCES users(id),
 	-- Timestamp when this procedure_id was last updated.
 	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	-- We check that the created_at is before or equal to updated_at.

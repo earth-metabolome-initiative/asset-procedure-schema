@@ -1,15 +1,15 @@
 CREATE TABLE IF NOT EXISTS procedure_template_asset_models (
 	-- Identifier of the procedure_id template asset model
-	id SERIAL PRIMARY KEY,
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	-- The name of the procedure_id template asset model
-	name TEXT NOT NULL CHECK (must_be_paragraph(name)),
+	name TEXT NOT NULL CHECK (name <> ''),
 	-- Procedure template this asset model is associated with
-	procedure_template_id INTEGER NOT NULL REFERENCES procedure_templates(id) ON DELETE CASCADE,
+	procedure_template_id UUID NOT NULL REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- Optional reference to a procedure_id template asset model from another procedure_id template
 	-- which this procedure_id template asset model is based on
-	based_on_id INTEGER REFERENCES procedure_template_asset_models(id),
+	based_on_id UUID REFERENCES procedure_template_asset_models(id),
 	-- The asset model this procedure_id template asset model is associated with
-	asset_model_id INTEGER NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
+	asset_model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
 	-- We enforce that, if based_on_id is specified, then the asset model must be the same as the one
 	-- of the procedure_id template asset model it is based on.
 	FOREIGN KEY (based_on_id, asset_model_id) REFERENCES procedure_template_asset_models(id, asset_model_id),

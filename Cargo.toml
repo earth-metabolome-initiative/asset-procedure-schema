@@ -1,0 +1,83 @@
+[workspace]
+resolver = "2"
+members = [
+  "aps/aps-asset_compatibility_rules",
+  "aps/aps-asset_model_ancestors",
+  "aps/aps-asset_models",
+  "aps/aps-assets",
+  "aps/aps-digital_asset_models",
+  "aps/aps-digital_assets",
+  "aps/aps-next_procedure_templates",
+  "aps/aps-parent_procedure_templates",
+  "aps/aps-physical_asset_models",
+  "aps/aps-physical_assets",
+  "aps/aps-procedure_asset_models",
+  "aps/aps-procedure_template_asset_models",
+  "aps/aps-procedure_templates",
+  "aps/aps-procedures",
+  "aps/aps-users",
+  "aps/aps",
+]
+
+[workspace.package]
+edition = "2024"
+
+[workspace.dependencies]
+aps-asset_compatibility_rules = { path = "aps/aps-asset_compatibility_rules" }
+aps-asset_model_ancestors = { path = "aps/aps-asset_model_ancestors" }
+aps-asset_models = { path = "aps/aps-asset_models" }
+aps-assets = { path = "aps/aps-assets" }
+aps-digital_asset_models = { path = "aps/aps-digital_asset_models" }
+aps-digital_assets = { path = "aps/aps-digital_assets" }
+aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
+aps-parent_procedure_templates = { path = "aps/aps-parent_procedure_templates" }
+aps-physical_asset_models = { path = "aps/aps-physical_asset_models" }
+aps-physical_assets = { path = "aps/aps-physical_assets" }
+aps-procedure_asset_models = { path = "aps/aps-procedure_asset_models" }
+aps-procedure_template_asset_models = { path = "aps/aps-procedure_template_asset_models" }
+aps-procedure_templates = { path = "aps/aps-procedure_templates" }
+aps-procedures = { path = "aps/aps-procedures" }
+aps-users = { path = "aps/aps-users" }
+rosetta_timestamp = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate", features = [
+  "diesel",
+  "serde",
+] }
+chrono = { version = "0.4.42" }
+pgrx_validation = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
+validation_errors = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
+postgis_diesel = { git = "https://github.com/LucaCappelletti94/postgis-diesel", branch = "master", features = [
+  "serde",
+  "diesel",
+  "postgres",
+  "sqlite",
+] }
+diesel = { git = "https://github.com/LucaCappelletti94/diesel", branch = "future3", features = [
+  "extras",
+] }
+diesel-builders = { git = "https://github.com/LucaCappelletti94/diesel-builders", branch = "main" }
+rosetta_uuid = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate", features = [
+  "diesel",
+  "serde",
+] }
+
+[workspace.lints.rust]
+missing_docs = "forbid"
+unused_macro_rules = "forbid"
+unused_doc_comments = "forbid"
+unconditional_recursion = "forbid"
+unreachable_patterns = "forbid"
+unused_import_braces = "forbid"
+unused_must_use = "forbid"
+deprecated = "deny"
+
+[workspace.lints.rustdoc]
+broken_intra_doc_links = "forbid"
+bare_urls = "forbid"
+invalid_codeblock_attributes = "forbid"
+invalid_html_tags = "forbid"
+missing_crate_level_docs = "forbid"
+unescaped_backticks = "forbid"
+redundant_explicit_links = "forbid"
+invalid_rust_codeblocks = "forbid"

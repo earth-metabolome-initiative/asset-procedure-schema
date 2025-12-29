@@ -8,15 +8,15 @@ CREATE TABLE IF NOT EXISTS procedure_templates (
 	-- Version of the procedure_id template.
 	version INTEGER NOT NULL DEFAULT 1,
 	-- Human-readable name of the procedure_id template
-	name TEXT UNIQUE NOT NULL CHECK (must_be_paragraph(name)),
+	name TEXT UNIQUE NOT NULL CHECK (name <> ''),
 	-- Human-readable description of the procedure_id template
-	description TEXT NOT NULL CHECK (must_be_paragraph(description)),
+	description TEXT NOT NULL CHECK (description <> ''),
 	-- The user who created this procedure_id template
-	created_by_id INTEGER NOT NULL REFERENCES users(id),
+	created_by_id UUID NOT NULL REFERENCES users(id),
 	-- The timestamp when this procedure_id template was created
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	-- The user who last updated this procedure_id template
-	updated_by_id INTEGER NOT NULL REFERENCES users(id),
+	updated_by_id UUID NOT NULL REFERENCES users(id),
 	-- The timestamp when this procedure_id template was last updated
 	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (created_at <= updated_at),
 	-- Whether this procedure_id template is deprecated and should not be used for new procedures

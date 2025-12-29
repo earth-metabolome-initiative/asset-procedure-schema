@@ -1,0 +1,25 @@
+[package]
+name = "aps"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+aps-asset_compatibility_rules.workspace = true
+aps-asset_model_ancestors.workspace = true
+aps-asset_models.workspace = true
+aps-assets.workspace = true
+aps-digital_asset_models.workspace = true
+aps-digital_assets.workspace = true
+aps-next_procedure_templates.workspace = true
+aps-parent_procedure_templates.workspace = true
+aps-physical_asset_models.workspace = true
+aps-physical_assets.workspace = true
+aps-procedure_asset_models.workspace = true
+aps-procedure_template_asset_models.workspace = true
+aps-procedure_templates.workspace = true
+aps-procedures.workspace = true
+aps-users.workspace = true
+
+[lints]
+workspace = true
