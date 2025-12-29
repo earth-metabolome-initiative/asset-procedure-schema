@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS physical_asset_models (
+	id UUID PRIMARY KEY REFERENCES asset_models(id) ON DELETE CASCADE
+);
