@@ -72,14 +72,12 @@ impl ::diesel_builders::ValidateColumn<assets::name>
         <Self as ::diesel_builders::ValidateColumn<assets::name>>::validate_column(name)?;
         if let Some(description) =
             <Self as diesel_builders::MayGetColumn<assets::description>>::may_get_column_ref(self)
-        {
-            if description.as_ref().is_some_and(|description| name == description) {
+            && description.as_ref().is_some_and(|description| name == description) {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::assets::name::NAME,
                     crate::assets::description::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -105,14 +103,12 @@ impl ::diesel_builders::ValidateColumn<assets::description>
         )?;
         if let Some(name) =
             <Self as diesel_builders::MayGetColumn<assets::name>>::may_get_column_ref(self)
-        {
-            if name.as_ref().is_some_and(|name| name == description) {
+            && name.as_ref().is_some_and(|name| name == description) {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::assets::name::NAME,
                     crate::assets::description::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -128,14 +124,12 @@ impl ::diesel_builders::ValidateColumn<assets::created_at>
         use diesel::Column;
         if let Some(edited_at) =
             <Self as diesel_builders::MayGetColumn<assets::edited_at>>::may_get_column_ref(self)
-        {
-            if created_at > edited_at {
+            && created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::assets::created_at::NAME,
                     crate::assets::edited_at::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -151,14 +145,12 @@ impl ::diesel_builders::ValidateColumn<assets::edited_at>
         use diesel::Column;
         if let Some(created_at) =
             <Self as diesel_builders::MayGetColumn<assets::created_at>>::may_get_column_ref(self)
-        {
-            if created_at > edited_at {
+            && created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::assets::created_at::NAME,
                     crate::assets::edited_at::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }

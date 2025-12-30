@@ -60,14 +60,12 @@ impl ::diesel_builders::ValidateColumn<asset_models::id>
         if let Some(parent_model_id) = <Self as diesel_builders::MayGetColumn<
             asset_models::parent_model_id,
         >>::may_get_column_ref(self)
-        {
-            if parent_model_id.as_ref().is_some_and(|parent_model_id| id == parent_model_id) {
+            && parent_model_id.as_ref().is_some_and(|parent_model_id| id == parent_model_id) {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::asset_models::id::NAME,
                     crate::asset_models::parent_model_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -92,14 +90,12 @@ impl ::diesel_builders::ValidateColumn<asset_models::name>
         if let Some(description) = <Self as diesel_builders::MayGetColumn<
             asset_models::description,
         >>::may_get_column_ref(self)
-        {
-            if name == description {
+            && name == description {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::asset_models::name::NAME,
                     crate::asset_models::description::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -125,14 +121,12 @@ impl ::diesel_builders::ValidateColumn<asset_models::description>
         )?;
         if let Some(name) =
             <Self as diesel_builders::MayGetColumn<asset_models::name>>::may_get_column_ref(self)
-        {
-            if name == description {
+            && name == description {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::asset_models::name::NAME,
                     crate::asset_models::description::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -148,14 +142,12 @@ impl ::diesel_builders::ValidateColumn<asset_models::parent_model_id>
         use diesel::Column;
         if let Some(id) =
             <Self as diesel_builders::MayGetColumn<asset_models::id>>::may_get_column_ref(self)
-        {
-            if id == parent_model_id {
+            && id == parent_model_id {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::asset_models::id::NAME,
                     crate::asset_models::parent_model_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -173,14 +165,12 @@ impl ::diesel_builders::ValidateColumn<asset_models::created_at>
             <Self as diesel_builders::MayGetColumn<asset_models::edited_at>>::may_get_column_ref(
                 self,
             )
-        {
-            if created_at > edited_at {
+            && created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::asset_models::created_at::NAME,
                     crate::asset_models::edited_at::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -197,14 +187,12 @@ impl ::diesel_builders::ValidateColumn<asset_models::edited_at>
         if let Some(created_at) = <Self as diesel_builders::MayGetColumn<
             asset_models::created_at,
         >>::may_get_column_ref(self)
-        {
-            if created_at > edited_at {
+            && created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::asset_models::created_at::NAME,
                     crate::asset_models::edited_at::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }

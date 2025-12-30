@@ -48,14 +48,12 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_mod
         if let Some(right_asset_model_id) = <Self as diesel_builders::MayGetColumn<
             asset_compatibility_rules::right_asset_model_id,
         >>::may_get_column_ref(self)
-        {
-            if left_asset_model_id == right_asset_model_id {
+            && left_asset_model_id == right_asset_model_id {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::asset_compatibility_rules::left_asset_model_id::NAME,
                     crate::asset_compatibility_rules::right_asset_model_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -72,14 +70,12 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::right_asset_mo
         if let Some(left_asset_model_id) = <Self as diesel_builders::MayGetColumn<
             asset_compatibility_rules::left_asset_model_id,
         >>::may_get_column_ref(self)
-        {
-            if left_asset_model_id == right_asset_model_id {
+            && left_asset_model_id == right_asset_model_id {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::asset_compatibility_rules::left_asset_model_id::NAME,
                     crate::asset_compatibility_rules::right_asset_model_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }

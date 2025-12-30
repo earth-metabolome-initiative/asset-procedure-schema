@@ -75,8 +75,7 @@ impl ::diesel_builders::ValidateColumn<procedures::id>
         if let Some(parent_procedure_id) = <Self as diesel_builders::MayGetColumn<
             procedures::parent_procedure_id,
         >>::may_get_column_ref(self)
-        {
-            if parent_procedure_id
+            && parent_procedure_id
                 .as_ref()
                 .is_some_and(|parent_procedure_id| id == parent_procedure_id)
             {
@@ -85,12 +84,10 @@ impl ::diesel_builders::ValidateColumn<procedures::id>
                     crate::procedures::parent_procedure_id::NAME,
                 ));
             }
-        }
         if let Some(predecessor_procedure_id) = <Self as diesel_builders::MayGetColumn<
             procedures::predecessor_procedure_id,
         >>::may_get_column_ref(self)
-        {
-            if predecessor_procedure_id
+            && predecessor_procedure_id
                 .as_ref()
                 .is_some_and(|predecessor_procedure_id| id == predecessor_procedure_id)
             {
@@ -99,7 +96,6 @@ impl ::diesel_builders::ValidateColumn<procedures::id>
                     crate::procedures::predecessor_procedure_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -116,8 +112,7 @@ impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
         if let Some(parent_procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::parent_procedure_template_id,
         >>::may_get_column_ref(self)
-        {
-            if parent_procedure_template_id.as_ref().is_some_and(|parent_procedure_template_id| {
+            && parent_procedure_template_id.as_ref().is_some_and(|parent_procedure_template_id| {
                 procedure_template_id == parent_procedure_template_id
             }) {
                 return Err(validation_errors::prelude::ValidationError::equal(
@@ -125,12 +120,10 @@ impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
                     crate::procedures::parent_procedure_template_id::NAME,
                 ));
             }
-        }
         if let Some(predecessor_procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::predecessor_procedure_template_id,
         >>::may_get_column_ref(self)
-        {
-            if predecessor_procedure_template_id.as_ref().is_some_and(
+            && predecessor_procedure_template_id.as_ref().is_some_and(
                 |predecessor_procedure_template_id| {
                     procedure_template_id == predecessor_procedure_template_id
                 },
@@ -140,7 +133,6 @@ impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
                     crate::procedures::predecessor_procedure_template_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -156,14 +148,12 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_id>
         use diesel::Column;
         if let Some(id) =
             <Self as diesel_builders::MayGetColumn<procedures::id>>::may_get_column_ref(self)
-        {
-            if id == parent_procedure_id {
+            && id == parent_procedure_id {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::procedures::id::NAME,
                     crate::procedures::parent_procedure_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -180,14 +170,12 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_template_id>
         if let Some(procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::procedure_template_id,
         >>::may_get_column_ref(self)
-        {
-            if procedure_template_id == parent_procedure_template_id {
+            && procedure_template_id == parent_procedure_template_id {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::procedures::procedure_template_id::NAME,
                     crate::procedures::parent_procedure_template_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -203,14 +191,12 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_id>
         use diesel::Column;
         if let Some(id) =
             <Self as diesel_builders::MayGetColumn<procedures::id>>::may_get_column_ref(self)
-        {
-            if id == predecessor_procedure_id {
+            && id == predecessor_procedure_id {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::procedures::id::NAME,
                     crate::procedures::predecessor_procedure_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -227,14 +213,12 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_templat
         if let Some(procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::procedure_template_id,
         >>::may_get_column_ref(self)
-        {
-            if procedure_template_id == predecessor_procedure_template_id {
+            && procedure_template_id == predecessor_procedure_template_id {
                 return Err(validation_errors::prelude::ValidationError::equal(
                     crate::procedures::procedure_template_id::NAME,
                     crate::procedures::predecessor_procedure_template_id::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -250,14 +234,12 @@ impl ::diesel_builders::ValidateColumn<procedures::created_at>
         use diesel::Column;
         if let Some(edited_at) =
             <Self as diesel_builders::MayGetColumn<procedures::edited_at>>::may_get_column_ref(self)
-        {
-            if created_at > edited_at {
+            && created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::procedures::created_at::NAME,
                     crate::procedures::edited_at::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
@@ -275,14 +257,12 @@ impl ::diesel_builders::ValidateColumn<procedures::edited_at>
             <Self as diesel_builders::MayGetColumn<procedures::created_at>>::may_get_column_ref(
                 self,
             )
-        {
-            if created_at > edited_at {
+            && created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::procedures::created_at::NAME,
                     crate::procedures::edited_at::NAME,
                 ));
             }
-        }
         Ok(())
     }
 }
