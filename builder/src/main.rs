@@ -38,15 +38,6 @@ pub fn main() {
 
     tracker.extend(synql.generate().expect("Unable to generate workspace"));
 
-    // Formats the generated code
-    let task = Task::new("Code Formatting");
-    Command::new("cargo")
-        .arg("fmt")
-        .current_dir("../")
-        .status()
-        .expect("Failed to format generated code");
-    tracker.add_completed_task(task);
-
     // Formats the generated TOML using `taplo fmt`
     let task = Task::new("TOML Formatting");
     Command::new("taplo")
@@ -54,6 +45,36 @@ pub fn main() {
         .current_dir("../")
         .status()
         .expect("Failed to format generated TOML");
+    tracker.add_completed_task(task);
+
+    // Formats the generated code
+    let task = Task::new("Code Formatting (1)");
+    Command::new("cargo")
+        .arg("fmt")
+        .current_dir("../")
+        .status()
+        .expect("Failed to format generated code");
+    tracker.add_completed_task(task);
+
+    // Fix clippy warnings in the generated code where possible
+    let task = Task::new("Clippy Fixes");
+    Command::new("cargo")
+        .arg("clippy")
+        .arg("--fix")
+        .arg("--allow-dirty")
+        .arg("--allow-staged")
+        .current_dir("../")
+        .status()
+        .expect("Failed to fix clippy warnings in generated code");
+    tracker.add_completed_task(task);
+
+    // Formats the generated code
+    let task = Task::new("Code Formatting (2)");
+    Command::new("cargo")
+        .arg("fmt")
+        .current_dir("../")
+        .status()
+        .expect("Failed to format generated code");
     tracker.add_completed_task(task);
 
     // We print the report

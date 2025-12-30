@@ -1,6 +1,10 @@
 //! Auto-generated crate for the `procedure_template_asset_models` table.
 #[derive(
     Clone,
+    Debug,
+    Hash,
+    Ord,
+    PartialOrd,
     Eq,
     PartialEq,
     serde :: Serialize,

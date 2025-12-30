@@ -304,6 +304,7 @@ dependencies = [
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
+ "aps-reused_procedure_template_asset_models",
  "aps-weighing_device_models",
  "diesel",
  "diesel-builders",

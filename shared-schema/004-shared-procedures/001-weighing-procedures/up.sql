@@ -19,6 +19,16 @@ CREATE TABLE IF NOT EXISTS weighing_procedure_templates (
 		procedure_template_weighed_asset_model_id,
 		weighed_asset_model_id
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
+	-- We add further constraints to ensure that all procedure template asset models are always linked to the current procedure template
+	-- even when they are not solely associated to this procedure template but shared from other procedure templates.
+	FOREIGN KEY (
+		id,
+		procedure_template_weighed_asset_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_weighed_with_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_weighed_container_model`
 	-- for the current `procedure_template`.
 	UNIQUE (

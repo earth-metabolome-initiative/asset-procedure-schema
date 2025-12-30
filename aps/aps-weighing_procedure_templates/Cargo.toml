@@ -12,6 +12,7 @@ rosetta_uuid.workspace = true
 aps-physical_asset_models.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-procedure_templates.workspace = true
+aps-reused_procedure_template_asset_models.workspace = true
 aps-weighing_device_models.workspace = true
 
 [lints]

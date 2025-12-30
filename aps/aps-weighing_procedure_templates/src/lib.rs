@@ -2,6 +2,10 @@
 #[derive(
     Copy,
     Clone,
+    Debug,
+    Hash,
+    Ord,
+    PartialOrd,
     Eq,
     PartialEq,
     serde :: Serialize,
@@ -52,3 +56,5 @@ pub struct WeighingProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
 :: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: weighed_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: weighed_with_model_id) -> (:: aps_weighing_device_models :: weighing_device_models :: id));
+:: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: id , weighing_procedure_templates :: procedure_template_weighed_asset_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: id , weighing_procedure_templates :: procedure_template_weighed_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));

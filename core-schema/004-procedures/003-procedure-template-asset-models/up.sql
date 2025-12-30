@@ -26,13 +26,13 @@ CREATE TABLE IF NOT EXISTS procedure_template_asset_models (
 );
 -- Table to track reused procedure template asset models across different procedure templates
 CREATE TABLE IF NOT EXISTS reused_procedure_template_asset_models (
-	-- Identifier of the reused procedure template asset model
-	procedure_template_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
 	-- Procedure template this reused asset model is associated with
 	procedure_template_id UUID NOT NULL REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	-- Primary key is composed of both id and procedure_template_id
+	-- Identifier of the reused procedure template asset model
+	procedure_template_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
+	-- Primary key is composed of both procedure_template_id and procedure_template_asset_model_id
 	PRIMARY KEY (
-		procedure_template_asset_model_id,
-		procedure_template_id
+		procedure_template_id,
+		procedure_template_asset_model_id
 	)
 );
