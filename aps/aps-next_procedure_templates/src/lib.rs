@@ -29,7 +29,7 @@ pub struct NextProcedureTemplate {
     /// Undocumented column
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    created_by_id: ::rosetta_uuid::Uuid,
+    creator_id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     #[infallible]
@@ -39,7 +39,7 @@ pub struct NextProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: predecessor_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: successor_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: created_by_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: creator_id) -> (:: aps_users :: users :: id));
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id , next_procedure_templates :: predecessor_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id , next_procedure_templates :: successor_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
 impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>

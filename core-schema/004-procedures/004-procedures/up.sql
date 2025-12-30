@@ -18,15 +18,15 @@ CREATE TABLE IF NOT EXISTS procedures (
 	-- The name of the most concrete table this procedure_id is associated with.
 	most_concrete_table TEXT NOT NULL,
 	-- User who created this procedure.
-	created_by_id UUID NOT NULL REFERENCES users(id),
+	creator_id UUID NOT NULL REFERENCES users(id),
 	-- Timestamp when this procedure_id was created.
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	-- User who last updated this procedure.
-	updated_by_id UUID NOT NULL REFERENCES users(id),
+	editor_id UUID NOT NULL REFERENCES users(id),
 	-- Timestamp when this procedure_id was last updated.
-	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	-- We check that the created_at is before or equal to updated_at.
-	CHECK (created_at <= updated_at),
+	edited_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	-- We check that the created_at is before or equal to edited_at.
+	CHECK (created_at <= edited_at),
 	-- We create an index on (procedure_template_id, parent_procedure_template_id) to allow for foreign
 	-- keys from the concrete procedures to check that the procedure_id template is correctly aligned.
 	UNIQUE (id, procedure_template_id),

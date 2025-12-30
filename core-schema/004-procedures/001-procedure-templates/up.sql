@@ -12,13 +12,13 @@ CREATE TABLE IF NOT EXISTS procedure_templates (
 	-- Human-readable description of the procedure_id template
 	description TEXT NOT NULL CHECK (description <> ''),
 	-- The user who created this procedure_id template
-	created_by_id UUID NOT NULL REFERENCES users(id),
+	creator_id UUID NOT NULL REFERENCES users(id),
 	-- The timestamp when this procedure_id template was created
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	-- The user who last updated this procedure_id template
-	updated_by_id UUID NOT NULL REFERENCES users(id),
+	editor_id UUID NOT NULL REFERENCES users(id),
 	-- The timestamp when this procedure_id template was last updated
-	updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (created_at <= updated_at),
+	edited_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (created_at <= edited_at),
 	-- Whether this procedure_id template is deprecated and should not be used for new procedures
 	deprecated BOOLEAN NOT NULL DEFAULT FALSE,
 	-- We enforce that the name and description are distinct to avoid lazy duplicates

@@ -1,0 +1,57 @@
+---
+config:
+  layout: elk
+---
+graph TD
+    asset_compatibility_rules --> asset_models
+    asset_compatibility_rules --> users
+    asset_model_ancestors --> asset_models
+    asset_models --> users
+    assets --> asset_models
+    assets --> users
+    brands --> users
+    commercial_products --> asset_models
+    commercial_products --> brands
+    digital_asset_models --> asset_models
+    digital_assets --> assets
+    digital_assets --> digital_asset_models
+    next_procedure_templates --> parent_procedure_templates
+    next_procedure_templates --> procedure_templates
+    next_procedure_templates --> users
+    parent_procedure_templates --> procedure_templates
+    parent_procedure_templates --> users
+    physical_asset_models --> asset_models
+    physical_assets --> assets
+    physical_assets --> physical_asset_models
+    procedure_asset_models --> asset_model_ancestors
+    procedure_asset_models --> asset_models
+    procedure_asset_models --> procedure_template_asset_models
+    procedure_asset_models --> procedure_templates
+    procedure_asset_models --> procedures
+    procedure_template_asset_models --> asset_models
+    procedure_template_asset_models --> procedure_templates
+    procedure_templates --> users
+    procedures --> next_procedure_templates
+    procedures --> parent_procedure_templates
+    procedures --> procedure_templates
+    procedures --> users
+    reused_procedure_template_asset_models --> procedure_template_asset_models
+    reused_procedure_template_asset_models --> procedure_templates
+    weighing_device_models --> asset_models
+    weighing_device_models --> physical_asset_models
+    weighing_devices --> assets
+    weighing_devices --> physical_assets
+    weighing_devices --> weighing_device_models
+    weighing_procedure_templates --> physical_asset_models
+    weighing_procedure_templates --> procedure_template_asset_models
+    weighing_procedure_templates --> procedure_templates
+    weighing_procedure_templates --> weighing_device_models
+    weighing_procedures --> assets
+    weighing_procedures --> physical_asset_models
+    weighing_procedures --> physical_assets
+    weighing_procedures --> procedure_asset_models
+    weighing_procedures --> procedure_template_asset_models
+    weighing_procedures --> procedures
+    weighing_procedures --> weighing_device_models
+    weighing_procedures --> weighing_devices
+    weighing_procedures --> weighing_procedure_templates

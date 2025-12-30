@@ -25,7 +25,7 @@ pub struct AssetCompatibilityRule {
     /// Undocumented column
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    created_by_id: ::rosetta_uuid::Uuid,
+    creator_id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     #[infallible]
@@ -34,7 +34,7 @@ pub struct AssetCompatibilityRule {
 }
 :: diesel_builders :: prelude :: fk ! ((asset_compatibility_rules :: left_asset_model_id) -> (:: aps_asset_models :: asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((asset_compatibility_rules :: right_asset_model_id) -> (:: aps_asset_models :: asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((asset_compatibility_rules :: created_by_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((asset_compatibility_rules :: creator_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_model_id>
     for <asset_compatibility_rules::table as ::diesel_builders::TableExt>::NewValues
 {

@@ -39,7 +39,7 @@ pub struct Procedure {
     /// Undocumented column
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    created_by_id: ::rosetta_uuid::Uuid,
+    creator_id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
@@ -47,11 +47,11 @@ pub struct Procedure {
     /// Undocumented column
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    updated_by_id: ::rosetta_uuid::Uuid,
+    editor_id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    updated_at: ::rosetta_timestamp::TimestampUTC,
+    edited_at: ::rosetta_timestamp::TimestampUTC,
 }
 ::diesel_builders::prelude::unique_index!(procedures::id, procedures::procedure_template_id);
 :: diesel_builders :: prelude :: fk ! ((procedures :: procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
@@ -59,8 +59,8 @@ pub struct Procedure {
 :: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_id) -> (procedures :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: created_by_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: updated_by_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((procedures :: creator_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((procedures :: editor_id) -> (:: aps_users :: users :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_id , procedures :: parent_procedure_template_id) -> (procedures :: id , procedures :: procedure_template_id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_id , procedures :: predecessor_procedure_template_id) -> (procedures :: id , procedures :: procedure_template_id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_template_id , procedures :: procedure_template_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
@@ -248,29 +248,27 @@ impl ::diesel_builders::ValidateColumn<procedures::created_at>
         created_at: &::rosetta_timestamp::TimestampUTC,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
-        if let Some(updated_at) =
-            <Self as diesel_builders::MayGetColumn<procedures::updated_at>>::may_get_column_ref(
-                self,
-            )
+        if let Some(edited_at) =
+            <Self as diesel_builders::MayGetColumn<procedures::edited_at>>::may_get_column_ref(self)
         {
-            if created_at > updated_at {
+            if created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::procedures::created_at::NAME,
-                    crate::procedures::updated_at::NAME,
+                    crate::procedures::edited_at::NAME,
                 ));
             }
         }
         Ok(())
     }
 }
-impl ::diesel_builders::ValidateColumn<procedures::updated_at>
+impl ::diesel_builders::ValidateColumn<procedures::edited_at>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
     type Error = ::validation_errors::ValidationError<&'static str>;
     #[inline]
     fn validate_column_in_context(
         &self,
-        updated_at: &::rosetta_timestamp::TimestampUTC,
+        edited_at: &::rosetta_timestamp::TimestampUTC,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
         if let Some(created_at) =
@@ -278,10 +276,10 @@ impl ::diesel_builders::ValidateColumn<procedures::updated_at>
                 self,
             )
         {
-            if created_at > updated_at {
+            if created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::procedures::created_at::NAME,
-                    crate::procedures::updated_at::NAME,
+                    crate::procedures::edited_at::NAME,
                 ));
             }
         }

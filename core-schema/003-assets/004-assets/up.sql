@@ -4,12 +4,12 @@ CREATE TABLE IF NOT EXISTS assets (
     name VARCHAR(255) CHECK (name <> ''),
     description TEXT CHECK (description <> ''),
     model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
-    created_by_id UUID NOT NULL REFERENCES users(id),
+    creator_id UUID NOT NULL REFERENCES users(id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_by_id UUID NOT NULL REFERENCES users(id),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    editor_id UUID NOT NULL REFERENCES users(id),
+    edited_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CHECK (name <> description),
-    CHECK (created_at <= updated_at),
+    CHECK (created_at <= edited_at),
     UNIQUE (id, model_id),
     -- Assets of different models can have the same name, but not assets of the same model.
     UNIQUE (name, model_id)

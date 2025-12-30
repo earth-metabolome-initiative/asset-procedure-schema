@@ -9,6 +9,8 @@ aps-asset_compatibility_rules.workspace = true
 aps-asset_model_ancestors.workspace = true
 aps-asset_models.workspace = true
 aps-assets.workspace = true
+aps-brands.workspace = true
+aps-commercial_products.workspace = true
 aps-digital_asset_models.workspace = true
 aps-digital_assets.workspace = true
 aps-next_procedure_templates.workspace = true
@@ -19,7 +21,12 @@ aps-procedure_asset_models.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-procedure_templates.workspace = true
 aps-procedures.workspace = true
+aps-reused_procedure_template_asset_models.workspace = true
 aps-users.workspace = true
+aps-weighing_device_models.workspace = true
+aps-weighing_devices.workspace = true
+aps-weighing_procedure_templates.workspace = true
+aps-weighing_procedures.workspace = true
 
 [lints]
 workspace = true

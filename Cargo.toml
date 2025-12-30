@@ -5,6 +5,8 @@ members = [
   "aps/aps-asset_model_ancestors",
   "aps/aps-asset_models",
   "aps/aps-assets",
+  "aps/aps-brands",
+  "aps/aps-commercial_products",
   "aps/aps-digital_asset_models",
   "aps/aps-digital_assets",
   "aps/aps-next_procedure_templates",
@@ -15,7 +17,12 @@ members = [
   "aps/aps-procedure_template_asset_models",
   "aps/aps-procedure_templates",
   "aps/aps-procedures",
+  "aps/aps-reused_procedure_template_asset_models",
   "aps/aps-users",
+  "aps/aps-weighing_device_models",
+  "aps/aps-weighing_devices",
+  "aps/aps-weighing_procedure_templates",
+  "aps/aps-weighing_procedures",
   "aps/aps",
 ]
 
@@ -27,6 +34,8 @@ aps-asset_compatibility_rules = { path = "aps/aps-asset_compatibility_rules" }
 aps-asset_model_ancestors = { path = "aps/aps-asset_model_ancestors" }
 aps-asset_models = { path = "aps/aps-asset_models" }
 aps-assets = { path = "aps/aps-assets" }
+aps-brands = { path = "aps/aps-brands" }
+aps-commercial_products = { path = "aps/aps-commercial_products" }
 aps-digital_asset_models = { path = "aps/aps-digital_asset_models" }
 aps-digital_assets = { path = "aps/aps-digital_assets" }
 aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
@@ -37,7 +46,12 @@ aps-procedure_asset_models = { path = "aps/aps-procedure_asset_models" }
 aps-procedure_template_asset_models = { path = "aps/aps-procedure_template_asset_models" }
 aps-procedure_templates = { path = "aps/aps-procedure_templates" }
 aps-procedures = { path = "aps/aps-procedures" }
+aps-reused_procedure_template_asset_models = { path = "aps/aps-reused_procedure_template_asset_models" }
 aps-users = { path = "aps/aps-users" }
+aps-weighing_device_models = { path = "aps/aps-weighing_device_models" }
+aps-weighing_devices = { path = "aps/aps-weighing_devices" }
+aps-weighing_procedure_templates = { path = "aps/aps-weighing_procedure_templates" }
+aps-weighing_procedures = { path = "aps/aps-weighing_procedures" }
 rosetta_timestamp = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate", features = [
   "diesel",
   "serde",

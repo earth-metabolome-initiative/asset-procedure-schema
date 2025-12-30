@@ -31,7 +31,7 @@ pub struct AssetModel {
     /// Undocumented column
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    created_by_id: ::rosetta_uuid::Uuid,
+    creator_id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
@@ -39,17 +39,17 @@ pub struct AssetModel {
     /// Undocumented column
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    updated_by_id: ::rosetta_uuid::Uuid,
+    editor_id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    updated_at: ::rosetta_timestamp::TimestampUTC,
+    edited_at: ::rosetta_timestamp::TimestampUTC,
 }
 ::diesel_builders::prelude::unique_index!(asset_models::name);
 ::diesel_builders::prelude::unique_index!(asset_models::id, asset_models::parent_model_id);
 :: diesel_builders :: prelude :: fk ! ((asset_models :: parent_model_id) -> (asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((asset_models :: created_by_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((asset_models :: updated_by_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((asset_models :: creator_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((asset_models :: editor_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<asset_models::id>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -169,38 +169,39 @@ impl ::diesel_builders::ValidateColumn<asset_models::created_at>
         created_at: &::rosetta_timestamp::TimestampUTC,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
-        if let Some(updated_at) = <Self as diesel_builders::MayGetColumn<
-            asset_models::updated_at,
-        >>::may_get_column_ref(self)
+        if let Some(edited_at) =
+            <Self as diesel_builders::MayGetColumn<asset_models::edited_at>>::may_get_column_ref(
+                self,
+            )
         {
-            if created_at > updated_at {
+            if created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::asset_models::created_at::NAME,
-                    crate::asset_models::updated_at::NAME,
+                    crate::asset_models::edited_at::NAME,
                 ));
             }
         }
         Ok(())
     }
 }
-impl ::diesel_builders::ValidateColumn<asset_models::updated_at>
+impl ::diesel_builders::ValidateColumn<asset_models::edited_at>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
     type Error = ::validation_errors::ValidationError<&'static str>;
     #[inline]
     fn validate_column_in_context(
         &self,
-        updated_at: &::rosetta_timestamp::TimestampUTC,
+        edited_at: &::rosetta_timestamp::TimestampUTC,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
         if let Some(created_at) = <Self as diesel_builders::MayGetColumn<
             asset_models::created_at,
         >>::may_get_column_ref(self)
         {
-            if created_at > updated_at {
+            if created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
                     crate::asset_models::created_at::NAME,
-                    crate::asset_models::updated_at::NAME,
+                    crate::asset_models::edited_at::NAME,
                 ));
             }
         }

@@ -1,6 +1,5 @@
-//! Auto-generated crate for the `users` table.
+//! Auto-generated crate for the `brands` table.
 #[derive(
-    Copy,
     Clone,
     Eq,
     PartialEq,
@@ -13,24 +12,51 @@
 )]
 /// Undocumented table
 # [table_model (error = :: validation_errors :: ValidationError)]
-# [diesel (table_name = users)]
-pub struct User {
+# [diesel (table_name = brands)]
+pub struct Brand {
     /// Undocumented column
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Undocumented column
+    name: String,
+    /// Undocumented column
+    #[infallible]
+    # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
+    creator_id: ::rosetta_uuid::Uuid,
+    /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
+    /// Undocumented column
+    #[infallible]
+    # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
+    editor_id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,
 }
-impl ::diesel_builders::ValidateColumn<users::created_at>
-    for <users::table as ::diesel_builders::TableExt>::NewValues
+:: diesel_builders :: prelude :: fk ! ((brands :: creator_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((brands :: editor_id) -> (:: aps_users :: users :: id));
+impl ::diesel_builders::ValidateColumn<brands::name>
+    for <brands::table as ::diesel_builders::TableExt>::NewValues
+{
+    type Error = ::validation_errors::ValidationError<&'static str>;
+    #[inline]
+    fn validate_column(name: &String) -> Result<(), Self::Error> {
+        use diesel::Column;
+        if name.is_empty() {
+            return Err(validation_errors::prelude::ValidationError::empty(
+                crate::brands::name::NAME,
+            ));
+        }
+        Ok(())
+    }
+}
+impl ::diesel_builders::ValidateColumn<brands::created_at>
+    for <brands::table as ::diesel_builders::TableExt>::NewValues
 {
     type Error = ::validation_errors::ValidationError<&'static str>;
     #[inline]
@@ -40,20 +66,20 @@ impl ::diesel_builders::ValidateColumn<users::created_at>
     ) -> Result<(), Self::Error> {
         use diesel::Column;
         if let Some(edited_at) =
-            <Self as diesel_builders::MayGetColumn<users::edited_at>>::may_get_column_ref(self)
+            <Self as diesel_builders::MayGetColumn<brands::edited_at>>::may_get_column_ref(self)
         {
             if created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
-                    crate::users::created_at::NAME,
-                    crate::users::edited_at::NAME,
+                    crate::brands::created_at::NAME,
+                    crate::brands::edited_at::NAME,
                 ));
             }
         }
         Ok(())
     }
 }
-impl ::diesel_builders::ValidateColumn<users::edited_at>
-    for <users::table as ::diesel_builders::TableExt>::NewValues
+impl ::diesel_builders::ValidateColumn<brands::edited_at>
+    for <brands::table as ::diesel_builders::TableExt>::NewValues
 {
     type Error = ::validation_errors::ValidationError<&'static str>;
     #[inline]
@@ -63,12 +89,12 @@ impl ::diesel_builders::ValidateColumn<users::edited_at>
     ) -> Result<(), Self::Error> {
         use diesel::Column;
         if let Some(created_at) =
-            <Self as diesel_builders::MayGetColumn<users::created_at>>::may_get_column_ref(self)
+            <Self as diesel_builders::MayGetColumn<brands::created_at>>::may_get_column_ref(self)
         {
             if created_at > edited_at {
                 return Err(validation_errors::prelude::ValidationError::smaller_than(
-                    crate::users::created_at::NAME,
-                    crate::users::edited_at::NAME,
+                    crate::brands::created_at::NAME,
+                    crate::brands::edited_at::NAME,
                 ));
             }
         }
