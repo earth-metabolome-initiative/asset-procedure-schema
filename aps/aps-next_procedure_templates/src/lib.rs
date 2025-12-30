@@ -55,12 +55,13 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>
         if let Some(successor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::successor_id,
         >>::may_get_column_ref(self)
-            && predecessor_id == successor_id {
-                return Err(validation_errors::prelude::ValidationError::equal(
-                    crate::next_procedure_templates::predecessor_id::NAME,
-                    crate::next_procedure_templates::successor_id::NAME,
-                ));
-            }
+            && predecessor_id == successor_id
+        {
+            return Err(validation_errors::prelude::ValidationError::equal(
+                crate::next_procedure_templates::predecessor_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
+        }
         Ok(())
     }
 }
@@ -77,12 +78,13 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::successor_id>
         if let Some(predecessor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::predecessor_id,
         >>::may_get_column_ref(self)
-            && predecessor_id == successor_id {
-                return Err(validation_errors::prelude::ValidationError::equal(
-                    crate::next_procedure_templates::predecessor_id::NAME,
-                    crate::next_procedure_templates::successor_id::NAME,
-                ));
-            }
+            && predecessor_id == successor_id
+        {
+            return Err(validation_errors::prelude::ValidationError::equal(
+                crate::next_procedure_templates::predecessor_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
+        }
         Ok(())
     }
 }

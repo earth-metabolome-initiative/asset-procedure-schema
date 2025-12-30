@@ -67,12 +67,13 @@ impl ::diesel_builders::ValidateColumn<brands::created_at>
         use diesel::Column;
         if let Some(edited_at) =
             <Self as diesel_builders::MayGetColumn<brands::edited_at>>::may_get_column_ref(self)
-            && created_at > edited_at {
-                return Err(validation_errors::prelude::ValidationError::smaller_than(
-                    crate::brands::created_at::NAME,
-                    crate::brands::edited_at::NAME,
-                ));
-            }
+            && created_at > edited_at
+        {
+            return Err(validation_errors::prelude::ValidationError::smaller_than(
+                crate::brands::created_at::NAME,
+                crate::brands::edited_at::NAME,
+            ));
+        }
         Ok(())
     }
 }
@@ -88,12 +89,13 @@ impl ::diesel_builders::ValidateColumn<brands::edited_at>
         use diesel::Column;
         if let Some(created_at) =
             <Self as diesel_builders::MayGetColumn<brands::created_at>>::may_get_column_ref(self)
-            && created_at > edited_at {
-                return Err(validation_errors::prelude::ValidationError::smaller_than(
-                    crate::brands::created_at::NAME,
-                    crate::brands::edited_at::NAME,
-                ));
-            }
+            && created_at > edited_at
+        {
+            return Err(validation_errors::prelude::ValidationError::smaller_than(
+                crate::brands::created_at::NAME,
+                crate::brands::edited_at::NAME,
+            ));
+        }
         Ok(())
     }
 }
