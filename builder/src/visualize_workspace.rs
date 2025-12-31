@@ -66,7 +66,9 @@ pub fn workspace_dependencies(db: &ParserDB) -> Result<ERDiagram, Box<dyn std::e
                     .position(|t| t == destination_root_table)
                     .expect("Referenced table not found in database") as u64;
 
-            if edges.contains(&(source_id, destination_id)) {
+            if edges.contains(&(source_id, destination_id))
+                || edges.contains(&(destination_id, source_id))
+            {
                 continue;
             }
             edges.insert((source_id, destination_id));

@@ -11,7 +11,7 @@ Asset-Procedure Schema (APS) and its models to be reused across projects
 - **`builder/`**: Contains the Rust application that connects to the database, introspects the schema, and generates the model code.
 - **`aps/`**: The output directory containing the generated Rust crates for the database schema.
 
-![Workspace Visualization](./workspace_dependencies.svg)
+![Workspace Visualization](./builder/workspace_dependencies.svg)
 
 ## Versioning
 
