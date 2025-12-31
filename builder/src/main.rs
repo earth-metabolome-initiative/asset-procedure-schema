@@ -11,12 +11,10 @@ use time_requirements::{prelude::TimeTracker, report::Report, task::Task};
 pub fn main() {
     let mut tracker = TimeTracker::new("Directus Schema Generation");
 
-    let mut tracking_test = TimeTracker::new("EMI Workspace Generation Test");
-
-    let task = Task::new("Database Parsing");
+    let task = Task::new("Database Introspection");
     let db = ParserDB::try_from(Path::new("../")).expect("Failed to parse database schema");
     assert!(db.has_tables(), "Database should have tables");
-    tracking_test.add_completed_task(task);
+    tracker.add_completed_task(task);
 
     // Validate the database schema with all available constraints
     let validation_task = Task::new("Schema Validation");
@@ -25,7 +23,7 @@ pub fn main() {
     constrainer
         .validate_schema(&db)
         .expect("Database schema should pass all constraints");
-    tracking_test.add_completed_task(validation_task);
+    tracker.add_completed_task(validation_task);
  
     // Generate the code associated with the database
     let synql: SynQL<ParserDB> =
