@@ -1,0 +1,23 @@
+[package]
+name = "aps-supernatant_procedures"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+rosetta_uuid.workspace = true
+aps-assets.workspace = true
+aps-procedure_asset_models.workspace = true
+aps-procedure_template_asset_models.workspace = true
+aps-procedures.workspace = true
+aps-supernatant_procedure_templates.workspace = true
+aps-volume_measuring_device_models.workspace = true
+aps-volume_measuring_devices.workspace = true
+aps-volumetric_container_models.workspace = true
+aps-volumetric_containers.workspace = true
+
+[lints]
+workspace = true

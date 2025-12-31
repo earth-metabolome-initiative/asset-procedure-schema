@@ -1,0 +1,17 @@
+[package]
+name = "aps-centrifuges"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+rosetta_uuid.workspace = true
+aps-assets.workspace = true
+aps-commercial_centrifuge_lots.workspace = true
+aps-physical_assets.workspace = true
+
+[lints]
+workspace = true

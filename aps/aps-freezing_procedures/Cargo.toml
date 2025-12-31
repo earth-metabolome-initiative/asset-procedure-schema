@@ -1,0 +1,24 @@
+[package]
+name = "aps-freezing_procedures"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+rosetta_uuid.workspace = true
+aps-asset_compatibility_rules.workspace = true
+aps-assets.workspace = true
+aps-freezer_models.workspace = true
+aps-freezers.workspace = true
+aps-freezing_procedure_templates.workspace = true
+aps-procedure_asset_models.workspace = true
+aps-procedure_template_asset_models.workspace = true
+aps-procedures.workspace = true
+aps-volumetric_container_models.workspace = true
+aps-volumetric_containers.workspace = true
+
+[lints]
+workspace = true

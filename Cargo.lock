@@ -15,28 +15,130 @@ dependencies = [
 name = "aps"
 version = "0.1.0"
 dependencies = [
+ "aps-aliquoting_procedure_templates",
+ "aps-aliquoting_procedures",
  "aps-asset_compatibility_rules",
  "aps-asset_model_ancestors",
  "aps-asset_models",
  "aps-assets",
+ "aps-ball_mill_machine_models",
+ "aps-ball_mill_machines",
+ "aps-ball_mill_procedure_templates",
+ "aps-ball_mill_procedures",
+ "aps-bead_models",
  "aps-brands",
+ "aps-camera_models",
+ "aps-cameras",
+ "aps-centrifuge_models",
+ "aps-centrifuge_procedure_templates",
+ "aps-centrifuge_procedures",
+ "aps-centrifuges",
+ "aps-commercial_ball_mill_machine_lots",
+ "aps-commercial_ball_mill_machine_models",
+ "aps-commercial_camera_lots",
+ "aps-commercial_camera_models",
+ "aps-commercial_centrifuge_lots",
+ "aps-commercial_centrifuge_models",
+ "aps-commercial_freeze_dryer_lots",
+ "aps-commercial_freeze_dryer_models",
+ "aps-commercial_freezer_lots",
+ "aps-commercial_freezer_models",
+ "aps-commercial_geopositioning_device_lots",
+ "aps-commercial_geopositioning_device_models",
+ "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-container_models",
+ "aps-container_sealer_models",
+ "aps-container_sealing_procedure_templates",
+ "aps-container_sealing_procedures",
+ "aps-containers",
  "aps-digital_asset_models",
  "aps-digital_assets",
+ "aps-disposal_procedure_templates",
+ "aps-disposal_procedures",
+ "aps-fractioning_procedure_templates",
+ "aps-fractioning_procedures",
+ "aps-freeze_dryer_models",
+ "aps-freeze_dryers",
+ "aps-freeze_drying_procedure_templates",
+ "aps-freeze_drying_procedures",
+ "aps-freezer_models",
+ "aps-freezers",
+ "aps-freezing_procedure_templates",
+ "aps-freezing_procedures",
+ "aps-geopositioning_device_models",
+ "aps-geopositioning_devices",
+ "aps-geopositioning_procedure_templates",
+ "aps-geopositioning_procedures",
+ "aps-harvesting_procedure_templates",
+ "aps-harvesting_procedures",
  "aps-next_procedure_templates",
+ "aps-packaging_models",
+ "aps-packaging_procedure_templates",
+ "aps-packaging_procedures",
  "aps-parent_procedure_templates",
+ "aps-photograph_procedure_templates",
+ "aps-photograph_procedures",
+ "aps-photographs",
  "aps-physical_asset_models",
  "aps-physical_assets",
+ "aps-pouring_procedure_templates",
+ "aps-pouring_procedures",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
  "aps-procedures",
  "aps-reused_procedure_template_asset_models",
+ "aps-sample_models",
+ "aps-sample_source_models",
+ "aps-sample_sources",
+ "aps-samples",
+ "aps-storage_procedure_templates",
+ "aps-storage_procedures",
+ "aps-supernatant_procedure_templates",
+ "aps-supernatant_procedures",
  "aps-users",
+ "aps-volume_measuring_device_models",
+ "aps-volume_measuring_devices",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "aps-weighed_container_models",
  "aps-weighing_device_models",
  "aps-weighing_devices",
  "aps-weighing_procedure_templates",
  "aps-weighing_procedures",
+]
+
+[[package]]
+name = "aps-aliquoting_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volume_measuring_device_models",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-aliquoting_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-aliquoting_procedure_templates",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volume_measuring_device_models",
+ "aps-volume_measuring_devices",
+ "aps-volumetric_containers",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
 ]
 
 [[package]]
@@ -92,6 +194,82 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-ball_mill_machine_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-ball_mill_machines"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-commercial_ball_mill_machine_lots",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-ball_mill_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-ball_mill_machine_models",
+ "aps-bead_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-ball_mill_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-assets",
+ "aps-ball_mill_machine_models",
+ "aps-ball_mill_machines",
+ "aps-ball_mill_procedure_templates",
+ "aps-bead_models",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-bead_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
 name = "aps-brands"
 version = "0.1.0"
 dependencies = [
@@ -105,11 +283,356 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-camera_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-cameras"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-commercial_camera_lots",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-centrifuge_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-centrifuge_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-centrifuge_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-centrifuge_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-assets",
+ "aps-centrifuge_models",
+ "aps-centrifuge_procedure_templates",
+ "aps-centrifuges",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-centrifuges"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-commercial_centrifuge_lots",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_ball_mill_machine_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-ball_mill_machine_models",
+ "aps-commercial_ball_mill_machine_models",
+ "aps-commercial_product_lots",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_ball_mill_machine_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-ball_mill_machine_models",
+ "aps-commercial_products",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_camera_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-camera_models",
+ "aps-commercial_camera_models",
+ "aps-commercial_product_lots",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_camera_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-camera_models",
+ "aps-commercial_products",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_centrifuge_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-centrifuge_models",
+ "aps-commercial_centrifuge_models",
+ "aps-commercial_product_lots",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_centrifuge_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-centrifuge_models",
+ "aps-commercial_products",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_freeze_dryer_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_freeze_dryer_models",
+ "aps-commercial_product_lots",
+ "aps-freeze_dryer_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_freeze_dryer_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-freeze_dryer_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_freezer_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_freezer_models",
+ "aps-commercial_product_lots",
+ "aps-freezer_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_freezer_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-freezer_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_geopositioning_device_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_geopositioning_device_models",
+ "aps-commercial_product_lots",
+ "aps-geopositioning_device_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_geopositioning_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-geopositioning_device_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-commercial_product_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
 name = "aps-commercial_products"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-brands",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-container_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-container_sealer_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-container_sealing_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-container_sealer_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-container_sealing_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-assets",
+ "aps-container_sealer_models",
+ "aps-container_sealing_procedure_templates",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-containers"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-container_models",
+ "aps-physical_assets",
  "diesel",
  "diesel-builders",
  "rosetta_uuid",
@@ -140,6 +663,285 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-disposal_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-physical_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-disposal_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-disposal_procedure_templates",
+ "aps-physical_asset_models",
+ "aps-physical_assets",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-fractioning_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volumetric_container_models",
+ "aps-weighing_device_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-fractioning_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-fractioning_procedure_templates",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "aps-weighing_device_models",
+ "aps-weighing_devices",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-freeze_dryer_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-freeze_dryers"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-commercial_freeze_dryer_lots",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-freeze_drying_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-freeze_dryer_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-freeze_drying_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-assets",
+ "aps-freeze_dryer_models",
+ "aps-freeze_dryers",
+ "aps-freeze_drying_procedure_templates",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-freezer_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-freezers"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-commercial_freezer_lots",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-freezing_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-freezer_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-freezing_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-assets",
+ "aps-freezer_models",
+ "aps-freezers",
+ "aps-freezing_procedure_templates",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-geopositioning_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-geopositioning_devices"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-commercial_geopositioning_device_lots",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-geopositioning_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-geopositioning_device_models",
+ "aps-physical_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-geopositioning_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-geopositioning_device_models",
+ "aps-geopositioning_devices",
+ "aps-geopositioning_procedure_templates",
+ "aps-physical_asset_models",
+ "aps-physical_assets",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "diesel",
+ "diesel-builders",
+ "postgis_diesel",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-harvesting_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-sample_models",
+ "aps-sample_source_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-harvesting_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-harvesting_procedure_templates",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-sample_models",
+ "aps-sample_source_models",
+ "aps-sample_sources",
+ "aps-samples",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
 name = "aps-next_procedure_templates"
 version = "0.1.0"
 dependencies = [
@@ -155,6 +957,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-packaging_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-packaging_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-packaging_models",
+ "aps-physical_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-packaging_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-assets",
+ "aps-packaging_models",
+ "aps-packaging_procedure_templates",
+ "aps-physical_asset_models",
+ "aps-physical_assets",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
 name = "aps-parent_procedure_templates"
 version = "0.1.0"
 dependencies = [
@@ -166,6 +1014,54 @@ dependencies = [
  "rosetta_uuid",
  "serde",
  "validation_errors",
+]
+
+[[package]]
+name = "aps-photograph_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-camera_models",
+ "aps-digital_asset_models",
+ "aps-physical_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-photograph_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-camera_models",
+ "aps-cameras",
+ "aps-digital_asset_models",
+ "aps-photograph_procedure_templates",
+ "aps-photographs",
+ "aps-physical_asset_models",
+ "aps-physical_assets",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-photographs"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-digital_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
 ]
 
 [[package]]
@@ -185,6 +1081,40 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-pouring_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volume_measuring_device_models",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-pouring_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-pouring_procedure_templates",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-volume_measuring_device_models",
+ "aps-volume_measuring_devices",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
  "diesel",
  "diesel-builders",
  "rosetta_uuid",
@@ -261,12 +1191,202 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-sample_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "aps-sample_source_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-sample_source_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-sample_sources"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-physical_assets",
+ "aps-sample_source_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-samples"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-physical_assets",
+ "aps-sample_models",
+ "aps-sample_source_models",
+ "aps-sample_sources",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-storage_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-container_models",
+ "aps-physical_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-storage_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-assets",
+ "aps-container_models",
+ "aps-containers",
+ "aps-physical_asset_models",
+ "aps-physical_assets",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-storage_procedure_templates",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-supernatant_procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-volume_measuring_device_models",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-supernatant_procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedures",
+ "aps-supernatant_procedure_templates",
+ "aps-volume_measuring_device_models",
+ "aps-volume_measuring_devices",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
 name = "aps-users"
 version = "0.1.0"
 dependencies = [
  "diesel",
  "diesel-builders",
  "rosetta_timestamp",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-volume_measuring_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-volume_measuring_devices"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-physical_assets",
+ "aps-volume_measuring_device_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-volumetric_container_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-container_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+ "validation_errors",
+]
+
+[[package]]
+name = "aps-volumetric_containers"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-containers",
+ "aps-physical_assets",
+ "aps-volumetric_container_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta_uuid",
+ "serde",
+]
+
+[[package]]
+name = "aps-weighed_container_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-container_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
  "rosetta_uuid",
  "serde",
  "validation_errors",
@@ -364,6 +1484,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5dd9dc738b7a8311c7ade152424974d8115f2cdad61e8dab8dac9f2362298510"
 
 [[package]]
+name = "byteorder"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
+
+[[package]]
 name = "cc"
 version = "1.2.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -449,16 +1575,22 @@ version = "2.3.5"
 source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#9cba7a4e780f64091b423bb346bdc61175ac0b22"
 dependencies = [
  "bigdecimal",
+ "bitflags",
+ "byteorder",
  "chrono",
  "diesel_derives",
  "downcast-rs",
  "ipnetwork",
+ "itoa",
  "libc",
+ "libsqlite3-sys",
  "num-bigint",
  "num-integer",
  "num-traits",
+ "pq-sys",
  "r2d2",
  "serde_json",
+ "sqlite-wasm-rs",
  "time",
  "uuid",
 ]
@@ -466,7 +1598,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#c2b67548ebf289e469212e5ceeb640a552ffac02"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#e6aa4afa0ab27a8c5fa31f7f5b1e1183be8cc869"
 dependencies = [
  "diesel",
  "diesel-builders-derive",
@@ -478,7 +1610,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders-derive"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#c2b67548ebf289e469212e5ceeb640a552ffac02"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#e6aa4afa0ab27a8c5fa31f7f5b1e1183be8cc869"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -543,6 +1675,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
+name = "foldhash"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
+
+[[package]]
 name = "getrandom"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -552,6 +1690,15 @@ dependencies = [
  "libc",
  "r-efi",
  "wasip2",
+]
+
+[[package]]
+name = "hashbrown"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
+dependencies = [
+ "foldhash",
 ]
 
 [[package]]
@@ -623,6 +1770,16 @@ name = "libm"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
+
+[[package]]
+name = "libsqlite3-sys"
+version = "0.35.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "133c182a6a2c87864fe97778797e46c7e999672690dc9fa3ee8e241aa4a9c13f"
+dependencies = [
+ "pkg-config",
+ "vcpkg",
+]
 
 [[package]]
 name = "lock_api"
@@ -709,10 +1866,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "pkg-config"
+version = "0.3.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
+
+[[package]]
+name = "postgis_diesel"
+version = "3.1.0"
+source = "git+https://github.com/LucaCappelletti94/postgis-diesel?branch=master#290ba5d140f783e2b11651b7559c7fbaf20a1feb"
+dependencies = [
+ "byteorder",
+ "diesel",
+ "serde",
+]
+
+[[package]]
 name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
+
+[[package]]
+name = "pq-sys"
+version = "0.7.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "574ddd6a267294433f140b02a726b0640c43cf7c6f717084684aaa3b285aba61"
+dependencies = [
+ "libc",
+ "pkg-config",
+ "vcpkg",
+]
 
 [[package]]
 name = "proc-macro2"
@@ -761,7 +1945,7 @@ dependencies = [
 [[package]]
 name = "rosetta_timestamp"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#9c4b6a73365c00aa70a788dcae7c62fb21a99c0b"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#763a73403d801b43ad85c072051b5fcb9033d01c"
 dependencies = [
  "chrono",
  "diesel",
@@ -771,7 +1955,7 @@ dependencies = [
 [[package]]
 name = "rosetta_uuid"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#9c4b6a73365c00aa70a788dcae7c62fb21a99c0b"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#763a73403d801b43ad85c072051b5fcb9033d01c"
 dependencies = [
  "diesel",
  "serde",
@@ -861,6 +2045,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
+name = "sqlite-wasm-rs"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05e98301bf8b0540c7de45ecd760539b9c62f5772aed172f08efba597c11cd5d"
+dependencies = [
+ "cc",
+ "hashbrown",
+ "js-sys",
+ "thiserror",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -868,13 +2065,33 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "syn"
-version = "2.0.111"
+version = "2.0.112"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "390cc9a294ab71bdb1aa2e99d13be9c753cd2d7bd6560c77118597410c4d2e87"
+checksum = "21f182278bf2d2bcb3c88b1b08a37df029d71ce3d3ae26168e3c653b213b99d4"
 dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "thiserror"
+version = "2.0.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f63587ca0f12b72a0600bcba1d40081f830876000bb46dd2337a3051618f4fc8"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "2.0.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ff15c8ecd7de3849db632e14d18d2571fa09dfc5ed93479bc4485c7a517c913"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -884,6 +2101,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "91e7d9e3bb61134e77bde20dd4825b97c010155709965fedf0f49bb138e52a9d"
 dependencies = [
  "deranged",
+ "itoa",
  "num-conv",
  "powerfmt",
  "serde",
@@ -1219,7 +2437,13 @@ dependencies = [
 [[package]]
 name = "validation_errors"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#9c4b6a73365c00aa70a788dcae7c62fb21a99c0b"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#763a73403d801b43ad85c072051b5fcb9033d01c"
+
+[[package]]
+name = "vcpkg"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "wasip2"
@@ -1342,6 +2566,6 @@ checksum = "f17a85883d4e6d00e8a97c586de764dabcc06133f7f1d55dce5cdc070ad7fe59"
 
 [[package]]
 name = "zmij"
-version = "1.0.3"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9747e91771f56fd7893e1164abd78febd14a670ceec257caad15e051de35f06"
+checksum = "e3280a1b827474fcd5dbef4b35a674deb52ba5c312363aef9135317df179d81b"

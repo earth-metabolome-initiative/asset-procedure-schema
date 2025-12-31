@@ -1,0 +1,17 @@
+[package]
+name = "aps-sample_sources"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+rosetta_uuid.workspace = true
+aps-assets.workspace = true
+aps-physical_assets.workspace = true
+aps-sample_source_models.workspace = true
+
+[lints]
+workspace = true

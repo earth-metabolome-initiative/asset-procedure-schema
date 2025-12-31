@@ -1,0 +1,127 @@
+CREATE TABLE IF NOT EXISTS supernatant_procedure_templates (
+	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
+	-- Volume in liters. The amount that should be transferred.
+	volume REAL NOT NULL CHECK (volume > 0.0),
+	-- The source container from which the supernatant is taken.
+	stratified_source_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
+	procedure_template_stratified_source_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
+	-- Destination container to which the supernatant is transferred.
+	supernatant_destination_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
+	procedure_template_supernatant_destination_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
+	-- The device used for the aliquoting procedure.
+	transferred_with_model_id UUID NOT NULL REFERENCES volume_measuring_device_models(id),
+	procedure_template_transferred_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
+	FOREIGN KEY (
+		procedure_template_transferred_with_model_id,
+		transferred_with_model_id
+	) REFERENCES procedure_template_asset_models(id, asset_model_id),
+	FOREIGN KEY (
+		procedure_template_stratified_source_model_id,
+		stratified_source_model_id
+	) REFERENCES procedure_template_asset_models(id, asset_model_id),
+	FOREIGN KEY (
+		procedure_template_supernatant_destination_model_id,
+		supernatant_destination_model_id
+	) REFERENCES procedure_template_asset_models(id, asset_model_id),
+	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_stratified_source_model`
+	-- for the current `procedure_template`.
+	UNIQUE (
+		id,
+		procedure_template_stratified_source_model_id
+	),
+	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_supernatant_destination_model`
+	-- for the current `procedure_template`.
+	UNIQUE (
+		id,
+		procedure_template_supernatant_destination_model_id
+	),
+	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_transferred_with_model`
+	-- for the current `procedure_template`.
+	UNIQUE (
+		id,
+		procedure_template_transferred_with_model_id
+	)
+);
+CREATE TABLE IF NOT EXISTS supernatant_procedures (
+	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
+	-- We enforce that the model of this procedure_id must be a supernatant procedure_id template.
+	supernatant_procedure_template_id UUID NOT NULL REFERENCES supernatant_procedure_templates(id),
+	-- The source container from which the supernatant is taken.
+	stratified_source_id UUID NOT NULL REFERENCES volumetric_containers(id),
+	-- The model of the source container from which the supernatant is taken.
+	stratified_source_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
+	-- The procedure_id template asset model associated to the `stratified_source`.
+	procedure_template_stratified_source_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
+	-- The procedure_id asset associated to the `stratified_source`.
+	procedure_stratified_source_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
+	-- The destination container to which the supernatant is transferred.
+	supernatant_destination_id UUID NOT NULL REFERENCES volumetric_containers(id),
+	-- The model of the destination container to which the supernatant is transferred.
+	supernatant_destination_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
+	-- The procedure_id template asset model associated to the `supernatant_destination`.
+	procedure_template_supernatant_destination_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
+	-- The procedure_id asset associated to the `supernatant_destination`.
+	procedure_supernatant_destination_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
+	-- The device used for the aliquoting procedure.
+	transferred_with_id UUID NOT NULL REFERENCES volume_measuring_devices(id),
+	-- The model of the device used for the aliquoting procedure.
+	transferred_with_model_id UUID NOT NULL REFERENCES volume_measuring_device_models(id),
+	-- The procedure_id template asset model associated to the `transferred_with`.
+	procedure_template_transferred_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
+	-- The procedure_id asset associated to the `transferred_with`.
+	procedure_transferred_with_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
+	-- We enforce that the extended `procedure` has indeed the same `procedure_template`, making
+	-- sure that the procedure_id is a supernatant procedure_id without the possibility of a mistake.
+	FOREIGN KEY (id, supernatant_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
+	-- The `procedure_template_stratified_source_model` must be the same as in the `supernatant_procedure_templates`.
+	FOREIGN KEY (
+		supernatant_procedure_template_id,
+		procedure_template_stratified_source_model_id
+	) REFERENCES supernatant_procedure_templates(
+		id,
+		procedure_template_stratified_source_model_id
+	),
+	-- The `procedure_template_supernatant_destination_model` must be the same as in the `supernatant_procedure_templates`.
+	FOREIGN KEY (
+		supernatant_procedure_template_id,
+		procedure_template_supernatant_destination_model_id
+	) REFERENCES supernatant_procedure_templates(
+		id,
+		procedure_template_supernatant_destination_model_id
+	),
+	-- The `procedure_template_transferred_with_model` must be the same as in the `supernatant_procedure_templates`.
+	FOREIGN KEY (
+		supernatant_procedure_template_id,
+		procedure_template_transferred_with_model_id
+	) REFERENCES supernatant_procedure_templates(
+		id,
+		procedure_template_transferred_with_model_id
+	),
+	-- We check that the `procedure_stratified_source` is associated to the `stratified_source`.
+	FOREIGN KEY (procedure_stratified_source_id, stratified_source_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
+	FOREIGN KEY (stratified_source_id, stratified_source_model_id) REFERENCES assets(id, model_id),
+	-- We check that the `procedure_supernatant_destination` is associated to the `supernatant_destination`.
+	FOREIGN KEY (
+		procedure_supernatant_destination_id,
+		supernatant_destination_model_id
+	) REFERENCES procedure_asset_models(id, asset_model_id),
+	FOREIGN KEY (supernatant_destination_id, supernatant_destination_model_id) REFERENCES assets(id, model_id),
+	-- We check that the `procedure_transferred_with` is associated to the `transferred_with_model`.
+	FOREIGN KEY (procedure_transferred_with_id, transferred_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
+	FOREIGN KEY (transferred_with_id, transferred_with_model_id) REFERENCES assets(id, model_id),
+	-- We check that the `procedure_stratified_source` is indeed associated to the `procedure_template_stratified_source_model`.
+	FOREIGN KEY (
+		procedure_stratified_source_id,
+		procedure_template_stratified_source_model_id
+	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
+	-- We check that the `procedure_supernatant_destination` is indeed associated to the `procedure_template_supernatant_destination_model`.
+	FOREIGN KEY (
+		procedure_supernatant_destination_id,
+		procedure_template_supernatant_destination_model_id
+	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
+	-- We check that the `procedure_transferred_with` is indeed associated to the `procedure_template_transferred_with_model`.
+	FOREIGN KEY (
+		procedure_transferred_with_id,
+		procedure_template_transferred_with_model_id
+	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id)
+);

@@ -1,24 +1,94 @@
 [workspace]
 resolver = "2"
 members = [
+  "aps/aps-aliquoting_procedure_templates",
+  "aps/aps-aliquoting_procedures",
   "aps/aps-asset_compatibility_rules",
   "aps/aps-asset_model_ancestors",
   "aps/aps-asset_models",
   "aps/aps-assets",
+  "aps/aps-ball_mill_machine_models",
+  "aps/aps-ball_mill_machines",
+  "aps/aps-ball_mill_procedure_templates",
+  "aps/aps-ball_mill_procedures",
+  "aps/aps-bead_models",
   "aps/aps-brands",
+  "aps/aps-camera_models",
+  "aps/aps-cameras",
+  "aps/aps-centrifuge_models",
+  "aps/aps-centrifuge_procedure_templates",
+  "aps/aps-centrifuge_procedures",
+  "aps/aps-centrifuges",
+  "aps/aps-commercial_ball_mill_machine_lots",
+  "aps/aps-commercial_ball_mill_machine_models",
+  "aps/aps-commercial_camera_lots",
+  "aps/aps-commercial_camera_models",
+  "aps/aps-commercial_centrifuge_lots",
+  "aps/aps-commercial_centrifuge_models",
+  "aps/aps-commercial_freeze_dryer_lots",
+  "aps/aps-commercial_freeze_dryer_models",
+  "aps/aps-commercial_freezer_lots",
+  "aps/aps-commercial_freezer_models",
+  "aps/aps-commercial_geopositioning_device_lots",
+  "aps/aps-commercial_geopositioning_device_models",
+  "aps/aps-commercial_product_lots",
   "aps/aps-commercial_products",
+  "aps/aps-container_models",
+  "aps/aps-container_sealer_models",
+  "aps/aps-container_sealing_procedure_templates",
+  "aps/aps-container_sealing_procedures",
+  "aps/aps-containers",
   "aps/aps-digital_asset_models",
   "aps/aps-digital_assets",
+  "aps/aps-disposal_procedure_templates",
+  "aps/aps-disposal_procedures",
+  "aps/aps-fractioning_procedure_templates",
+  "aps/aps-fractioning_procedures",
+  "aps/aps-freeze_dryer_models",
+  "aps/aps-freeze_dryers",
+  "aps/aps-freeze_drying_procedure_templates",
+  "aps/aps-freeze_drying_procedures",
+  "aps/aps-freezer_models",
+  "aps/aps-freezers",
+  "aps/aps-freezing_procedure_templates",
+  "aps/aps-freezing_procedures",
+  "aps/aps-geopositioning_device_models",
+  "aps/aps-geopositioning_devices",
+  "aps/aps-geopositioning_procedure_templates",
+  "aps/aps-geopositioning_procedures",
+  "aps/aps-harvesting_procedure_templates",
+  "aps/aps-harvesting_procedures",
   "aps/aps-next_procedure_templates",
+  "aps/aps-packaging_models",
+  "aps/aps-packaging_procedure_templates",
+  "aps/aps-packaging_procedures",
   "aps/aps-parent_procedure_templates",
+  "aps/aps-photograph_procedure_templates",
+  "aps/aps-photograph_procedures",
+  "aps/aps-photographs",
   "aps/aps-physical_asset_models",
   "aps/aps-physical_assets",
+  "aps/aps-pouring_procedure_templates",
+  "aps/aps-pouring_procedures",
   "aps/aps-procedure_asset_models",
   "aps/aps-procedure_template_asset_models",
   "aps/aps-procedure_templates",
   "aps/aps-procedures",
   "aps/aps-reused_procedure_template_asset_models",
+  "aps/aps-sample_models",
+  "aps/aps-sample_source_models",
+  "aps/aps-sample_sources",
+  "aps/aps-samples",
+  "aps/aps-storage_procedure_templates",
+  "aps/aps-storage_procedures",
+  "aps/aps-supernatant_procedure_templates",
+  "aps/aps-supernatant_procedures",
   "aps/aps-users",
+  "aps/aps-volume_measuring_device_models",
+  "aps/aps-volume_measuring_devices",
+  "aps/aps-volumetric_container_models",
+  "aps/aps-volumetric_containers",
+  "aps/aps-weighed_container_models",
   "aps/aps-weighing_device_models",
   "aps/aps-weighing_devices",
   "aps/aps-weighing_procedure_templates",
@@ -30,24 +100,94 @@ members = [
 edition = "2024"
 
 [workspace.dependencies]
+aps-aliquoting_procedure_templates = { path = "aps/aps-aliquoting_procedure_templates" }
+aps-aliquoting_procedures = { path = "aps/aps-aliquoting_procedures" }
 aps-asset_compatibility_rules = { path = "aps/aps-asset_compatibility_rules" }
 aps-asset_model_ancestors = { path = "aps/aps-asset_model_ancestors" }
 aps-asset_models = { path = "aps/aps-asset_models" }
 aps-assets = { path = "aps/aps-assets" }
+aps-ball_mill_machine_models = { path = "aps/aps-ball_mill_machine_models" }
+aps-ball_mill_machines = { path = "aps/aps-ball_mill_machines" }
+aps-ball_mill_procedure_templates = { path = "aps/aps-ball_mill_procedure_templates" }
+aps-ball_mill_procedures = { path = "aps/aps-ball_mill_procedures" }
+aps-bead_models = { path = "aps/aps-bead_models" }
 aps-brands = { path = "aps/aps-brands" }
+aps-camera_models = { path = "aps/aps-camera_models" }
+aps-cameras = { path = "aps/aps-cameras" }
+aps-centrifuge_models = { path = "aps/aps-centrifuge_models" }
+aps-centrifuge_procedure_templates = { path = "aps/aps-centrifuge_procedure_templates" }
+aps-centrifuge_procedures = { path = "aps/aps-centrifuge_procedures" }
+aps-centrifuges = { path = "aps/aps-centrifuges" }
+aps-commercial_ball_mill_machine_lots = { path = "aps/aps-commercial_ball_mill_machine_lots" }
+aps-commercial_ball_mill_machine_models = { path = "aps/aps-commercial_ball_mill_machine_models" }
+aps-commercial_camera_lots = { path = "aps/aps-commercial_camera_lots" }
+aps-commercial_camera_models = { path = "aps/aps-commercial_camera_models" }
+aps-commercial_centrifuge_lots = { path = "aps/aps-commercial_centrifuge_lots" }
+aps-commercial_centrifuge_models = { path = "aps/aps-commercial_centrifuge_models" }
+aps-commercial_freeze_dryer_lots = { path = "aps/aps-commercial_freeze_dryer_lots" }
+aps-commercial_freeze_dryer_models = { path = "aps/aps-commercial_freeze_dryer_models" }
+aps-commercial_freezer_lots = { path = "aps/aps-commercial_freezer_lots" }
+aps-commercial_freezer_models = { path = "aps/aps-commercial_freezer_models" }
+aps-commercial_geopositioning_device_lots = { path = "aps/aps-commercial_geopositioning_device_lots" }
+aps-commercial_geopositioning_device_models = { path = "aps/aps-commercial_geopositioning_device_models" }
+aps-commercial_product_lots = { path = "aps/aps-commercial_product_lots" }
 aps-commercial_products = { path = "aps/aps-commercial_products" }
+aps-container_models = { path = "aps/aps-container_models" }
+aps-container_sealer_models = { path = "aps/aps-container_sealer_models" }
+aps-container_sealing_procedure_templates = { path = "aps/aps-container_sealing_procedure_templates" }
+aps-container_sealing_procedures = { path = "aps/aps-container_sealing_procedures" }
+aps-containers = { path = "aps/aps-containers" }
 aps-digital_asset_models = { path = "aps/aps-digital_asset_models" }
 aps-digital_assets = { path = "aps/aps-digital_assets" }
+aps-disposal_procedure_templates = { path = "aps/aps-disposal_procedure_templates" }
+aps-disposal_procedures = { path = "aps/aps-disposal_procedures" }
+aps-fractioning_procedure_templates = { path = "aps/aps-fractioning_procedure_templates" }
+aps-fractioning_procedures = { path = "aps/aps-fractioning_procedures" }
+aps-freeze_dryer_models = { path = "aps/aps-freeze_dryer_models" }
+aps-freeze_dryers = { path = "aps/aps-freeze_dryers" }
+aps-freeze_drying_procedure_templates = { path = "aps/aps-freeze_drying_procedure_templates" }
+aps-freeze_drying_procedures = { path = "aps/aps-freeze_drying_procedures" }
+aps-freezer_models = { path = "aps/aps-freezer_models" }
+aps-freezers = { path = "aps/aps-freezers" }
+aps-freezing_procedure_templates = { path = "aps/aps-freezing_procedure_templates" }
+aps-freezing_procedures = { path = "aps/aps-freezing_procedures" }
+aps-geopositioning_device_models = { path = "aps/aps-geopositioning_device_models" }
+aps-geopositioning_devices = { path = "aps/aps-geopositioning_devices" }
+aps-geopositioning_procedure_templates = { path = "aps/aps-geopositioning_procedure_templates" }
+aps-geopositioning_procedures = { path = "aps/aps-geopositioning_procedures" }
+aps-harvesting_procedure_templates = { path = "aps/aps-harvesting_procedure_templates" }
+aps-harvesting_procedures = { path = "aps/aps-harvesting_procedures" }
 aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
+aps-packaging_models = { path = "aps/aps-packaging_models" }
+aps-packaging_procedure_templates = { path = "aps/aps-packaging_procedure_templates" }
+aps-packaging_procedures = { path = "aps/aps-packaging_procedures" }
 aps-parent_procedure_templates = { path = "aps/aps-parent_procedure_templates" }
+aps-photograph_procedure_templates = { path = "aps/aps-photograph_procedure_templates" }
+aps-photograph_procedures = { path = "aps/aps-photograph_procedures" }
+aps-photographs = { path = "aps/aps-photographs" }
 aps-physical_asset_models = { path = "aps/aps-physical_asset_models" }
 aps-physical_assets = { path = "aps/aps-physical_assets" }
+aps-pouring_procedure_templates = { path = "aps/aps-pouring_procedure_templates" }
+aps-pouring_procedures = { path = "aps/aps-pouring_procedures" }
 aps-procedure_asset_models = { path = "aps/aps-procedure_asset_models" }
 aps-procedure_template_asset_models = { path = "aps/aps-procedure_template_asset_models" }
 aps-procedure_templates = { path = "aps/aps-procedure_templates" }
 aps-procedures = { path = "aps/aps-procedures" }
 aps-reused_procedure_template_asset_models = { path = "aps/aps-reused_procedure_template_asset_models" }
+aps-sample_models = { path = "aps/aps-sample_models" }
+aps-sample_source_models = { path = "aps/aps-sample_source_models" }
+aps-sample_sources = { path = "aps/aps-sample_sources" }
+aps-samples = { path = "aps/aps-samples" }
+aps-storage_procedure_templates = { path = "aps/aps-storage_procedure_templates" }
+aps-storage_procedures = { path = "aps/aps-storage_procedures" }
+aps-supernatant_procedure_templates = { path = "aps/aps-supernatant_procedure_templates" }
+aps-supernatant_procedures = { path = "aps/aps-supernatant_procedures" }
 aps-users = { path = "aps/aps-users" }
+aps-volume_measuring_device_models = { path = "aps/aps-volume_measuring_device_models" }
+aps-volume_measuring_devices = { path = "aps/aps-volume_measuring_devices" }
+aps-volumetric_container_models = { path = "aps/aps-volumetric_container_models" }
+aps-volumetric_containers = { path = "aps/aps-volumetric_containers" }
+aps-weighed_container_models = { path = "aps/aps-weighed_container_models" }
 aps-weighing_device_models = { path = "aps/aps-weighing_device_models" }
 aps-weighing_devices = { path = "aps/aps-weighing_devices" }
 aps-weighing_procedure_templates = { path = "aps/aps-weighing_procedure_templates" }

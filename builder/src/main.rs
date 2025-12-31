@@ -26,7 +26,7 @@ pub fn main() {
         .validate_schema(&db)
         .expect("Database schema should pass all constraints");
     tracking_test.add_completed_task(validation_task);
-
+ 
     // Generate the code associated with the database
     let synql: SynQL<ParserDB> =
         SynQL::new_with_crate_base_path(&db, "../".as_ref(), "aps".as_ref())
