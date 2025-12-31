@@ -1,11 +1,11 @@
 //! Builder executable to generate the Directus database code.
+use std::{path::Path, process::Command};
+
 use sql_constraints::prelude::*;
-use sql_traits::prelude::ParserDB;
-use sql_traits::traits::DatabaseLike;
-use std::path::Path;
-use std::process::Command;
+use sql_traits::{prelude::ParserDB, traits::DatabaseLike};
 use synql::prelude::*;
 use time_requirements::{prelude::TimeTracker, report::Report, task::Task};
+mod visualize_workspace;
 
 /// Executable to generate the code for the Directus database.
 pub fn main() {
@@ -20,11 +20,9 @@ pub fn main() {
     let validation_task = Task::new("Schema Validation");
     let mut constrainer = DefaultConstrainer::<ParserDB>::default();
     sql_procedure_constraints::register_procedure_constraints(&mut constrainer);
-    constrainer
-        .validate_schema(&db)
-        .expect("Database schema should pass all constraints");
+    constrainer.validate_schema(&db).expect("Database schema should pass all constraints");
     tracker.add_completed_task(validation_task);
- 
+
     // Generate the code associated with the database
     let synql: SynQL<ParserDB> =
         SynQL::new_with_crate_base_path(&db, "../".as_ref(), "aps".as_ref())
@@ -32,6 +30,7 @@ pub fn main() {
             .sink_crate("aps")
             .generate_workspace_toml()
             .generate_rustfmt()
+            .member("builder")
             .into();
 
     tracker.extend(synql.generate().expect("Unable to generate workspace"));
@@ -75,11 +74,17 @@ pub fn main() {
         .expect("Failed to format generated code");
     tracker.add_completed_task(task);
 
+    // We visualize the workspace dependencies as an ERD
+    let task = Task::new("Workspace Dependency Visualization");
+    let erd = visualize_workspace::workspace_dependencies(&db)
+        .expect("Failed to visualize workspace dependencies");
+    // We write the ERD to a file
+    std::fs::write("workspace_dependencies.mmd", erd.to_string())
+        .expect("Failed to write workspace dependencies ERD");
+    tracker.add_completed_task(task);
+
     // We print the report
     Report::new(tracker)
-        .write(
-            Path::new("TIME_REQUIREMENTS.md"),
-            Path::new("TIME_REQUIREMENTS.png"),
-        )
+        .write(Path::new("TIME_REQUIREMENTS.md"), Path::new("TIME_REQUIREMENTS.png"))
         .unwrap();
 }

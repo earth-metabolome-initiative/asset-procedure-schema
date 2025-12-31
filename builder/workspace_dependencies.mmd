@@ -1,0 +1,48 @@
+---
+config:
+  layout: elk
+  theme: default
+  look: classic
+title: Workspace Dependencies
+---
+erDiagram
+direction TB
+v2["asset compatibility rules"]
+v3["asset model ancestors"]
+v4["asset models DAG"]
+v5["assets DAG"]
+v11["brands"]
+v57["next procedure templates"]
+v61["parent procedure templates"]
+v69["procedure asset models"]
+v70["procedure template asset models"]
+v71["procedure templates DAG"]
+v72["procedures DAG"]
+v73["reused procedure template asset models"]
+v82["users"]
+v2 ||--|| v4 : "depends on"
+v2 ||--|| v82 : "depends on"
+v3 ||--|| v4 : "depends on"
+v4 ||--|| v82 : "depends on"
+v5 ||--|| v4 : "depends on"
+v5 ||--|| v82 : "depends on"
+v11 ||--|| v82 : "depends on"
+v57 ||--|| v61 : "depends on"
+v57 ||--|| v71 : "depends on"
+v57 ||--|| v82 : "depends on"
+v61 ||--|| v71 : "depends on"
+v61 ||--|| v82 : "depends on"
+v69 ||--|| v3 : "depends on"
+v69 ||--|| v4 : "depends on"
+v69 ||--|| v70 : "depends on"
+v69 ||--|| v71 : "depends on"
+v69 ||--|| v72 : "depends on"
+v70 ||--|| v4 : "depends on"
+v70 ||--|| v71 : "depends on"
+v71 ||--|| v82 : "depends on"
+v72 ||--|| v57 : "depends on"
+v72 ||--|| v61 : "depends on"
+v72 ||--|| v71 : "depends on"
+v72 ||--|| v82 : "depends on"
+v73 ||--|| v70 : "depends on"
+v73 ||--|| v71 : "depends on"

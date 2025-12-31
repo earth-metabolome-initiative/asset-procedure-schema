@@ -99,6 +99,7 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 name = "builder"
 version = "0.1.0"
 dependencies = [
+ "mermaid",
  "sql_constraints",
  "sql_procedure_constraints",
  "sql_traits",
@@ -207,6 +208,12 @@ name = "color_quant"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
+
+[[package]]
+name = "colorsys"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65036b2f761dc2d20b4634890f73bdbad811d5edb677f84fd652ae9256051fcb"
 
 [[package]]
 name = "common_traits"
@@ -814,6 +821,16 @@ name = "memchr"
 version = "2.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
+
+[[package]]
+name = "mermaid"
+version = "0.1.0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#763a73403d801b43ad85c072051b5fcb9033d01c"
+dependencies = [
+ "colorsys",
+ "common_traits",
+ "serde",
+]
 
 [[package]]
 name = "miniz_oxide"

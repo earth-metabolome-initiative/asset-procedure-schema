@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+  "builder",
   "aps/aps-aliquoting_procedure_templates",
   "aps/aps-aliquoting_procedures",
   "aps/aps-asset_compatibility_rules",
