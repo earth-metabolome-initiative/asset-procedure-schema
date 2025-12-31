@@ -6,10 +6,6 @@
 
 Asset-Procedure Schema (APS) and its models to be reused across projects
 
-## Milestones
-
-
-
 ## Versioning
 
 We expect that there will be breaking changes to the schema over time. Transitioning between versions will be made possible via SQL migrations and shared Rust migration code.
