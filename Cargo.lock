@@ -32,7 +32,7 @@ dependencies = [
 [[package]]
 name = "algebra"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "arbitrary",
  "common_traits",
@@ -1672,22 +1672,9 @@ checksum = "65036b2f761dc2d20b4634890f73bdbad811d5edb677f84fd652ae9256051fcb"
 [[package]]
 name = "common_traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "console"
-version = "0.16.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03e45a4a8926227e4197636ba97a9fc9b00477e9f4bd711395687c5f0734bec4"
-dependencies = [
- "encode_unicode",
- "libc",
- "once_cell",
- "unicode-width",
- "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1749,68 +1736,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9481c1c90cbf2ac953f07c8d4a58aa3945c425b7185c9154d67a65e4230da511"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "crossbeam-deque"
-version = "0.8.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9dd111b7b7f7d55b72c0a6ae361660ee5853c9af73f70c3c2ef6858b950e2e51"
-dependencies = [
- "crossbeam-epoch",
- "crossbeam-utils",
-]
-
-[[package]]
-name = "crossbeam-epoch"
-version = "0.9.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
-dependencies = [
- "crossbeam-utils",
-]
-
-[[package]]
-name = "crossbeam-utils"
-version = "0.8.21"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
-
-[[package]]
-name = "csqlv"
-version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
-dependencies = [
- "csv",
- "flate2",
- "indicatif",
- "inflector",
- "iso_codes",
- "rosetta_uuid",
- "serde",
- "serde_json",
- "sqlparser",
-]
-
-[[package]]
-name = "csv"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52cd9d68cf7efc6ddfaaee42e7288d3a99d613d4b50f76ce9827ae0c6e14f938"
-dependencies = [
- "csv-core",
- "itoa",
- "ryu",
- "serde_core",
-]
-
-[[package]]
-name = "csv-core"
-version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "704a3c26996a80471189265814dbc2c257598b96b8a7feae2d31ace646bb9782"
-dependencies = [
- "memchr",
 ]
 
 [[package]]
@@ -2039,12 +1964,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
-name = "encode_unicode"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34aa73646ffb006b8f5147f3dc182bd4bcb190227ce861fc4a4844bf8e3cb2c0"
-
-[[package]]
 name = "enumflags2"
 version = "0.7.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2218,7 +2137,7 @@ dependencies = [
 [[package]]
 name = "graph"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "algebra",
  "multi_ranged",
@@ -2299,22 +2218,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "indicatif"
-version = "0.18.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9375e112e4b463ec1b1c6c011953545c65a30164fbab5b581df32b3abf0dcb88"
-dependencies = [
- "console",
- "portable-atomic",
- "unicode-width",
- "unit-prefix",
- "web-time",
-]
-
-[[package]]
 name = "inflector"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "pluralizer",
  "regex",
@@ -2327,19 +2233,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf370abdafd54d13e54a620e8c3e1145f28e46cc9d704bc6d94414559df41763"
 
 [[package]]
-name = "iso_codes"
-version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
-dependencies = [
- "serde",
- "strum",
- "strum_macros",
-]
-
-[[package]]
 name = "iter_utils"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 
 [[package]]
 name = "itoa"
@@ -2456,7 +2352,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 [[package]]
 name = "mermaid"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "colorsys",
  "common_traits",
@@ -2476,7 +2372,7 @@ dependencies = [
 [[package]]
 name = "multi_ranged"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "num-traits",
 ]
@@ -2518,7 +2414,7 @@ dependencies = [
 [[package]]
 name = "numeric_common_traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "common_traits",
  "num-traits",
@@ -2674,12 +2570,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "portable-atomic"
-version = "1.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f89776e4d69bb58bc6993e99ffa1d11f228b839984854c7daeb5d37f87cbe950"
-
-[[package]]
 name = "postgis_diesel"
 version = "3.1.0"
 source = "git+https://github.com/LucaCappelletti94/postgis-diesel?branch=master#290ba5d140f783e2b11651b7559c7fbaf20a1feb"
@@ -2774,26 +2664,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rayon"
-version = "1.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "368f01d005bf8fd9b1206fb6fa653e6c4a81ceb1466406b81792d87c5677a58f"
-dependencies = [
- "either",
- "rayon-core",
-]
-
-[[package]]
-name = "rayon-core"
-version = "1.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
-dependencies = [
- "crossbeam-deque",
- "crossbeam-utils",
-]
-
-[[package]]
 name = "recursive"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2865,7 +2735,7 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 [[package]]
 name = "rosetta_timestamp"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "chrono",
  "diesel",
@@ -2875,7 +2745,7 @@ dependencies = [
 [[package]]
 name = "rosetta_uuid"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "diesel",
  "serde",
@@ -2896,12 +2766,6 @@ name = "rustversion"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
-
-[[package]]
-name = "ryu"
-version = "1.0.22"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a50f4cf475b65d88e057964e0e9bb1f0aa9bbb2036dc65c64596b42932536984"
 
 [[package]]
 name = "same-file"
@@ -3003,12 +2867,12 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 [[package]]
 name = "snake_case_sanitizer"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 
 [[package]]
 name = "sorted_vec"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "common_traits",
 ]
@@ -3016,7 +2880,7 @@ dependencies = [
 [[package]]
 name = "sql_constraints"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "common_traits",
  "inflector",
@@ -3029,7 +2893,7 @@ dependencies = [
 [[package]]
 name = "sql_procedure_constraints"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "common_traits",
  "sql_constraints",
@@ -3040,7 +2904,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "sql_traits",
 ]
@@ -3048,12 +2912,10 @@ dependencies = [
 [[package]]
 name = "sql_traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "algebra",
- "csqlv",
  "graph",
- "rayon",
  "sqlparser",
  "thiserror",
 ]
@@ -3142,7 +3004,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "cached",
  "chrono",
@@ -3239,7 +3101,7 @@ dependencies = [
 [[package]]
 name = "time_requirements"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 dependencies = [
  "chrono",
  "chrono-humanize",
@@ -3559,12 +3421,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
 
 [[package]]
-name = "unit-prefix"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81e544489bf3d8ef66c953931f56617f423cd4b5494be343d9b9d3dda037b9a3"
-
-[[package]]
 name = "uuid"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3579,7 +3435,7 @@ dependencies = [
 [[package]]
 name = "validation_errors"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#17aeacb39a9ef4954495d6ceaa231af3056173f7"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
 
 [[package]]
 name = "vcpkg"
@@ -3909,6 +3765,6 @@ dependencies = [
 
 [[package]]
 name = "zmij"
-version = "1.0.5"
+version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3280a1b827474fcd5dbef4b35a674deb52ba5c312363aef9135317df179d81b"
+checksum = "aac060176f7020d62c3bcc1cdbcec619d54f48b07ad1963a3f80ce7a0c17755f"

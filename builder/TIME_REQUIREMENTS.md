@@ -1,31 +1,32 @@
 # Time Report for Directus Schema Generation
 
-The total time spent on all tasks was 15 seconds.
-The slowest task was `Clippy Fixes` which took 13 seconds, 486 ms, 124 µs and 826 ns (89.09% of all time).
+The total time spent on all tasks was 17 seconds.
+The slowest task was `Clippy Fixes` which took 16 seconds, 214 ms, 262 µs and 134 ns (90.62% of all time).
 
 | name                               | time                                  | percentage | comment |
 |------------------------------------|---------------------------------------|------------|---------|
-| Database Introspection             | 97 ms, 242 µs and 370 ns              | 0.64%      |         |
-| Schema Validation                  | 300 ms, 976 µs and 234 ns             | 1.99%      |         |
-| SQL Workspace Generation           | 776 ms, 267 µs and 137 ns             | 5.13%      |         |
-| TOML Formatting                    | 127 ms, 254 µs and 393 ns             | 0.84%      |         |
-| Code Formatting (1)                | 177 ms, 432 µs and 580 ns             | 1.17%      |         |
-| Clippy Fixes                       | 13 seconds, 486 ms, 124 µs and 826 ns | 89.09%     |         |
-| Code Formatting (2)                | 165 ms, 179 µs and 146 ns             | 1.09%      |         |
-| Workspace Dependency Visualization | 7 ms, 396 µs and 28 ns                | 0.05%      |         |
+| Database Introspection             | 118 ms, 458 µs and 221 ns             | 0.66%      |         |
+| Schema Validation                  | 297 ms, 317 µs and 97 ns              | 1.66%      |         |
+| SQL Workspace Generation           | 752 ms, 907 µs and 39 ns              | 4.21%      |         |
+| TOML Formatting                    | 152 ms, 291 µs and 137 ns             | 0.85%      |         |
+| Code Formatting (1)                | 177 ms, 20 µs and 773 ns              | 0.99%      |         |
+| Clippy Fixes                       | 16 seconds, 214 ms, 262 µs and 134 ns | 90.62%     |         |
+| Code Formatting (2)                | 165 ms, 331 µs and 609 ns             | 0.92%      |         |
+| Workspace Dependency Visualization | 7 ms, 559 µs and 474 ns               | 0.04%      |         |
+| DAG Structure Visualization        | 7 ms, 835 µs and 982 ns               | 0.04%      |         |
 
 ## Time Report for SQL Workspace Generation
 
 The total time spent on all tasks was now.
-The slowest task was `writing_crate_lib` which took 752 ms, 200 µs and 379 ns (96.90% of all time).
+The slowest task was `writing_crate_lib` which took 729 ms, 90 µs and 55 ns (96.84% of all time).
 
-| name                    | time                      | percentage | comment |
-|-------------------------|---------------------------|------------|---------|
-| writing_crate_toml      | 12 ms, 116 µs and 23 ns   | 1.56%      |         |
-| writing_crate_lib       | 752 ms, 200 µs and 379 ns | 96.90%     |         |
-| writing_sink_crate_toml | 644 µs and 566 ns         | 0.08%      |         |
-| writing_sink_crate_lib  | 8 ms, 874 µs and 878 ns   | 1.14%      |         |
-| workspace_toml          | 2 ms, 356 µs and 999 ns   | 0.30%      |         |
-| workspace_rustfmt       | 74 µs and 292 ns          | 0.01%      |         |
+| name                    | time                     | percentage | comment |
+|-------------------------|--------------------------|------------|---------|
+| writing_crate_toml      | 11 ms, 841 µs and 596 ns | 1.57%      |         |
+| writing_crate_lib       | 729 ms, 90 µs and 55 ns  | 96.84%     |         |
+| writing_sink_crate_toml | 601 µs and 180 ns        | 0.08%      |         |
+| writing_sink_crate_lib  | 8 ms, 877 µs and 499 ns  | 1.18%      |         |
+| workspace_toml          | 2 ms, 422 µs and 547 ns  | 0.32%      |         |
+| workspace_rustfmt       | 74 µs and 162 ns         | 0.01%      |         |
 
 ![Plot](TIME_REQUIREMENTS.png)

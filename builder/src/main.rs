@@ -5,6 +5,7 @@ use sql_constraints::prelude::*;
 use sql_traits::{prelude::ParserDB, traits::DatabaseLike};
 use synql::prelude::*;
 use time_requirements::{prelude::TimeTracker, report::Report, task::Task};
+mod visualize_dags;
 mod visualize_workspace;
 
 /// Executable to generate the code for the Directus database.
@@ -81,6 +82,11 @@ pub fn main() {
     // We write the ERD to a file
     std::fs::write("workspace_dependencies.mmd", erd.to_string())
         .expect("Failed to write workspace dependencies ERD");
+    tracker.add_completed_task(task);
+
+    // We visualize the DAG structures present in the database
+    let task = Task::new("DAG Structure Visualization");
+    visualize_dags::visualize_dags(&db).expect("Failed to visualize DAG structures");
     tracker.add_completed_task(task);
 
     // We print the report

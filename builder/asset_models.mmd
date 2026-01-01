@@ -1,0 +1,141 @@
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: asset_models
+---
+flowchart TB
+v0@{shape: rounded, label: "ball_mill_machine_models"}
+style v0 rx: 3px, ry: 3px 
+v1@{shape: rounded, label: "bead_models"}
+style v1 rx: 3px, ry: 3px 
+v2@{shape: rounded, label: "camera_models"}
+style v2 rx: 3px, ry: 3px 
+v3@{shape: rounded, label: "centrifuge_models"}
+style v3 rx: 3px, ry: 3px 
+v4@{shape: rounded, label: "commercial_ball_mill_machine_lots"}
+style v4 rx: 3px, ry: 3px 
+v5@{shape: rounded, label: "commercial_ball_mill_machine_models"}
+style v5 rx: 3px, ry: 3px 
+v6@{shape: rounded, label: "commercial_camera_lots"}
+style v6 rx: 3px, ry: 3px 
+v7@{shape: rounded, label: "commercial_camera_models"}
+style v7 rx: 3px, ry: 3px 
+v8@{shape: rounded, label: "commercial_centrifuge_lots"}
+style v8 rx: 3px, ry: 3px 
+v9@{shape: rounded, label: "commercial_centrifuge_models"}
+style v9 rx: 3px, ry: 3px 
+v10@{shape: rounded, label: "commercial_freeze_dryer_lots"}
+style v10 rx: 3px, ry: 3px 
+v11@{shape: rounded, label: "commercial_freeze_dryer_models"}
+style v11 rx: 3px, ry: 3px 
+v12@{shape: rounded, label: "commercial_freezer_lots"}
+style v12 rx: 3px, ry: 3px 
+v13@{shape: rounded, label: "commercial_freezer_models"}
+style v13 rx: 3px, ry: 3px 
+v14@{shape: rounded, label: "commercial_geopositioning_device_lots"}
+style v14 rx: 3px, ry: 3px 
+v15@{shape: rounded, label: "commercial_geopositioning_device_models"}
+style v15 rx: 3px, ry: 3px 
+v16@{shape: rounded, label: "commercial_product_lots"}
+style v16 rx: 3px, ry: 3px 
+v17@{shape: rounded, label: "commercial_products"}
+style v17 rx: 3px, ry: 3px 
+v18@{shape: rounded, label: "container_models"}
+style v18 rx: 3px, ry: 3px 
+v19@{shape: rounded, label: "container_sealer_models"}
+style v19 rx: 3px, ry: 3px 
+v20@{shape: rounded, label: "digital_asset_models"}
+style v20 rx: 3px, ry: 3px 
+v21@{shape: rounded, label: "freeze_dryer_models"}
+style v21 rx: 3px, ry: 3px 
+v22@{shape: rounded, label: "freezer_models"}
+style v22 rx: 3px, ry: 3px 
+v23@{shape: rounded, label: "geopositioning_device_models"}
+style v23 rx: 3px, ry: 3px 
+v24@{shape: rounded, label: "packaging_models"}
+style v24 rx: 3px, ry: 3px 
+v25@{shape: rounded, label: "physical_asset_models"}
+style v25 rx: 3px, ry: 3px 
+v26@{shape: rounded, label: "sample_models"}
+style v26 rx: 3px, ry: 3px 
+v27@{shape: rounded, label: "sample_source_models"}
+style v27 rx: 3px, ry: 3px 
+v28@{shape: rounded, label: "volume_measuring_device_models"}
+style v28 rx: 3px, ry: 3px 
+v29@{shape: rounded, label: "volumetric_container_models"}
+style v29 rx: 3px, ry: 3px 
+v30@{shape: rounded, label: "weighed_container_models"}
+style v30 rx: 3px, ry: 3px 
+v31@{shape: rounded, label: "weighing_device_models"}
+style v31 rx: 3px, ry: 3px 
+v32@{shape: rounded, label: "asset_models"}
+style v32 rx: 3px, ry: 3px 
+v0 ---> v25
+v1 ---> v25
+v2 ---> v25
+v3 ---> v25
+v4 ---> v32
+v4 ---> v0
+v4 ---> v5
+v4 ---> v16
+v5 ---> v32
+v5 ---> v0
+v5 ---> v17
+v6 ---> v32
+v6 ---> v2
+v6 ---> v7
+v6 ---> v16
+v7 ---> v32
+v7 ---> v2
+v7 ---> v17
+v8 ---> v32
+v8 ---> v3
+v8 ---> v9
+v8 ---> v16
+v9 ---> v32
+v9 ---> v3
+v9 ---> v17
+v10 ---> v32
+v10 ---> v11
+v10 ---> v16
+v10 ---> v21
+v11 ---> v32
+v11 ---> v17
+v11 ---> v21
+v12 ---> v32
+v12 ---> v13
+v12 ---> v16
+v12 ---> v22
+v13 ---> v32
+v13 ---> v17
+v13 ---> v22
+v14 ---> v32
+v14 ---> v15
+v14 ---> v16
+v14 ---> v23
+v15 ---> v32
+v15 ---> v17
+v15 ---> v23
+v16 ---> v32
+v16 ---> v17
+v16 ---> v25
+v17 ---> v32
+v18 ---> v25
+v19 ---> v25
+v20 ---> v32
+v21 ---> v25
+v22 ---> v25
+v23 ---> v25
+v24 ---> v25
+v25 ---> v32
+v26 ---> v25
+v26 ---> v27
+v27 ---> v25
+v28 ---> v25
+v29 ---> v18
+v30 ---> v18
+v31 ---> v25
+v32 ---> v32
