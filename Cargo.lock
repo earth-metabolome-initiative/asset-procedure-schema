@@ -32,7 +32,7 @@ dependencies = [
 [[package]]
 name = "algebra"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "arbitrary",
  "common_traits",
@@ -1672,7 +1672,7 @@ checksum = "65036b2f761dc2d20b4634890f73bdbad811d5edb677f84fd652ae9256051fcb"
 [[package]]
 name = "common_traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "serde",
 ]
@@ -2137,7 +2137,7 @@ dependencies = [
 [[package]]
 name = "graph"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "algebra",
  "multi_ranged",
@@ -2220,7 +2220,7 @@ dependencies = [
 [[package]]
 name = "inflector"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "pluralizer",
  "regex",
@@ -2235,7 +2235,7 @@ checksum = "cf370abdafd54d13e54a620e8c3e1145f28e46cc9d704bc6d94414559df41763"
 [[package]]
 name = "iter_utils"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 
 [[package]]
 name = "itoa"
@@ -2352,11 +2352,11 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 [[package]]
 name = "mermaid"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "colorsys",
- "common_traits",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -2372,7 +2372,7 @@ dependencies = [
 [[package]]
 name = "multi_ranged"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "num-traits",
 ]
@@ -2414,7 +2414,7 @@ dependencies = [
 [[package]]
 name = "numeric_common_traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "common_traits",
  "num-traits",
@@ -2735,7 +2735,7 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 [[package]]
 name = "rosetta_timestamp"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "chrono",
  "diesel",
@@ -2745,7 +2745,7 @@ dependencies = [
 [[package]]
 name = "rosetta_uuid"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "diesel",
  "serde",
@@ -2867,12 +2867,12 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 [[package]]
 name = "snake_case_sanitizer"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 
 [[package]]
 name = "sorted_vec"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "common_traits",
 ]
@@ -2880,7 +2880,7 @@ dependencies = [
 [[package]]
 name = "sql_constraints"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "common_traits",
  "inflector",
@@ -2893,7 +2893,7 @@ dependencies = [
 [[package]]
 name = "sql_procedure_constraints"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "common_traits",
  "sql_constraints",
@@ -2904,7 +2904,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "sql_traits",
 ]
@@ -2912,7 +2912,7 @@ dependencies = [
 [[package]]
 name = "sql_traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "algebra",
  "graph",
@@ -3004,7 +3004,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "cached",
  "chrono",
@@ -3101,7 +3101,7 @@ dependencies = [
 [[package]]
 name = "time_requirements"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 dependencies = [
  "chrono",
  "chrono-humanize",
@@ -3435,7 +3435,7 @@ dependencies = [
 [[package]]
 name = "validation_errors"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#5e9f8e2801450d7315ebf3fe1cf2ef814e6771e0"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
 
 [[package]]
 name = "vcpkg"

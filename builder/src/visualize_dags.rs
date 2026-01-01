@@ -19,7 +19,7 @@ fn visualize_dag(
         FlowchartConfigurationBuilder::default()
             .renderer(Renderer::EclipseLayoutKernel)
             .direction(Direction::TopToBottom)
-            .title(&root.table_name())?,
+            .title(root.table_name())?,
     )?;
 
     let tables = root.extending_tables(db).chain(std::iter::once(root)).collect::<Vec<_>>();
