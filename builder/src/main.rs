@@ -10,7 +10,7 @@ mod visualize_workspace;
 
 /// Executable to generate the code for the Directus database.
 pub fn main() {
-    let mut tracker = TimeTracker::new("Directus Schema Generation");
+    let mut tracker = TimeTracker::new("APS Generation");
 
     let task = Task::new("Database Introspection");
     let db = ParserDB::try_from(Path::new("../")).expect("Failed to parse database schema");

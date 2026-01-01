@@ -1,32 +1,32 @@
-# Time Report for Directus Schema Generation
+# Time Report for APS Generation
 
-The total time spent on all tasks was 17 seconds.
-The slowest task was `Clippy Fixes` which took 16 seconds, 214 ms, 262 µs and 134 ns (90.62% of all time).
+The total time spent on all tasks was 15 seconds.
+The slowest task was `Clippy Fixes` which took 13 seconds, 402 ms, 168 µs and 75 ns (88.76% of all time).
 
-| name                               | time                                  | percentage | comment |
-|------------------------------------|---------------------------------------|------------|---------|
-| Database Introspection             | 118 ms, 458 µs and 221 ns             | 0.66%      |         |
-| Schema Validation                  | 297 ms, 317 µs and 97 ns              | 1.66%      |         |
-| SQL Workspace Generation           | 752 ms, 907 µs and 39 ns              | 4.21%      |         |
-| TOML Formatting                    | 152 ms, 291 µs and 137 ns             | 0.85%      |         |
-| Code Formatting (1)                | 177 ms, 20 µs and 773 ns              | 0.99%      |         |
-| Clippy Fixes                       | 16 seconds, 214 ms, 262 µs and 134 ns | 90.62%     |         |
-| Code Formatting (2)                | 165 ms, 331 µs and 609 ns             | 0.92%      |         |
-| Workspace Dependency Visualization | 7 ms, 559 µs and 474 ns               | 0.04%      |         |
-| DAG Structure Visualization        | 7 ms, 835 µs and 982 ns               | 0.04%      |         |
+| name                               | time                                 | percentage | comment |
+|------------------------------------|--------------------------------------|------------|---------|
+| Database Introspection             | 118 ms, 237 µs and 558 ns            | 0.78%      |         |
+| Schema Validation                  | 297 ms, 673 µs and 487 ns            | 1.97%      |         |
+| SQL Workspace Generation           | 770 ms, 685 µs and 195 ns            | 5.10%      |         |
+| TOML Formatting                    | 148 ms, 760 µs and 362 ns            | 0.99%      |         |
+| Code Formatting (1)                | 177 ms, 875 µs and 287 ns            | 1.18%      |         |
+| Clippy Fixes                       | 13 seconds, 402 ms, 168 µs and 75 ns | 88.76%     |         |
+| Code Formatting (2)                | 168 ms, 465 µs and 273 ns            | 1.12%      |         |
+| Workspace Dependency Visualization | 7 ms, 323 µs and 806 ns              | 0.05%      |         |
+| DAG Structure Visualization        | 7 ms, 820 µs and 839 ns              | 0.05%      |         |
 
 ## Time Report for SQL Workspace Generation
 
 The total time spent on all tasks was now.
-The slowest task was `writing_crate_lib` which took 729 ms, 90 µs and 55 ns (96.84% of all time).
+The slowest task was `writing_crate_lib` which took 747 ms, 8 µs and 190 ns (96.93% of all time).
 
 | name                    | time                     | percentage | comment |
 |-------------------------|--------------------------|------------|---------|
-| writing_crate_toml      | 11 ms, 841 µs and 596 ns | 1.57%      |         |
-| writing_crate_lib       | 729 ms, 90 µs and 55 ns  | 96.84%     |         |
-| writing_sink_crate_toml | 601 µs and 180 ns        | 0.08%      |         |
-| writing_sink_crate_lib  | 8 ms, 877 µs and 499 ns  | 1.18%      |         |
-| workspace_toml          | 2 ms, 422 µs and 547 ns  | 0.32%      |         |
-| workspace_rustfmt       | 74 µs and 162 ns         | 0.01%      |         |
+| writing_crate_toml      | 11 ms, 693 µs and 176 ns | 1.52%      |         |
+| writing_crate_lib       | 747 ms, 8 µs and 190 ns  | 96.93%     |         |
+| writing_sink_crate_toml | 628 µs and 731 ns        | 0.08%      |         |
+| writing_sink_crate_lib  | 8 ms, 946 µs and 102 ns  | 1.16%      |         |
+| workspace_toml          | 2 ms, 339 µs and 942 ns  | 0.30%      |         |
+| workspace_rustfmt       | 69 µs and 54 ns          | 0.01%      |         |
 
 ![Plot](TIME_REQUIREMENTS.png)
