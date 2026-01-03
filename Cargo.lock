@@ -67,7 +67,9 @@ dependencies = [
  "aps-aliquoting_procedures",
  "aps-asset_compatibility_rules",
  "aps-asset_model_ancestors",
+ "aps-asset_model_tables",
  "aps-asset_models",
+ "aps-asset_tables",
  "aps-assets",
  "aps-ball_mill_machine_models",
  "aps-ball_mill_machines",
@@ -133,7 +135,9 @@ dependencies = [
  "aps-pouring_procedure_templates",
  "aps-pouring_procedures",
  "aps-procedure_asset_models",
+ "aps-procedure_tables",
  "aps-procedure_template_asset_models",
+ "aps-procedure_template_tables",
  "aps-procedure_templates",
  "aps-procedures",
  "aps-reused_procedure_template_asset_models",
@@ -215,9 +219,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-asset_model_tables"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel-builders",
+ "serde",
+]
+
+[[package]]
 name = "aps-asset_models"
 version = "0.1.0"
 dependencies = [
+ "aps-asset_model_tables",
  "aps-users",
  "diesel",
  "diesel-builders",
@@ -228,10 +242,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-asset_tables"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel-builders",
+ "serde",
+]
+
+[[package]]
 name = "aps-assets"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-asset_tables",
  "aps-users",
  "diesel",
  "diesel-builders",
@@ -1185,6 +1209,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-procedure_tables"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel-builders",
+ "serde",
+]
+
+[[package]]
 name = "aps-procedure_template_asset_models"
 version = "0.1.0"
 dependencies = [
@@ -1198,9 +1231,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-procedure_template_tables"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel-builders",
+ "serde",
+]
+
+[[package]]
 name = "aps-procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-procedure_template_tables",
  "aps-users",
  "diesel",
  "diesel-builders",
@@ -1216,6 +1259,7 @@ version = "0.1.0"
 dependencies = [
  "aps-next_procedure_templates",
  "aps-parent_procedure_templates",
+ "aps-procedure_tables",
  "aps-procedure_templates",
  "aps-users",
  "diesel",
@@ -2626,6 +2670,10 @@ checksum = "9695f8df41bb4f3d222c95a67532365f569318332d03d5f3f67f37b20e6ebdf0"
 dependencies = [
  "unicode-ident",
 ]
+
+[[package]]
+name = "procedure-traits"
+version = "0.1.0"
 
 [[package]]
 name = "psm"

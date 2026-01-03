@@ -1,6 +1,9 @@
+-- Meta-table with the unique names of asset tables, to be referenced by assets
+-- and facilitate DAG traversal.
+CREATE TABLE IF NOT EXISTS asset_tables (id TEXT PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    most_concrete_table TEXT NOT NULL,
+    asset_table_id TEXT NOT NULL REFERENCES asset_tables(id),
     name VARCHAR(255) CHECK (name <> ''),
     description TEXT CHECK (description <> ''),
     model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,

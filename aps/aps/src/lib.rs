@@ -5,7 +5,9 @@ pub use aps_aliquoting_procedure_templates::{
 pub use aps_aliquoting_procedures::{self, AliquotingProcedure, aliquoting_procedures};
 pub use aps_asset_compatibility_rules::{self, AssetCompatibilityRule, asset_compatibility_rules};
 pub use aps_asset_model_ancestors::{self, AssetModelAncestor, asset_model_ancestors};
+pub use aps_asset_model_tables::{self, AssetModelTable, asset_model_tables};
 pub use aps_asset_models::{self, AssetModel, asset_models};
+pub use aps_asset_tables::{self, AssetTable, asset_tables};
 pub use aps_assets::{self, Asset, assets};
 pub use aps_ball_mill_machine_models::{self, BallMillMachineModel, ball_mill_machine_models};
 pub use aps_ball_mill_machines::{self, BallMillMachine, ball_mill_machines};
@@ -117,9 +119,11 @@ pub use aps_pouring_procedure_templates::{
 };
 pub use aps_pouring_procedures::{self, PouringProcedure, pouring_procedures};
 pub use aps_procedure_asset_models::{self, ProcedureAssetModel, procedure_asset_models};
+pub use aps_procedure_tables::{self, ProcedureTable, procedure_tables};
 pub use aps_procedure_template_asset_models::{
     self, ProcedureTemplateAssetModel, procedure_template_asset_models,
 };
+pub use aps_procedure_template_tables::{self, ProcedureTemplateTable, procedure_template_tables};
 pub use aps_procedure_templates::{self, ProcedureTemplate, procedure_templates};
 pub use aps_procedures::{self, Procedure, procedures};
 pub use aps_reused_procedure_template_asset_models::{

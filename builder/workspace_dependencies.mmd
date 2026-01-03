@@ -9,47 +9,55 @@ erDiagram
 direction TB
 v2["asset compatibility rules"]
 v3["asset model ancestors"]
-v4["asset models DAG"]
-v5["assets DAG"]
-v11["brands"]
-v57["next procedure templates"]
-v61["parent procedure templates"]
-v69["procedure asset models"]
-v70["procedure template asset models"]
-v71["procedure templates DAG"]
-v72["procedures DAG"]
-v73["reused procedure template asset models"]
-v82["users"]
-v71 ||--|| v70 : "depends on"
-v71 ||--|| v4 : "depends on"
-v72 ||--|| v71 : "depends on"
-v72 ||--|| v69 : "depends on"
-v72 ||--|| v70 : "depends on"
-v72 ||--|| v4 : "depends on"
-v72 ||--|| v5 : "depends on"
-v2 ||--|| v4 : "depends on"
-v2 ||--|| v82 : "depends on"
-v3 ||--|| v4 : "depends on"
-v4 ||--|| v82 : "depends on"
+v4["asset model tables"]
+v5["asset models DAG"]
+v6["asset tables"]
+v7["assets DAG"]
+v13["brands"]
+v59["next procedure templates"]
+v63["parent procedure templates"]
+v71["procedure asset models"]
+v72["procedure tables"]
+v73["procedure template asset models"]
+v74["procedure template tables"]
+v75["procedure templates DAG"]
+v76["procedures DAG"]
+v77["reused procedure template asset models"]
+v86["users"]
+v75 ||--|| v73 : "depends on"
+v75 ||--|| v5 : "depends on"
+v76 ||--|| v75 : "depends on"
+v76 ||--|| v71 : "depends on"
+v76 ||--|| v73 : "depends on"
+v76 ||--|| v5 : "depends on"
+v76 ||--|| v7 : "depends on"
+v2 ||--|| v5 : "depends on"
+v2 ||--|| v86 : "depends on"
+v3 ||--|| v5 : "depends on"
 v5 ||--|| v4 : "depends on"
-v5 ||--|| v82 : "depends on"
-v71 ||--|| v2 : "depends on"
-v72 ||--|| v2 : "depends on"
-v11 ||--|| v82 : "depends on"
-v4 ||--|| v11 : "depends on"
-v57 ||--|| v61 : "depends on"
-v57 ||--|| v71 : "depends on"
-v57 ||--|| v82 : "depends on"
-v61 ||--|| v71 : "depends on"
-v61 ||--|| v82 : "depends on"
-v69 ||--|| v3 : "depends on"
-v69 ||--|| v4 : "depends on"
-v69 ||--|| v70 : "depends on"
-v69 ||--|| v71 : "depends on"
-v70 ||--|| v4 : "depends on"
-v71 ||--|| v82 : "depends on"
-v72 ||--|| v57 : "depends on"
-v72 ||--|| v61 : "depends on"
-v72 ||--|| v82 : "depends on"
-v73 ||--|| v70 : "depends on"
-v73 ||--|| v71 : "depends on"
+v5 ||--|| v86 : "depends on"
+v7 ||--|| v5 : "depends on"
+v7 ||--|| v6 : "depends on"
+v7 ||--|| v86 : "depends on"
+v75 ||--|| v2 : "depends on"
+v76 ||--|| v2 : "depends on"
+v13 ||--|| v86 : "depends on"
+v5 ||--|| v13 : "depends on"
+v59 ||--|| v63 : "depends on"
+v59 ||--|| v75 : "depends on"
+v59 ||--|| v86 : "depends on"
+v63 ||--|| v75 : "depends on"
+v63 ||--|| v86 : "depends on"
+v71 ||--|| v3 : "depends on"
+v71 ||--|| v5 : "depends on"
+v71 ||--|| v73 : "depends on"
+v71 ||--|| v75 : "depends on"
+v73 ||--|| v5 : "depends on"
+v75 ||--|| v74 : "depends on"
+v75 ||--|| v86 : "depends on"
+v76 ||--|| v59 : "depends on"
+v76 ||--|| v63 : "depends on"
+v76 ||--|| v72 : "depends on"
+v76 ||--|| v86 : "depends on"
+v77 ||--|| v73 : "depends on"
+v77 ||--|| v75 : "depends on"

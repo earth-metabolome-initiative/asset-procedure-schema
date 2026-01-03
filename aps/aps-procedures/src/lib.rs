@@ -39,7 +39,7 @@ pub struct Procedure {
     predecessor_procedure_template_id: Option<::rosetta_uuid::Uuid>,
     /// Undocumented column
     #[infallible]
-    most_concrete_table: String,
+    procedure_table_id: String,
     /// Undocumented column
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
@@ -63,6 +63,7 @@ pub struct Procedure {
 :: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_id) -> (procedures :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
+:: diesel_builders :: prelude :: fk ! ((procedures :: procedure_table_id) -> (:: aps_procedure_tables :: procedure_tables :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: creator_id) -> (:: aps_users :: users :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: editor_id) -> (:: aps_users :: users :: id));
 :: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_id , procedures :: parent_procedure_template_id) -> (procedures :: id , procedures :: procedure_template_id));

@@ -2,11 +2,14 @@
 resolver = "2"
 members = [
   "builder",
+  "procedure-traits",
   "aps/aps-aliquoting_procedure_templates",
   "aps/aps-aliquoting_procedures",
   "aps/aps-asset_compatibility_rules",
   "aps/aps-asset_model_ancestors",
+  "aps/aps-asset_model_tables",
   "aps/aps-asset_models",
+  "aps/aps-asset_tables",
   "aps/aps-assets",
   "aps/aps-ball_mill_machine_models",
   "aps/aps-ball_mill_machines",
@@ -72,7 +75,9 @@ members = [
   "aps/aps-pouring_procedure_templates",
   "aps/aps-pouring_procedures",
   "aps/aps-procedure_asset_models",
+  "aps/aps-procedure_tables",
   "aps/aps-procedure_template_asset_models",
+  "aps/aps-procedure_template_tables",
   "aps/aps-procedure_templates",
   "aps/aps-procedures",
   "aps/aps-reused_procedure_template_asset_models",
@@ -105,7 +110,9 @@ aps-aliquoting_procedure_templates = { path = "aps/aps-aliquoting_procedure_temp
 aps-aliquoting_procedures = { path = "aps/aps-aliquoting_procedures" }
 aps-asset_compatibility_rules = { path = "aps/aps-asset_compatibility_rules" }
 aps-asset_model_ancestors = { path = "aps/aps-asset_model_ancestors" }
+aps-asset_model_tables = { path = "aps/aps-asset_model_tables" }
 aps-asset_models = { path = "aps/aps-asset_models" }
+aps-asset_tables = { path = "aps/aps-asset_tables" }
 aps-assets = { path = "aps/aps-assets" }
 aps-ball_mill_machine_models = { path = "aps/aps-ball_mill_machine_models" }
 aps-ball_mill_machines = { path = "aps/aps-ball_mill_machines" }
@@ -171,7 +178,9 @@ aps-physical_assets = { path = "aps/aps-physical_assets" }
 aps-pouring_procedure_templates = { path = "aps/aps-pouring_procedure_templates" }
 aps-pouring_procedures = { path = "aps/aps-pouring_procedures" }
 aps-procedure_asset_models = { path = "aps/aps-procedure_asset_models" }
+aps-procedure_tables = { path = "aps/aps-procedure_tables" }
 aps-procedure_template_asset_models = { path = "aps/aps-procedure_template_asset_models" }
+aps-procedure_template_tables = { path = "aps/aps-procedure_template_tables" }
 aps-procedure_templates = { path = "aps/aps-procedure_templates" }
 aps-procedures = { path = "aps/aps-procedures" }
 aps-reused_procedure_template_asset_models = { path = "aps/aps-reused_procedure_template_asset_models" }

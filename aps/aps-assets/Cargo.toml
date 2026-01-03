@@ -12,6 +12,7 @@ validation_errors.workspace = true
 rosetta_timestamp.workspace = true
 rosetta_uuid.workspace = true
 aps-asset_models.workspace = true
+aps-asset_tables.workspace = true
 aps-users.workspace = true
 
 [lints]

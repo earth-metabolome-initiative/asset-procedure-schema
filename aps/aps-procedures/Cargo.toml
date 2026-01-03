@@ -13,6 +13,7 @@ rosetta_timestamp.workspace = true
 rosetta_uuid.workspace = true
 aps-next_procedure_templates.workspace = true
 aps-parent_procedure_templates.workspace = true
+aps-procedure_tables.workspace = true
 aps-procedure_templates.workspace = true
 aps-users.workspace = true
 

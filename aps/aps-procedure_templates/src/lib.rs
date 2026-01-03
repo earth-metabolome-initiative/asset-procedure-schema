@@ -25,7 +25,7 @@ pub struct ProcedureTemplate {
     id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     #[infallible]
-    most_concrete_table: String,
+    procedure_template_table_id: String,
     /// Undocumented column
     #[table_model(default = 1i32)]
     #[infallible]
@@ -56,6 +56,7 @@ pub struct ProcedureTemplate {
     deprecated: bool,
 }
 ::diesel_builders::prelude::unique_index!(procedure_templates::name);
+:: diesel_builders :: prelude :: fk ! ((procedure_templates :: procedure_template_table_id) -> (:: aps_procedure_template_tables :: procedure_template_tables :: id));
 :: diesel_builders :: prelude :: fk ! ((procedure_templates :: creator_id) -> (:: aps_users :: users :: id));
 :: diesel_builders :: prelude :: fk ! ((procedure_templates :: editor_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<procedure_templates::name>

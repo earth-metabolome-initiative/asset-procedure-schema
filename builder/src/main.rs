@@ -31,7 +31,7 @@ pub fn main() {
             .sink_crate("aps")
             .generate_workspace_toml()
             .generate_rustfmt()
-            .member("builder")
+            .members(["builder", "procedure-traits"])
             .into();
 
     tracker.extend(synql.generate().expect("Unable to generate workspace"));

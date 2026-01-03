@@ -24,7 +24,7 @@ pub struct AssetModel {
     id: ::rosetta_uuid::Uuid,
     /// Undocumented column
     #[infallible]
-    most_concrete_table: String,
+    asset_model_table_id: String,
     /// Undocumented column
     name: String,
     /// Undocumented column
@@ -51,6 +51,7 @@ pub struct AssetModel {
 }
 ::diesel_builders::prelude::unique_index!(asset_models::name);
 ::diesel_builders::prelude::unique_index!(asset_models::id, asset_models::parent_model_id);
+:: diesel_builders :: prelude :: fk ! ((asset_models :: asset_model_table_id) -> (:: aps_asset_model_tables :: asset_model_tables :: id));
 :: diesel_builders :: prelude :: fk ! ((asset_models :: parent_model_id) -> (asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((asset_models :: creator_id) -> (:: aps_users :: users :: id));
 :: diesel_builders :: prelude :: fk ! ((asset_models :: editor_id) -> (:: aps_users :: users :: id));

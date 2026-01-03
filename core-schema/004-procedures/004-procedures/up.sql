@@ -1,3 +1,6 @@
+-- Meta-table with the unique names of procedure tables, to be referenced by procedures
+-- and facilitate DAG traversal.
+CREATE TABLE IF NOT EXISTS procedure_tables (id TEXT PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS procedures (
 	-- The ID of this procedure.
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -16,7 +19,7 @@ CREATE TABLE IF NOT EXISTS procedures (
 		procedure_template_id <> predecessor_procedure_template_id
 	),
 	-- The name of the most concrete table this procedure_id is associated with.
-	most_concrete_table TEXT NOT NULL,
+	procedure_table_id TEXT NOT NULL REFERENCES procedure_tables(id),
 	-- User who created this procedure.
 	creator_id UUID NOT NULL REFERENCES users(id),
 	-- Timestamp when this procedure_id was created.
