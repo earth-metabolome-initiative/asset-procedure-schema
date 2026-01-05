@@ -2,7 +2,7 @@
 
 use std::collections::HashSet;
 
-use mermaid::prelude::*;
+use mermaid_builder::prelude::*;
 use sql_traits::prelude::*;
 
 /// Generates an Entity-Relationship Diagram (ERD) for the workspace

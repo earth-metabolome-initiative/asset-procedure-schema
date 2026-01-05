@@ -1597,7 +1597,7 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 name = "builder"
 version = "0.1.0"
 dependencies = [
- "mermaid",
+ "mermaid-builder",
  "sql_constraints",
  "sql_procedure_constraints",
  "sql_traits",
@@ -2394,9 +2394,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 
 [[package]]
-name = "mermaid"
-version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#c974cd5836826f3178d2cb48d7487c8bd39ab05c"
+name = "mermaid-builder"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f08513f81dd3dbfeb05ccdf3dbdfcad6491de4ac83996413211cbe60bcb3e4a"
 dependencies = [
  "colorsys",
  "serde",

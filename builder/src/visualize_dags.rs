@@ -1,6 +1,6 @@
 //! Submodule for visualizing the DAG structures present in the database.
 
-use mermaid::prelude::*;
+use mermaid_builder::prelude::*;
 use sql_traits::prelude::*;
 
 /// Visualizes the DAG structures present in the given database.
