@@ -15,14 +15,15 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `camera_models` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
+#[table_model(default(aps_asset_models::asset_models::asset_model_table_id, "camera_models"))]
 # [diesel (table_name = camera_models)]
 pub struct CameraModel {
-    /// Undocumented column
+    /// Field representing the `id` column in table `camera_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
 }

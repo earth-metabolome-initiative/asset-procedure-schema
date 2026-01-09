@@ -15,32 +15,41 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `harvesting_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
+#[table_model(default(
+    aps_procedure_templates::procedure_templates::procedure_template_table_id,
+    "harvesting_procedure_templates"
+))]
 # [diesel (table_name = harvesting_procedure_templates)]
 pub struct HarvestingProcedureTemplate {
-    /// Undocumented column
+    /// Field representing the `id` column in table
+    /// `harvesting_procedure_templates`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `sample_source_model_id` column in table
+    /// `harvesting_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_sample_source_model_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_sample_source_model_id`
+    /// column in table `harvesting_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_source_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `sample_model_id` column in table
+    /// `harvesting_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_sample_model_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_sample_model_id` column in
+    /// table `harvesting_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_model_id: ::rosetta_uuid::Uuid,

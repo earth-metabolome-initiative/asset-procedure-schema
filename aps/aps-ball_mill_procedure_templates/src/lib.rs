@@ -12,28 +12,38 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `ball_mill_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(
+    aps_procedure_templates::procedure_templates::procedure_template_table_id,
+    "ball_mill_procedure_templates"
+))]
 # [diesel (table_name = ball_mill_procedure_templates)]
 pub struct BallMillProcedureTemplate {
-    /// Undocumented column
+    /// Field representing the `id` column in table
+    /// `ball_mill_procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `kelvin` column in table
+    /// `ball_mill_procedure_templates`.
     #[table_model(default = 293.15f32)]
     kelvin: f32,
-    /// Undocumented column
+    /// Field representing the `kelvin_tolerance_percentage` column in table
+    /// `ball_mill_procedure_templates`.
     #[table_model(default = 1f32)]
     kelvin_tolerance_percentage: f32,
-    /// Undocumented column
+    /// Field representing the `duration` column in table
+    /// `ball_mill_procedure_templates`.
     #[table_model(default = 150f32)]
     duration: f32,
-    /// Undocumented column
+    /// Field representing the `hertz` column in table
+    /// `ball_mill_procedure_templates`.
     #[table_model(default = 25f32)]
     hertz: f32,
-    /// Undocumented column
+    /// Field representing the `bead_model_id` column in table
+    /// `ball_mill_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_bead_model_id
@@ -41,15 +51,18 @@ pub struct BallMillProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     bead_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_bead_model_id` column in
+    /// table `ball_mill_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_bead_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `bead_count` column in table
+    /// `ball_mill_procedure_templates`.
     #[table_model(default = 3i16)]
     bead_count: i16,
-    /// Undocumented column
+    /// Field representing the `milled_with_model_id` column in table
+    /// `ball_mill_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_milled_with_model_id
@@ -57,12 +70,14 @@ pub struct BallMillProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     milled_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_milled_with_model_id` column
+    /// in table `ball_mill_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_milled_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `milled_container_model_id` column in table
+    /// `ball_mill_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_milled_container_model_id
@@ -70,7 +85,8 @@ pub struct BallMillProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     milled_container_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_milled_container_model_id`
+    /// column in table `ball_mill_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

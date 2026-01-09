@@ -15,9 +15,9 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `procedure_template_tables` table.
 # [diesel (table_name = procedure_template_tables)]
 pub struct ProcedureTemplateTable {
-    /// Undocumented column
+    /// Field representing the `id` column in table `procedure_template_tables`.
     id: String,
 }

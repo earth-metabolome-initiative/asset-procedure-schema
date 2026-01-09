@@ -15,14 +15,15 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `centrifuge_models` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
+#[table_model(default(aps_asset_models::asset_models::asset_model_table_id, "centrifuge_models"))]
 # [diesel (table_name = centrifuge_models)]
 pub struct CentrifugeModel {
-    /// Undocumented column
+    /// Field representing the `id` column in table `centrifuge_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
 }

@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-synql = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
-sql_traits = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
-sql_constraints = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
-time_requirements = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
-sql_procedure_constraints = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
+synql = { git = "https://github.com/earth-metabolome-initiative/synql", branch = "main" }
+sql-traits = { git = "https://github.com/earth-metabolome-initiative/sql-traits", branch = "main" }
+sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", branch = "main" }
+time_requirements = "0.1.0"
+sql_procedure_rules = { path = "../crates/sql_procedure_rules" }
 mermaid-builder = "0.1.1"

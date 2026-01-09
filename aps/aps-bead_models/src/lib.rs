@@ -12,19 +12,20 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `bead_models` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(aps_asset_models::asset_models::asset_model_table_id, "bead_models"))]
 # [diesel (table_name = bead_models)]
 pub struct BeadModel {
-    /// Undocumented column
+    /// Field representing the `id` column in table `bead_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `diameter` column in table `bead_models`.
     diameter: f32,
 }
 :: diesel_builders :: prelude :: fk ! ((bead_models :: id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));

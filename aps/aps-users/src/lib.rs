@@ -15,20 +15,20 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `users` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (table_name = users)]
 pub struct User {
-    /// Undocumented column
+    /// Field representing the `id` column in table `users`.
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `created_at` column in table `users`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
-    /// Undocumented column
+    /// Field representing the `edited_at` column in table `users`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,

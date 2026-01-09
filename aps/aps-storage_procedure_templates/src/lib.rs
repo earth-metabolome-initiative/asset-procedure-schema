@@ -12,22 +12,30 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `storage_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(
+    aps_procedure_templates::procedure_templates::procedure_template_table_id,
+    "storage_procedure_templates"
+))]
 # [diesel (table_name = storage_procedure_templates)]
 pub struct StorageProcedureTemplate {
-    /// Undocumented column
+    /// Field representing the `id` column in table
+    /// `storage_procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `kelvin` column in table
+    /// `storage_procedure_templates`.
     #[table_model(default = 293.15f32)]
     kelvin: f32,
-    /// Undocumented column
+    /// Field representing the `kelvin_tolerance_percentage` column in table
+    /// `storage_procedure_templates`.
     #[table_model(default = 1f32)]
     kelvin_tolerance_percentage: f32,
-    /// Undocumented column
+    /// Field representing the `stored_into_model_id` column in table
+    /// `storage_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_stored_into_model_id
@@ -35,12 +43,14 @@ pub struct StorageProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stored_into_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_stored_into_model_id` column
+    /// in table `storage_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_stored_into_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `stored_asset_model_id` column in table
+    /// `storage_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_stored_asset_model_id
@@ -48,7 +58,8 @@ pub struct StorageProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stored_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_stored_asset_model_id` column
+    /// in table `storage_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

@@ -15,9 +15,9 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `asset_model_tables` table.
 # [diesel (table_name = asset_model_tables)]
 pub struct AssetModelTable {
-    /// Undocumented column
+    /// Field representing the `id` column in table `asset_model_tables`.
     id: String,
 }

@@ -14,22 +14,27 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `commercial_product_lots` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(
+    aps_asset_models::asset_models::asset_model_table_id,
+    "commercial_product_lots"
+))]
 # [diesel (table_name = commercial_product_lots)]
 pub struct CommercialProductLot {
-    /// Undocumented column
+    /// Field representing the `id` column in table `commercial_product_lots`.
     #[same_as(aps_asset_models::asset_models::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `lot` column in table `commercial_product_lots`.
     lot: String,
-    /// Undocumented column
+    /// Field representing the `product_model_id` column in table
+    /// `commercial_product_lots`.
     #[same_as(aps_asset_models::asset_models::parent_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

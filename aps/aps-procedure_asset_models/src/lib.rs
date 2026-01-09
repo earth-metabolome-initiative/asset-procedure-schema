@@ -15,26 +15,31 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `procedure_asset_models` table.
 # [diesel (table_name = procedure_asset_models)]
 pub struct ProcedureAssetModel {
-    /// Undocumented column
+    /// Field representing the `id` column in table `procedure_asset_models`.
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_id` column in table
+    /// `procedure_asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_id` column in table
+    /// `procedure_asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `asset_model_id` column in table
+    /// `procedure_asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_asset_model_id` column in
+    /// table `procedure_asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `ancestor_model_id` column in table
+    /// `procedure_asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     ancestor_model_id: ::rosetta_uuid::Uuid,
 }

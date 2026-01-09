@@ -15,22 +15,26 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `asset_compatibility_rules` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
 #[diesel(primary_key(left_asset_model_id, right_asset_model_id))]
 # [diesel (table_name = asset_compatibility_rules)]
 pub struct AssetCompatibilityRule {
-    /// Undocumented column
+    /// Field representing the `left_asset_model_id` column in table
+    /// `asset_compatibility_rules`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     left_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `right_asset_model_id` column in table
+    /// `asset_compatibility_rules`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     right_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `creator_id` column in table
+    /// `asset_compatibility_rules`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `created_at` column in table
+    /// `asset_compatibility_rules`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]

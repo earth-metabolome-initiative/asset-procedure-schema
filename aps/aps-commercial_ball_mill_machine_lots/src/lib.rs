@@ -15,20 +15,26 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `commercial_ball_mill_machine_lots` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
     aps_ball_mill_machine_models::ball_mill_machine_models,
     aps_commercial_product_lots::commercial_product_lots
 ))]
+#[table_model(default(
+    aps_asset_models::asset_models::asset_model_table_id,
+    "commercial_ball_mill_machine_lots"
+))]
 # [diesel (table_name = commercial_ball_mill_machine_lots)]
 pub struct CommercialBallMillMachineLot {
-    /// Undocumented column
+    /// Field representing the `id` column in table
+    /// `commercial_ball_mill_machine_lots`.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `commercial_ball_mill_machine_model_id` column in
+    /// table `commercial_ball_mill_machine_lots`.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     commercial_ball_mill_machine_model_id: ::rosetta_uuid::Uuid,

@@ -15,14 +15,17 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `reused_procedure_template_asset_models`
+/// table.
 #[diesel(primary_key(procedure_template_id, procedure_template_asset_model_id))]
 # [diesel (table_name = reused_procedure_template_asset_models)]
 pub struct ReusedProcedureTemplateAssetModel {
-    /// Undocumented column
+    /// Field representing the `procedure_template_id` column in table
+    /// `reused_procedure_template_asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_asset_model_id` column in
+    /// table `reused_procedure_template_asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_asset_model_id: ::rosetta_uuid::Uuid,
 }

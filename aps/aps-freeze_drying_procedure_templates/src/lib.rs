@@ -12,28 +12,38 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `freeze_drying_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(
+    aps_procedure_templates::procedure_templates::procedure_template_table_id,
+    "freeze_drying_procedure_templates"
+))]
 # [diesel (table_name = freeze_drying_procedure_templates)]
 pub struct FreezeDryingProcedureTemplate {
-    /// Undocumented column
+    /// Field representing the `id` column in table
+    /// `freeze_drying_procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `kelvin` column in table
+    /// `freeze_drying_procedure_templates`.
     #[table_model(default = 203.15f32)]
     kelvin: f32,
-    /// Undocumented column
+    /// Field representing the `kelvin_tolerance_percentage` column in table
+    /// `freeze_drying_procedure_templates`.
     #[table_model(default = 5f32)]
     kelvin_tolerance_percentage: f32,
-    /// Undocumented column
+    /// Field representing the `pascal` column in table
+    /// `freeze_drying_procedure_templates`.
     #[table_model(default = 4f32)]
     pascal: f32,
-    /// Undocumented column
+    /// Field representing the `duration` column in table
+    /// `freeze_drying_procedure_templates`.
     #[table_model(default = 259200f32)]
     duration: f32,
-    /// Undocumented column
+    /// Field representing the `freeze_dried_with_model_id` column in table
+    /// `freeze_drying_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_freeze_dried_with_model_id
@@ -41,12 +51,14 @@ pub struct FreezeDryingProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freeze_dried_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_freeze_dried_with_model_id`
+    /// column in table `freeze_drying_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_freeze_dried_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `freeze_dried_container_model_id` column in table
+    /// `freeze_drying_procedure_templates`.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_freeze_dried_container_model_id
@@ -54,7 +66,9 @@ pub struct FreezeDryingProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freeze_dried_container_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the
+    /// `procedure_template_freeze_dried_container_model_id` column in table
+    /// `freeze_drying_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

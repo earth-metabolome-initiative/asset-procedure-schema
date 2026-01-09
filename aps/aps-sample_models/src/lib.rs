@@ -15,17 +15,19 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `sample_models` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
+#[table_model(default(aps_asset_models::asset_models::asset_model_table_id, "sample_models"))]
 # [diesel (table_name = sample_models)]
 pub struct SampleModel {
-    /// Undocumented column
+    /// Field representing the `id` column in table `sample_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `sample_source_model_id` column in table
+    /// `sample_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_model_id: ::rosetta_uuid::Uuid,
 }

@@ -1,10 +1,10 @@
 //! Builder executable to generate the Directus database code.
 use std::{path::Path, process::Command};
 
-use sql_constraints::prelude::*;
+use sql_rules::prelude::*;
 use sql_traits::{prelude::ParserDB, traits::DatabaseLike};
 use synql::prelude::*;
-use time_requirements::{prelude::TimeTracker, report::Report, task::Task};
+use time_requirements::{prelude::TimeTracker, task::Task};
 mod visualize_dags;
 mod visualize_workspace;
 
@@ -20,7 +20,7 @@ pub fn main() {
     // Validate the database schema with all available constraints
     let validation_task = Task::new("Schema Validation");
     let mut constrainer = DefaultConstrainer::<ParserDB>::default();
-    sql_procedure_constraints::register_procedure_constraints(&mut constrainer);
+    sql_procedure_rules::register_procedure_constraints(&mut constrainer);
     constrainer.validate_schema(&db).expect("Database schema should pass all constraints");
     tracker.add_completed_task(validation_task);
 
@@ -31,7 +31,7 @@ pub fn main() {
             .sink_crate("aps")
             .generate_workspace_toml()
             .generate_rustfmt()
-            .members(["builder", "procedure-traits"])
+            .members(["builder", "crates/procedure-traits", "crates/sql_procedure_rules"])
             .into();
 
     tracker.extend(synql.generate().expect("Unable to generate workspace"));
@@ -90,7 +90,5 @@ pub fn main() {
     tracker.add_completed_task(task);
 
     // We print the report
-    Report::new(tracker)
-        .write(Path::new("TIME_REQUIREMENTS.md"), Path::new("TIME_REQUIREMENTS.png"))
-        .unwrap();
+    tracker.write(Path::new("TIME_REQUIREMENTS.md")).unwrap();
 }

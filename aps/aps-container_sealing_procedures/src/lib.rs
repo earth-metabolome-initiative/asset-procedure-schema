@@ -15,54 +15,67 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `container_sealing_procedures` table.
 #[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(default(
+    aps_procedures::procedures::procedure_table_id,
+    "container_sealing_procedures"
+))]
 # [diesel (table_name = container_sealing_procedures)]
 pub struct ContainerSealingProcedure {
-    /// Undocumented column
+    /// Field representing the `id` column in table
+    /// `container_sealing_procedures`.
     #[same_as(aps_procedures::procedures::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `capping_procedure_template_id` column in table
+    /// `container_sealing_procedures`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     capping_procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `capped_container_id` column in table
+    /// `container_sealing_procedures`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     capped_container_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `sealable_container_model_id` column in table
+    /// `container_sealing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_capped_container_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sealable_container_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_sealable_container_model_id`
+    /// column in table `container_sealing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_capped_container_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sealable_container_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_capped_container_id` column in table
+    /// `container_sealing_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_capped_container_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `sealed_with_model_id` column in table
+    /// `container_sealing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_capped_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sealed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_sealed_with_model_id` column
+    /// in table `container_sealing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_capped_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sealed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_capped_with_id` column in table
+    /// `container_sealing_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_capped_with_id: ::rosetta_uuid::Uuid,

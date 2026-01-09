@@ -15,15 +15,17 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `digital_assets` table.
 #[table_model(ancestors(aps_assets::assets))]
+#[table_model(default(aps_assets::assets::asset_table_id, "digital_assets"))]
 # [diesel (table_name = digital_assets)]
 pub struct DigitalAsset {
-    /// Undocumented column
+    /// Field representing the `id` column in table `digital_assets`.
     #[same_as(aps_assets::assets::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `digital_asset_model_id` column in table
+    /// `digital_assets`.
     #[same_as(aps_assets::assets::model_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     digital_asset_model_id: ::rosetta_uuid::Uuid,

@@ -14,43 +14,51 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `procedure_templates` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (table_name = procedure_templates)]
 pub struct ProcedureTemplate {
-    /// Undocumented column
+    /// Field representing the `id` column in table `procedure_templates`.
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_table_id` column in table
+    /// `procedure_templates`.
+    #[table_model(default = "\"procedure_templates\"")]
     #[infallible]
     procedure_template_table_id: String,
-    /// Undocumented column
+    /// Field representing the `version` column in table `procedure_templates`.
     #[table_model(default = 1i32)]
     #[infallible]
     version: i32,
-    /// Undocumented column
+    /// Field representing the `name` column in table `procedure_templates`.
     name: String,
-    /// Undocumented column
+    /// Field representing the `description` column in table
+    /// `procedure_templates`.
     description: String,
-    /// Undocumented column
+    /// Field representing the `creator_id` column in table
+    /// `procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `created_at` column in table
+    /// `procedure_templates`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
-    /// Undocumented column
+    /// Field representing the `editor_id` column in table
+    /// `procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     editor_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `edited_at` column in table
+    /// `procedure_templates`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,
-    /// Undocumented column
+    /// Field representing the `deprecated` column in table
+    /// `procedure_templates`.
     #[table_model(default = false)]
     #[infallible]
     deprecated: bool,

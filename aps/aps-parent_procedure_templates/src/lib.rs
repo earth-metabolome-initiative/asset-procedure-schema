@@ -15,22 +15,26 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `parent_procedure_templates` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
 #[diesel(primary_key(parent_id, child_id))]
 # [diesel (table_name = parent_procedure_templates)]
 pub struct ParentProcedureTemplate {
-    /// Undocumented column
+    /// Field representing the `parent_id` column in table
+    /// `parent_procedure_templates`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     parent_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `child_id` column in table
+    /// `parent_procedure_templates`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     child_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `creator_id` column in table
+    /// `parent_procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `created_at` column in table
+    /// `parent_procedure_templates`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]

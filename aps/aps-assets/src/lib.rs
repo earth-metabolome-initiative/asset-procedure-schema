@@ -14,39 +14,40 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `assets` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (table_name = assets)]
 pub struct Asset {
-    /// Undocumented column
+    /// Field representing the `id` column in table `assets`.
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `asset_table_id` column in table `assets`.
+    #[table_model(default = "\"assets\"")]
     #[infallible]
     asset_table_id: String,
-    /// Undocumented column
+    /// Field representing the `name` column in table `assets`.
     name: Option<String>,
-    /// Undocumented column
+    /// Field representing the `description` column in table `assets`.
     description: Option<String>,
-    /// Undocumented column
+    /// Field representing the `model_id` column in table `assets`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `creator_id` column in table `assets`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `created_at` column in table `assets`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
-    /// Undocumented column
+    /// Field representing the `editor_id` column in table `assets`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     editor_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `edited_at` column in table `assets`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,

@@ -101,7 +101,7 @@ version = "0.1.0"
 dependencies = [
  "mermaid",
  "sql_constraints",
- "sql_procedure_constraints",
+ "sql_procedure_rules",
  "sql_traits",
  "synql",
  "time_requirements",
@@ -1262,7 +1262,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sql_procedure_constraints"
+name = "sql_procedure_rules"
 version = "0.1.0"
 source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#763a73403d801b43ad85c072051b5fcb9033d01c"
 dependencies = [
@@ -1373,7 +1373,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "snake_case_sanitizer",
- "sql_procedure_constraints",
+ "sql_procedure_rules",
  "sql_relations",
  "sql_traits",
  "sqlparser",

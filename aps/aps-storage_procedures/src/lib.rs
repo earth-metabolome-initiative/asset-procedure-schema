@@ -15,57 +15,67 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `storage_procedures` table.
 #[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(default(aps_procedures::procedures::procedure_table_id, "storage_procedures"))]
 # [diesel (table_name = storage_procedures)]
 pub struct StorageProcedure {
-    /// Undocumented column
+    /// Field representing the `id` column in table `storage_procedures`.
     #[same_as(aps_procedures::procedures::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `storage_procedure_template_id` column in table
+    /// `storage_procedures`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     storage_procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `stored_asset_id` column in table
+    /// `storage_procedures`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stored_asset_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `stored_asset_model_id` column in table
+    /// `storage_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_stored_asset_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stored_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_stored_asset_model_id` column
+    /// in table `storage_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_stored_asset_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_stored_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_stored_asset_id` column in table
+    /// `storage_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_stored_asset_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `stored_into_id` column in table
+    /// `storage_procedures`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stored_into_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `stored_into_model_id` column in table
+    /// `storage_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_stored_into_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stored_into_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_stored_into_model_id` column
+    /// in table `storage_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_stored_into_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_stored_into_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_stored_into_id` column in table
+    /// `storage_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_stored_into_id: ::rosetta_uuid::Uuid,

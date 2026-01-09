@@ -15,20 +15,25 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `commercial_freezer_lots` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
     aps_freezer_models::freezer_models,
     aps_commercial_product_lots::commercial_product_lots
 ))]
+#[table_model(default(
+    aps_asset_models::asset_models::asset_model_table_id,
+    "commercial_freezer_lots"
+))]
 # [diesel (table_name = commercial_freezer_lots)]
 pub struct CommercialFreezerLot {
-    /// Undocumented column
+    /// Field representing the `id` column in table `commercial_freezer_lots`.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `commercial_freezer_model_id` column in table
+    /// `commercial_freezer_lots`.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     commercial_freezer_model_id: ::rosetta_uuid::Uuid,

@@ -1,0 +1,12 @@
+[package]
+name = "sql_procedure_rules"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+sql-traits = { git = "https://github.com/earth-metabolome-initiative/sql-traits", branch = "main" }
+sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", branch = "main" }
+sql_relations = { git = "https://github.com/earth-metabolome-initiative/synql", branch = "main" }
+
+[lints]
+workspace = true

@@ -12,26 +12,30 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `weighing_procedures` table.
 #[table_model(ancestors(aps_procedures::procedures))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(aps_procedures::procedures::procedure_table_id, "weighing_procedures"))]
 # [diesel (table_name = weighing_procedures)]
 pub struct WeighingProcedure {
-    /// Undocumented column
+    /// Field representing the `id` column in table `weighing_procedures`.
     #[same_as(aps_procedures::procedures::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `weighing_procedure_template_id` column in table
+    /// `weighing_procedures`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighing_procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `weighed_asset_id` column in table
+    /// `weighing_procedures`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_asset_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `weighed_asset_model_id` column in table
+    /// `weighing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_weighed_asset_id
@@ -39,7 +43,8 @@ pub struct WeighingProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_weighed_asset_model_id`
+    /// column in table `weighing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_weighed_asset_id
@@ -47,18 +52,21 @@ pub struct WeighingProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_weighed_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_weighed_asset_id` column in table
+    /// `weighing_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_weighed_asset_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `mass` column in table `weighing_procedures`.
     mass: f32,
-    /// Undocumented column
+    /// Field representing the `weighed_with_id` column in table
+    /// `weighing_procedures`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_with_id: Option<::rosetta_uuid::Uuid>,
-    /// Undocumented column
+    /// Field representing the `weighed_with_model_id` column in table
+    /// `weighing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_weighed_with_id
@@ -66,7 +74,8 @@ pub struct WeighingProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_weighed_with_model_id` column
+    /// in table `weighing_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_weighed_with_id
@@ -74,7 +83,8 @@ pub struct WeighingProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_weighed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_weighed_with_id` column in table
+    /// `weighing_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

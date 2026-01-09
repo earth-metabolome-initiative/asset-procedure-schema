@@ -15,14 +15,16 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `asset_model_ancestors` table.
 #[diesel(primary_key(descendant_model_id, ancestor_model_id))]
 # [diesel (table_name = asset_model_ancestors)]
 pub struct AssetModelAncestor {
-    /// Undocumented column
+    /// Field representing the `descendant_model_id` column in table
+    /// `asset_model_ancestors`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     descendant_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `ancestor_model_id` column in table
+    /// `asset_model_ancestors`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     ancestor_model_id: ::rosetta_uuid::Uuid,
 }

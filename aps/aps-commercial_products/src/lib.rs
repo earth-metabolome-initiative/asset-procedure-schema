@@ -15,14 +15,18 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `commercial_products` table.
 #[table_model(ancestors(aps_asset_models::asset_models))]
+#[table_model(default(
+    aps_asset_models::asset_models::asset_model_table_id,
+    "commercial_products"
+))]
 # [diesel (table_name = commercial_products)]
 pub struct CommercialProduct {
-    /// Undocumented column
+    /// Field representing the `id` column in table `commercial_products`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `brand_id` column in table `commercial_products`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     brand_id: ::rosetta_uuid::Uuid,
 }

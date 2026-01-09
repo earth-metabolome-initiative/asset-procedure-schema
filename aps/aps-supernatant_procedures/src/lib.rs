@@ -15,78 +15,93 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `supernatant_procedures` table.
 #[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(default(aps_procedures::procedures::procedure_table_id, "supernatant_procedures"))]
 # [diesel (table_name = supernatant_procedures)]
 pub struct SupernatantProcedure {
-    /// Undocumented column
+    /// Field representing the `id` column in table `supernatant_procedures`.
     #[same_as(aps_procedures::procedures::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `supernatant_procedure_template_id` column in
+    /// table `supernatant_procedures`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     supernatant_procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `stratified_source_id` column in table
+    /// `supernatant_procedures`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stratified_source_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `stratified_source_model_id` column in table
+    /// `supernatant_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_stratified_source_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     stratified_source_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_stratified_source_model_id`
+    /// column in table `supernatant_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_stratified_source_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_stratified_source_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_stratified_source_id` column in table
+    /// `supernatant_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_stratified_source_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `supernatant_destination_id` column in table
+    /// `supernatant_procedures`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     supernatant_destination_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `supernatant_destination_model_id` column in
+    /// table `supernatant_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_supernatant_destination_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     supernatant_destination_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the
+    /// `procedure_template_supernatant_destination_model_id` column in table
+    /// `supernatant_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_supernatant_destination_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_supernatant_destination_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_supernatant_destination_id` column in
+    /// table `supernatant_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_supernatant_destination_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `transferred_with_id` column in table
+    /// `supernatant_procedures`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     transferred_with_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `transferred_with_model_id` column in table
+    /// `supernatant_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_transferred_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     transferred_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_transferred_with_model_id`
+    /// column in table `supernatant_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_transferred_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_transferred_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_transferred_with_id` column in table
+    /// `supernatant_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_transferred_with_id: ::rosetta_uuid::Uuid,

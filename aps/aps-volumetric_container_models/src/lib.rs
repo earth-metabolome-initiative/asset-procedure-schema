@@ -12,20 +12,26 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `volumetric_container_models` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
     aps_container_models::container_models
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(
+    aps_asset_models::asset_models::asset_model_table_id,
+    "volumetric_container_models"
+))]
 # [diesel (table_name = volumetric_container_models)]
 pub struct VolumetricContainerModel {
-    /// Undocumented column
+    /// Field representing the `id` column in table
+    /// `volumetric_container_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `volume` column in table
+    /// `volumetric_container_models`.
     volume: f32,
 }
 :: diesel_builders :: prelude :: fk ! ((volumetric_container_models :: id) -> (:: aps_container_models :: container_models :: id));

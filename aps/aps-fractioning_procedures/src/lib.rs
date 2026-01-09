@@ -12,26 +12,30 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `fractioning_procedures` table.
 #[table_model(ancestors(aps_procedures::procedures))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+#[table_model(default(aps_procedures::procedures::procedure_table_id, "fractioning_procedures"))]
 # [diesel (table_name = fractioning_procedures)]
 pub struct FractioningProcedure {
-    /// Undocumented column
+    /// Field representing the `id` column in table `fractioning_procedures`.
     #[same_as(aps_procedures::procedures::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `fractioning_procedure_template_id` column in
+    /// table `fractioning_procedures`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     fractioning_procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `fragment_container_id` column in table
+    /// `fractioning_procedures`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     fragment_container_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `fragment_container_model_id` column in table
+    /// `fractioning_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_fragment_container_id
@@ -39,7 +43,8 @@ pub struct FractioningProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     fragment_container_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_fragment_container_model_id`
+    /// column in table `fractioning_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_fragment_container_id
@@ -47,16 +52,19 @@ pub struct FractioningProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_fragment_container_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_fragment_container_id` column in table
+    /// `fractioning_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_fragment_container_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `fragment_placed_into_id` column in table
+    /// `fractioning_procedures`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     fragment_placed_into_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `fragment_placed_into_model_id` column in table
+    /// `fractioning_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_fragment_placed_into_id
@@ -64,7 +72,9 @@ pub struct FractioningProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     fragment_placed_into_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the
+    /// `procedure_template_fragment_placed_into_model_id` column in table
+    /// `fractioning_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_fragment_placed_into_id
@@ -72,18 +82,21 @@ pub struct FractioningProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_fragment_placed_into_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_fragment_placed_into_id` column in
+    /// table `fractioning_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_fragment_placed_into_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `mass` column in table `fractioning_procedures`.
     mass: f32,
-    /// Undocumented column
+    /// Field representing the `weighed_with_id` column in table
+    /// `fractioning_procedures`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_with_id: Option<::rosetta_uuid::Uuid>,
-    /// Undocumented column
+    /// Field representing the `weighed_with_model_id` column in table
+    /// `fractioning_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_weighed_with_id
@@ -91,7 +104,8 @@ pub struct FractioningProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_weighed_with_model_id` column
+    /// in table `fractioning_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_weighed_with_id
@@ -99,7 +113,8 @@ pub struct FractioningProcedure {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_weighed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_weighed_with_id` column in table
+    /// `fractioning_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

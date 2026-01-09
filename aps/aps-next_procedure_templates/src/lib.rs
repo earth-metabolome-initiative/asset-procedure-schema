@@ -15,26 +15,31 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `next_procedure_templates` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
 #[diesel(primary_key(parent_id, predecessor_id, successor_id))]
 # [diesel (table_name = next_procedure_templates)]
 pub struct NextProcedureTemplate {
-    /// Undocumented column
+    /// Field representing the `parent_id` column in table
+    /// `next_procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     parent_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `predecessor_id` column in table
+    /// `next_procedure_templates`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     predecessor_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `successor_id` column in table
+    /// `next_procedure_templates`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     successor_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `creator_id` column in table
+    /// `next_procedure_templates`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `created_at` column in table
+    /// `next_procedure_templates`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]

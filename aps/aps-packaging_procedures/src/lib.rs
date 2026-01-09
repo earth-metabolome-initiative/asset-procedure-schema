@@ -15,54 +15,63 @@
     diesel :: Identifiable,
     diesel_builders :: prelude :: TableModel,
 )]
-/// Undocumented table
+/// Struct representing a row in the `packaging_procedures` table.
 #[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(default(aps_procedures::procedures::procedure_table_id, "packaging_procedures"))]
 # [diesel (table_name = packaging_procedures)]
 pub struct PackagingProcedure {
-    /// Undocumented column
+    /// Field representing the `id` column in table `packaging_procedures`.
     #[same_as(aps_procedures::procedures::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `packaging_procedure_template_id` column in table
+    /// `packaging_procedures`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     packaging_procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `sample_id` column in table
+    /// `packaging_procedures`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `sample_model_id` column in table
+    /// `packaging_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_sample_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_sample_model_id` column in
+    /// table `packaging_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_sample_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_sample_id` column in table
+    /// `packaging_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_sample_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `packaged_with_model_id` column in table
+    /// `packaging_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_packaged_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     packaged_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_template_packaged_with_model_id`
+    /// column in table `packaging_procedures`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_packaged_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_packaged_with_model_id: ::rosetta_uuid::Uuid,
-    /// Undocumented column
+    /// Field representing the `procedure_packaged_with_id` column in table
+    /// `packaging_procedures`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_packaged_with_id: ::rosetta_uuid::Uuid,
