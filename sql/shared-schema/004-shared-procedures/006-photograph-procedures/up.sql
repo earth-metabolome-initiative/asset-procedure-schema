@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS photograph_procedure_templates (
+CREATE TABLE photograph_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The device used for photograph.
 	photographed_with_model_id UUID NOT NULL REFERENCES camera_models(id),
@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS photograph_procedure_templates (
 		procedure_template_photograph_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS photograph_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('photograph_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE photograph_procedures (
 	-- Identifier of the photograph_id id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The template of this procedure_id should be a photograph_id procedure_id template.
@@ -116,3 +117,4 @@ CREATE TABLE IF NOT EXISTS photograph_procedures (
 	-- We check that the `procedure_photograph` is associated to the `photograph`.
 	FOREIGN KEY (photograph_id, photograph_model_id) REFERENCES assets(id, model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('photograph_procedures') ON CONFLICT DO NOTHING;

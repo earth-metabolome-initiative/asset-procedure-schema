@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS centrifuge_procedure_templates (
+CREATE TABLE centrifuge_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The storage temperature in Kelvin.
 	kelvin REAL NOT NULL DEFAULT 293.15 CHECK (kelvin > 0.0),
@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS centrifuge_procedure_templates (
 		procedure_template_centrifuged_container_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS centrifuge_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('centrifuge_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE centrifuge_procedures (
 	-- Identifier of the centrifuge id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- We enforce that the model of this procedure_id must be a centrifuge procedure_id template.
@@ -124,3 +125,4 @@ CREATE TABLE IF NOT EXISTS centrifuge_procedures (
 		centrifuged_with_model_id
 	) REFERENCES procedure_asset_models(id, asset_model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('centrifuge_procedures') ON CONFLICT DO NOTHING;

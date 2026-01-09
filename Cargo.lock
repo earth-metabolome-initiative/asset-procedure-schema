@@ -204,6 +204,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
+ "validation_errors",
 ]
 
 [[package]]
@@ -227,6 +228,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
+ "validation_errors",
 ]
 
 [[package]]
@@ -1194,6 +1196,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
+ "validation_errors",
 ]
 
 [[package]]
@@ -1216,6 +1219,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
+ "validation_errors",
 ]
 
 [[package]]
@@ -1562,9 +1566,9 @@ name = "builder"
 version = "0.1.0"
 dependencies = [
  "mermaid-builder",
+ "sql-procedure-rules",
  "sql-rules",
  "sql-traits",
- "sql_procedure_rules",
  "synql",
  "time_requirements",
 ]
@@ -2720,6 +2724,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
+name = "sql-procedure-rules"
+version = "0.1.0"
+dependencies = [
+ "sql-rules",
+ "sql-traits",
+ "sql_relations",
+]
+
+[[package]]
 name = "sql-rules"
 version = "0.1.0"
 source = "git+https://github.com/earth-metabolome-initiative/sql-rules?branch=main#ce62698d8414fcc4812ef7dc79a2705a39770d0c"
@@ -2733,7 +2746,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#8d57de01e8df3a171e6e1d20fbd41696aa35a6ff"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#da2f216a366d980a59bf863068c174cc2e2ad258"
 dependencies = [
  "geometric-traits",
  "git2",
@@ -2743,18 +2756,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "sql_procedure_rules"
-version = "0.1.0"
-dependencies = [
- "sql-rules",
- "sql-traits",
- "sql_relations",
-]
-
-[[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#fe3bd304d26f4bf29ec53c7b154e9667ab204dad"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#e5cc9ebc03d7f3a8a43e75c567e3999f9a4cbf5a"
 dependencies = [
  "sql-traits",
 ]
@@ -2848,7 +2852,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#fe3bd304d26f4bf29ec53c7b154e9667ab204dad"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#e5cc9ebc03d7f3a8a43e75c567e3999f9a4cbf5a"
 dependencies = [
  "cached",
  "chrono",

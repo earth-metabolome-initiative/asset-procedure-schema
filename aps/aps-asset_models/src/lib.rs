@@ -24,7 +24,7 @@ pub struct AssetModel {
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `asset_model_table_id` column in table
     /// `asset_models`.
-    #[table_model(default = "\"asset_models\"")]
+    #[table_model(default = "asset_models")]
     #[infallible]
     asset_model_table_id: String,
     /// Field representing the `name` column in table `asset_models`.

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS packaging_procedure_templates (
+CREATE TABLE packaging_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	packaged_with_model_id UUID NOT NULL REFERENCES packaging_models(id),
 	procedure_template_packaged_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS packaging_procedure_templates (
 		procedure_template_sample_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS packaging_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('packaging_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE packaging_procedures (
 	-- The extended `procedure`.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The procedure_id template of the extended `procedure`.
@@ -86,3 +87,4 @@ CREATE TABLE IF NOT EXISTS packaging_procedures (
 	-- We check that the `procedure_sample` is associated to the `sample_model`.
 	FOREIGN KEY (procedure_sample_id, sample_model_id) REFERENCES procedure_asset_models(id, asset_model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('packaging_procedures') ON CONFLICT DO NOTHING;

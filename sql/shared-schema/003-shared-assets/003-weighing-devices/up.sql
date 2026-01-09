@@ -1,8 +1,9 @@
-CREATE TABLE IF NOT EXISTS weighing_device_models (
+CREATE TABLE weighing_device_models (
 	id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE
 );
+INSERT INTO asset_model_tables (id) VALUES ('weighing_device_models') ON CONFLICT DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS weighing_devices (
+CREATE TABLE weighing_devices (
 	id UUID PRIMARY KEY REFERENCES physical_assets (id) ON DELETE CASCADE,
 	-- The model of the weighing device.
 	weighing_device_model_id UUID NOT NULL REFERENCES weighing_device_models (id),
@@ -10,3 +11,4 @@ CREATE TABLE IF NOT EXISTS weighing_devices (
 	-- sure that the asset is a weighing device without the possibility of a mistake.
 	FOREIGN KEY (id, weighing_device_model_id) REFERENCES assets (id, model_id)
 );
+INSERT INTO asset_tables (id) VALUES ('weighing_devices') ON CONFLICT DO NOTHING;

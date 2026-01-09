@@ -16,8 +16,24 @@
     diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `asset_model_tables` table.
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (table_name = asset_model_tables)]
 pub struct AssetModelTable {
     /// Field representing the `id` column in table `asset_model_tables`.
     id: String,
+}
+impl ::diesel_builders::ValidateColumn<asset_model_tables::id>
+    for <asset_model_tables::table as ::diesel_builders::TableExt>::NewValues
+{
+    type Error = ::validation_errors::ValidationError<&'static str>;
+    #[inline]
+    fn validate_column(id: &String) -> Result<(), Self::Error> {
+        use diesel::Column;
+        if id.is_empty() {
+            return Err(validation_errors::prelude::ValidationError::empty(
+                crate::asset_model_tables::id::NAME,
+            ));
+        }
+        Ok(())
+    }
 }

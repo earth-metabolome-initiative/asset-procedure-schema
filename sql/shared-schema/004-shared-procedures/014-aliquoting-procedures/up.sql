@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS aliquoting_procedure_templates (
+CREATE TABLE aliquoting_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The volume in liters that should be aliquoted.
 	volume REAL NOT NULL CHECK (volume > 0.0),
@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS aliquoting_procedure_templates (
 		procedure_template_aliquoted_with_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS aliquoting_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('aliquoting_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE aliquoting_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- We enforce that the model of this procedure must be an aliquoting procedure template.
 	aliquoting_procedure_template_id UUID NOT NULL REFERENCES aliquoting_procedure_templates(id),
@@ -117,3 +118,4 @@ CREATE TABLE IF NOT EXISTS aliquoting_procedures (
 	-- We enfore that the `aliquoted_with_model` asset model is correctly associated to the `aliquoted_with` procedure asset.
 	FOREIGN KEY (procedure_aliquoted_with_id, aliquoted_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('aliquoting_procedures') ON CONFLICT DO NOTHING;

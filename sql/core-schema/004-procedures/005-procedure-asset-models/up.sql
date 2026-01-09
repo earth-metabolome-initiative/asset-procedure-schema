@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS procedure_asset_models (
+CREATE TABLE procedure_asset_models (
 	-- The ID of this procedure_id asset.
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	-- The ID of the procedure_id this asset is used in.

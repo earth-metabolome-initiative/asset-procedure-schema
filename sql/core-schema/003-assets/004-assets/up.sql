@@ -1,9 +1,9 @@
 -- Meta-table with the unique names of asset tables, to be referenced by assets
 -- and facilitate DAG traversal.
-CREATE TABLE IF NOT EXISTS asset_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
-CREATE TABLE IF NOT EXISTS assets (
+CREATE TABLE asset_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
+CREATE TABLE assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    asset_table_id TEXT DEFAULT "assets" NOT NULL REFERENCES asset_tables(id),
+    asset_table_id TEXT DEFAULT 'assets' NOT NULL REFERENCES asset_tables(id),
     name VARCHAR(255) CHECK (name <> ''),
     description TEXT CHECK (description <> ''),
     model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
@@ -17,3 +17,4 @@ CREATE TABLE IF NOT EXISTS assets (
     -- Assets of different models can have the same name, but not assets of the same model.
     UNIQUE (name, model_id)
 );
+INSERT INTO asset_tables (id) VALUES ('assets') ON CONFLICT DO NOTHING;

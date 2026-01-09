@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS storage_procedure_templates (
+CREATE TABLE storage_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The storage temperature in Kelvin.
 	kelvin REAL NOT NULL DEFAULT 293.15 CHECK (kelvin > 0.0),
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS storage_procedure_templates (
 		procedure_template_stored_asset_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS storage_procedures (
+CREATE TABLE storage_procedures (
 	-- Identifier of the storage id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The template of this procedure_id should be a storage procedure_id template.

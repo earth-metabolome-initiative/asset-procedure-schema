@@ -1,5 +1,5 @@
 [package]
-name = "sql_procedure_rules"
+name = "sql-procedure-rules"
 version = "0.1.0"
 edition.workspace = true
 

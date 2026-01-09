@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS freezing_procedure_templates (
+CREATE TABLE freezing_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The storage temperature in Kelvin.
 	kelvin REAL NOT NULL DEFAULT 203.15 CHECK (kelvin > 0.0),
@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS freezing_procedure_templates (
 		procedure_template_frozen_container_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS freezing_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('freezing_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE freezing_procedures (
 	-- Identifier of the freezing id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The template of this procedure_id should be a freezing procedure_id template.
@@ -101,3 +102,4 @@ CREATE TABLE IF NOT EXISTS freezing_procedures (
 	FOREIGN KEY (procedure_frozen_with_id, frozen_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
 	FOREIGN KEY (frozen_with_id, frozen_with_model_id) REFERENCES assets(id, model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('freezing_procedures') ON CONFLICT DO NOTHING;

@@ -1,7 +1,7 @@
 -- Meta-table with the unique names of procedure tables, to be referenced by procedures
 -- and facilitate DAG traversal.
-CREATE TABLE IF NOT EXISTS procedure_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
-CREATE TABLE IF NOT EXISTS procedures (
+CREATE TABLE procedure_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
+CREATE TABLE procedures (
 	-- The ID of this procedure.
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	-- The procedure_id template of this procedure.
@@ -94,3 +94,4 @@ CREATE TABLE IF NOT EXISTS procedures (
 		)
 	)
 );
+INSERT INTO procedure_tables (id) VALUES ('procedures') ON CONFLICT DO NOTHING;

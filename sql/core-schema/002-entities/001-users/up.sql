@@ -1,5 +1,5 @@
 -- Table storing users of the system
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
 	-- Surrogate primary key for the user entity
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	-- Time of account creation

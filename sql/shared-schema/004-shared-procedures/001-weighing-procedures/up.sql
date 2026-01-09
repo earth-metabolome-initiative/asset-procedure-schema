@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS weighing_procedure_templates (
+CREATE TABLE weighing_procedure_templates (
 	-- Identifier of the weighing procedure_id template, which is also a a foreign key to the general procedure_id template table.
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The asset model being weighed.
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS weighing_procedure_templates (
 		procedure_template_weighed_with_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS weighing_procedures(
+CREATE TABLE weighing_procedures(
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- We enforce that the model of this procedure_id must be a weighing procedure_id template.
 	weighing_procedure_template_id UUID NOT NULL REFERENCES weighing_procedure_templates(id),

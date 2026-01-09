@@ -1,5 +1,5 @@
 -- Table to store procedure template asset models
-CREATE TABLE IF NOT EXISTS procedure_template_asset_models (
+CREATE TABLE procedure_template_asset_models (
 	-- Identifier of the procedure template asset model
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	-- The name of the procedure template asset model
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS procedure_template_asset_models (
 	UNIQUE (id, asset_model_id)
 );
 -- Table to track reused procedure template asset models across different procedure templates
-CREATE TABLE IF NOT EXISTS reused_procedure_template_asset_models (
+CREATE TABLE reused_procedure_template_asset_models (
 	-- Procedure template this reused asset model is associated with
 	procedure_template_id UUID NOT NULL REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- Identifier of the reused procedure template asset model

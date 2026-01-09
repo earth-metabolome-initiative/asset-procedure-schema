@@ -1,9 +1,9 @@
 -- Meta-table with the unique names of asset model tables, to be referenced by asset models
 -- and facilitate DAG traversal.
-CREATE TABLE IF NOT EXISTS asset_model_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
-CREATE TABLE IF NOT EXISTS asset_models (
+CREATE TABLE asset_model_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
+CREATE TABLE asset_models (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	asset_model_table_id TEXT DEFAULT "asset_models" NOT NULL REFERENCES asset_model_tables(id),
+	asset_model_table_id TEXT DEFAULT 'asset_models' NOT NULL REFERENCES asset_model_tables(id),
 	name VARCHAR(255) NOT NULL UNIQUE CHECK (name <> ''),
 	description TEXT NOT NULL CHECK (description <> ''),
 	parent_model_id UUID REFERENCES asset_models(id) ON DELETE CASCADE,
@@ -16,12 +16,13 @@ CREATE TABLE IF NOT EXISTS asset_models (
 	CHECK (created_at <= edited_at),
 	UNIQUE (id, parent_model_id)
 );
-CREATE TABLE IF NOT EXISTS asset_model_ancestors (
+INSERT INTO asset_model_tables (id) VALUES ('asset_models') ON CONFLICT DO NOTHING;
+CREATE TABLE asset_model_ancestors (
 	descendant_model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
 	ancestor_model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
 	PRIMARY KEY (descendant_model_id, ancestor_model_id)
 );
-CREATE TABLE IF NOT EXISTS asset_compatibility_rules (
+CREATE TABLE asset_compatibility_rules (
 	left_asset_model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
 	right_asset_model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
 	creator_id UUID NOT NULL REFERENCES users(id),

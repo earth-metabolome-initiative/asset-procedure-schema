@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS fractioning_procedure_templates (
+CREATE TABLE fractioning_procedure_templates (
 	-- Identifier of the fractioning procedure_id template, which is also a foreign key to the general procedure_id template.
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- Mass in kilograms. Expected amount of the fraction to be collected.
@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS fractioning_procedure_templates (
 		procedure_template_fragment_placed_into_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS fractioning_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('fractioning_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE fractioning_procedures (
 	-- Identifier of the fractioning id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The template of this procedure_id should be a fractioning procedure_id template.
@@ -146,3 +147,4 @@ CREATE TABLE IF NOT EXISTS fractioning_procedures (
 		procedure_template_weighed_with_model_id
 	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('fractioning_procedures') ON CONFLICT DO NOTHING;

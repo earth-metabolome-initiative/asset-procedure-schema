@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS parent_procedure_templates (
+CREATE TABLE parent_procedure_templates (
 	PRIMARY KEY (parent_id, child_id),
 	-- The parent_id procedure_id template
 	parent_id UUID NOT NULL REFERENCES procedure_templates(id) ON DELETE CASCADE,
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS parent_procedure_templates (
 	-- The timestamp when this relationship was created
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS next_procedure_templates (
+CREATE TABLE next_procedure_templates (
 	PRIMARY KEY (parent_id, predecessor_id, successor_id),
 	-- The parent_id procedure_id template
 	parent_id UUID NOT NULL REFERENCES procedure_templates(id) ON DELETE CASCADE,

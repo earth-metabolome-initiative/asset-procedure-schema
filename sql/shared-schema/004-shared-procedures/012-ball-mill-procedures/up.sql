@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS ball_mill_procedure_templates (
+CREATE TABLE ball_mill_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The storage temperature in Kelvin.
 	kelvin REAL NOT NULL DEFAULT 293.15 CHECK (kelvin > 0.0),
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS ball_mill_procedure_templates (
 		procedure_template_milled_container_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS ball_mill_procedures (
+CREATE TABLE ball_mill_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	ball_mill_procedure_template_id UUID NOT NULL REFERENCES ball_mill_procedure_templates(id),
 	-- The beads model used for the procedure.

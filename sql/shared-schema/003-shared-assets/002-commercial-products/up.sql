@@ -1,11 +1,12 @@
 -- A commercial product is an asset model produced by some brand.
-CREATE TABLE IF NOT EXISTS commercial_products (
+CREATE TABLE commercial_products (
 	-- Identifier of the commercial product
 	id UUID PRIMARY KEY REFERENCES asset_models(id) ON DELETE CASCADE,
 	-- The brand producing this commercial product
 	brand_id UUID NOT NULL REFERENCES brands(id)
 );
-CREATE TABLE IF NOT EXISTS commercial_product_lots (
+INSERT INTO asset_model_tables (id) VALUES ('commercial_products') ON CONFLICT DO NOTHING;
+CREATE TABLE commercial_product_lots (
 	id UUID PRIMARY KEY REFERENCES physical_asset_models(id) ON DELETE CASCADE,
 	lot TEXT NOT NULL CHECK (lot <> ''),
 	product_model_id UUID NOT NULL REFERENCES commercial_products(id) ON DELETE CASCADE,
@@ -14,3 +15,4 @@ CREATE TABLE IF NOT EXISTS commercial_product_lots (
 	-- The parent_id product model must be a commercial product.
 	FOREIGN KEY (id, product_model_id) REFERENCES asset_models(id, parent_model_id)
 );
+INSERT INTO asset_model_tables (id) VALUES ('commercial_product_lots') ON CONFLICT DO NOTHING;

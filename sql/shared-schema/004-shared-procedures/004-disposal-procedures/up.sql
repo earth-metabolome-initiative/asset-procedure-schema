@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS disposal_procedure_templates (
+CREATE TABLE disposal_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The disposed asset asset model being disposed of.
 	disposed_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS disposal_procedure_templates (
 		procedure_template_disposed_asset_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS disposal_procedures (
+CREATE TABLE disposal_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The model of the procedure.
 	disposal_procedure_template_id UUID NOT NULL REFERENCES disposal_procedure_templates(id) ON DELETE CASCADE,

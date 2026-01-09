@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS container_sealing_procedure_templates (
+CREATE TABLE container_sealing_procedure_templates (
 	-- Identifier of the capping procedure_id template, which is also a foreign key to the general procedure_id template.
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The container to be capped.
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS container_sealing_procedure_templates (
 		procedure_template_sealed_with_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS container_sealing_procedures (
+CREATE TABLE container_sealing_procedures (
 	-- Identifier of the capping id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- We enforce that the model of this procedure_id must be a capping procedure_id template.

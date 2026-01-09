@@ -3,7 +3,7 @@ resolver = "2"
 members = [
   "builder",
   "crates/procedure-traits",
-  "crates/sql_procedure_rules",
+  "crates/sql-procedure-rules",
   "aps/aps-aliquoting_procedure_templates",
   "aps/aps-aliquoting_procedures",
   "aps/aps-asset_compatibility_rules",

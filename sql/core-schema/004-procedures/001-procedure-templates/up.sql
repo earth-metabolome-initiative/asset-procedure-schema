@@ -1,13 +1,13 @@
 -- Meta-table with the unique names of procedure template tables, to be referenced by procedure templates
 -- and facilitate DAG traversal.
-CREATE TABLE IF NOT EXISTS procedure_template_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
-CREATE TABLE IF NOT EXISTS procedure_templates (
+CREATE TABLE procedure_template_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
+CREATE TABLE procedure_templates (
 	-- Identifier of the procedure_id template
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	-- The most concrete table variant descendant of this procedure_id template,
 	-- which allows for rapidly determining the type of a procedure_id template
 	-- without having to execute multiple queries.
-	procedure_template_table_id TEXT DEFAULT "procedure_templates" NOT NULL REFERENCES procedure_template_tables(id),
+	procedure_template_table_id TEXT DEFAULT 'procedure_templates' NOT NULL REFERENCES procedure_template_tables(id),
 	-- Version of the procedure_id template.
 	version INTEGER NOT NULL DEFAULT 1,
 	-- Human-readable name of the procedure_id template
@@ -27,3 +27,4 @@ CREATE TABLE IF NOT EXISTS procedure_templates (
 	-- We enforce that the name and description are distinct to avoid lazy duplicates
 	CHECK (name <> description)
 );
+INSERT INTO procedure_template_tables (id) VALUES ('procedure_templates') ON CONFLICT DO NOTHING;

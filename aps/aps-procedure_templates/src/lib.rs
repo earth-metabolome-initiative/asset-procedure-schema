@@ -25,7 +25,7 @@ pub struct ProcedureTemplate {
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `procedure_template_table_id` column in table
     /// `procedure_templates`.
-    #[table_model(default = "\"procedure_templates\"")]
+    #[table_model(default = "procedure_templates")]
     #[infallible]
     procedure_template_table_id: String,
     /// Field representing the `version` column in table `procedure_templates`.

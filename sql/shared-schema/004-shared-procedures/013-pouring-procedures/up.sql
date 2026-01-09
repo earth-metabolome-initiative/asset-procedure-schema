@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS pouring_procedure_templates (
+CREATE TABLE pouring_procedure_templates (
 	-- Identifier of the pouring procedure_id template, which is also a foreign key to the general procedure_id template.
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The device model used to measure the liquid volume.
@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS pouring_procedure_templates (
 		procedure_template_poured_into_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS pouring_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('pouring_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE pouring_procedures (
 	-- The extended `procedure`.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The procedure_id template of the extended `procedure`.
@@ -130,3 +131,4 @@ CREATE TABLE IF NOT EXISTS pouring_procedures (
 	FOREIGN KEY (procedure_measured_with_id, measured_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
 	FOREIGN KEY (measured_with_id, measured_with_model_id) REFERENCES assets(id, model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('pouring_procedures') ON CONFLICT DO NOTHING;

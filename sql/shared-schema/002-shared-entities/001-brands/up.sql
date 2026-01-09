@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS brands (
+CREATE TABLE brands (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL CHECK (name <> ''),
     creator_id UUID NOT NULL REFERENCES users(id),

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS geopositioning_procedure_templates (
+CREATE TABLE geopositioning_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- The device used for geopositioning.
 	geopositioned_with_model_id UUID NOT NULL REFERENCES geopositioning_device_models(id),
@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS geopositioning_procedure_templates (
 		procedure_template_geopositioned_asset_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS geopositioning_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('geopositioning_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE geopositioning_procedures (
 	-- Identifier of the geopositioning id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The template of this procedure_id should be a geopositioning procedure_id template.
@@ -88,3 +89,4 @@ CREATE TABLE IF NOT EXISTS geopositioning_procedures (
 	-- We check that the `procedure_geopositioned_with` is associated to the `geopositioned_with`.
 	FOREIGN KEY (geopositioned_with_id, geopositioned_with_model_id) REFERENCES assets(id, model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('geopositioning_procedures') ON CONFLICT DO NOTHING;

@@ -8,5 +8,5 @@ synql = { git = "https://github.com/earth-metabolome-initiative/synql", branch =
 sql-traits = { git = "https://github.com/earth-metabolome-initiative/sql-traits", branch = "main" }
 sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", branch = "main" }
 time_requirements = "0.1.0"
-sql_procedure_rules = { path = "../crates/sql_procedure_rules" }
+sql-procedure-rules = { path = "../crates/sql-procedure-rules" }
 mermaid-builder = "0.1.1"

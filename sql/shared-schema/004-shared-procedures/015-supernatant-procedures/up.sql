@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS supernatant_procedure_templates (
+CREATE TABLE supernatant_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
 	-- Volume in liters. The amount that should be transferred.
 	volume REAL NOT NULL CHECK (volume > 0.0),
@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS supernatant_procedure_templates (
 		procedure_template_transferred_with_model_id
 	)
 );
-CREATE TABLE IF NOT EXISTS supernatant_procedures (
+INSERT INTO procedure_template_tables (id) VALUES ('supernatant_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE TABLE supernatant_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- We enforce that the model of this procedure_id must be a supernatant procedure_id template.
 	supernatant_procedure_template_id UUID NOT NULL REFERENCES supernatant_procedure_templates(id),
@@ -125,3 +126,4 @@ CREATE TABLE IF NOT EXISTS supernatant_procedures (
 		procedure_template_transferred_with_model_id
 	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id)
 );
+INSERT INTO procedure_tables (id) VALUES ('supernatant_procedures') ON CONFLICT DO NOTHING;

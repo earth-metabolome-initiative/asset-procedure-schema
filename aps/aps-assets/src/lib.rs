@@ -24,7 +24,7 @@ pub struct Asset {
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `asset_table_id` column in table `assets`.
-    #[table_model(default = "\"assets\"")]
+    #[table_model(default = "assets")]
     #[infallible]
     asset_table_id: String,
     /// Field representing the `name` column in table `assets`.
