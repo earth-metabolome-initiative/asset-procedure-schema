@@ -5,15 +5,38 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Codecov](https://codecov.io/gh/earth-metabolome-initiative/asset-procedure-schema/branch/main/graph/badge.svg)](https://codecov.io/gh/earth-metabolome-initiative/asset-procedure-schema)
 
-Asset-Procedure Schema (APS) and its models to be reused across projects
+The Asset-Procedure Schema (APS) defines a comprehensive data model for tracking assets and procedures throughout their lifecycle. It serves as the single source of truth for the database schema and automatically generates type-safe Rust interfaces.
 
-## Repository Structure
+## Project Structure
 
-- **`builder/`**: Contains the Rust application that connects to the database, introspects the schema, and generates the model code.
-- **`aps/`**: The output directory containing the generated Rust crates for the database schema.
+The repository is organized into four primary sections:
+
+- **[`sql/`](./sql)**: The core definitions of the database schema. This directory contains the SQL migration files that define the entities, procedures, and their relationships. It is the source of truth for the project.
+
+- **[`builder/`](./builder)**: A Rust application responsible for ensuring schema integrity and generating code. It performs three key tasks:
+  1. **Introspection**: Connects to and parses the SQL schema.
+  2. **Validation**: Applies strict checks (via `sql-procedure-rules`) to ensure the schema follows defined conventions and DAG structures.
+  3. **Generation**: Outputting the Rust crates found in the `aps/` directory.
+
+- **[`crates/`](./crates)**: Supporting libraries used by the builder and the generated code.
+  - **`sql-procedure-rules`**: Defines the custom validation logic and constraints ensuring the logical consistency of the procedure schema.
+  - **`procedure-traits`**: Common traits and interfaces used to standardize behavior across different procedure types.
+
+- **[`aps/`](./aps)**: The output directory containing the auto-generated Rust crates. These provide type-safe access to the database tables defined in `sql/` and are meant to be reused across applications.
 
 ![Workspace Visualization](./builder/workspace_dependencies.svg)
 
+## Primary Dependencies
+
+This project relies heavily on a set of core libraries for SQL parsing, traits, and rule enforcement:
+
+- **[synql](https://github.com/earth-metabolome-initiative/synql)**: SQL parser and analyzer.
+- **[sql-traits](https://github.com/earth-metabolome-initiative/sql-traits)**: Shared traits defining the behavior of SQL entities.
+- **[sql-rules](https://github.com/earth-metabolome-initiative/sql-rules)**: Framework for defining and enforcing validation rules on the schema.
+
 ## Versioning
 
-We expect that there will be breaking changes to the schema over time. Transitioning between versions will be made possible via SQL migrations and shared Rust migration code.
+The schema evolves over time. We anticipate breaking changes as the model refines. Version transitions are managed through:
+
+1. SQL migrations for the database.
+2. Regenerated Rust crates for application code.
