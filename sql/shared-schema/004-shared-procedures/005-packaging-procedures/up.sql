@@ -38,6 +38,17 @@ CREATE TABLE packaging_procedure_templates (
 	)
 );
 INSERT INTO procedure_template_tables (id) VALUES ('packaging_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE OR REPLACE FUNCTION packaging_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_packaged_with_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_sample_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER packaging_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON packaging_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION packaging_procedure_templates_rptam_insert_fn();
 CREATE TABLE packaging_procedures (
 	-- The extended `procedure`.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,

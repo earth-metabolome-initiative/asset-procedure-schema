@@ -31,6 +31,9 @@ pub fn register_procedure_constraints<DB: sql_traits::traits::DatabaseLike + 'st
         table_constraints::ReusedProcedureTemplateAssetModelsForeignKey::<DB>::default(),
     ));
     constrainer.register_table_rule(Box::new(
+        table_constraints::ReusedProcedureTemplateAssetModelsTrigger::<DB>::default(),
+    ));
+    constrainer.register_table_rule(Box::new(
         table_constraints::ProcedureTemplateDescendantNaming::<DB>::default(),
     ));
 

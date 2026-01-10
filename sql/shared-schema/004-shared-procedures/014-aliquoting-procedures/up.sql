@@ -130,4 +130,16 @@ CREATE TABLE aliquoting_procedures (
 	-- We enfore that the `aliquoted_with_model` asset model is correctly associated to the `aliquoted_with` procedure asset.
 	FOREIGN KEY (procedure_aliquoted_with_id, aliquoted_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id)
 );
+CREATE OR REPLACE FUNCTION aliquoting_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_aliquoted_from_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_aliquoted_into_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_aliquoted_with_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER aliquoting_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON aliquoting_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION aliquoting_procedure_templates_rptam_insert_fn();
 INSERT INTO procedure_tables (id) VALUES ('aliquoting_procedures') ON CONFLICT DO NOTHING;

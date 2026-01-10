@@ -52,6 +52,18 @@ CREATE TABLE photograph_procedure_templates (
 	)
 );
 INSERT INTO procedure_template_tables (id) VALUES ('photograph_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE OR REPLACE FUNCTION photograph_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_photographed_with_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_photographed_asset_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_photograph_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER photograph_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON photograph_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION photograph_procedure_templates_rptam_insert_fn();
 CREATE TABLE photograph_procedures (
 	-- Identifier of the photograph_id id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,

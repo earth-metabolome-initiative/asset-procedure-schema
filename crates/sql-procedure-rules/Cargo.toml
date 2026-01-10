@@ -7,6 +7,7 @@ edition.workspace = true
 sql-traits = { git = "https://github.com/earth-metabolome-initiative/sql-traits", branch = "main" }
 sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", branch = "main" }
 sql_relations = { git = "https://github.com/earth-metabolome-initiative/synql", branch = "main" }
+sqlparser = "0.60"
 
 [lints]
 workspace = true

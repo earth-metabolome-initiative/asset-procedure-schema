@@ -49,6 +49,17 @@ CREATE TABLE freezing_procedure_templates (
 	)
 );
 INSERT INTO procedure_template_tables (id) VALUES ('freezing_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE OR REPLACE FUNCTION freezing_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_frozen_with_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_frozen_container_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER freezing_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON freezing_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION freezing_procedure_templates_rptam_insert_fn();
 CREATE TABLE freezing_procedures (
 	-- Identifier of the freezing id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,

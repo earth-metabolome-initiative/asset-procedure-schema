@@ -40,7 +40,17 @@ CREATE TABLE harvesting_procedure_templates (
 	)
 );
 INSERT INTO procedure_template_tables (id) VALUES ('harvesting_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE OR REPLACE FUNCTION harvesting_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_sample_source_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_sample_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
+CREATE TRIGGER harvesting_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON harvesting_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION harvesting_procedure_templates_rptam_insert_fn();
 CREATE TABLE harvesting_procedures (
 	-- Identifier of the harvesting id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,

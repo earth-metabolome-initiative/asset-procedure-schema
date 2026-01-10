@@ -59,6 +59,17 @@ CREATE TABLE freeze_drying_procedure_templates (
 		procedure_template_freeze_dried_container_model_id
 	)
 );
+CREATE OR REPLACE FUNCTION freeze_drying_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_freeze_dried_with_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_freeze_dried_container_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER freeze_drying_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON freeze_drying_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION freeze_drying_procedure_templates_rptam_insert_fn();
 INSERT INTO procedure_template_tables (id) VALUES ('freeze_drying_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE TABLE freeze_drying_procedures (
 	-- Identifier of the freeze drying id, which is also a foreign key to the general procedure.

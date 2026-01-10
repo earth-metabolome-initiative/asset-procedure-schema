@@ -2944,6 +2944,7 @@ dependencies = [
  "sql-rules",
  "sql-traits",
  "sql_relations",
+ "sqlparser",
 ]
 
 [[package]]
@@ -2960,7 +2961,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#da2f216a366d980a59bf863068c174cc2e2ad258"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#5e2da53ae124597cadd4eac430fe0c436daccfeb"
 dependencies = [
  "geometric-traits",
  "git2",

@@ -76,6 +76,18 @@ CREATE TABLE ball_mill_procedure_templates (
 		procedure_template_milled_container_model_id
 	)
 );
+CREATE OR REPLACE FUNCTION ball_mill_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_bead_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_milled_with_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_milled_container_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ball_mill_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON ball_mill_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION ball_mill_procedure_templates_rptam_insert_fn();
 CREATE TABLE ball_mill_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	ball_mill_procedure_template_id UUID NOT NULL REFERENCES ball_mill_procedure_templates(id),

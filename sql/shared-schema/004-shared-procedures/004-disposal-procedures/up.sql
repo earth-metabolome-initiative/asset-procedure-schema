@@ -20,6 +20,16 @@ CREATE TABLE disposal_procedure_templates (
 		procedure_template_disposed_asset_model_id
 	)
 );
+CREATE OR REPLACE FUNCTION disposal_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_disposed_asset_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER disposal_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON disposal_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION disposal_procedure_templates_rptam_insert_fn();
 CREATE TABLE disposal_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- The model of the procedure.

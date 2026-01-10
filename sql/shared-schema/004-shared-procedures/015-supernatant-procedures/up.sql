@@ -55,6 +55,18 @@ CREATE TABLE supernatant_procedure_templates (
 	)
 );
 INSERT INTO procedure_template_tables (id) VALUES ('supernatant_procedure_templates') ON CONFLICT DO NOTHING;
+CREATE OR REPLACE FUNCTION supernatant_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
+BEGIN
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_stratified_source_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_supernatant_destination_model_id) ON CONFLICT DO NOTHING;
+	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_transferred_with_model_id) ON CONFLICT DO NOTHING;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER supernatant_procedure_templates_rptam_insert_trigger
+AFTER INSERT ON supernatant_procedure_templates
+FOR EACH ROW EXECUTE FUNCTION supernatant_procedure_templates_rptam_insert_fn();
 CREATE TABLE supernatant_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- We enforce that the model of this procedure_id must be a supernatant procedure_id template.
