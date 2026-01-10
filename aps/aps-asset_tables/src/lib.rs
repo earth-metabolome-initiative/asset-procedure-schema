@@ -25,12 +25,13 @@ pub struct AssetTable {
 impl ::diesel_builders::ValidateColumn<asset_tables::id>
     for <asset_tables::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(id: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if id.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "asset_tables",
                 crate::asset_tables::id::NAME,
             ));
         }

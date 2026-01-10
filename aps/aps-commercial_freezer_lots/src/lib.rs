@@ -41,3 +41,35 @@ pub struct CommercialFreezerLot {
 :: diesel_builders :: prelude :: fk ! ((commercial_freezer_lots :: commercial_freezer_model_id) -> (:: aps_commercial_freezer_models :: commercial_freezer_models :: id));
 :: diesel_builders :: prelude :: fk ! ((commercial_freezer_lots :: id) -> (:: aps_commercial_product_lots :: commercial_product_lots :: id));
 :: diesel_builders :: prelude :: fk ! ((commercial_freezer_lots :: id) -> (:: aps_freezer_models :: freezer_models :: id));
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for CommercialFreezerLot {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_freezer_lots::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_commercial_product_lots::commercial_product_lots::id>
+    for CommercialFreezerLot
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_freezer_lots::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_freezer_models::freezer_models::id> for CommercialFreezerLot {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_freezer_lots::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for CommercialFreezerLot
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_freezer_lots::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

@@ -36,6 +36,7 @@ aps-commercial_geopositioning_device_lots.workspace = true
 aps-commercial_geopositioning_device_models.workspace = true
 aps-commercial_product_lots.workspace = true
 aps-commercial_products.workspace = true
+aps-container_compatibility_rules.workspace = true
 aps-container_models.workspace = true
 aps-container_sealer_models.workspace = true
 aps-container_sealing_procedure_templates.workspace = true

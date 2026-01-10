@@ -116,3 +116,8 @@ pub struct PouringProcedure {
 :: diesel_builders :: prelude :: fk ! ((pouring_procedures :: poured_into_id) -> (:: aps_volumetric_containers :: volumetric_containers :: id));
 :: diesel_builders :: prelude :: fk ! ((pouring_procedures :: poured_into_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((pouring_procedures :: procedure_template_poured_into_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for PouringProcedure {
+    fn get_column_ref(&self) -> &<pouring_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

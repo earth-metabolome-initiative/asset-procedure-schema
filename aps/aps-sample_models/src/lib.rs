@@ -34,3 +34,15 @@ pub struct SampleModel {
 ::diesel_builders::prelude::unique_index!(sample_models::id, sample_models::sample_source_model_id);
 :: diesel_builders :: prelude :: fk ! ((sample_models :: id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((sample_models :: sample_source_model_id) -> (:: aps_sample_source_models :: sample_source_models :: id));
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for SampleModel {
+    fn get_column_ref(&self) -> &<sample_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for SampleModel
+{
+    fn get_column_ref(&self) -> &<sample_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

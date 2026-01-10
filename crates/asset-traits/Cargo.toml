@@ -1,0 +1,18 @@
+[package]
+name = "asset-traits"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+aps-asset_models.workspace = true
+aps-users.workspace = true
+aps-asset_compatibility_rules.workspace = true
+diesel-builders.workspace = true
+validation-errors.workspace = true
+diesel.workspace = true
+
+[dev-dependencies]
+aps-test-utils = { path = "../aps-test-utils" }
+
+[lints]
+workspace = true

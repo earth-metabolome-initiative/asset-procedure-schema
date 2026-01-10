@@ -134,16 +134,24 @@ pub struct FractioningProcedure {
 impl ::diesel_builders::ValidateColumn<fractioning_procedures::mass>
     for <fractioning_procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(mass: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if mass <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "fractioning_procedures",
                 crate::fractioning_procedures::mass::NAME,
                 0f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for FractioningProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<fractioning_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

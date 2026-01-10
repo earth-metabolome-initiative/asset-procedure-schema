@@ -89,3 +89,8 @@ pub struct StorageProcedure {
 :: diesel_builders :: prelude :: fk ! ((storage_procedures :: stored_into_model_id) -> (:: aps_container_models :: container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((storage_procedures :: procedure_template_stored_into_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((storage_procedures :: stored_into_model_id , storage_procedures :: stored_asset_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for StorageProcedure {
+    fn get_column_ref(&self) -> &<storage_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

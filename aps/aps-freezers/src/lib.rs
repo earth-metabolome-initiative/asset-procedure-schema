@@ -32,3 +32,13 @@ pub struct Freezer {
 }
 :: diesel_builders :: prelude :: fk ! ((freezers :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((freezers :: commercial_freezer_lot_id) -> (:: aps_commercial_freezer_lots :: commercial_freezer_lots :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for Freezer {
+    fn get_column_ref(&self) -> &<freezers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for Freezer {
+    fn get_column_ref(&self) -> &<freezers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

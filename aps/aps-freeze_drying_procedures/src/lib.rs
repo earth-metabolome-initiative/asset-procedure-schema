@@ -90,3 +90,10 @@ pub struct FreezeDryingProcedure {
 :: diesel_builders :: prelude :: fk ! ((freeze_drying_procedures :: freeze_dried_with_model_id) -> (:: aps_freeze_dryer_models :: freeze_dryer_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freeze_drying_procedures :: procedure_template_freeze_dried_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freeze_drying_procedures :: freeze_dried_with_model_id , freeze_drying_procedures :: freeze_dried_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for FreezeDryingProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<freeze_drying_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

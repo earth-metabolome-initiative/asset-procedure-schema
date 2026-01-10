@@ -88,3 +88,10 @@ pub struct ContainerSealingProcedure {
 :: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: sealed_with_model_id) -> (:: aps_container_sealer_models :: container_sealer_models :: id));
 :: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: procedure_template_sealed_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: sealable_container_model_id , container_sealing_procedures :: sealed_with_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for ContainerSealingProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<container_sealing_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

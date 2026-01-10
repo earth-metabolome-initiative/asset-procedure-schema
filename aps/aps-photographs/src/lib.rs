@@ -25,3 +25,13 @@ pub struct Photograph {
     id: ::rosetta_uuid::Uuid,
 }
 :: diesel_builders :: prelude :: fk ! ((photographs :: id) -> (:: aps_digital_assets :: digital_assets :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for Photograph {
+    fn get_column_ref(&self) -> &<photographs::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_digital_assets::digital_assets::id> for Photograph {
+    fn get_column_ref(&self) -> &<photographs::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

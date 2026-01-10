@@ -91,12 +91,13 @@ pub struct CentrifugeProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::kelvin>
     for <centrifuge_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(kelvin: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "centrifuge_procedure_templates",
                 crate::centrifuge_procedure_templates::kelvin::NAME,
                 0f64,
             ));
@@ -107,18 +108,20 @@ impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::kelvin>
 impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::kelvin_tolerance_percentage>
     for <centrifuge_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(kelvin_tolerance_percentage: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin_tolerance_percentage <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "centrifuge_procedure_templates",
                 crate::centrifuge_procedure_templates::kelvin_tolerance_percentage::NAME,
                 0f64,
             ));
         }
         if kelvin_tolerance_percentage > &100f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "centrifuge_procedure_templates",
                 crate::centrifuge_procedure_templates::kelvin_tolerance_percentage::NAME,
                 100f64,
             ));
@@ -129,18 +132,20 @@ impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::kelvin_to
 impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::duration>
     for <centrifuge_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(duration: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if duration < &30f32 {
-            return Err(validation_errors::prelude::ValidationError::greater_than_value(
+            return Err(::validation_errors::ValidationError::greater_than_value(
+                "centrifuge_procedure_templates",
                 crate::centrifuge_procedure_templates::duration::NAME,
                 30f64,
             ));
         }
         if duration > &1800f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "centrifuge_procedure_templates",
                 crate::centrifuge_procedure_templates::duration::NAME,
                 1800f64,
             ));
@@ -151,22 +156,33 @@ impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::duration>
 impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::rotation_per_minute>
     for <centrifuge_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(rotation_per_minute: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if rotation_per_minute < &5000f32 {
-            return Err(validation_errors::prelude::ValidationError::greater_than_value(
+            return Err(::validation_errors::ValidationError::greater_than_value(
+                "centrifuge_procedure_templates",
                 crate::centrifuge_procedure_templates::rotation_per_minute::NAME,
                 5000f64,
             ));
         }
         if rotation_per_minute > &30000f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "centrifuge_procedure_templates",
                 crate::centrifuge_procedure_templates::rotation_per_minute::NAME,
                 30000f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for CentrifugeProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<centrifuge_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

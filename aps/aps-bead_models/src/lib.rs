@@ -32,16 +32,29 @@ pub struct BeadModel {
 impl ::diesel_builders::ValidateColumn<bead_models::diameter>
     for <bead_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(diameter: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if diameter <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "bead_models",
                 crate::bead_models::diameter::NAME,
                 0f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for BeadModel {
+    fn get_column_ref(&self) -> &<bead_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for BeadModel
+{
+    fn get_column_ref(&self) -> &<bead_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

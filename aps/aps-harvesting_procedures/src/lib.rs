@@ -88,3 +88,8 @@ pub struct HarvestingProcedure {
 :: diesel_builders :: prelude :: fk ! ((harvesting_procedures :: sample_id) -> (:: aps_samples :: samples :: id));
 :: diesel_builders :: prelude :: fk ! ((harvesting_procedures :: sample_model_id) -> (:: aps_sample_models :: sample_models :: id));
 :: diesel_builders :: prelude :: fk ! ((harvesting_procedures :: procedure_template_sample_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for HarvestingProcedure {
+    fn get_column_ref(&self) -> &<harvesting_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

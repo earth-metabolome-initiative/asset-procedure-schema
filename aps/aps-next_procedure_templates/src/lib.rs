@@ -54,7 +54,7 @@ pub struct NextProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>
     for <next_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -66,7 +66,8 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>
         >>::may_get_column_ref(self)
             && predecessor_id == successor_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "next_procedure_templates",
                 crate::next_procedure_templates::predecessor_id::NAME,
                 crate::next_procedure_templates::successor_id::NAME,
             ));
@@ -77,7 +78,7 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>
 impl ::diesel_builders::ValidateColumn<next_procedure_templates::successor_id>
     for <next_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -89,7 +90,8 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::successor_id>
         >>::may_get_column_ref(self)
             && predecessor_id == successor_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "next_procedure_templates",
                 crate::next_procedure_templates::predecessor_id::NAME,
                 crate::next_procedure_templates::successor_id::NAME,
             ));

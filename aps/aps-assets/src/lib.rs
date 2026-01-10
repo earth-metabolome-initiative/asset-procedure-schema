@@ -61,12 +61,13 @@ pub struct Asset {
 impl ::diesel_builders::ValidateColumn<assets::name>
     for <assets::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(name: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if name.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "assets",
                 crate::assets::name::NAME,
             ));
         }
@@ -80,7 +81,8 @@ impl ::diesel_builders::ValidateColumn<assets::name>
             <Self as diesel_builders::MayGetColumn<assets::description>>::may_get_column_ref(self)
             && description.as_ref().is_some_and(|description| name == description)
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "assets",
                 crate::assets::name::NAME,
                 crate::assets::description::NAME,
             ));
@@ -91,12 +93,13 @@ impl ::diesel_builders::ValidateColumn<assets::name>
 impl ::diesel_builders::ValidateColumn<assets::description>
     for <assets::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(description: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if description.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "assets",
                 crate::assets::description::NAME,
             ));
         }
@@ -112,7 +115,8 @@ impl ::diesel_builders::ValidateColumn<assets::description>
             <Self as diesel_builders::MayGetColumn<assets::name>>::may_get_column_ref(self)
             && name.as_ref().is_some_and(|name| name == description)
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "assets",
                 crate::assets::name::NAME,
                 crate::assets::description::NAME,
             ));
@@ -123,7 +127,7 @@ impl ::diesel_builders::ValidateColumn<assets::description>
 impl ::diesel_builders::ValidateColumn<assets::created_at>
     for <assets::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -134,7 +138,8 @@ impl ::diesel_builders::ValidateColumn<assets::created_at>
             <Self as diesel_builders::MayGetColumn<assets::edited_at>>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "assets",
                 crate::assets::created_at::NAME,
                 crate::assets::edited_at::NAME,
             ));
@@ -145,7 +150,7 @@ impl ::diesel_builders::ValidateColumn<assets::created_at>
 impl ::diesel_builders::ValidateColumn<assets::edited_at>
     for <assets::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -156,7 +161,8 @@ impl ::diesel_builders::ValidateColumn<assets::edited_at>
             <Self as diesel_builders::MayGetColumn<assets::created_at>>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "assets",
                 crate::assets::created_at::NAME,
                 crate::assets::edited_at::NAME,
             ));

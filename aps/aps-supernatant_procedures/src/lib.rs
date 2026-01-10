@@ -117,3 +117,10 @@ pub struct SupernatantProcedure {
 :: diesel_builders :: prelude :: fk ! ((supernatant_procedures :: transferred_with_id) -> (:: aps_volume_measuring_devices :: volume_measuring_devices :: id));
 :: diesel_builders :: prelude :: fk ! ((supernatant_procedures :: transferred_with_model_id) -> (:: aps_volume_measuring_device_models :: volume_measuring_device_models :: id));
 :: diesel_builders :: prelude :: fk ! ((supernatant_procedures :: procedure_template_transferred_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for SupernatantProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<supernatant_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

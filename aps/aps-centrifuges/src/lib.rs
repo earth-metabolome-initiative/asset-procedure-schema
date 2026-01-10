@@ -32,3 +32,13 @@ pub struct Centrifuge {
 }
 :: diesel_builders :: prelude :: fk ! ((centrifuges :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((centrifuges :: commercial_centrifuge_lot_id) -> (:: aps_commercial_centrifuge_lots :: commercial_centrifuge_lots :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for Centrifuge {
+    fn get_column_ref(&self) -> &<centrifuges::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for Centrifuge {
+    fn get_column_ref(&self) -> &<centrifuges::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

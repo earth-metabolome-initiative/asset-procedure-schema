@@ -1,0 +1,18 @@
+[package]
+name = "aps-test-utils"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+pg2sqlite = { git = "https://github.com/LucaCappelletti94/pg2sqlite", branch = "main" }
+aps-users.workspace = true
+diesel-builders.workspace = true
+aps-asset_models.workspace = true
+diesel = { workspace = true, features = [
+  "sqlite",
+  "returning_clauses_for_sqlite_3_35",
+  "extras",
+] }
+
+[lints]
+workspace = true

@@ -32,3 +32,8 @@ pub struct PhysicalAsset {
 }
 :: diesel_builders :: prelude :: fk ! ((physical_assets :: id) -> (:: aps_assets :: assets :: id));
 :: diesel_builders :: prelude :: fk ! ((physical_assets :: physical_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for PhysicalAsset {
+    fn get_column_ref(&self) -> &<physical_assets::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

@@ -67,3 +67,12 @@ pub struct GeopositioningProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((geopositioning_procedure_templates :: geopositioned_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((geopositioning_procedure_templates :: id , geopositioning_procedure_templates :: procedure_template_geopositioned_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((geopositioning_procedure_templates :: id , geopositioning_procedure_templates :: procedure_template_geopositioned_asset_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for GeopositioningProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<geopositioning_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

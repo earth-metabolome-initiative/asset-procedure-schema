@@ -28,3 +28,15 @@ pub struct PackagingModel {
     id: ::rosetta_uuid::Uuid,
 }
 :: diesel_builders :: prelude :: fk ! ((packaging_models :: id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for PackagingModel {
+    fn get_column_ref(&self) -> &<packaging_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for PackagingModel
+{
+    fn get_column_ref(&self) -> &<packaging_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

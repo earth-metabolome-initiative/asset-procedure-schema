@@ -32,3 +32,8 @@ pub struct CommercialProduct {
 }
 :: diesel_builders :: prelude :: fk ! ((commercial_products :: id) -> (:: aps_asset_models :: asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((commercial_products :: brand_id) -> (:: aps_brands :: brands :: id));
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for CommercialProduct {
+    fn get_column_ref(&self) -> &<commercial_products::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

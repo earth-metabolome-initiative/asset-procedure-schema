@@ -90,3 +90,8 @@ pub struct CentrifugeProcedure {
 :: diesel_builders :: prelude :: fk ! ((centrifuge_procedures :: centrifuged_with_id) -> (:: aps_centrifuges :: centrifuges :: id));
 :: diesel_builders :: prelude :: fk ! ((centrifuge_procedures :: procedure_template_centrifuged_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((centrifuge_procedures :: centrifuged_with_model_id , centrifuge_procedures :: centrifuged_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for CentrifugeProcedure {
+    fn get_column_ref(&self) -> &<centrifuge_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

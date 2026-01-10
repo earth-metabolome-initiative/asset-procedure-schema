@@ -70,12 +70,13 @@ pub struct ProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<procedure_templates::name>
     for <procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(name: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if name.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "procedure_templates",
                 crate::procedure_templates::name::NAME,
             ));
         }
@@ -92,7 +93,8 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::name>
         >>::may_get_column_ref(self)
             && name == description
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedure_templates",
                 crate::procedure_templates::name::NAME,
                 crate::procedure_templates::description::NAME,
             ));
@@ -103,12 +105,13 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::name>
 impl ::diesel_builders::ValidateColumn<procedure_templates::description>
     for <procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(description: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if description.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "procedure_templates",
                 crate::procedure_templates::description::NAME,
             ));
         }
@@ -124,7 +127,8 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::description>
             )
             && name == description
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedure_templates",
                 crate::procedure_templates::name::NAME,
                 crate::procedure_templates::description::NAME,
             ));
@@ -135,7 +139,7 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::description>
 impl ::diesel_builders::ValidateColumn<procedure_templates::created_at>
     for <procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -147,7 +151,8 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::created_at>
         >>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "procedure_templates",
                 crate::procedure_templates::created_at::NAME,
                 crate::procedure_templates::edited_at::NAME,
             ));
@@ -158,7 +163,7 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::created_at>
 impl ::diesel_builders::ValidateColumn<procedure_templates::edited_at>
     for <procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -170,7 +175,8 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::edited_at>
         >>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "procedure_templates",
                 crate::procedure_templates::created_at::NAME,
                 crate::procedure_templates::edited_at::NAME,
             ));

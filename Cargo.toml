@@ -4,6 +4,8 @@ members = [
   "builder",
   "crates/procedure-traits",
   "crates/sql-procedure-rules",
+  "crates/asset-traits",
+  "crates/aps-test-utils",
   "aps/aps-aliquoting_procedure_templates",
   "aps/aps-aliquoting_procedures",
   "aps/aps-asset_compatibility_rules",
@@ -38,6 +40,7 @@ members = [
   "aps/aps-commercial_geopositioning_device_models",
   "aps/aps-commercial_product_lots",
   "aps/aps-commercial_products",
+  "aps/aps-container_compatibility_rules",
   "aps/aps-container_models",
   "aps/aps-container_sealer_models",
   "aps/aps-container_sealing_procedure_templates",
@@ -145,6 +148,7 @@ aps-commercial_geopositioning_device_lots = { path = "aps/aps-commercial_geoposi
 aps-commercial_geopositioning_device_models = { path = "aps/aps-commercial_geopositioning_device_models" }
 aps-commercial_product_lots = { path = "aps/aps-commercial_product_lots" }
 aps-commercial_products = { path = "aps/aps-commercial_products" }
+aps-container_compatibility_rules = { path = "aps/aps-container_compatibility_rules" }
 aps-container_models = { path = "aps/aps-container_models" }
 aps-container_sealer_models = { path = "aps/aps-container_sealer_models" }
 aps-container_sealing_procedure_templates = { path = "aps/aps-container_sealing_procedure_templates" }
@@ -210,11 +214,12 @@ aps-weighing_procedures = { path = "aps/aps-weighing_procedures" }
 rosetta_timestamp = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate", features = [
   "diesel",
   "serde",
+  "sqlite",
 ] }
 pgrx_validation = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
-validation_errors = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
+validation-errors = { git = "https://github.com/LucaCappelletti94/diesel-builders", branch = "main" }
 postgis_diesel = { git = "https://github.com/LucaCappelletti94/postgis-diesel", branch = "master", features = [
   "serde",
   "diesel",
@@ -228,6 +233,7 @@ diesel-builders = { git = "https://github.com/LucaCappelletti94/diesel-builders"
 rosetta_uuid = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate", features = [
   "diesel",
   "serde",
+  "sqlite",
 ] }
 
 [workspace.lints.rust]

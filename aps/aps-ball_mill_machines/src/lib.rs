@@ -32,3 +32,13 @@ pub struct BallMillMachine {
 }
 :: diesel_builders :: prelude :: fk ! ((ball_mill_machines :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((ball_mill_machines :: commercial_ball_mill_machine_lot_id) -> (:: aps_commercial_ball_mill_machine_lots :: commercial_ball_mill_machine_lots :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for BallMillMachine {
+    fn get_column_ref(&self) -> &<ball_mill_machines::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for BallMillMachine {
+    fn get_column_ref(&self) -> &<ball_mill_machines::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

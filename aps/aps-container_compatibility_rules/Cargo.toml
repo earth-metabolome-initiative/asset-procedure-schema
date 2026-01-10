@@ -1,0 +1,19 @@
+[package]
+name = "aps-container_compatibility_rules"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+validation-errors.workspace = true
+rosetta_timestamp.workspace = true
+rosetta_uuid.workspace = true
+aps-container_models.workspace = true
+aps-physical_asset_models.workspace = true
+aps-users.workspace = true
+
+[lints]
+workspace = true

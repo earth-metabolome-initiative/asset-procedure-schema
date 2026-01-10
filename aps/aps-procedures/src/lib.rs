@@ -80,7 +80,7 @@ pub struct Procedure {
 impl ::diesel_builders::ValidateColumn<procedures::id>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(&self, id: &::rosetta_uuid::Uuid) -> Result<(), Self::Error> {
         use diesel::Column;
@@ -91,7 +91,8 @@ impl ::diesel_builders::ValidateColumn<procedures::id>
                 .as_ref()
                 .is_some_and(|parent_procedure_id| id == parent_procedure_id)
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::id::NAME,
                 crate::procedures::parent_procedure_id::NAME,
             ));
@@ -103,7 +104,8 @@ impl ::diesel_builders::ValidateColumn<procedures::id>
                 .as_ref()
                 .is_some_and(|predecessor_procedure_id| id == predecessor_procedure_id)
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::id::NAME,
                 crate::procedures::predecessor_procedure_id::NAME,
             ));
@@ -114,7 +116,7 @@ impl ::diesel_builders::ValidateColumn<procedures::id>
 impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -128,7 +130,8 @@ impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
                 procedure_template_id == parent_procedure_template_id
             })
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::procedure_template_id::NAME,
                 crate::procedures::parent_procedure_template_id::NAME,
             ));
@@ -142,7 +145,8 @@ impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
                 },
             )
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::procedure_template_id::NAME,
                 crate::procedures::predecessor_procedure_template_id::NAME,
             ));
@@ -153,7 +157,7 @@ impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
 impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_id>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -164,7 +168,8 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_id>
             <Self as diesel_builders::MayGetColumn<procedures::id>>::may_get_column_ref(self)
             && id == parent_procedure_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::id::NAME,
                 crate::procedures::parent_procedure_id::NAME,
             ));
@@ -175,7 +180,7 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_id>
 impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_template_id>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -187,7 +192,8 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_template_id>
         >>::may_get_column_ref(self)
             && procedure_template_id == parent_procedure_template_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::procedure_template_id::NAME,
                 crate::procedures::parent_procedure_template_id::NAME,
             ));
@@ -198,7 +204,7 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_template_id>
 impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_id>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -209,7 +215,8 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_id>
             <Self as diesel_builders::MayGetColumn<procedures::id>>::may_get_column_ref(self)
             && id == predecessor_procedure_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::id::NAME,
                 crate::procedures::predecessor_procedure_id::NAME,
             ));
@@ -220,7 +227,7 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_id>
 impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_template_id>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -232,7 +239,8 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_templat
         >>::may_get_column_ref(self)
             && procedure_template_id == predecessor_procedure_template_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "procedures",
                 crate::procedures::procedure_template_id::NAME,
                 crate::procedures::predecessor_procedure_template_id::NAME,
             ));
@@ -243,7 +251,7 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_templat
 impl ::diesel_builders::ValidateColumn<procedures::created_at>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -254,7 +262,8 @@ impl ::diesel_builders::ValidateColumn<procedures::created_at>
             <Self as diesel_builders::MayGetColumn<procedures::edited_at>>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "procedures",
                 crate::procedures::created_at::NAME,
                 crate::procedures::edited_at::NAME,
             ));
@@ -265,7 +274,7 @@ impl ::diesel_builders::ValidateColumn<procedures::created_at>
 impl ::diesel_builders::ValidateColumn<procedures::edited_at>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -278,7 +287,8 @@ impl ::diesel_builders::ValidateColumn<procedures::edited_at>
             )
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "procedures",
                 crate::procedures::created_at::NAME,
                 crate::procedures::edited_at::NAME,
             ));

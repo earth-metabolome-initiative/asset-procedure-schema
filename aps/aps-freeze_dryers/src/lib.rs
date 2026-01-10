@@ -32,3 +32,13 @@ pub struct FreezeDryer {
 }
 :: diesel_builders :: prelude :: fk ! ((freeze_dryers :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((freeze_dryers :: commercial_freeze_dryer_lot_id) -> (:: aps_commercial_freeze_dryer_lots :: commercial_freeze_dryer_lots :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for FreezeDryer {
+    fn get_column_ref(&self) -> &<freeze_dryers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for FreezeDryer {
+    fn get_column_ref(&self) -> &<freeze_dryers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

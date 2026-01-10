@@ -86,3 +86,12 @@ pub struct PhotographProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((photograph_procedure_templates :: id , photograph_procedure_templates :: procedure_template_photographed_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((photograph_procedure_templates :: id , photograph_procedure_templates :: procedure_template_photographed_asset_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((photograph_procedure_templates :: id , photograph_procedure_templates :: procedure_template_photograph_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for PhotographProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<photograph_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

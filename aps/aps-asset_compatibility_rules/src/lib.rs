@@ -46,7 +46,7 @@ pub struct AssetCompatibilityRule {
 impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_model_id>
     for <asset_compatibility_rules::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -58,7 +58,8 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_mod
         >>::may_get_column_ref(self)
             && left_asset_model_id == right_asset_model_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "asset_compatibility_rules",
                 crate::asset_compatibility_rules::left_asset_model_id::NAME,
                 crate::asset_compatibility_rules::right_asset_model_id::NAME,
             ));
@@ -69,7 +70,7 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_mod
 impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::right_asset_model_id>
     for <asset_compatibility_rules::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -81,7 +82,8 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::right_asset_mo
         >>::may_get_column_ref(self)
             && left_asset_model_id == right_asset_model_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "asset_compatibility_rules",
                 crate::asset_compatibility_rules::left_asset_model_id::NAME,
                 crate::asset_compatibility_rules::right_asset_model_id::NAME,
             ));

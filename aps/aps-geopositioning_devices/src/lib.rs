@@ -32,3 +32,17 @@ pub struct GeopositioningDevice {
 }
 :: diesel_builders :: prelude :: fk ! ((geopositioning_devices :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((geopositioning_devices :: commercial_geopositioning_device_lot_id) -> (:: aps_commercial_geopositioning_device_lots :: commercial_geopositioning_device_lots :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for GeopositioningDevice {
+    fn get_column_ref(
+        &self,
+    ) -> &<geopositioning_devices::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for GeopositioningDevice {
+    fn get_column_ref(
+        &self,
+    ) -> &<geopositioning_devices::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

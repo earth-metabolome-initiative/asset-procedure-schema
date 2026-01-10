@@ -76,6 +76,7 @@ dependencies = [
  "aps-commercial_geopositioning_device_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-container_compatibility_rules",
  "aps-container_models",
  "aps-container_sealer_models",
  "aps-container_sealing_procedure_templates",
@@ -153,7 +154,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -184,7 +185,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -205,7 +206,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -219,7 +220,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -229,7 +230,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -244,7 +245,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -287,7 +288,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -321,7 +322,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -334,7 +335,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -388,7 +389,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -609,7 +610,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -622,6 +623,21 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
+]
+
+[[package]]
+name = "aps-container_compatibility_rules"
+version = "0.1.0"
+dependencies = [
+ "aps-container_models",
+ "aps-physical_asset_models",
+ "aps-users",
+ "diesel",
+ "diesel-builders",
+ "rosetta_timestamp",
+ "rosetta_uuid",
+ "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -731,6 +747,7 @@ dependencies = [
  "aps-commercial_geopositioning_device_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-container_compatibility_rules",
  "aps-container_models",
  "aps-container_sealer_models",
  "aps-container_sealing_procedure_templates",
@@ -962,7 +979,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -982,7 +999,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1024,7 +1041,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1086,7 +1103,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1215,7 +1232,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1276,7 +1293,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1364,7 +1381,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1408,7 +1425,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1421,7 +1438,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1431,7 +1448,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1445,7 +1462,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1462,7 +1479,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1544,7 +1561,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1580,7 +1597,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1603,6 +1620,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-test-utils"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-users",
+ "diesel",
+ "diesel-builders",
+ "pg2sqlite",
+]
+
+[[package]]
 name = "aps-users"
 version = "0.1.0"
 dependencies = [
@@ -1611,7 +1639,7 @@ dependencies = [
  "rosetta_timestamp",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1650,7 +1678,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1678,7 +1706,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1738,7 +1766,7 @@ dependencies = [
  "diesel-builders",
  "rosetta_uuid",
  "serde",
- "validation_errors",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1748,6 +1776,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0c269894b6fe5e9d7ada0cf69b5bf847ff35bc25fc271f08e1d080fce80339a"
 dependencies = [
  "object",
+]
+
+[[package]]
+name = "asset-traits"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-asset_models",
+ "aps-test-utils",
+ "aps-users",
+ "diesel",
+ "diesel-builders",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1782,7 +1823,7 @@ dependencies = [
  "mermaid-builder",
  "sql-procedure-rules",
  "sql-rules",
- "sql-traits",
+ "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
  "synql",
  "time_requirements",
 ]
@@ -2005,7 +2046,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#50fc39ff3252c38643620504b888125b468ad812"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#2aacbe596839d866530aee42e13ca257e6164afa"
 dependencies = [
  "diesel",
  "diesel-builders-derive",
@@ -2017,7 +2058,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders-derive"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#50fc39ff3252c38643620504b888125b468ad812"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#2aacbe596839d866530aee42e13ca257e6164afa"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2652,6 +2693,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
+name = "pg2sqlite"
+version = "0.1.0"
+source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#a67d760bc84052e82a18dc780009c52e0d2b1743"
+dependencies = [
+ "git2",
+ "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits)",
+ "sqlparser",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
 name = "pkg-config"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2825,7 +2878,7 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 [[package]]
 name = "rosetta_timestamp"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#e8f59fc3a57c7db0c9122761bf0e1cedd58b56db"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#dc7f8d9b3982e57089871461c0fdc32e98568c67"
 dependencies = [
  "chrono",
  "diesel",
@@ -2835,7 +2888,7 @@ dependencies = [
 [[package]]
 name = "rosetta_uuid"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#e8f59fc3a57c7db0c9122761bf0e1cedd58b56db"
+source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#dc7f8d9b3982e57089871461c0fdc32e98568c67"
 dependencies = [
  "diesel",
  "serde",
@@ -2942,7 +2995,7 @@ name = "sql-procedure-rules"
 version = "0.1.0"
 dependencies = [
  "sql-rules",
- "sql-traits",
+ "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
  "sql_relations",
  "sqlparser",
 ]
@@ -2954,7 +3007,7 @@ source = "git+https://github.com/earth-metabolome-initiative/sql-rules?branch=ma
 dependencies = [
  "heck",
  "inflection-rs",
- "sql-traits",
+ "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
  "thiserror",
 ]
 
@@ -2971,11 +3024,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "sql-traits"
+version = "0.1.0"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits#5e2da53ae124597cadd4eac430fe0c436daccfeb"
+dependencies = [
+ "geometric-traits",
+ "git2",
+ "sqlparser",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#bda69e8397c0e7dd905d7fce4bc2287898345c7a"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#7fe43c9de645524a471405a3935a0ab682ea2bfd"
 dependencies = [
- "sql-traits",
+ "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
 ]
 
 [[package]]
@@ -3067,7 +3132,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#bda69e8397c0e7dd905d7fce4bc2287898345c7a"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#7fe43c9de645524a471405a3935a0ab682ea2bfd"
 dependencies = [
  "cached",
  "chrono",
@@ -3076,7 +3141,7 @@ dependencies = [
  "inflection-rs",
  "proc-macro2",
  "quote",
- "sql-traits",
+ "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
  "sql_relations",
  "sqlparser",
  "strum",
@@ -3551,9 +3616,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "validation_errors"
+name = "validation-errors"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#e8f59fc3a57c7db0c9122761bf0e1cedd58b56db"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#2aacbe596839d866530aee42e13ca257e6164afa"
+dependencies = [
+ "diesel",
+ "diesel-builders",
+ "thiserror",
+]
 
 [[package]]
 name = "vcpkg"

@@ -32,3 +32,13 @@ pub struct Camera {
 }
 :: diesel_builders :: prelude :: fk ! ((cameras :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((cameras :: commercial_camera_lot_id) -> (:: aps_commercial_camera_lots :: commercial_camera_lots :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for Camera {
+    fn get_column_ref(&self) -> &<cameras::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for Camera {
+    fn get_column_ref(&self) -> &<cameras::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

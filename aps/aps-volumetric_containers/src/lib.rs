@@ -38,3 +38,18 @@ pub struct VolumetricContainer {
 }
 :: diesel_builders :: prelude :: fk ! ((volumetric_containers :: id) -> (:: aps_containers :: containers :: id));
 :: diesel_builders :: prelude :: fk ! ((volumetric_containers :: volumetric_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for VolumetricContainer {
+    fn get_column_ref(&self) -> &<volumetric_containers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_containers::containers::id> for VolumetricContainer {
+    fn get_column_ref(&self) -> &<volumetric_containers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for VolumetricContainer {
+    fn get_column_ref(&self) -> &<volumetric_containers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

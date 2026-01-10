@@ -53,6 +53,9 @@ pub use aps_commercial_geopositioning_device_models::{
 };
 pub use aps_commercial_product_lots::{self, CommercialProductLot, commercial_product_lots};
 pub use aps_commercial_products::{self, CommercialProduct, commercial_products};
+pub use aps_container_compatibility_rules::{
+    self, ContainerCompatibilityRule, container_compatibility_rules,
+};
 pub use aps_container_models::{self, ContainerModel, container_models};
 pub use aps_container_sealer_models::{self, ContainerSealerModel, container_sealer_models};
 pub use aps_container_sealing_procedure_templates::{

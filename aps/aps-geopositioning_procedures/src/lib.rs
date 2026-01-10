@@ -90,3 +90,10 @@ pub struct GeopositioningProcedure {
 :: diesel_builders :: prelude :: fk ! ((geopositioning_procedures :: geopositioned_with_id) -> (:: aps_geopositioning_devices :: geopositioning_devices :: id));
 :: diesel_builders :: prelude :: fk ! ((geopositioning_procedures :: geopositioned_with_model_id) -> (:: aps_geopositioning_device_models :: geopositioning_device_models :: id));
 :: diesel_builders :: prelude :: fk ! ((geopositioning_procedures :: procedure_template_geopositioned_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for GeopositioningProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<geopositioning_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

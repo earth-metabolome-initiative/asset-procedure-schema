@@ -47,12 +47,13 @@ pub struct Brand {
 impl ::diesel_builders::ValidateColumn<brands::name>
     for <brands::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(name: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if name.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "brands",
                 crate::brands::name::NAME,
             ));
         }
@@ -62,7 +63,7 @@ impl ::diesel_builders::ValidateColumn<brands::name>
 impl ::diesel_builders::ValidateColumn<brands::created_at>
     for <brands::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -73,7 +74,8 @@ impl ::diesel_builders::ValidateColumn<brands::created_at>
             <Self as diesel_builders::MayGetColumn<brands::edited_at>>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "brands",
                 crate::brands::created_at::NAME,
                 crate::brands::edited_at::NAME,
             ));
@@ -84,7 +86,7 @@ impl ::diesel_builders::ValidateColumn<brands::created_at>
 impl ::diesel_builders::ValidateColumn<brands::edited_at>
     for <brands::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -95,7 +97,8 @@ impl ::diesel_builders::ValidateColumn<brands::edited_at>
             <Self as diesel_builders::MayGetColumn<brands::created_at>>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "brands",
                 crate::brands::created_at::NAME,
                 crate::brands::edited_at::NAME,
             ));

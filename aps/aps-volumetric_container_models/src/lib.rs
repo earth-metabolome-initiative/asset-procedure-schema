@@ -38,16 +38,42 @@ pub struct VolumetricContainerModel {
 impl ::diesel_builders::ValidateColumn<volumetric_container_models::volume>
     for <volumetric_container_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(volume: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if volume <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "volumetric_container_models",
                 crate::volumetric_container_models::volume::NAME,
                 0f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for VolumetricContainerModel {
+    fn get_column_ref(
+        &self,
+    ) -> &<volumetric_container_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_container_models::container_models::id>
+    for VolumetricContainerModel
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<volumetric_container_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for VolumetricContainerModel
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<volumetric_container_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

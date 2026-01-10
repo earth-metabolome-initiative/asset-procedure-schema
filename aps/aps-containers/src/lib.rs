@@ -32,3 +32,13 @@ pub struct Container {
 }
 :: diesel_builders :: prelude :: fk ! ((containers :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((containers :: container_model_id) -> (:: aps_container_models :: container_models :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for Container {
+    fn get_column_ref(&self) -> &<containers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for Container {
+    fn get_column_ref(&self) -> &<containers::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

@@ -28,3 +28,8 @@ pub struct PhysicalAssetModel {
     id: ::rosetta_uuid::Uuid,
 }
 :: diesel_builders :: prelude :: fk ! ((physical_asset_models :: id) -> (:: aps_asset_models :: asset_models :: id));
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for PhysicalAssetModel {
+    fn get_column_ref(&self) -> &<physical_asset_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

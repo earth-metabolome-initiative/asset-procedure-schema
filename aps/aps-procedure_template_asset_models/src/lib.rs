@@ -62,12 +62,13 @@ pub struct ProcedureTemplateAssetModel {
 impl ::diesel_builders::ValidateColumn<procedure_template_asset_models::name>
     for <procedure_template_asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(name: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if name.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "procedure_template_asset_models",
                 crate::procedure_template_asset_models::name::NAME,
             ));
         }

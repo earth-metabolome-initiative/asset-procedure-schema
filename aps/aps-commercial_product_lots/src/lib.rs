@@ -49,15 +49,32 @@ pub struct CommercialProductLot {
 impl ::diesel_builders::ValidateColumn<commercial_product_lots::lot>
     for <commercial_product_lots::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(lot: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if lot.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "commercial_product_lots",
                 crate::commercial_product_lots::lot::NAME,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for CommercialProductLot {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_product_lots::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for CommercialProductLot
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_product_lots::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

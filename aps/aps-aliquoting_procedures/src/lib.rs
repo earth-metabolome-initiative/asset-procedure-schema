@@ -98,3 +98,8 @@ pub struct AliquotingProcedure {
 :: diesel_builders :: prelude :: fk ! ((aliquoting_procedures :: procedure_template_aliquoted_from_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((aliquoting_procedures :: aliquoted_into_id) -> (:: aps_volumetric_containers :: volumetric_containers :: id));
 :: diesel_builders :: prelude :: fk ! ((aliquoting_procedures :: procedure_template_aliquoted_into_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for AliquotingProcedure {
+    fn get_column_ref(&self) -> &<aliquoting_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

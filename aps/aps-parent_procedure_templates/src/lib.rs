@@ -46,7 +46,7 @@ pub struct ParentProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<parent_procedure_templates::parent_id>
     for <parent_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -58,7 +58,8 @@ impl ::diesel_builders::ValidateColumn<parent_procedure_templates::parent_id>
         >>::may_get_column_ref(self)
             && parent_id == child_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "parent_procedure_templates",
                 crate::parent_procedure_templates::parent_id::NAME,
                 crate::parent_procedure_templates::child_id::NAME,
             ));
@@ -69,7 +70,7 @@ impl ::diesel_builders::ValidateColumn<parent_procedure_templates::parent_id>
 impl ::diesel_builders::ValidateColumn<parent_procedure_templates::child_id>
     for <parent_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -81,7 +82,8 @@ impl ::diesel_builders::ValidateColumn<parent_procedure_templates::child_id>
         >>::may_get_column_ref(self)
             && parent_id == child_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "parent_procedure_templates",
                 crate::parent_procedure_templates::parent_id::NAME,
                 crate::parent_procedure_templates::child_id::NAME,
             ));

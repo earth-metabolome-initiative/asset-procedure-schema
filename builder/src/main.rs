@@ -32,7 +32,13 @@ pub fn main() {
             .dag_sink_crate_prefix("aps-dag-")
             .generate_workspace_toml()
             .generate_rustfmt()
-            .members(["builder", "crates/procedure-traits", "crates/sql-procedure-rules"])
+            .members([
+                "builder",
+                "crates/procedure-traits",
+                "crates/sql-procedure-rules",
+                "crates/asset-traits",
+                "crates/aps-test-utils",
+            ])
             .into();
 
     tracker.extend(synql.generate().expect("Unable to generate workspace"));

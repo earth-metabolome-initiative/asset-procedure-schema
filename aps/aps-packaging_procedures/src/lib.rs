@@ -84,3 +84,8 @@ pub struct PackagingProcedure {
 :: diesel_builders :: prelude :: fk ! ((packaging_procedures :: packaged_with_model_id) -> (:: aps_packaging_models :: packaging_models :: id));
 :: diesel_builders :: prelude :: fk ! ((packaging_procedures :: procedure_template_packaged_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((packaging_procedures :: packaged_with_model_id , packaging_procedures :: sample_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for PackagingProcedure {
+    fn get_column_ref(&self) -> &<packaging_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

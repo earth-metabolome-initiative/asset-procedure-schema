@@ -69,3 +69,12 @@ pub struct ContainerSealingProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((container_sealing_procedure_templates :: sealable_container_model_id , container_sealing_procedure_templates :: sealed_with_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((container_sealing_procedure_templates :: id , container_sealing_procedure_templates :: procedure_template_sealable_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((container_sealing_procedure_templates :: id , container_sealing_procedure_templates :: procedure_template_sealed_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for ContainerSealingProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<container_sealing_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

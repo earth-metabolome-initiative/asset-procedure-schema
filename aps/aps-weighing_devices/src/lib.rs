@@ -32,3 +32,13 @@ pub struct WeighingDevice {
 }
 :: diesel_builders :: prelude :: fk ! ((weighing_devices :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((weighing_devices :: weighing_device_model_id) -> (:: aps_weighing_device_models :: weighing_device_models :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for WeighingDevice {
+    fn get_column_ref(&self) -> &<weighing_devices::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for WeighingDevice {
+    fn get_column_ref(&self) -> &<weighing_devices::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

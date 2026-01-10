@@ -43,3 +43,39 @@ pub struct CommercialBallMillMachineModel {
 :: diesel_builders :: prelude :: fk ! ((commercial_ball_mill_machine_models :: ball_mill_machine_model_id) -> (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id));
 :: diesel_builders :: prelude :: fk ! ((commercial_ball_mill_machine_models :: id) -> (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id));
 :: diesel_builders :: prelude :: fk ! ((commercial_ball_mill_machine_models :: id) -> (:: aps_commercial_products :: commercial_products :: id));
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id>
+    for CommercialBallMillMachineModel
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_ball_mill_machine_models::ball_mill_machine_models::id>
+    for CommercialBallMillMachineModel
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
+    for CommercialBallMillMachineModel
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for CommercialBallMillMachineModel
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

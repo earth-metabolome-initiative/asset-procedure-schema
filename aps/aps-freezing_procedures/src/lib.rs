@@ -89,3 +89,8 @@ pub struct FreezingProcedure {
 :: diesel_builders :: prelude :: fk ! ((freezing_procedures :: frozen_with_model_id) -> (:: aps_freezer_models :: freezer_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freezing_procedures :: procedure_template_frozen_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freezing_procedures :: frozen_with_model_id , freezing_procedures :: frozen_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for FreezingProcedure {
+    fn get_column_ref(&self) -> &<freezing_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

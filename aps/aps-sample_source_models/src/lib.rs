@@ -31,3 +31,15 @@ pub struct SampleSourceModel {
     id: ::rosetta_uuid::Uuid,
 }
 :: diesel_builders :: prelude :: fk ! ((sample_source_models :: id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
+impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for SampleSourceModel {
+    fn get_column_ref(&self) -> &<sample_source_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+    for SampleSourceModel
+{
+    fn get_column_ref(&self) -> &<sample_source_models::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

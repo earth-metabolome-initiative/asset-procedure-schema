@@ -33,7 +33,7 @@ pub struct AssetModel {
     description: String,
     /// Field representing the `parent_model_id` column in table `asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    parent_model_id: Option<::rosetta_uuid::Uuid>,
+    parent_model_id: Option<rosetta_uuid::Uuid>,
     /// Field representing the `creator_id` column in table `asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
@@ -60,7 +60,7 @@ pub struct AssetModel {
 impl ::diesel_builders::ValidateColumn<asset_models::id>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(&self, id: &::rosetta_uuid::Uuid) -> Result<(), Self::Error> {
         use diesel::Column;
@@ -69,7 +69,8 @@ impl ::diesel_builders::ValidateColumn<asset_models::id>
         >>::may_get_column_ref(self)
             && parent_model_id.as_ref().is_some_and(|parent_model_id| id == parent_model_id)
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "asset_models",
                 crate::asset_models::id::NAME,
                 crate::asset_models::parent_model_id::NAME,
             ));
@@ -80,12 +81,13 @@ impl ::diesel_builders::ValidateColumn<asset_models::id>
 impl ::diesel_builders::ValidateColumn<asset_models::name>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(name: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if name.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "asset_models",
                 crate::asset_models::name::NAME,
             ));
         }
@@ -100,7 +102,8 @@ impl ::diesel_builders::ValidateColumn<asset_models::name>
         >>::may_get_column_ref(self)
             && name == description
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "asset_models",
                 crate::asset_models::name::NAME,
                 crate::asset_models::description::NAME,
             ));
@@ -111,12 +114,13 @@ impl ::diesel_builders::ValidateColumn<asset_models::name>
 impl ::diesel_builders::ValidateColumn<asset_models::description>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(description: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if description.is_empty() {
-            return Err(validation_errors::prelude::ValidationError::empty(
+            return Err(::validation_errors::ValidationError::empty(
+                "asset_models",
                 crate::asset_models::description::NAME,
             ));
         }
@@ -132,7 +136,8 @@ impl ::diesel_builders::ValidateColumn<asset_models::description>
             <Self as diesel_builders::MayGetColumn<asset_models::name>>::may_get_column_ref(self)
             && name == description
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "asset_models",
                 crate::asset_models::name::NAME,
                 crate::asset_models::description::NAME,
             ));
@@ -143,7 +148,7 @@ impl ::diesel_builders::ValidateColumn<asset_models::description>
 impl ::diesel_builders::ValidateColumn<asset_models::parent_model_id>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -154,7 +159,8 @@ impl ::diesel_builders::ValidateColumn<asset_models::parent_model_id>
             <Self as diesel_builders::MayGetColumn<asset_models::id>>::may_get_column_ref(self)
             && id == parent_model_id
         {
-            return Err(validation_errors::prelude::ValidationError::equal(
+            return Err(::validation_errors::ValidationError::equal(
+                "asset_models",
                 crate::asset_models::id::NAME,
                 crate::asset_models::parent_model_id::NAME,
             ));
@@ -165,7 +171,7 @@ impl ::diesel_builders::ValidateColumn<asset_models::parent_model_id>
 impl ::diesel_builders::ValidateColumn<asset_models::created_at>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -178,7 +184,8 @@ impl ::diesel_builders::ValidateColumn<asset_models::created_at>
             )
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "asset_models",
                 crate::asset_models::created_at::NAME,
                 crate::asset_models::edited_at::NAME,
             ));
@@ -189,7 +196,7 @@ impl ::diesel_builders::ValidateColumn<asset_models::created_at>
 impl ::diesel_builders::ValidateColumn<asset_models::edited_at>
     for <asset_models::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -201,7 +208,8 @@ impl ::diesel_builders::ValidateColumn<asset_models::edited_at>
         >>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "asset_models",
                 crate::asset_models::created_at::NAME,
                 crate::asset_models::edited_at::NAME,
             ));

@@ -67,3 +67,12 @@ pub struct WeighingProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: weighed_with_model_id) -> (:: aps_weighing_device_models :: weighing_device_models :: id));
 :: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: id , weighing_procedure_templates :: procedure_template_weighed_asset_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((weighing_procedure_templates :: id , weighing_procedure_templates :: procedure_template_weighed_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for WeighingProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<weighing_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

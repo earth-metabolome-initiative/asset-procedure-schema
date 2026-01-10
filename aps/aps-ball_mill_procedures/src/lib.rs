@@ -114,3 +114,8 @@ pub struct BallMillProcedure {
 :: diesel_builders :: prelude :: fk ! ((ball_mill_procedures :: milled_with_model_id , ball_mill_procedures :: milled_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((ball_mill_procedures :: milled_with_model_id , ball_mill_procedures :: bead_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
 :: diesel_builders :: prelude :: fk ! ((ball_mill_procedures :: bead_model_id , ball_mill_procedures :: milled_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for BallMillProcedure {
+    fn get_column_ref(&self) -> &<ball_mill_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

@@ -97,16 +97,26 @@ pub struct PouringProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<pouring_procedure_templates::volume>
     for <pouring_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(volume: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if volume <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "pouring_procedure_templates",
                 crate::pouring_procedure_templates::volume::NAME,
                 0f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for PouringProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<pouring_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

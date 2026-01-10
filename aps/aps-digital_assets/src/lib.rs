@@ -32,3 +32,8 @@ pub struct DigitalAsset {
 }
 :: diesel_builders :: prelude :: fk ! ((digital_assets :: id) -> (:: aps_assets :: assets :: id));
 :: diesel_builders :: prelude :: fk ! ((digital_assets :: digital_asset_model_id) -> (:: aps_digital_asset_models :: digital_asset_models :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for DigitalAsset {
+    fn get_column_ref(&self) -> &<digital_assets::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

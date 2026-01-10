@@ -82,12 +82,13 @@ pub struct StorageProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<storage_procedure_templates::kelvin>
     for <storage_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(kelvin: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "storage_procedure_templates",
                 crate::storage_procedure_templates::kelvin::NAME,
                 0f64,
             ));
@@ -98,22 +99,33 @@ impl ::diesel_builders::ValidateColumn<storage_procedure_templates::kelvin>
 impl ::diesel_builders::ValidateColumn<storage_procedure_templates::kelvin_tolerance_percentage>
     for <storage_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(kelvin_tolerance_percentage: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin_tolerance_percentage <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "storage_procedure_templates",
                 crate::storage_procedure_templates::kelvin_tolerance_percentage::NAME,
                 0f64,
             ));
         }
         if kelvin_tolerance_percentage > &100f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "storage_procedure_templates",
                 crate::storage_procedure_templates::kelvin_tolerance_percentage::NAME,
                 100f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for StorageProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<storage_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

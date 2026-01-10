@@ -117,12 +117,13 @@ pub struct BallMillProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::kelvin>
     for <ball_mill_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(kelvin: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::kelvin::NAME,
                 0f64,
             ));
@@ -133,18 +134,20 @@ impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::kelvin>
 impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::kelvin_tolerance_percentage>
     for <ball_mill_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(kelvin_tolerance_percentage: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin_tolerance_percentage <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::kelvin_tolerance_percentage::NAME,
                 0f64,
             ));
         }
         if kelvin_tolerance_percentage > &100f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::kelvin_tolerance_percentage::NAME,
                 100f64,
             ));
@@ -155,18 +158,20 @@ impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::kelvin_tol
 impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::duration>
     for <ball_mill_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(duration: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if duration > &900f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::duration::NAME,
                 900f64,
             ));
         }
         if duration < &30f32 {
-            return Err(validation_errors::prelude::ValidationError::greater_than_value(
+            return Err(::validation_errors::ValidationError::greater_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::duration::NAME,
                 30f64,
             ));
@@ -177,18 +182,20 @@ impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::duration>
 impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::hertz>
     for <ball_mill_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(hertz: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if hertz > &50f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::hertz::NAME,
                 50f64,
             ));
         }
         if hertz < &15f32 {
-            return Err(validation_errors::prelude::ValidationError::greater_than_value(
+            return Err(::validation_errors::ValidationError::greater_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::hertz::NAME,
                 15f64,
             ));
@@ -199,16 +206,26 @@ impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::hertz>
 impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::bead_count>
     for <ball_mill_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(bead_count: &i16) -> Result<(), Self::Error> {
         use diesel::Column;
         if bead_count <= &0i16 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "ball_mill_procedure_templates",
                 crate::ball_mill_procedure_templates::bead_count::NAME,
                 0f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for BallMillProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<ball_mill_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

@@ -32,3 +32,19 @@ pub struct VolumeMeasuringDevice {
 }
 :: diesel_builders :: prelude :: fk ! ((volume_measuring_devices :: id) -> (:: aps_physical_assets :: physical_assets :: id));
 :: diesel_builders :: prelude :: fk ! ((volume_measuring_devices :: volume_measuring_device_model_id) -> (:: aps_volume_measuring_device_models :: volume_measuring_device_models :: id));
+impl diesel_builders::GetColumn<aps_assets::assets::id> for VolumeMeasuringDevice {
+    fn get_column_ref(
+        &self,
+    ) -> &<volume_measuring_devices::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}
+impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id>
+    for VolumeMeasuringDevice
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<volume_measuring_devices::id as diesel_builders::Typed>::ColumnType {
+        &self.id
+    }
+}

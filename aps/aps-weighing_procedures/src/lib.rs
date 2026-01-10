@@ -101,16 +101,22 @@ pub struct WeighingProcedure {
 impl ::diesel_builders::ValidateColumn<weighing_procedures::mass>
     for <weighing_procedures::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(mass: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if mass <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "weighing_procedures",
                 crate::weighing_procedures::mass::NAME,
                 0f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_procedures::procedures::id> for WeighingProcedure {
+    fn get_column_ref(&self) -> &<weighing_procedures::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }

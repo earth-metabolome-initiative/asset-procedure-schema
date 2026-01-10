@@ -36,7 +36,7 @@ pub struct User {
 impl ::diesel_builders::ValidateColumn<users::created_at>
     for <users::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -47,7 +47,8 @@ impl ::diesel_builders::ValidateColumn<users::created_at>
             <Self as diesel_builders::MayGetColumn<users::edited_at>>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "users",
                 crate::users::created_at::NAME,
                 crate::users::edited_at::NAME,
             ));
@@ -58,7 +59,7 @@ impl ::diesel_builders::ValidateColumn<users::created_at>
 impl ::diesel_builders::ValidateColumn<users::edited_at>
     for <users::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column_in_context(
         &self,
@@ -69,7 +70,8 @@ impl ::diesel_builders::ValidateColumn<users::edited_at>
             <Self as diesel_builders::MayGetColumn<users::created_at>>::may_get_column_ref(self)
             && created_at > edited_at
         {
-            return Err(validation_errors::prelude::ValidationError::smaller_than(
+            return Err(::validation_errors::ValidationError::smaller_than(
+                "users",
                 crate::users::created_at::NAME,
                 crate::users::edited_at::NAME,
             ));

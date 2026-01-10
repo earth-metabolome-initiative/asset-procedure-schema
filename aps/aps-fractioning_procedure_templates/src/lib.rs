@@ -101,12 +101,13 @@ pub struct FractioningProcedureTemplate {
 impl ::diesel_builders::ValidateColumn<fractioning_procedure_templates::mass>
     for <fractioning_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(mass: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if mass <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "fractioning_procedure_templates",
                 crate::fractioning_procedure_templates::mass::NAME,
                 0f64,
             ));
@@ -117,22 +118,33 @@ impl ::diesel_builders::ValidateColumn<fractioning_procedure_templates::mass>
 impl ::diesel_builders::ValidateColumn<fractioning_procedure_templates::tolerance_percentage>
     for <fractioning_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
-    type Error = ::validation_errors::ValidationError<&'static str>;
+    type Error = ::validation_errors::ValidationError;
     #[inline]
     fn validate_column(tolerance_percentage: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if tolerance_percentage <= &0f32 {
-            return Err(validation_errors::prelude::ValidationError::strictly_greater_than_value(
+            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                "fractioning_procedure_templates",
                 crate::fractioning_procedure_templates::tolerance_percentage::NAME,
                 0f64,
             ));
         }
         if tolerance_percentage > &100f32 {
-            return Err(validation_errors::prelude::ValidationError::smaller_than_value(
+            return Err(::validation_errors::ValidationError::smaller_than_value(
+                "fractioning_procedure_templates",
                 crate::fractioning_procedure_templates::tolerance_percentage::NAME,
                 100f64,
             ));
         }
         Ok(())
+    }
+}
+impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    for FractioningProcedureTemplate
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<fractioning_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+        &self.id
     }
 }
