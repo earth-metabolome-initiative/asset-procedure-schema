@@ -80,6 +80,14 @@ where
 ///
 /// # Panics
 /// * If the asset model creation fails.
+/// 
+/// # Example
+/// 
+/// ```rust
+/// use aps_test_utils::asset_model;
+/// let mut conn = aps_test_utils::aps_conn();
+/// let _test_asset_model = asset_model("Test Model", &mut conn);
+/// ```
 pub fn asset_model<C>(name: &str, conn: &mut C) -> AssetModel
 where
     TableBuilder<users::table>: Insert<C>,
