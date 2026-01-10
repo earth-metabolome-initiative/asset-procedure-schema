@@ -62,9 +62,9 @@ pub fn aps_conn() -> SqliteConnection {
 /// let mut conn = aps_test_utils::aps_conn();
 /// let _test_user = user(&mut conn);
 /// ```
-pub fn user(conn: &mut SqliteConnection) -> aps_users::User
+pub fn user<C>(conn: &mut C) -> aps_users::User
 where
-    TableBuilder<users::table>: Insert<SqliteConnection>,
+    TableBuilder<users::table>: Insert<C>,
 {
     users::table::builder().insert(conn).expect("Failed to create test user")
 }
@@ -80,10 +80,10 @@ where
 ///
 /// # Panics
 /// * If the asset model creation fails.
-pub fn asset_model(name: &str, conn: &mut SqliteConnection) -> AssetModel
+pub fn asset_model<C>(name: &str, conn: &mut C) -> AssetModel
 where
-    TableBuilder<users::table>: Insert<SqliteConnection>,
-    TableBuilder<asset_models::table>: Insert<SqliteConnection>,
+    TableBuilder<users::table>: Insert<C>,
+    TableBuilder<asset_models::table>: Insert<C>,
 {
     let creator = user(conn);
     asset_models::table::builder()
