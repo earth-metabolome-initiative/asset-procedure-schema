@@ -1,0 +1,42 @@
+[package]
+name = "aps-dag-assets"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+aps-aliquoting_procedures.workspace = true
+aps-assets.workspace = true
+aps-ball_mill_machines.workspace = true
+aps-ball_mill_procedures.workspace = true
+aps-cameras.workspace = true
+aps-centrifuge_procedures.workspace = true
+aps-centrifuges.workspace = true
+aps-container_sealing_procedures.workspace = true
+aps-containers.workspace = true
+aps-digital_assets.workspace = true
+aps-disposal_procedures.workspace = true
+aps-fractioning_procedures.workspace = true
+aps-freeze_dryers.workspace = true
+aps-freeze_drying_procedures.workspace = true
+aps-freezers.workspace = true
+aps-freezing_procedures.workspace = true
+aps-geopositioning_devices.workspace = true
+aps-geopositioning_procedures.workspace = true
+aps-harvesting_procedures.workspace = true
+aps-packaging_procedures.workspace = true
+aps-photograph_procedures.workspace = true
+aps-photographs.workspace = true
+aps-physical_assets.workspace = true
+aps-pouring_procedures.workspace = true
+aps-sample_sources.workspace = true
+aps-samples.workspace = true
+aps-storage_procedures.workspace = true
+aps-supernatant_procedures.workspace = true
+aps-volume_measuring_devices.workspace = true
+aps-volumetric_containers.workspace = true
+aps-weighing_devices.workspace = true
+aps-weighing_procedures.workspace = true
+
+[lints]
+workspace = true

@@ -693,6 +693,205 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-dag-asset_models"
+version = "0.1.0"
+dependencies = [
+ "aps-aliquoting_procedure_templates",
+ "aps-aliquoting_procedures",
+ "aps-asset_compatibility_rules",
+ "aps-asset_model_ancestors",
+ "aps-asset_models",
+ "aps-assets",
+ "aps-ball_mill_machine_models",
+ "aps-ball_mill_machines",
+ "aps-ball_mill_procedure_templates",
+ "aps-ball_mill_procedures",
+ "aps-bead_models",
+ "aps-camera_models",
+ "aps-cameras",
+ "aps-centrifuge_models",
+ "aps-centrifuge_procedure_templates",
+ "aps-centrifuge_procedures",
+ "aps-centrifuges",
+ "aps-commercial_ball_mill_machine_lots",
+ "aps-commercial_ball_mill_machine_models",
+ "aps-commercial_camera_lots",
+ "aps-commercial_camera_models",
+ "aps-commercial_centrifuge_lots",
+ "aps-commercial_centrifuge_models",
+ "aps-commercial_freeze_dryer_lots",
+ "aps-commercial_freeze_dryer_models",
+ "aps-commercial_freezer_lots",
+ "aps-commercial_freezer_models",
+ "aps-commercial_geopositioning_device_lots",
+ "aps-commercial_geopositioning_device_models",
+ "aps-commercial_product_lots",
+ "aps-commercial_products",
+ "aps-container_models",
+ "aps-container_sealer_models",
+ "aps-container_sealing_procedure_templates",
+ "aps-container_sealing_procedures",
+ "aps-containers",
+ "aps-digital_asset_models",
+ "aps-digital_assets",
+ "aps-disposal_procedure_templates",
+ "aps-disposal_procedures",
+ "aps-fractioning_procedure_templates",
+ "aps-fractioning_procedures",
+ "aps-freeze_dryer_models",
+ "aps-freeze_dryers",
+ "aps-freeze_drying_procedure_templates",
+ "aps-freeze_drying_procedures",
+ "aps-freezer_models",
+ "aps-freezers",
+ "aps-freezing_procedure_templates",
+ "aps-freezing_procedures",
+ "aps-geopositioning_device_models",
+ "aps-geopositioning_devices",
+ "aps-geopositioning_procedure_templates",
+ "aps-geopositioning_procedures",
+ "aps-harvesting_procedure_templates",
+ "aps-harvesting_procedures",
+ "aps-packaging_models",
+ "aps-packaging_procedure_templates",
+ "aps-packaging_procedures",
+ "aps-photograph_procedure_templates",
+ "aps-photograph_procedures",
+ "aps-photographs",
+ "aps-physical_asset_models",
+ "aps-physical_assets",
+ "aps-pouring_procedure_templates",
+ "aps-pouring_procedures",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-reused_procedure_template_asset_models",
+ "aps-sample_models",
+ "aps-sample_source_models",
+ "aps-sample_sources",
+ "aps-samples",
+ "aps-storage_procedure_templates",
+ "aps-storage_procedures",
+ "aps-supernatant_procedure_templates",
+ "aps-supernatant_procedures",
+ "aps-volume_measuring_device_models",
+ "aps-volume_measuring_devices",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "aps-weighed_container_models",
+ "aps-weighing_device_models",
+ "aps-weighing_devices",
+ "aps-weighing_procedure_templates",
+ "aps-weighing_procedures",
+]
+
+[[package]]
+name = "aps-dag-assets"
+version = "0.1.0"
+dependencies = [
+ "aps-aliquoting_procedures",
+ "aps-assets",
+ "aps-ball_mill_machines",
+ "aps-ball_mill_procedures",
+ "aps-cameras",
+ "aps-centrifuge_procedures",
+ "aps-centrifuges",
+ "aps-container_sealing_procedures",
+ "aps-containers",
+ "aps-digital_assets",
+ "aps-disposal_procedures",
+ "aps-fractioning_procedures",
+ "aps-freeze_dryers",
+ "aps-freeze_drying_procedures",
+ "aps-freezers",
+ "aps-freezing_procedures",
+ "aps-geopositioning_devices",
+ "aps-geopositioning_procedures",
+ "aps-harvesting_procedures",
+ "aps-packaging_procedures",
+ "aps-photograph_procedures",
+ "aps-photographs",
+ "aps-physical_assets",
+ "aps-pouring_procedures",
+ "aps-sample_sources",
+ "aps-samples",
+ "aps-storage_procedures",
+ "aps-supernatant_procedures",
+ "aps-volume_measuring_devices",
+ "aps-volumetric_containers",
+ "aps-weighing_devices",
+ "aps-weighing_procedures",
+]
+
+[[package]]
+name = "aps-dag-procedure_templates"
+version = "0.1.0"
+dependencies = [
+ "aps-aliquoting_procedure_templates",
+ "aps-aliquoting_procedures",
+ "aps-ball_mill_procedure_templates",
+ "aps-ball_mill_procedures",
+ "aps-centrifuge_procedure_templates",
+ "aps-centrifuge_procedures",
+ "aps-container_sealing_procedure_templates",
+ "aps-container_sealing_procedures",
+ "aps-disposal_procedure_templates",
+ "aps-disposal_procedures",
+ "aps-fractioning_procedure_templates",
+ "aps-fractioning_procedures",
+ "aps-freeze_drying_procedure_templates",
+ "aps-freeze_drying_procedures",
+ "aps-freezing_procedure_templates",
+ "aps-freezing_procedures",
+ "aps-geopositioning_procedure_templates",
+ "aps-geopositioning_procedures",
+ "aps-harvesting_procedure_templates",
+ "aps-harvesting_procedures",
+ "aps-next_procedure_templates",
+ "aps-packaging_procedure_templates",
+ "aps-packaging_procedures",
+ "aps-parent_procedure_templates",
+ "aps-photograph_procedure_templates",
+ "aps-photograph_procedures",
+ "aps-pouring_procedure_templates",
+ "aps-pouring_procedures",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-procedures",
+ "aps-reused_procedure_template_asset_models",
+ "aps-storage_procedure_templates",
+ "aps-storage_procedures",
+ "aps-supernatant_procedure_templates",
+ "aps-supernatant_procedures",
+ "aps-weighing_procedure_templates",
+ "aps-weighing_procedures",
+]
+
+[[package]]
+name = "aps-dag-procedures"
+version = "0.1.0"
+dependencies = [
+ "aps-aliquoting_procedures",
+ "aps-ball_mill_procedures",
+ "aps-centrifuge_procedures",
+ "aps-container_sealing_procedures",
+ "aps-disposal_procedures",
+ "aps-fractioning_procedures",
+ "aps-freeze_drying_procedures",
+ "aps-freezing_procedures",
+ "aps-geopositioning_procedures",
+ "aps-harvesting_procedures",
+ "aps-packaging_procedures",
+ "aps-photograph_procedures",
+ "aps-pouring_procedures",
+ "aps-procedure_asset_models",
+ "aps-procedures",
+ "aps-storage_procedures",
+ "aps-supernatant_procedures",
+ "aps-weighing_procedures",
+]
+
+[[package]]
 name = "aps-digital_asset_models"
 version = "0.1.0"
 dependencies = [
@@ -2758,7 +2957,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#e5cc9ebc03d7f3a8a43e75c567e3999f9a4cbf5a"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#bda69e8397c0e7dd905d7fce4bc2287898345c7a"
 dependencies = [
  "sql-traits",
 ]
@@ -2852,7 +3051,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#e5cc9ebc03d7f3a8a43e75c567e3999f9a4cbf5a"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#bda69e8397c0e7dd905d7fce4bc2287898345c7a"
 dependencies = [
  "cached",
  "chrono",

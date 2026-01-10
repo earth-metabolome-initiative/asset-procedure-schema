@@ -29,6 +29,7 @@ pub fn main() {
         SynQL::new_with_crate_base_path(&db, "../".as_ref(), "aps".as_ref())
             .name("aps")
             .sink_crate("aps")
+            .dag_sink_crate_prefix("aps-dag-")
             .generate_workspace_toml()
             .generate_rustfmt()
             .members(["builder", "crates/procedure-traits", "crates/sql-procedure-rules"])

@@ -1,0 +1,28 @@
+[package]
+name = "aps-dag-procedures"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+aps-aliquoting_procedures.workspace = true
+aps-ball_mill_procedures.workspace = true
+aps-centrifuge_procedures.workspace = true
+aps-container_sealing_procedures.workspace = true
+aps-disposal_procedures.workspace = true
+aps-fractioning_procedures.workspace = true
+aps-freeze_drying_procedures.workspace = true
+aps-freezing_procedures.workspace = true
+aps-geopositioning_procedures.workspace = true
+aps-harvesting_procedures.workspace = true
+aps-packaging_procedures.workspace = true
+aps-photograph_procedures.workspace = true
+aps-pouring_procedures.workspace = true
+aps-procedure_asset_models.workspace = true
+aps-procedures.workspace = true
+aps-storage_procedures.workspace = true
+aps-supernatant_procedures.workspace = true
+aps-weighing_procedures.workspace = true
+
+[lints]
+workspace = true

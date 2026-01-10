@@ -101,6 +101,10 @@ members = [
   "aps/aps-weighing_procedure_templates",
   "aps/aps-weighing_procedures",
   "aps/aps",
+  "aps/aps-dag-asset_models",
+  "aps/aps-dag-assets",
+  "aps/aps-dag-procedure_templates",
+  "aps/aps-dag-procedures",
 ]
 
 [workspace.package]
