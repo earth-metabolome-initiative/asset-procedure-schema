@@ -11,6 +11,7 @@ diesel.workspace = true
 rosetta_uuid.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-procedure_templates.workspace = true
+aps-reused_procedure_template_asset_models.workspace = true
 aps-sample_models.workspace = true
 aps-sample_source_models.workspace = true
 

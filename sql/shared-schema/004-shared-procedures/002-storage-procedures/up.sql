@@ -25,6 +25,14 @@ CREATE TABLE storage_procedure_templates (
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
 	-- We check that the `stored_into_model` is indeed a container that can hold the `stored_asset_model`.
 	FOREIGN KEY (stored_into_model_id, stored_asset_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_stored_into_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_stored_asset_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_stored_into_model`
 	-- for the current `procedure_template`.
 	UNIQUE (

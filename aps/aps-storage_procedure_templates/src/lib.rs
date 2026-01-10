@@ -77,6 +77,8 @@ pub struct StorageProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: stored_into_model_id) -> (:: aps_container_models :: container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: stored_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
 :: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: stored_into_model_id , storage_procedure_templates :: stored_asset_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: id , storage_procedure_templates :: procedure_template_stored_into_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: id , storage_procedure_templates :: procedure_template_stored_asset_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<storage_procedure_templates::kelvin>
     for <storage_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

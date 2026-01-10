@@ -81,6 +81,8 @@ pub struct FreezingProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: frozen_with_model_id) -> (:: aps_freezer_models :: freezer_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: frozen_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: frozen_with_model_id , freezing_procedure_templates :: frozen_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: id , freezing_procedure_templates :: procedure_template_frozen_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: id , freezing_procedure_templates :: procedure_template_frozen_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::kelvin>
     for <freezing_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

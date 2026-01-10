@@ -32,6 +32,18 @@ CREATE TABLE fractioning_procedure_templates (
 		procedure_template_fragment_placed_into_model_id,
 		fragment_placed_into_model_id
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_weighed_with_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_fragment_container_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_fragment_placed_into_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_weighed_with_model`
 	-- for the current `procedure_template`.
 	UNIQUE (

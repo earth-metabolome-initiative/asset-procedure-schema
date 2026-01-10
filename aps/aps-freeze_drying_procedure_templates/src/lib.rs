@@ -86,6 +86,8 @@ pub struct FreezeDryingProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: freeze_dried_with_model_id) -> (:: aps_freeze_dryer_models :: freeze_dryer_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: freeze_dried_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: freeze_dried_with_model_id , freeze_drying_procedure_templates :: freeze_dried_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: id , freeze_drying_procedure_templates :: procedure_template_freeze_dried_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: id , freeze_drying_procedure_templates :: procedure_template_freeze_dried_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<freeze_drying_procedure_templates::kelvin>
     for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

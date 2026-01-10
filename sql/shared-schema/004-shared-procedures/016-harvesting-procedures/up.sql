@@ -18,6 +18,14 @@ CREATE TABLE harvesting_procedure_templates (
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
 	-- We enforce that the `sample_model` is associated with the `sample_source_model`.
 	FOREIGN KEY (sample_model_id, sample_source_model_id) REFERENCES sample_models(id, sample_source_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_sample_source_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_sample_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_sample_source_model`
 	-- for the current `procedure_template`.
 	UNIQUE (

@@ -23,6 +23,18 @@ CREATE TABLE supernatant_procedure_templates (
 		procedure_template_supernatant_destination_model_id,
 		supernatant_destination_model_id
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_stratified_source_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_supernatant_destination_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_transferred_with_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_stratified_source_model`
 	-- for the current `procedure_template`.
 	UNIQUE (

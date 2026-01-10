@@ -91,6 +91,9 @@ pub struct PouringProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((pouring_procedure_templates :: measured_with_model_id) -> (:: aps_volume_measuring_device_models :: volume_measuring_device_models :: id));
 :: diesel_builders :: prelude :: fk ! ((pouring_procedure_templates :: poured_from_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((pouring_procedure_templates :: poured_into_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
+:: diesel_builders :: prelude :: fk ! ((pouring_procedure_templates :: id , pouring_procedure_templates :: procedure_template_measured_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((pouring_procedure_templates :: id , pouring_procedure_templates :: procedure_template_poured_into_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((pouring_procedure_templates :: id , pouring_procedure_templates :: procedure_template_poured_from_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<pouring_procedure_templates::volume>
     for <pouring_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

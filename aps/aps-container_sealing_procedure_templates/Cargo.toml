@@ -13,6 +13,7 @@ aps-asset_compatibility_rules.workspace = true
 aps-container_sealer_models.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-procedure_templates.workspace = true
+aps-reused_procedure_template_asset_models.workspace = true
 aps-volumetric_container_models.workspace = true
 
 [lints]

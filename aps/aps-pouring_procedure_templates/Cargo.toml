@@ -12,6 +12,7 @@ validation_errors.workspace = true
 rosetta_uuid.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-procedure_templates.workspace = true
+aps-reused_procedure_template_asset_models.workspace = true
 aps-volume_measuring_device_models.workspace = true
 aps-volumetric_container_models.workspace = true
 

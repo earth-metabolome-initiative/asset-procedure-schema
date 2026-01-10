@@ -9,6 +9,10 @@ CREATE TABLE disposal_procedure_templates (
 		procedure_template_disposed_asset_model_id,
 		disposed_asset_model_id
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_disposed_asset_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_disposed_asset_model`
 	-- for the current `procedure_template`.
 	UNIQUE (

@@ -86,6 +86,8 @@ pub struct CentrifugeProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: centrifuged_with_model_id) -> (:: aps_centrifuge_models :: centrifuge_models :: id));
 :: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: centrifuged_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: centrifuged_with_model_id , centrifuge_procedure_templates :: centrifuged_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: id , centrifuge_procedure_templates :: procedure_template_centrifuged_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
+:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: id , centrifuge_procedure_templates :: procedure_template_centrifuged_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::kelvin>
     for <centrifuge_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

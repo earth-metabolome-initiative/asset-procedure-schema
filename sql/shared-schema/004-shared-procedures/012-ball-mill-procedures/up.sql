@@ -41,6 +41,18 @@ CREATE TABLE ball_mill_procedure_templates (
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
 	-- We check that the `milled_with` is indeed a ball mill machine that can hold the `milled_container_model`.
 	FOREIGN KEY (milled_with_model_id, milled_container_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_bead_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_milled_with_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_milled_container_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We check that the `milled_with` is indeed a ball mill machine that can use the `bead_model`.
 	FOREIGN KEY (milled_with_model_id, bead_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
 	-- We check that the `bead_model` is indeed a beads model that can be used with the `milled_container_model`.

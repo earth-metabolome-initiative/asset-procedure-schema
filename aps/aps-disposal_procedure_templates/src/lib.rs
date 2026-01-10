@@ -47,3 +47,4 @@ pub struct DisposalProcedureTemplate {
 );
 :: diesel_builders :: prelude :: fk ! ((disposal_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
 :: diesel_builders :: prelude :: fk ! ((disposal_procedure_templates :: disposed_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
+:: diesel_builders :: prelude :: fk ! ((disposal_procedure_templates :: id , disposal_procedure_templates :: procedure_template_disposed_asset_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));

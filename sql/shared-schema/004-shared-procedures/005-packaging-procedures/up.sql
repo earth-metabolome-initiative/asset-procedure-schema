@@ -16,6 +16,14 @@ CREATE TABLE packaging_procedure_templates (
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
 	-- The `sample_model` must be compatible with the `packaged_with_model`.
 	FOREIGN KEY (packaged_with_model_id, sample_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_packaged_with_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_sample_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_packaged_with_model`
 	-- for the current `procedure_template`.
 	UNIQUE (

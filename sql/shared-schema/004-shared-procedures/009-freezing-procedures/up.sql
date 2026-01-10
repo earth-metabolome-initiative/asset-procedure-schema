@@ -27,6 +27,14 @@ CREATE TABLE freezing_procedure_templates (
 	) REFERENCES procedure_template_asset_models(id, asset_model_id),
 	-- We check that the `frozen_with_model` is indeed a container that can hold the `frozen_container_model`.
 	FOREIGN KEY (frozen_with_model_id, frozen_container_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_frozen_with_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
+	FOREIGN KEY (
+		id,
+		procedure_template_frozen_container_model_id
+	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
 	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_frozen_with_model`
 	-- for the current `procedure_template`.
 	UNIQUE (
