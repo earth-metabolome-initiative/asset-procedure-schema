@@ -1625,6 +1625,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-container_models",
+ "aps-procedure_templates",
  "aps-users",
  "diesel",
  "diesel-builders",
@@ -2049,7 +2050,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#6a90e6a494c83c956f3ed8f3e30a6c72a3f6c1d8"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#59cb5d3ffa1104b0a12691d70065c04d26651be8"
 dependencies = [
  "diesel",
  "diesel-builders-derive",
@@ -2061,7 +2062,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders-derive"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#6a90e6a494c83c956f3ed8f3e30a6c72a3f6c1d8"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#59cb5d3ffa1104b0a12691d70065c04d26651be8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2783,6 +2784,14 @@ dependencies = [
 [[package]]
 name = "procedure-traits"
 version = "0.1.0"
+dependencies = [
+ "aps-parent_procedure_templates",
+ "aps-procedure_templates",
+ "aps-test-utils",
+ "aps-users",
+ "diesel",
+ "diesel-builders",
+]
 
 [[package]]
 name = "psm"
@@ -3621,7 +3630,7 @@ dependencies = [
 [[package]]
 name = "validation-errors"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#6a90e6a494c83c956f3ed8f3e30a6c72a3f6c1d8"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#59cb5d3ffa1104b0a12691d70065c04d26651be8"
 dependencies = [
  "diesel",
  "diesel-builders",

@@ -9,6 +9,7 @@ aps-users.workspace = true
 diesel-builders.workspace = true
 aps-asset_models.workspace = true
 aps-container_models.workspace = true
+aps-procedure_templates.workspace = true
 diesel = { workspace = true, features = [
   "sqlite",
   "returning_clauses_for_sqlite_3_35",

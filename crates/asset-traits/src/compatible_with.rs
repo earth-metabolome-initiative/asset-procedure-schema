@@ -35,8 +35,8 @@ pub trait CompatibleWith:
     /// use diesel::associations::Identifiable;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
-    /// let asset_model_a = aps_test_utils::asset_model("Model A", &mut conn);
-    /// let asset_model_b = aps_test_utils::asset_model("Model B", &mut conn);
+    /// let asset_model_a = aps_test_utils::asset_model("Model A", &user, &mut conn);
+    /// let asset_model_b = aps_test_utils::asset_model("Model B", &user, &mut conn);
     /// let compatibility_rule = asset_model_a
     ///     .compatible_with(&asset_model_b, &user, &mut conn)
     ///     .expect("Failed to create compatibility rule");
@@ -93,8 +93,8 @@ pub trait CanContain:
     /// use diesel::associations::Identifiable;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
-    /// let container_model = aps_test_utils::container_model("Container Model", &mut conn);
-    /// let asset_model = aps_test_utils::asset_model("Contained Asset Model", &mut conn);
+    /// let container_model = aps_test_utils::container_model("Container Model", &user, &mut conn);
+    /// let asset_model = aps_test_utils::asset_model("Contained Asset Model", &user, &mut conn);
     /// let compatibility_rule = container_model
     ///     .can_contain(&asset_model, 10, &user, &mut conn)
     ///     .expect("Failed to create container compatibility rule");

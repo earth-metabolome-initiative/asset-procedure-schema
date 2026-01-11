@@ -1,6 +1,7 @@
 //! Test utilities for APS crates.
 
 use aps_asset_models::*;
+use aps_procedure_templates::*;
 use aps_users::*;
 use diesel::{Connection, SqliteConnection, connection::SimpleConnection};
 use diesel_builders::{TableBuilder, prelude::*};
@@ -75,6 +76,7 @@ where
 /// # Arguments
 ///
 /// * `name` - The name of the asset model to be created.
+/// * `user` - The user creating the asset model.
 /// * `conn` - A mutable reference to the database connection where the asset
 ///   model will be created.
 ///
@@ -84,23 +86,23 @@ where
 /// # Example
 ///
 /// ```rust
-/// use aps_test_utils::asset_model;
-/// let mut conn = aps_test_utils::aps_conn();
-/// let _test_asset_model = asset_model("Test Model", &mut conn);
+/// use aps_test_utils::{aps_conn, asset_model, user};
+/// let mut conn = aps_conn();
+/// let test_user = user(&mut conn);
+/// let _test_asset_model = asset_model("Test Model", &test_user, &mut conn);
 /// ```
-pub fn asset_model<C>(name: &str, conn: &mut C) -> AssetModel
+pub fn asset_model<C>(name: &str, user: &aps_users::User, conn: &mut C) -> AssetModel
 where
     TableBuilder<users::table>: Insert<C>,
     TableBuilder<asset_models::table>: Insert<C>,
 {
-    let creator = user(conn);
     asset_models::table::builder()
         .try_name(name)
         .expect("Failed to set asset model name")
         .try_description("A test asset model")
         .expect("Failed to set asset model description")
-        .creator_id(creator.get_column::<users::id>())
-        .editor_id(creator.get_column::<users::id>())
+        .creator_id(user.get_column::<users::id>())
+        .editor_id(user.get_column::<users::id>())
         .insert(conn)
         .expect("Failed to create test asset model")
 }
@@ -111,6 +113,7 @@ where
 /// # Arguments
 ///
 /// * `name` - The name of the container model to be created.
+/// * `user` - The user creating the container model.
 /// * `conn` - A mutable reference to the database connection where the
 ///   container model will be created.
 ///
@@ -120,23 +123,68 @@ where
 /// # Example
 ///
 /// ```rust
-/// use aps_test_utils::container_model;
-/// let mut conn = aps_test_utils::aps_conn();
-/// let _test_container_model = container_model("Test Container", &mut conn);
+/// use aps_test_utils::{aps_conn, container_model, user};
+/// let mut conn = aps_conn();
+/// let test_user = user(&mut conn);
+/// let _test_container_model = container_model("Test Container", &test_user, &mut conn);
 /// ```
-pub fn container_model<C>(name: &str, conn: &mut C) -> aps_container_models::ContainerModel
+pub fn container_model<C>(
+    name: &str,
+    user: &aps_users::User,
+    conn: &mut C,
+) -> aps_container_models::ContainerModel
 where
     TableBuilder<users::table>: Insert<C>,
     TableBuilder<aps_container_models::container_models::table>: Insert<C>,
 {
-    let creator = user(conn);
     aps_container_models::container_models::table::builder()
         .try_name(name)
         .expect("Failed to set container model name")
         .try_description("A test container model")
         .expect("Failed to set container model description")
-        .creator_id(creator.get_column::<users::id>())
-        .editor_id(creator.get_column::<users::id>())
+        .creator_id(user.get_column::<users::id>())
+        .editor_id(user.get_column::<users::id>())
         .insert(conn)
         .expect("Failed to create test container model")
+}
+
+/// Creates and returns a procedure template with the given name in the
+/// provided connection for testing purposes.
+///
+/// # Arguments
+///
+/// * `name` - The name of the procedure template to be created.
+/// * `user` - The user creating the procedure template.
+/// * `conn` - A mutable reference to the database connection where the
+///   procedure template will be created.
+///
+/// # Panics
+/// * If the procedure template creation fails.
+///
+/// # Example
+///
+/// ```rust
+/// use aps_test_utils::{aps_conn, procedure_template, user};
+/// let mut conn = aps_conn();
+/// let test_user = user(&mut conn);
+/// let _test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
+/// ```
+pub fn procedure_template<C>(
+    name: &str,
+    user: &aps_users::User,
+    conn: &mut C,
+) -> aps_procedure_templates::ProcedureTemplate
+where
+    TableBuilder<users::table>: Insert<C>,
+    TableBuilder<aps_procedure_templates::procedure_templates::table>: Insert<C>,
+{
+    aps_procedure_templates::procedure_templates::table::builder()
+        .try_name(name)
+        .expect("Failed to set procedure template name")
+        .try_description("A test procedure template")
+        .expect("Failed to set procedure template description")
+        .creator_id(user.get_column::<users::id>())
+        .editor_id(user.get_column::<users::id>())
+        .insert(conn)
+        .expect("Failed to create test procedure template")
 }
