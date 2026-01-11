@@ -50,7 +50,7 @@ pub fn aps_conn() -> SqliteConnection {
 /// # Arguments
 ///
 /// * `conn` - A mutable reference to the database connection where the user
-///  will be created.
+///   will be created.
 ///
 /// # Panics
 /// * If the user creation fails.
