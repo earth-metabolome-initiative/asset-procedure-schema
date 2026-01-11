@@ -2024,7 +2024,7 @@ checksum = "abd57806937c9cc163efc8ea3910e00a62e2aeb0b8119f1793a978088f8f6b04"
 [[package]]
 name = "diesel"
 version = "2.3.5"
-source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#6243f4dc88b928bf1e19bdd752191b6475e777b1"
+source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#c1afd31da99c7b131766edf01a0583702e7ace56"
 dependencies = [
  "bigdecimal",
  "bitflags",
@@ -2072,7 +2072,7 @@ dependencies = [
 [[package]]
 name = "diesel_derives"
 version = "2.3.6"
-source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#6243f4dc88b928bf1e19bdd752191b6475e777b1"
+source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#c1afd31da99c7b131766edf01a0583702e7ace56"
 dependencies = [
  "diesel_table_macro_syntax",
  "dsl_auto_type",
@@ -2084,7 +2084,7 @@ dependencies = [
 [[package]]
 name = "diesel_table_macro_syntax"
 version = "0.3.0"
-source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#6243f4dc88b928bf1e19bdd752191b6475e777b1"
+source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#c1afd31da99c7b131766edf01a0583702e7ace56"
 dependencies = [
  "syn",
 ]
@@ -2109,7 +2109,7 @@ checksum = "117240f60069e65410b3ae1bb213295bd828f707b5bec6596a1afc8793ce0cbc"
 [[package]]
 name = "dsl_auto_type"
 version = "0.2.0"
-source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#6243f4dc88b928bf1e19bdd752191b6475e777b1"
+source = "git+https://github.com/LucaCappelletti94/diesel?branch=future3#c1afd31da99c7b131766edf01a0583702e7ace56"
 dependencies = [
  "darling 0.21.3",
  "either",
@@ -2785,6 +2785,7 @@ dependencies = [
 name = "procedure-traits"
 version = "0.1.0"
 dependencies = [
+ "aps-next_procedure_templates",
  "aps-parent_procedure_templates",
  "aps-procedure_templates",
  "aps-test-utils",
@@ -3050,7 +3051,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#7fe43c9de645524a471405a3935a0ab682ea2bfd"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#26fd0c0f90adc89e855ab44b2bf6ea77389da9ed"
 dependencies = [
  "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
 ]
@@ -3144,7 +3145,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#7fe43c9de645524a471405a3935a0ab682ea2bfd"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#26fd0c0f90adc89e855ab44b2bf6ea77389da9ed"
 dependencies = [
  "cached",
  "chrono",

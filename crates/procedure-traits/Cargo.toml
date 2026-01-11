@@ -6,6 +6,7 @@ edition.workspace = true
 [dependencies]
 aps-procedure_templates.workspace = true
 aps-users.workspace = true
+aps-next_procedure_templates.workspace = true
 aps-parent_procedure_templates.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true

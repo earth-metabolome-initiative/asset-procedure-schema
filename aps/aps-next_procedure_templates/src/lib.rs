@@ -22,7 +22,6 @@
 pub struct NextProcedureTemplate {
     /// Field representing the `parent_id` column in table
     /// `next_procedure_templates`.
-    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     parent_id: ::rosetta_uuid::Uuid,
     /// Field representing the `predecessor_id` column in table
@@ -51,6 +50,41 @@ pub struct NextProcedureTemplate {
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: creator_id) -> (:: aps_users :: users :: id));
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id , next_procedure_templates :: predecessor_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
 :: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id , next_procedure_templates :: successor_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
+impl ::diesel_builders::ValidateColumn<next_procedure_templates::parent_id>
+    for <next_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+{
+    type Error = ::validation_errors::ValidationError;
+    #[inline]
+    fn validate_column_in_context(
+        &self,
+        parent_id: &::rosetta_uuid::Uuid,
+    ) -> Result<(), Self::Error> {
+        use diesel::Column;
+        if let Some(predecessor_id) = <Self as diesel_builders::MayGetColumn<
+            next_procedure_templates::predecessor_id,
+        >>::may_get_column_ref(self)
+            && parent_id == predecessor_id
+        {
+            return Err(::validation_errors::ValidationError::equal(
+                "next_procedure_templates",
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::predecessor_id::NAME,
+            ));
+        }
+        if let Some(successor_id) = <Self as diesel_builders::MayGetColumn<
+            next_procedure_templates::successor_id,
+        >>::may_get_column_ref(self)
+            && parent_id == successor_id
+        {
+            return Err(::validation_errors::ValidationError::equal(
+                "next_procedure_templates",
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
+        }
+        Ok(())
+    }
+}
 impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>
     for <next_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -61,6 +95,17 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>
         predecessor_id: &::rosetta_uuid::Uuid,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
+        if let Some(parent_id) = <Self as diesel_builders::MayGetColumn<
+            next_procedure_templates::parent_id,
+        >>::may_get_column_ref(self)
+            && parent_id == predecessor_id
+        {
+            return Err(::validation_errors::ValidationError::equal(
+                "next_procedure_templates",
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::predecessor_id::NAME,
+            ));
+        }
         if let Some(successor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::successor_id,
         >>::may_get_column_ref(self)
@@ -85,6 +130,17 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::successor_id>
         successor_id: &::rosetta_uuid::Uuid,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
+        if let Some(parent_id) = <Self as diesel_builders::MayGetColumn<
+            next_procedure_templates::parent_id,
+        >>::may_get_column_ref(self)
+            && parent_id == successor_id
+        {
+            return Err(::validation_errors::ValidationError::equal(
+                "next_procedure_templates",
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
+        }
         if let Some(predecessor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::predecessor_id,
         >>::may_get_column_ref(self)
