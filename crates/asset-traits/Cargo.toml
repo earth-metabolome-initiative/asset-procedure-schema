@@ -5,7 +5,9 @@ edition.workspace = true
 
 [dependencies]
 aps-asset_models.workspace = true
+aps-container_models.workspace = true
 aps-users.workspace = true
+aps-container_compatibility_rules.workspace = true
 aps-asset_compatibility_rules.workspace = true
 diesel-builders.workspace = true
 validation-errors.workspace = true

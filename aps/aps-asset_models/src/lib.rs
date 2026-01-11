@@ -33,7 +33,7 @@ pub struct AssetModel {
     description: String,
     /// Field representing the `parent_model_id` column in table `asset_models`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    parent_model_id: Option<rosetta_uuid::Uuid>,
+    parent_model_id: Option<::rosetta_uuid::Uuid>,
     /// Field representing the `creator_id` column in table `asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

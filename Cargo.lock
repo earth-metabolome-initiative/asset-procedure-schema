@@ -1624,6 +1624,7 @@ name = "aps-test-utils"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-container_models",
  "aps-users",
  "diesel",
  "diesel-builders",
@@ -1784,6 +1785,8 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-asset_models",
+ "aps-container_compatibility_rules",
+ "aps-container_models",
  "aps-test-utils",
  "aps-users",
  "diesel",
@@ -2046,7 +2049,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#2aacbe596839d866530aee42e13ca257e6164afa"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#6a90e6a494c83c956f3ed8f3e30a6c72a3f6c1d8"
 dependencies = [
  "diesel",
  "diesel-builders-derive",
@@ -2058,7 +2061,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders-derive"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#2aacbe596839d866530aee42e13ca257e6164afa"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#6a90e6a494c83c956f3ed8f3e30a6c72a3f6c1d8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3618,7 +3621,7 @@ dependencies = [
 [[package]]
 name = "validation-errors"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#2aacbe596839d866530aee42e13ca257e6164afa"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#6a90e6a494c83c956f3ed8f3e30a6c72a3f6c1d8"
 dependencies = [
  "diesel",
  "diesel-builders",

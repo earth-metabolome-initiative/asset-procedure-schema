@@ -80,9 +80,9 @@ where
 ///
 /// # Panics
 /// * If the asset model creation fails.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```rust
 /// use aps_test_utils::asset_model;
 /// let mut conn = aps_test_utils::aps_conn();
@@ -99,8 +99,44 @@ where
         .expect("Failed to set asset model name")
         .try_description("A test asset model")
         .expect("Failed to set asset model description")
-        .creator_id(&creator)
-        .editor_id(&creator)
+        .creator_id(creator.get_column::<users::id>())
+        .editor_id(creator.get_column::<users::id>())
         .insert(conn)
         .expect("Failed to create test asset model")
+}
+
+/// Creates and returns a container model with the given name in the provided
+/// connection for testing purposes.
+///
+/// # Arguments
+///
+/// * `name` - The name of the container model to be created.
+/// * `conn` - A mutable reference to the database connection where the
+///   container model will be created.
+///
+/// # Panics
+/// * If the container model creation fails.
+///
+/// # Example
+///
+/// ```rust
+/// use aps_test_utils::container_model;
+/// let mut conn = aps_test_utils::aps_conn();
+/// let _test_container_model = container_model("Test Container", &mut conn);
+/// ```
+pub fn container_model<C>(name: &str, conn: &mut C) -> aps_container_models::ContainerModel
+where
+    TableBuilder<users::table>: Insert<C>,
+    TableBuilder<aps_container_models::container_models::table>: Insert<C>,
+{
+    let creator = user(conn);
+    aps_container_models::container_models::table::builder()
+        .try_name(name)
+        .expect("Failed to set container model name")
+        .try_description("A test container model")
+        .expect("Failed to set container model description")
+        .creator_id(creator.get_column::<users::id>())
+        .editor_id(creator.get_column::<users::id>())
+        .insert(conn)
+        .expect("Failed to create test container model")
 }

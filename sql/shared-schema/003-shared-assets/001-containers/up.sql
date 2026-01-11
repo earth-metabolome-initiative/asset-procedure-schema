@@ -6,7 +6,7 @@ CREATE TABLE container_compatibility_rules (
     container_model_id UUID NOT NULL REFERENCES container_models(id) ON DELETE CASCADE,
     contained_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id) ON DELETE CASCADE,
     -- The maximal quantity of the right trackable that can be associated with the left trackable.
-    quantity SMALLINT DEFAULT 1 CHECK (quantity > 0),
+    quantity SMALLINT NOT NULL DEFAULT 1 CHECK (quantity > 0),
     creator_id UUID NOT NULL REFERENCES users(id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (container_model_id, contained_asset_model_id),

@@ -31,12 +31,12 @@ pub struct ContainerCompatibilityRule {
     /// Field representing the `quantity` column in table
     /// `container_compatibility_rules`.
     #[table_model(default = 1i16)]
-    quantity: Option<i16>,
-    /// Field representing the `created_by_id` column in table
+    quantity: i16,
+    /// Field representing the `creator_id` column in table
     /// `container_compatibility_rules`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    created_by_id: ::rosetta_uuid::Uuid,
+    creator_id: ::rosetta_uuid::Uuid,
     /// Field representing the `created_at` column in table
     /// `container_compatibility_rules`.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
@@ -46,7 +46,7 @@ pub struct ContainerCompatibilityRule {
 }
 :: diesel_builders :: prelude :: fk ! ((container_compatibility_rules :: container_model_id) -> (:: aps_container_models :: container_models :: id));
 :: diesel_builders :: prelude :: fk ! ((container_compatibility_rules :: contained_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((container_compatibility_rules :: created_by_id) -> (:: aps_users :: users :: id));
+:: diesel_builders :: prelude :: fk ! ((container_compatibility_rules :: creator_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<container_compatibility_rules::container_model_id>
     for <container_compatibility_rules::table as ::diesel_builders::TableExt>::NewValues
 {
