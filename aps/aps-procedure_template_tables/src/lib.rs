@@ -8,18 +8,18 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `procedure_template_tables` table.
+/// and facilitate DAG traversal.
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (table_name = procedure_template_tables)]
 pub struct ProcedureTemplateTable {
-    /// Field representing the `id` column in table `procedure_template_tables`.
+    /// and facilitate DAG traversal.
     id: String,
 }
 impl ::diesel_builders::ValidateColumn<procedure_template_tables::id>

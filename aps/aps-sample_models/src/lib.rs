@@ -8,18 +8,23 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `sample_models` table.
 #[table_model(ancestors(
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
+# [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = id))]
+# [diesel (belongs_to (aps_sample_source_models :: SampleSourceModel , foreign_key = sample_source_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
+# [table_model (foreign_key ((sample_source_model_id ,) , (:: aps_sample_source_models :: sample_source_models :: id)))]
 #[table_model(default(aps_asset_models::asset_models::asset_model_table_id, "sample_models"))]
 # [diesel (table_name = sample_models)]
 pub struct SampleModel {
@@ -32,17 +37,15 @@ pub struct SampleModel {
     sample_source_model_id: ::rosetta_uuid::Uuid,
 }
 ::diesel_builders::prelude::unique_index!(sample_models::id, sample_models::sample_source_model_id);
-:: diesel_builders :: prelude :: fk ! ((sample_models :: id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((sample_models :: sample_source_model_id) -> (:: aps_sample_source_models :: sample_source_models :: id));
-impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for SampleModel {
-    fn get_column_ref(&self) -> &<sample_models::id as diesel_builders::Typed>::ColumnType {
+impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for SampleModel {
+    fn get_column_ref(&self) -> &<sample_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
     for SampleModel
 {
-    fn get_column_ref(&self) -> &<sample_models::id as diesel_builders::Typed>::ColumnType {
+    fn get_column_ref(&self) -> &<sample_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

@@ -1,38 +1,38 @@
 # Time Report for APS Generation
 
-The total time spent on all tasks was 29 seconds.
-The slowest task was `Clippy Fixes` which took 27 seconds, 576 ms, 506 µs and 885 ns (93.58% of all time).
+The total time spent on all tasks was 42 seconds.
+The slowest task was `Clippy Fixes` which took 39 seconds, 896 ms, 481 µs and 117 ns (94.42% of all time).
 
 | name                               | time                                  | percentage |
 |------------------------------------|---------------------------------------|------------|
-| Database Introspection             | 136 ms, 319 µs and 497 ns             | 0.46%      |
-| Schema Validation                  | 70 ms, 117 µs and 675 ns              | 0.24%      |
-| SQL Workspace Generation           | 951 ms, 4 µs and 929 ns               | 3.23%      |
-| TOML Formatting                    | 186 ms, 761 µs and 741 ns             | 0.63%      |
-| Code Formatting (1)                | 309 ms, 894 µs and 879 ns             | 1.05%      |
-| Clippy Fixes                       | 27 seconds, 576 ms, 506 µs and 885 ns | 93.58%     |
-| Code Formatting (2)                | 211 ms, 680 µs and 405 ns             | 0.72%      |
-| Workspace Dependency Visualization | 12 ms, 283 µs and 441 ns              | 0.04%      |
-| DAG Structure Visualization        | 13 ms, 384 µs and 118 ns              | 0.05%      |
+| Database Introspection             | 142 ms, 902 µs and 313 ns             | 0.34%      |
+| Schema Validation                  | 70 ms, 373 µs and 304 ns              | 0.17%      |
+| SQL Workspace Generation           | 1 second, 434 ms, 969 µs and 19 ns    | 3.40%      |
+| TOML Formatting                    | 179 ms, 25 µs and 614 ns              | 0.42%      |
+| Code Formatting (1)                | 276 ms, 89 µs and 26 ns               | 0.65%      |
+| Clippy Fixes                       | 39 seconds, 896 ms, 481 µs and 117 ns | 94.42%     |
+| Code Formatting (2)                | 229 ms, 362 µs and 960 ns             | 0.54%      |
+| Workspace Dependency Visualization | 13 ms, 247 µs and 451 ns              | 0.03%      |
+| DAG Structure Visualization        | 13 ms, 551 µs and 812 ns              | 0.03%      |
 
 ## Time Report for SQL Workspace Generation
 
 The total time spent on all tasks was now.
-The slowest task was `writing_crate_lib` which took 883 ms, 394 µs and 478 ns (92.89% of all time).
+The slowest task was `writing_crate_lib` which took 1 second, 159 ms, 307 µs and 608 ns (80.79% of all time).
 
-| name                                                | time                      | percentage |
-|-----------------------------------------------------|---------------------------|------------|
-| writing_crate_toml                                  | 12 ms, 959 µs and 368 ns  | 1.36%      |
-| writing_crate_lib                                   | 883 ms, 394 µs and 478 ns | 92.89%     |
-| writing_sink_crate_toml                             | 791 µs and 539 ns         | 0.08%      |
-| writing_sink_crate_lib                              | 10 ms, 696 µs and 937 ns  | 1.12%      |
-| writing_sink_crate_toml_aps-dag-asset_models        | 1 ms, 290 µs and 285 ns   | 0.14%      |
-| writing_sink_crate_lib_aps-dag-asset_models         | 10 ms, 152 µs and 222 ns  | 1.07%      |
-| writing_sink_crate_toml_aps-dag-assets              | 2 ms, 378 µs and 694 ns   | 0.25%      |
-| writing_sink_crate_lib_aps-dag-assets               | 5 ms, 647 µs and 297 ns   | 0.59%      |
-| writing_sink_crate_toml_aps-dag-procedure_templates | 879 µs and 52 ns          | 0.09%      |
-| writing_sink_crate_lib_aps-dag-procedure_templates  | 4 ms, 904 µs and 160 ns   | 0.52%      |
-| writing_sink_crate_toml_aps-dag-procedures          | 1 ms, 356 µs and 325 ns   | 0.14%      |
-| writing_sink_crate_lib_aps-dag-procedures           | 3 ms, 175 µs and 91 ns    | 0.33%      |
-| workspace_toml                                      | 13 ms, 290 µs and 206 ns  | 1.40%      |
-| workspace_rustfmt                                   | 89 µs and 275 ns          | 0.01%      |
+| name                                                | time                                | percentage |
+|-----------------------------------------------------|-------------------------------------|------------|
+| writing_crate_toml                                  | 222 ms, 395 µs and 266 ns           | 15.50%     |
+| writing_crate_lib                                   | 1 second, 159 ms, 307 µs and 608 ns | 80.79%     |
+| writing_sink_crate_toml                             | 775 µs and 275 ns                   | 0.05%      |
+| writing_sink_crate_lib                              | 10 ms, 564 µs and 477 ns            | 0.74%      |
+| writing_sink_crate_toml_aps-dag-asset_models        | 1 ms, 303 µs and 295 ns             | 0.09%      |
+| writing_sink_crate_lib_aps-dag-asset_models         | 10 ms, 22 µs and 25 ns              | 0.70%      |
+| writing_sink_crate_toml_aps-dag-assets              | 2 ms, 374 µs and 828 ns             | 0.17%      |
+| writing_sink_crate_lib_aps-dag-assets               | 5 ms, 560 µs and 986 ns             | 0.39%      |
+| writing_sink_crate_toml_aps-dag-procedure_templates | 895 µs and 347 ns                   | 0.06%      |
+| writing_sink_crate_lib_aps-dag-procedure_templates  | 4 ms, 874 µs and 816 ns             | 0.34%      |
+| writing_sink_crate_toml_aps-dag-procedures          | 1 ms, 372 µs and 138 ns             | 0.10%      |
+| writing_sink_crate_lib_aps-dag-procedures           | 3 ms, 178 µs and 946 ns             | 0.22%      |
+| workspace_toml                                      | 12 ms, 257 µs and 181 ns            | 0.85%      |
+| workspace_rustfmt                                   | 86 µs and 831 ns                    | 0.01%      |

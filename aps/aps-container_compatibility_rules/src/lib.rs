@@ -8,16 +8,23 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `container_compatibility_rules` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_container_models :: ContainerModel , foreign_key = container_model_id))]
+# [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = contained_asset_model_id))]
+# [diesel (belongs_to (aps_users :: User , foreign_key = creator_id))]
 #[diesel(primary_key(container_model_id, contained_asset_model_id))]
+# [table_model (foreign_key ((container_model_id ,) , (:: aps_container_models :: container_models :: id)))]
+# [table_model (foreign_key ((contained_asset_model_id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
 # [diesel (table_name = container_compatibility_rules)]
 pub struct ContainerCompatibilityRule {
     /// Field representing the `container_model_id` column in table
@@ -28,8 +35,8 @@ pub struct ContainerCompatibilityRule {
     /// `container_compatibility_rules`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     contained_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `quantity` column in table
-    /// `container_compatibility_rules`.
+    /// The maximal quantity of the right trackable that can be associated with
+    /// the left trackable.
     #[table_model(default = 1i16)]
     quantity: i16,
     /// Field representing the `creator_id` column in table
@@ -44,9 +51,6 @@ pub struct ContainerCompatibilityRule {
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
 }
-:: diesel_builders :: prelude :: fk ! ((container_compatibility_rules :: container_model_id) -> (:: aps_container_models :: container_models :: id));
-:: diesel_builders :: prelude :: fk ! ((container_compatibility_rules :: contained_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((container_compatibility_rules :: creator_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<container_compatibility_rules::container_model_id>
     for <container_compatibility_rules::table as ::diesel_builders::TableExt>::NewValues
 {

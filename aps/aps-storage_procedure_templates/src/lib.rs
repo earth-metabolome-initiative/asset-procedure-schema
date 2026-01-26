@@ -5,16 +5,26 @@
     Debug,
     PartialOrd,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `storage_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
+# [diesel (belongs_to (aps_container_models :: ContainerModel , foreign_key = stored_into_model_id))]
+# [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = stored_asset_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((stored_into_model_id ,) , (:: aps_container_models :: container_models :: id)))]
+# [table_model (foreign_key ((stored_asset_model_id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
+# [table_model (foreign_key ((stored_into_model_id , stored_asset_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_stored_into_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_stored_asset_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 #[table_model(default(
     aps_procedure_templates::procedure_templates::procedure_template_table_id,
     "storage_procedure_templates"
@@ -26,16 +36,13 @@ pub struct StorageProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `kelvin` column in table
-    /// `storage_procedure_templates`.
+    /// The storage temperature in Kelvin.
     #[table_model(default = 293.15f32)]
     kelvin: f32,
-    /// Field representing the `kelvin_tolerance_percentage` column in table
-    /// `storage_procedure_templates`.
+    /// Tolerance percentage for the storage temperature.
     #[table_model(default = 1f32)]
     kelvin_tolerance_percentage: f32,
-    /// Field representing the `stored_into_model_id` column in table
-    /// `storage_procedure_templates`.
+    /// The container that will be used for storage.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_stored_into_model_id
@@ -49,8 +56,7 @@ pub struct StorageProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_stored_into_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `stored_asset_model_id` column in table
-    /// `storage_procedure_templates`.
+    /// The asset that is being stored.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_stored_asset_model_id
@@ -73,12 +79,6 @@ pub struct StorageProcedureTemplate {
     storage_procedure_templates::id,
     storage_procedure_templates::procedure_template_stored_asset_model_id
 );
-:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: stored_into_model_id) -> (:: aps_container_models :: container_models :: id));
-:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: stored_asset_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: stored_into_model_id , storage_procedure_templates :: stored_asset_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: id , storage_procedure_templates :: procedure_template_stored_into_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((storage_procedure_templates :: id , storage_procedure_templates :: procedure_template_stored_asset_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<storage_procedure_templates::kelvin>
     for <storage_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -120,12 +120,12 @@ impl ::diesel_builders::ValidateColumn<storage_procedure_templates::kelvin_toler
         Ok(())
     }
 }
-impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
     for StorageProcedureTemplate
 {
     fn get_column_ref(
         &self,
-    ) -> &<storage_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<storage_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

@@ -7,66 +7,62 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `procedure_templates` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_template_tables :: ProcedureTemplateTable , foreign_key = procedure_template_table_id))]
+# [table_model (foreign_key ((procedure_template_table_id ,) , (:: aps_procedure_template_tables :: procedure_template_tables :: id)))]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
+# [table_model (foreign_key ((editor_id ,) , (:: aps_users :: users :: id)))]
 # [diesel (table_name = procedure_templates)]
 pub struct ProcedureTemplate {
-    /// Field representing the `id` column in table `procedure_templates`.
+    /// Identifier of the procedure_id template
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `procedure_template_table_id` column in table
-    /// `procedure_templates`.
+    /// without having to execute multiple queries.
     #[table_model(default = "procedure_templates")]
     #[infallible]
     procedure_template_table_id: String,
-    /// Field representing the `version` column in table `procedure_templates`.
+    /// Version of the procedure_id template.
     #[table_model(default = 1i32)]
     #[infallible]
     version: i32,
-    /// Field representing the `name` column in table `procedure_templates`.
+    /// Human-readable name of the procedure_id template
     name: String,
-    /// Field representing the `description` column in table
-    /// `procedure_templates`.
+    /// Human-readable description of the procedure_id template
     description: String,
-    /// Field representing the `creator_id` column in table
-    /// `procedure_templates`.
+    /// The user who created this procedure_id template
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `created_at` column in table
-    /// `procedure_templates`.
+    /// The timestamp when this procedure_id template was created
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
-    /// Field representing the `editor_id` column in table
-    /// `procedure_templates`.
+    /// The user who last updated this procedure_id template
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     editor_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `edited_at` column in table
-    /// `procedure_templates`.
+    /// The timestamp when this procedure_id template was last updated
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,
-    /// Field representing the `deprecated` column in table
-    /// `procedure_templates`.
+    /// Whether this procedure_id template is deprecated and should not be used
+    /// for new procedures
     #[table_model(default = false)]
     #[infallible]
     deprecated: bool,
 }
 ::diesel_builders::prelude::unique_index!(procedure_templates::name);
-:: diesel_builders :: prelude :: fk ! ((procedure_templates :: procedure_template_table_id) -> (:: aps_procedure_template_tables :: procedure_template_tables :: id));
-:: diesel_builders :: prelude :: fk ! ((procedure_templates :: creator_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((procedure_templates :: editor_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<procedure_templates::name>
     for <procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

@@ -7,15 +7,18 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `digital_asset_models` table.
 #[table_model(ancestors(aps_asset_models::asset_models))]
+# [diesel (belongs_to (aps_asset_models :: AssetModel , foreign_key = id))]
+# [table_model (foreign_key ((id ,) , (:: aps_asset_models :: asset_models :: id)))]
 #[table_model(default(
     aps_asset_models::asset_models::asset_model_table_id,
     "digital_asset_models"
@@ -29,9 +32,10 @@ pub struct DigitalAssetModel {
     /// `digital_asset_models`.
     mime_type: String,
 }
-:: diesel_builders :: prelude :: fk ! ((digital_asset_models :: id) -> (:: aps_asset_models :: asset_models :: id));
-impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for DigitalAssetModel {
-    fn get_column_ref(&self) -> &<digital_asset_models::id as diesel_builders::Typed>::ColumnType {
+impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for DigitalAssetModel {
+    fn get_column_ref(
+        &self,
+    ) -> &<digital_asset_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

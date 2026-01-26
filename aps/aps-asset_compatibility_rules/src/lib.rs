@@ -8,16 +8,21 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `asset_compatibility_rules` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_users :: User , foreign_key = creator_id))]
 #[diesel(primary_key(left_asset_model_id, right_asset_model_id))]
+# [table_model (foreign_key ((left_asset_model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
+# [table_model (foreign_key ((right_asset_model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
 # [diesel (table_name = asset_compatibility_rules)]
 pub struct AssetCompatibilityRule {
     /// Field representing the `left_asset_model_id` column in table
@@ -40,9 +45,6 @@ pub struct AssetCompatibilityRule {
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
 }
-:: diesel_builders :: prelude :: fk ! ((asset_compatibility_rules :: left_asset_model_id) -> (:: aps_asset_models :: asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((asset_compatibility_rules :: right_asset_model_id) -> (:: aps_asset_models :: asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((asset_compatibility_rules :: creator_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_model_id>
     for <asset_compatibility_rules::table as ::diesel_builders::TableExt>::NewValues
 {

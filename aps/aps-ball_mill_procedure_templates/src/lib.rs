@@ -5,16 +5,31 @@
     Debug,
     PartialOrd,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `ball_mill_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
+# [diesel (belongs_to (aps_bead_models :: BeadModel , foreign_key = bead_model_id))]
+# [diesel (belongs_to (aps_ball_mill_machine_models :: BallMillMachineModel , foreign_key = milled_with_model_id))]
+# [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = milled_container_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((bead_model_id ,) , (:: aps_bead_models :: bead_models :: id)))]
+# [table_model (foreign_key ((milled_with_model_id ,) , (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id)))]
+# [table_model (foreign_key ((milled_container_model_id ,) , (:: aps_volumetric_container_models :: volumetric_container_models :: id)))]
+# [table_model (foreign_key ((milled_with_model_id , milled_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_bead_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_milled_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_milled_container_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((milled_with_model_id , bead_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
+# [table_model (foreign_key ((bead_model_id , milled_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
 #[table_model(default(
     aps_procedure_templates::procedure_templates::procedure_template_table_id,
     "ball_mill_procedure_templates"
@@ -26,24 +41,20 @@ pub struct BallMillProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `kelvin` column in table
-    /// `ball_mill_procedure_templates`.
+    /// The storage temperature in Kelvin.
     #[table_model(default = 293.15f32)]
     kelvin: f32,
-    /// Field representing the `kelvin_tolerance_percentage` column in table
-    /// `ball_mill_procedure_templates`.
+    /// Tolerance percentage for the storage temperature.
     #[table_model(default = 1f32)]
     kelvin_tolerance_percentage: f32,
-    /// Field representing the `duration` column in table
-    /// `ball_mill_procedure_templates`.
+    /// Duration in seconds. By default, we set it to 150 seconds (2.5 minutes).
     #[table_model(default = 150f32)]
     duration: f32,
-    /// Field representing the `hertz` column in table
-    /// `ball_mill_procedure_templates`.
+    /// The frequency in hertz at which the ball mill should operate during the
+    /// procedure.
     #[table_model(default = 25f32)]
     hertz: f32,
-    /// Field representing the `bead_model_id` column in table
-    /// `ball_mill_procedure_templates`.
+    /// The beads model used for the procedure.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_bead_model_id
@@ -57,12 +68,10 @@ pub struct BallMillProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_bead_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `bead_count` column in table
-    /// `ball_mill_procedure_templates`.
+    /// - The count of beads used in the procedure.
     #[table_model(default = 3i16)]
     bead_count: i16,
-    /// Field representing the `milled_with_model_id` column in table
-    /// `ball_mill_procedure_templates`.
+    /// The device used for the ball mill procedure.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_milled_with_model_id
@@ -76,8 +85,7 @@ pub struct BallMillProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_milled_with_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `milled_container_model_id` column in table
-    /// `ball_mill_procedure_templates`.
+    /// The container that is being milled.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_milled_container_model_id
@@ -104,16 +112,6 @@ pub struct BallMillProcedureTemplate {
     ball_mill_procedure_templates::id,
     ball_mill_procedure_templates::procedure_template_milled_container_model_id
 );
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: bead_model_id) -> (:: aps_bead_models :: bead_models :: id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: milled_with_model_id) -> (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: milled_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: milled_with_model_id , ball_mill_procedure_templates :: milled_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: id , ball_mill_procedure_templates :: procedure_template_bead_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: id , ball_mill_procedure_templates :: procedure_template_milled_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: id , ball_mill_procedure_templates :: procedure_template_milled_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: milled_with_model_id , ball_mill_procedure_templates :: bead_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((ball_mill_procedure_templates :: bead_model_id , ball_mill_procedure_templates :: milled_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
 impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::kelvin>
     for <ball_mill_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -220,12 +218,12 @@ impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::bead_count
         Ok(())
     }
 }
-impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
     for BallMillProcedureTemplate
 {
     fn get_column_ref(
         &self,
-    ) -> &<ball_mill_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<ball_mill_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

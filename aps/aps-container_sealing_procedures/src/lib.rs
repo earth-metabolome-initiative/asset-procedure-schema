@@ -8,90 +8,92 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `container_sealing_procedures` table.
 #[table_model(ancestors(aps_procedures::procedures))]
+# [diesel (belongs_to (aps_volumetric_containers :: VolumetricContainer , foreign_key = capped_container_id))]
+# [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = sealable_container_model_id))]
+# [diesel (belongs_to (aps_container_sealer_models :: ContainerSealerModel , foreign_key = sealed_with_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_procedures :: procedures :: id)))]
+# [table_model (foreign_key ((capping_procedure_template_id ,) , (:: aps_container_sealing_procedure_templates :: container_sealing_procedure_templates :: id)))]
+# [table_model (foreign_key ((capped_container_id ,) , (:: aps_volumetric_containers :: volumetric_containers :: id)))]
+# [table_model (foreign_key ((sealable_container_model_id ,) , (:: aps_volumetric_container_models :: volumetric_container_models :: id)))]
+# [table_model (foreign_key ((procedure_template_sealable_container_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
+# [table_model (foreign_key ((sealed_with_model_id ,) , (:: aps_container_sealer_models :: container_sealer_models :: id)))]
+# [table_model (foreign_key ((procedure_template_sealed_with_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
+# [table_model (foreign_key ((sealable_container_model_id , sealed_with_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
 #[table_model(default(
     aps_procedures::procedures::procedure_table_id,
     "container_sealing_procedures"
 ))]
 # [diesel (table_name = container_sealing_procedures)]
 pub struct ContainerSealingProcedure {
-    /// Field representing the `id` column in table
-    /// `container_sealing_procedures`.
+    /// Identifier of the capping id, which is also a foreign key to the general
+    /// procedure.
     #[same_as(aps_procedures::procedures::id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `capping_procedure_template_id` column in table
-    /// `container_sealing_procedures`.
+    /// We enforce that the model of this procedure_id must be a capping
+    /// procedure_id template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     capping_procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `capped_container_id` column in table
-    /// `container_sealing_procedures`.
+    /// The container being capped, which must be a volumetric container.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     capped_container_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `sealable_container_model_id` column in table
-    /// `container_sealing_procedures`.
+    /// The model of the container being capped.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_capped_container_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sealable_container_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `procedure_template_sealable_container_model_id`
-    /// column in table `container_sealing_procedures`.
+    /// The procedure_id template asset model describing the `capped_container`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_capped_container_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sealable_container_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `procedure_capped_container_id` column in table
-    /// `container_sealing_procedures`.
+    /// The procedure_id asset describing the `capped_container`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_capped_container_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `sealed_with_model_id` column in table
-    /// `container_sealing_procedures`.
+    /// The cap being used, which must be a cap model.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_capped_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sealed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `procedure_template_sealed_with_model_id` column
-    /// in table `container_sealing_procedures`.
+    /// The procedure_id template asset model describing the
+    /// `capped_with_model`.
     #[same_as(
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_capped_with_id
     )]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sealed_with_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `procedure_capped_with_id` column in table
-    /// `container_sealing_procedures`.
+    /// The procedure_id asset describing the `capped_with_model`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_capped_with_id: ::rosetta_uuid::Uuid,
 }
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: id) -> (:: aps_procedures :: procedures :: id));
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: capping_procedure_template_id) -> (:: aps_container_sealing_procedure_templates :: container_sealing_procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: capped_container_id) -> (:: aps_volumetric_containers :: volumetric_containers :: id));
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: sealable_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: procedure_template_sealable_container_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: sealed_with_model_id) -> (:: aps_container_sealer_models :: container_sealer_models :: id));
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: procedure_template_sealed_with_model_id) -> (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((container_sealing_procedures :: sealable_container_model_id , container_sealing_procedures :: sealed_with_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-impl diesel_builders::GetColumn<aps_procedures::procedures::id> for ContainerSealingProcedure {
+impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for ContainerSealingProcedure {
     fn get_column_ref(
         &self,
-    ) -> &<container_sealing_procedures::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<container_sealing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
+}
+impl procedure_like::ProcedureTableLike for container_sealing_procedures::table {
+    type ProcedureTemplateTable =
+        aps_container_sealing_procedure_templates::container_sealing_procedure_templates::table;
 }

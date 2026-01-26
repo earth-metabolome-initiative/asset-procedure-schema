@@ -16,6 +16,7 @@ aps-parent_procedure_templates.workspace = true
 aps-procedure_tables.workspace = true
 aps-procedure_templates.workspace = true
 aps-users.workspace = true
+procedure-like = { path = "../../crates/procedure-like" }
 
 [lints]
 workspace = true

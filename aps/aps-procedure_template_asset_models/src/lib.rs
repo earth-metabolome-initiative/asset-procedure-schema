@@ -7,38 +7,40 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `procedure_template_asset_models` table.
+/// Table to store procedure template asset models
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = procedure_template_id))]
+# [diesel (belongs_to (aps_asset_models :: AssetModel , foreign_key = asset_model_id))]
+# [table_model (foreign_key ((procedure_template_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((based_on_id ,) , (procedure_template_asset_models :: id)))]
+# [table_model (foreign_key ((asset_model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
+# [table_model (foreign_key ((based_on_id , asset_model_id ,) , (procedure_template_asset_models :: id , procedure_template_asset_models :: asset_model_id)))]
 # [diesel (table_name = procedure_template_asset_models)]
 pub struct ProcedureTemplateAssetModel {
-    /// Field representing the `id` column in table
-    /// `procedure_template_asset_models`.
+    /// Identifier of the procedure template asset model
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `name` column in table
-    /// `procedure_template_asset_models`.
+    /// The name of the procedure template asset model
     name: String,
-    /// Field representing the `procedure_template_id` column in table
-    /// `procedure_template_asset_models`.
+    /// Procedure template this asset model is associated with
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `based_on_id` column in table
-    /// `procedure_template_asset_models`.
+    /// which this procedure template asset model is based on
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     based_on_id: Option<::rosetta_uuid::Uuid>,
-    /// Field representing the `asset_model_id` column in table
-    /// `procedure_template_asset_models`.
+    /// The asset model this procedure template asset model is associated with
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     asset_model_id: ::rosetta_uuid::Uuid,
@@ -55,10 +57,6 @@ pub struct ProcedureTemplateAssetModel {
     procedure_template_asset_models::id,
     procedure_template_asset_models::asset_model_id
 );
-:: diesel_builders :: prelude :: fk ! ((procedure_template_asset_models :: procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((procedure_template_asset_models :: based_on_id) -> (procedure_template_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((procedure_template_asset_models :: asset_model_id) -> (:: aps_asset_models :: asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((procedure_template_asset_models :: based_on_id , procedure_template_asset_models :: asset_model_id) -> (procedure_template_asset_models :: id , procedure_template_asset_models :: asset_model_id));
 impl ::diesel_builders::ValidateColumn<procedure_template_asset_models::name>
     for <procedure_template_asset_models::table as ::diesel_builders::TableExt>::NewValues
 {

@@ -8,12 +8,13 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `commercial_ball_mill_machine_models`
 /// table.
@@ -23,6 +24,10 @@
     aps_commercial_products::commercial_products,
     aps_ball_mill_machine_models::ball_mill_machine_models
 ))]
+# [diesel (belongs_to (aps_commercial_products :: CommercialProduct , foreign_key = id))]
+# [table_model (foreign_key ((ball_mill_machine_model_id ,) , (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id)))]
+# [table_model (foreign_key ((id ,) , (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id)))]
+# [table_model (foreign_key ((id ,) , (:: aps_commercial_products :: commercial_products :: id)))]
 #[table_model(default(
     aps_asset_models::asset_models::asset_model_table_id,
     "commercial_ball_mill_machine_models"
@@ -40,42 +45,43 @@ pub struct CommercialBallMillMachineModel {
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     ball_mill_machine_model_id: ::rosetta_uuid::Uuid,
 }
-:: diesel_builders :: prelude :: fk ! ((commercial_ball_mill_machine_models :: ball_mill_machine_model_id) -> (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id));
-:: diesel_builders :: prelude :: fk ! ((commercial_ball_mill_machine_models :: id) -> (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id));
-:: diesel_builders :: prelude :: fk ! ((commercial_ball_mill_machine_models :: id) -> (:: aps_commercial_products :: commercial_products :: id));
-impl diesel_builders::GetColumn<aps_asset_models::asset_models::id>
+impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id>
     for CommercialBallMillMachineModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_ball_mill_machine_models::ball_mill_machine_models::id>
+impl ::diesel_builders::GetColumn<aps_ball_mill_machine_models::ball_mill_machine_models::id>
     for CommercialBallMillMachineModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
+impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
     for CommercialBallMillMachineModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
     for CommercialBallMillMachineModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_ball_mill_machine_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
         &self.id
     }
 }

@@ -7,15 +7,17 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `brands` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
+# [table_model (foreign_key ((editor_id ,) , (:: aps_users :: users :: id)))]
 # [diesel (table_name = brands)]
 pub struct Brand {
     /// Field representing the `id` column in table `brands`.
@@ -42,8 +44,6 @@ pub struct Brand {
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,
 }
-:: diesel_builders :: prelude :: fk ! ((brands :: creator_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((brands :: editor_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<brands::name>
     for <brands::table as ::diesel_builders::TableExt>::NewValues
 {

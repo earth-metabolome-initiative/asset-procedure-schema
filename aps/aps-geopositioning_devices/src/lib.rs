@@ -8,15 +8,20 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `geopositioning_devices` table.
 #[table_model(ancestors(aps_assets::assets, aps_physical_assets::physical_assets))]
+# [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = id))]
+# [diesel (belongs_to (aps_commercial_geopositioning_device_lots :: CommercialGeopositioningDeviceLot , foreign_key = commercial_geopositioning_device_lot_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
+# [table_model (foreign_key ((commercial_geopositioning_device_lot_id ,) , (:: aps_commercial_geopositioning_device_lots :: commercial_geopositioning_device_lots :: id)))]
 #[table_model(default(aps_assets::assets::asset_table_id, "geopositioning_devices"))]
 # [diesel (table_name = geopositioning_devices)]
 pub struct GeopositioningDevice {
@@ -30,19 +35,19 @@ pub struct GeopositioningDevice {
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     commercial_geopositioning_device_lot_id: ::rosetta_uuid::Uuid,
 }
-:: diesel_builders :: prelude :: fk ! ((geopositioning_devices :: id) -> (:: aps_physical_assets :: physical_assets :: id));
-:: diesel_builders :: prelude :: fk ! ((geopositioning_devices :: commercial_geopositioning_device_lot_id) -> (:: aps_commercial_geopositioning_device_lots :: commercial_geopositioning_device_lots :: id));
-impl diesel_builders::GetColumn<aps_assets::assets::id> for GeopositioningDevice {
+impl ::diesel_builders::GetColumn<aps_assets::assets::id> for GeopositioningDevice {
     fn get_column_ref(
         &self,
-    ) -> &<geopositioning_devices::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<geopositioning_devices::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for GeopositioningDevice {
+impl ::diesel_builders::GetColumn<aps_physical_assets::physical_assets::id>
+    for GeopositioningDevice
+{
     fn get_column_ref(
         &self,
-    ) -> &<geopositioning_devices::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<geopositioning_devices::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

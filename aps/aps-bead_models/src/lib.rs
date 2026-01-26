@@ -5,12 +5,13 @@
     Debug,
     PartialOrd,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `bead_models` table.
 #[table_model(ancestors(
@@ -18,6 +19,8 @@
     aps_physical_asset_models::physical_asset_models
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = id))]
+# [table_model (foreign_key ((id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
 #[table_model(default(aps_asset_models::asset_models::asset_model_table_id, "bead_models"))]
 # [diesel (table_name = bead_models)]
 pub struct BeadModel {
@@ -25,10 +28,9 @@ pub struct BeadModel {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `diameter` column in table `bead_models`.
+    /// Diameter in millimeters
     diameter: f32,
 }
-:: diesel_builders :: prelude :: fk ! ((bead_models :: id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
 impl ::diesel_builders::ValidateColumn<bead_models::diameter>
     for <bead_models::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -46,15 +48,15 @@ impl ::diesel_builders::ValidateColumn<bead_models::diameter>
         Ok(())
     }
 }
-impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for BeadModel {
-    fn get_column_ref(&self) -> &<bead_models::id as diesel_builders::Typed>::ColumnType {
+impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for BeadModel {
+    fn get_column_ref(&self) -> &<bead_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
     for BeadModel
 {
-    fn get_column_ref(&self) -> &<bead_models::id as diesel_builders::Typed>::ColumnType {
+    fn get_column_ref(&self) -> &<bead_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

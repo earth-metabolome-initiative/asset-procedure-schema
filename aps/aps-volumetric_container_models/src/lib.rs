@@ -5,12 +5,13 @@
     Debug,
     PartialOrd,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `volumetric_container_models` table.
 #[table_model(ancestors(
@@ -19,6 +20,8 @@
     aps_container_models::container_models
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_container_models :: ContainerModel , foreign_key = id))]
+# [table_model (foreign_key ((id ,) , (:: aps_container_models :: container_models :: id)))]
 #[table_model(default(
     aps_asset_models::asset_models::asset_model_table_id,
     "volumetric_container_models"
@@ -30,11 +33,9 @@ pub struct VolumetricContainerModel {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `volume` column in table
-    /// `volumetric_container_models`.
+    /// Volume in liters. The maximum volume of the container.
     volume: f32,
 }
-:: diesel_builders :: prelude :: fk ! ((volumetric_container_models :: id) -> (:: aps_container_models :: container_models :: id));
 impl ::diesel_builders::ValidateColumn<volumetric_container_models::volume>
     for <volumetric_container_models::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -52,28 +53,28 @@ impl ::diesel_builders::ValidateColumn<volumetric_container_models::volume>
         Ok(())
     }
 }
-impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for VolumetricContainerModel {
+impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for VolumetricContainerModel {
     fn get_column_ref(
         &self,
-    ) -> &<volumetric_container_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<volumetric_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_container_models::container_models::id>
+impl ::diesel_builders::GetColumn<aps_container_models::container_models::id>
     for VolumetricContainerModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<volumetric_container_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<volumetric_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
     for VolumetricContainerModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<volumetric_container_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<volumetric_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

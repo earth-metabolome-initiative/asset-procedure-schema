@@ -16,6 +16,7 @@ aps-physical_assets.workspace = true
 aps-procedure_asset_models.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-procedures.workspace = true
+procedure-like = { path = "../../crates/procedure-like" }
 
 [lints]
 workspace = true

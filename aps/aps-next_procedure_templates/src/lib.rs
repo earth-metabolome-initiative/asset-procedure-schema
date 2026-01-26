@@ -8,48 +8,45 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `next_procedure_templates` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_users :: User , foreign_key = creator_id))]
 #[diesel(primary_key(parent_id, predecessor_id, successor_id))]
+# [table_model (foreign_key ((parent_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((predecessor_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((successor_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
+# [table_model (foreign_key ((parent_id , predecessor_id ,) , (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id)))]
+# [table_model (foreign_key ((parent_id , successor_id ,) , (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id)))]
 # [diesel (table_name = next_procedure_templates)]
 pub struct NextProcedureTemplate {
-    /// Field representing the `parent_id` column in table
-    /// `next_procedure_templates`.
+    /// The parent_id procedure_id template
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     parent_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `predecessor_id` column in table
-    /// `next_procedure_templates`.
+    /// The predecessor_id procedure_id template
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     predecessor_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `successor_id` column in table
-    /// `next_procedure_templates`.
+    /// The successor_id procedure_id template
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     successor_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `creator_id` column in table
-    /// `next_procedure_templates`.
+    /// The user who created this relationship
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `created_at` column in table
-    /// `next_procedure_templates`.
+    /// The timestamp when this relationship was created
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
 }
-:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: predecessor_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: successor_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: creator_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id , next_procedure_templates :: predecessor_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
-:: diesel_builders :: prelude :: fk ! ((next_procedure_templates :: parent_id , next_procedure_templates :: successor_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
 impl ::diesel_builders::ValidateColumn<next_procedure_templates::parent_id>
     for <next_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

@@ -8,41 +8,39 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `parent_procedure_templates` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_users :: User , foreign_key = creator_id))]
 #[diesel(primary_key(parent_id, child_id))]
+# [table_model (foreign_key ((parent_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((child_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
 # [diesel (table_name = parent_procedure_templates)]
 pub struct ParentProcedureTemplate {
-    /// Field representing the `parent_id` column in table
-    /// `parent_procedure_templates`.
+    /// The parent_id procedure_id template
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     parent_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `child_id` column in table
-    /// `parent_procedure_templates`.
+    /// The child_id procedure_id template
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     child_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `creator_id` column in table
-    /// `parent_procedure_templates`.
+    /// The user who created this relationship
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `created_at` column in table
-    /// `parent_procedure_templates`.
+    /// The timestamp when this relationship was created
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
 }
-:: diesel_builders :: prelude :: fk ! ((parent_procedure_templates :: parent_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((parent_procedure_templates :: child_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((parent_procedure_templates :: creator_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<parent_procedure_templates::parent_id>
     for <parent_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {

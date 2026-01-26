@@ -1,16 +1,16 @@
-//! Crate providing constraints to validate tables in the `procedures` and
+//! Crate providing rules to validate tables in the `procedures` and
 //! `procedure_templates` DAGs.
 
 use sql_rules::traits::Constrainer;
 
-pub mod column_constraints;
-pub mod table_constraints;
+pub mod column_rules;
+pub mod table_rules;
 
 /// Prelude module re-exporting commonly used items from the crate.
 pub mod prelude {
     pub use sql_rules::prelude::*;
 
-    pub use crate::{column_constraints::*, table_constraints::*};
+    pub use crate::{column_rules::*, table_rules::*};
 }
 
 /// Function to register all procedure-related constraints to a given
@@ -19,37 +19,35 @@ pub fn register_procedure_constraints<DB: sql_traits::traits::DatabaseLike + 'st
     constrainer: &mut impl Constrainer<Database = DB>,
 ) {
     constrainer.register_table_rule(Box::new(
-        table_constraints::MatchingProcedureAndTemplateTables::<DB>::default(),
+        table_rules::MatchingProcedureAndTemplateTables::<DB>::default(),
+    ));
+    constrainer
+        .register_table_rule(Box::new(table_rules::ProcedureDescendantNaming::<DB>::default()));
+    constrainer.register_table_rule(Box::new(
+        table_rules::ProcedureTemplateAssetModelUniqueIndex::<DB>::default(),
     ));
     constrainer.register_table_rule(Box::new(
-        table_constraints::ProcedureDescendantNaming::<DB>::default(),
+        table_rules::ReusedProcedureTemplateAssetModelsForeignKey::<DB>::default(),
     ));
     constrainer.register_table_rule(Box::new(
-        table_constraints::ProcedureTemplateAssetModelUniqueIndex::<DB>::default(),
+        table_rules::ReusedProcedureTemplateAssetModelsTrigger::<DB>::default(),
     ));
     constrainer.register_table_rule(Box::new(
-        table_constraints::ReusedProcedureTemplateAssetModelsForeignKey::<DB>::default(),
-    ));
-    constrainer.register_table_rule(Box::new(
-        table_constraints::ReusedProcedureTemplateAssetModelsTrigger::<DB>::default(),
-    ));
-    constrainer.register_table_rule(Box::new(
-        table_constraints::ProcedureTemplateDescendantNaming::<DB>::default(),
+        table_rules::ProcedureTemplateDescendantNaming::<DB>::default(),
     ));
 
+    constrainer
+        .register_column_rule(Box::new(column_rules::AssetColumnNaming::<DB::Column>::default()));
     constrainer.register_column_rule(Box::new(
-        column_constraints::AssetColumnNaming::<DB::Column>::default(),
+        column_rules::AssetModelColumnNaming::<DB::Column>::default(),
     ));
-    constrainer.register_column_rule(Box::new(column_constraints::AssetModelColumnNaming::<
+    constrainer.register_column_rule(Box::new(column_rules::HorizontalAssetModelForeignKey::<
         DB::Column,
     >::default()));
     constrainer.register_column_rule(Box::new(
-        column_constraints::HorizontalAssetModelForeignKey::<DB::Column>::default(),
+        column_rules::MatchingAssetModelColumns::<DB::Column>::default(),
     ));
-    constrainer.register_column_rule(Box::new(column_constraints::MatchingAssetModelColumns::<
-        DB::Column,
-    >::default()));
     constrainer.register_column_rule(Box::new(
-        column_constraints::ProcedureTemplateAssetModelColumnNaming::<DB::Column>::default(),
+        column_rules::ProcedureTemplateAssetModelColumnNaming::<DB::Column>::default(),
     ));
 }

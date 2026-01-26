@@ -8,15 +8,25 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `packaging_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
+# [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
+# [diesel (belongs_to (aps_packaging_models :: PackagingModel , foreign_key = packaged_with_model_id))]
+# [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = sample_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((packaged_with_model_id ,) , (:: aps_packaging_models :: packaging_models :: id)))]
+# [table_model (foreign_key ((sample_model_id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
+# [table_model (foreign_key ((packaged_with_model_id , sample_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_packaged_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_sample_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 #[table_model(default(
     aps_procedure_templates::procedure_templates::procedure_template_table_id,
     "packaging_procedure_templates"
@@ -62,18 +72,12 @@ pub struct PackagingProcedureTemplate {
     packaging_procedure_templates::id,
     packaging_procedure_templates::procedure_template_sample_model_id
 );
-:: diesel_builders :: prelude :: fk ! ((packaging_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((packaging_procedure_templates :: packaged_with_model_id) -> (:: aps_packaging_models :: packaging_models :: id));
-:: diesel_builders :: prelude :: fk ! ((packaging_procedure_templates :: sample_model_id) -> (:: aps_physical_asset_models :: physical_asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((packaging_procedure_templates :: packaged_with_model_id , packaging_procedure_templates :: sample_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((packaging_procedure_templates :: id , packaging_procedure_templates :: procedure_template_packaged_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((packaging_procedure_templates :: id , packaging_procedure_templates :: procedure_template_sample_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
     for PackagingProcedureTemplate
 {
     fn get_column_ref(
         &self,
-    ) -> &<packaging_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<packaging_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

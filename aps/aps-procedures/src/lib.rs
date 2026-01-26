@@ -7,76 +7,73 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `procedures` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_tables :: ProcedureTable , foreign_key = procedure_table_id))]
+# [table_model (foreign_key ((procedure_template_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((parent_procedure_id ,) , (procedures :: id)))]
+# [table_model (foreign_key ((parent_procedure_template_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((predecessor_procedure_id ,) , (procedures :: id)))]
+# [table_model (foreign_key ((predecessor_procedure_template_id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((procedure_table_id ,) , (:: aps_procedure_tables :: procedure_tables :: id)))]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
+# [table_model (foreign_key ((editor_id ,) , (:: aps_users :: users :: id)))]
+# [table_model (foreign_key ((parent_procedure_id , parent_procedure_template_id ,) , (procedures :: id , procedures :: procedure_template_id)))]
+# [table_model (foreign_key ((predecessor_procedure_id , predecessor_procedure_template_id ,) , (procedures :: id , procedures :: procedure_template_id)))]
+# [table_model (foreign_key ((parent_procedure_template_id , procedure_template_id ,) , (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id)))]
+# [table_model (foreign_key ((parent_procedure_template_id , predecessor_procedure_template_id , procedure_template_id ,) , (:: aps_next_procedure_templates :: next_procedure_templates :: parent_id , :: aps_next_procedure_templates :: next_procedure_templates :: predecessor_id , :: aps_next_procedure_templates :: next_procedure_templates :: successor_id)))]
 # [diesel (table_name = procedures)]
 pub struct Procedure {
-    /// Field representing the `id` column in table `procedures`.
+    /// The ID of this procedure.
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `procedure_template_id` column in table
-    /// `procedures`.
+    /// The procedure_id template of this procedure.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `parent_procedure_id` column in table
-    /// `procedures`.
+    /// The parent_id procedure_id (if any) of this procedure.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     parent_procedure_id: Option<::rosetta_uuid::Uuid>,
-    /// Field representing the `parent_procedure_template_id` column in table
-    /// `procedures`.
+    /// The parent_id procedure_id template (if any) of this procedure.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     parent_procedure_template_id: Option<::rosetta_uuid::Uuid>,
-    /// Field representing the `predecessor_procedure_id` column in table
-    /// `procedures`.
+    /// The predecessor_id procedure_id (if any) of this procedure.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     predecessor_procedure_id: Option<::rosetta_uuid::Uuid>,
-    /// Field representing the `predecessor_procedure_template_id` column in
-    /// table `procedures`.
+    /// The predecessor_id procedure_id template (if any) of this procedure.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     predecessor_procedure_template_id: Option<::rosetta_uuid::Uuid>,
-    /// Field representing the `procedure_table_id` column in table
-    /// `procedures`.
+    /// The name of the most concrete table this procedure_id is associated
+    /// with.
     #[table_model(default = "\"procedures\"")]
     #[infallible]
     procedure_table_id: String,
-    /// Field representing the `creator_id` column in table `procedures`.
+    /// User who created this procedure.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `created_at` column in table `procedures`.
+    /// Timestamp when this procedure_id was created.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
-    /// Field representing the `editor_id` column in table `procedures`.
+    /// User who last updated this procedure.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     editor_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `edited_at` column in table `procedures`.
+    /// Timestamp when this procedure_id was last updated.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,
 }
 ::diesel_builders::prelude::unique_index!(procedures::id, procedures::procedure_template_id);
-:: diesel_builders :: prelude :: fk ! ((procedures :: procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_id) -> (procedures :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_id) -> (procedures :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_template_id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: procedure_table_id) -> (:: aps_procedure_tables :: procedure_tables :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: creator_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: editor_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_id , procedures :: parent_procedure_template_id) -> (procedures :: id , procedures :: procedure_template_id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: predecessor_procedure_id , procedures :: predecessor_procedure_template_id) -> (procedures :: id , procedures :: procedure_template_id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_template_id , procedures :: procedure_template_id) -> (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id));
-:: diesel_builders :: prelude :: fk ! ((procedures :: parent_procedure_template_id , procedures :: predecessor_procedure_template_id , procedures :: procedure_template_id) -> (:: aps_next_procedure_templates :: next_procedure_templates :: parent_id , :: aps_next_procedure_templates :: next_procedure_templates :: predecessor_id , :: aps_next_procedure_templates :: next_procedure_templates :: successor_id));
 impl ::diesel_builders::ValidateColumn<procedures::id>
     for <procedures::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -295,4 +292,7 @@ impl ::diesel_builders::ValidateColumn<procedures::edited_at>
         }
         Ok(())
     }
+}
+impl procedure_like::ProcedureTableLike for procedures::table {
+    type ProcedureTemplateTable = aps_procedure_templates::procedure_templates::table;
 }

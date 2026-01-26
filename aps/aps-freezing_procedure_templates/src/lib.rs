@@ -5,16 +5,26 @@
     Debug,
     PartialOrd,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `freezing_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
+# [diesel (belongs_to (aps_freezer_models :: FreezerModel , foreign_key = frozen_with_model_id))]
+# [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = frozen_container_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((frozen_with_model_id ,) , (:: aps_freezer_models :: freezer_models :: id)))]
+# [table_model (foreign_key ((frozen_container_model_id ,) , (:: aps_volumetric_container_models :: volumetric_container_models :: id)))]
+# [table_model (foreign_key ((frozen_with_model_id , frozen_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_frozen_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_frozen_container_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 #[table_model(default(
     aps_procedure_templates::procedure_templates::procedure_template_table_id,
     "freezing_procedure_templates"
@@ -26,20 +36,17 @@ pub struct FreezingProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `kelvin` column in table
-    /// `freezing_procedure_templates`.
+    /// The storage temperature in Kelvin.
     #[table_model(default = 203.15f32)]
     kelvin: f32,
-    /// Field representing the `kelvin_tolerance_percentage` column in table
-    /// `freezing_procedure_templates`.
+    /// Tolerance percentage for the storage temperature.
     #[table_model(default = 5f32)]
     kelvin_tolerance_percentage: f32,
-    /// Field representing the `duration` column in table
-    /// `freezing_procedure_templates`.
+    /// Duration in seconds. We use a default of 43200 seconds (12 hours) for
+    /// the freezing procedure.
     #[table_model(default = 43200f32)]
     duration: Option<f32>,
-    /// Field representing the `frozen_with_model_id` column in table
-    /// `freezing_procedure_templates`.
+    /// The device used for freezing.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_frozen_with_model_id
@@ -53,8 +60,7 @@ pub struct FreezingProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_frozen_with_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `frozen_container_model_id` column in table
-    /// `freezing_procedure_templates`.
+    /// The container that is being stored in the freezer.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_frozen_container_model_id
@@ -77,12 +83,6 @@ pub struct FreezingProcedureTemplate {
     freezing_procedure_templates::id,
     freezing_procedure_templates::procedure_template_frozen_container_model_id
 );
-:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: frozen_with_model_id) -> (:: aps_freezer_models :: freezer_models :: id));
-:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: frozen_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
-:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: frozen_with_model_id , freezing_procedure_templates :: frozen_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: id , freezing_procedure_templates :: procedure_template_frozen_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((freezing_procedure_templates :: id , freezing_procedure_templates :: procedure_template_frozen_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::kelvin>
     for <freezing_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -141,12 +141,12 @@ impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::duration>
         Ok(())
     }
 }
-impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
     for FreezingProcedureTemplate
 {
     fn get_column_ref(
         &self,
-    ) -> &<freezing_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<freezing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

@@ -1,0 +1,12 @@
+[package]
+name = "procedure-like"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+diesel.workspace = true
+diesel-builders.workspace = true
+rosetta_uuid.workspace = true
+
+[lints]
+workspace = true

@@ -8,27 +8,27 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `users` table.
+/// Table storing users of the system
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (table_name = users)]
 pub struct User {
-    /// Field representing the `id` column in table `users`.
+    /// Surrogate primary key for the user entity
     # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `created_at` column in table `users`.
+    /// Time of account creation
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     created_at: ::rosetta_timestamp::TimestampUTC,
-    /// Field representing the `edited_at` column in table `users`.
+    /// Time of last account update
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     edited_at: ::rosetta_timestamp::TimestampUTC,

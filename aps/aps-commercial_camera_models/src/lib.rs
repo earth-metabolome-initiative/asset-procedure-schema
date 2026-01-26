@@ -8,12 +8,13 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `commercial_camera_models` table.
 #[table_model(ancestors(
@@ -22,6 +23,10 @@
     aps_commercial_products::commercial_products,
     aps_camera_models::camera_models
 ))]
+# [diesel (belongs_to (aps_commercial_products :: CommercialProduct , foreign_key = id))]
+# [table_model (foreign_key ((camera_model_id ,) , (:: aps_camera_models :: camera_models :: id)))]
+# [table_model (foreign_key ((id ,) , (:: aps_camera_models :: camera_models :: id)))]
+# [table_model (foreign_key ((id ,) , (:: aps_commercial_products :: commercial_products :: id)))]
 #[table_model(default(
     aps_asset_models::asset_models::asset_model_table_id,
     "commercial_camera_models"
@@ -38,38 +43,35 @@ pub struct CommercialCameraModel {
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     camera_model_id: ::rosetta_uuid::Uuid,
 }
-:: diesel_builders :: prelude :: fk ! ((commercial_camera_models :: camera_model_id) -> (:: aps_camera_models :: camera_models :: id));
-:: diesel_builders :: prelude :: fk ! ((commercial_camera_models :: id) -> (:: aps_camera_models :: camera_models :: id));
-:: diesel_builders :: prelude :: fk ! ((commercial_camera_models :: id) -> (:: aps_commercial_products :: commercial_products :: id));
-impl diesel_builders::GetColumn<aps_asset_models::asset_models::id> for CommercialCameraModel {
+impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for CommercialCameraModel {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_camera_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_camera_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_camera_models::camera_models::id> for CommercialCameraModel {
+impl ::diesel_builders::GetColumn<aps_camera_models::camera_models::id> for CommercialCameraModel {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_camera_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_camera_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
+impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
     for CommercialCameraModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_camera_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_camera_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
     for CommercialCameraModel
 {
     fn get_column_ref(
         &self,
-    ) -> &<commercial_camera_models::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<commercial_camera_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

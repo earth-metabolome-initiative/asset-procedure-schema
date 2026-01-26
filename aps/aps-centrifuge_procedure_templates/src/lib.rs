@@ -5,16 +5,26 @@
     Debug,
     PartialOrd,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `centrifuge_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
+# [diesel (belongs_to (aps_centrifuge_models :: CentrifugeModel , foreign_key = centrifuged_with_model_id))]
+# [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = centrifuged_container_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((centrifuged_with_model_id ,) , (:: aps_centrifuge_models :: centrifuge_models :: id)))]
+# [table_model (foreign_key ((centrifuged_container_model_id ,) , (:: aps_volumetric_container_models :: volumetric_container_models :: id)))]
+# [table_model (foreign_key ((centrifuged_with_model_id , centrifuged_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_centrifuged_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_centrifuged_container_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 #[table_model(default(
     aps_procedure_templates::procedure_templates::procedure_template_table_id,
     "centrifuge_procedure_templates"
@@ -26,24 +36,20 @@ pub struct CentrifugeProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `kelvin` column in table
-    /// `centrifuge_procedure_templates`.
+    /// The storage temperature in Kelvin.
     #[table_model(default = 293.15f32)]
     kelvin: f32,
-    /// Field representing the `kelvin_tolerance_percentage` column in table
-    /// `centrifuge_procedure_templates`.
+    /// Tolerance percentage for the storage temperature.
     #[table_model(default = 1f32)]
     kelvin_tolerance_percentage: f32,
-    /// Field representing the `duration` column in table
-    /// `centrifuge_procedure_templates`.
+    /// Duration in seconds that the centrifuge should be used for the
+    /// procedure.
     #[table_model(default = 120f32)]
     duration: f32,
-    /// Field representing the `rotation_per_minute` column in table
-    /// `centrifuge_procedure_templates`.
+    /// The RPMs (rotations per minute) of the centrifuge.
     #[table_model(default = 13000f32)]
     rotation_per_minute: f32,
-    /// Field representing the `centrifuged_with_model_id` column in table
-    /// `centrifuge_procedure_templates`.
+    /// The device used for the centrifuge procedure.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_centrifuged_with_model_id
@@ -57,8 +63,7 @@ pub struct CentrifugeProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_centrifuged_with_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `centrifuged_container_model_id` column in table
-    /// `centrifuge_procedure_templates`.
+    /// The container that is being centrifuged.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_centrifuged_container_model_id
@@ -66,9 +71,8 @@ pub struct CentrifugeProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     centrifuged_container_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the
-    /// `procedure_template_centrifuged_container_model_id` column in table
-    /// `centrifuge_procedure_templates`.
+    /// The centrifuged container model should allways be an asset model that is
+    /// compatible with the procedure_id template.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
@@ -82,12 +86,6 @@ pub struct CentrifugeProcedureTemplate {
     centrifuge_procedure_templates::id,
     centrifuge_procedure_templates::procedure_template_centrifuged_container_model_id
 );
-:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: centrifuged_with_model_id) -> (:: aps_centrifuge_models :: centrifuge_models :: id));
-:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: centrifuged_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
-:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: centrifuged_with_model_id , centrifuge_procedure_templates :: centrifuged_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: id , centrifuge_procedure_templates :: procedure_template_centrifuged_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((centrifuge_procedure_templates :: id , centrifuge_procedure_templates :: procedure_template_centrifuged_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::kelvin>
     for <centrifuge_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -177,12 +175,12 @@ impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::rotation_
         Ok(())
     }
 }
-impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
     for CentrifugeProcedureTemplate
 {
     fn get_column_ref(
         &self,
-    ) -> &<centrifuge_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<centrifuge_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

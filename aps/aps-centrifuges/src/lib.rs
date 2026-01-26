@@ -8,15 +8,20 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `centrifuges` table.
 #[table_model(ancestors(aps_assets::assets, aps_physical_assets::physical_assets))]
+# [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = id))]
+# [diesel (belongs_to (aps_commercial_centrifuge_lots :: CommercialCentrifugeLot , foreign_key = commercial_centrifuge_lot_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
+# [table_model (foreign_key ((commercial_centrifuge_lot_id ,) , (:: aps_commercial_centrifuge_lots :: commercial_centrifuge_lots :: id)))]
 #[table_model(default(aps_assets::assets::asset_table_id, "centrifuges"))]
 # [diesel (table_name = centrifuges)]
 pub struct Centrifuge {
@@ -30,15 +35,13 @@ pub struct Centrifuge {
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     commercial_centrifuge_lot_id: ::rosetta_uuid::Uuid,
 }
-:: diesel_builders :: prelude :: fk ! ((centrifuges :: id) -> (:: aps_physical_assets :: physical_assets :: id));
-:: diesel_builders :: prelude :: fk ! ((centrifuges :: commercial_centrifuge_lot_id) -> (:: aps_commercial_centrifuge_lots :: commercial_centrifuge_lots :: id));
-impl diesel_builders::GetColumn<aps_assets::assets::id> for Centrifuge {
-    fn get_column_ref(&self) -> &<centrifuges::id as diesel_builders::Typed>::ColumnType {
+impl ::diesel_builders::GetColumn<aps_assets::assets::id> for Centrifuge {
+    fn get_column_ref(&self) -> &<centrifuges::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }
-impl diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for Centrifuge {
-    fn get_column_ref(&self) -> &<centrifuges::id as diesel_builders::Typed>::ColumnType {
+impl ::diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for Centrifuge {
+    fn get_column_ref(&self) -> &<centrifuges::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
 }

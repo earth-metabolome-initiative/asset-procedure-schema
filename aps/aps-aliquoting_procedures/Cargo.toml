@@ -16,6 +16,7 @@ aps-procedures.workspace = true
 aps-volume_measuring_device_models.workspace = true
 aps-volume_measuring_devices.workspace = true
 aps-volumetric_containers.workspace = true
+procedure-like = { path = "../../crates/procedure-like" }
 
 [lints]
 workspace = true

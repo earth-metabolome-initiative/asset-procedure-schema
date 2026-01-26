@@ -5,16 +5,26 @@
     Debug,
     PartialOrd,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `freeze_drying_procedure_templates` table.
 #[table_model(ancestors(aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
+# [diesel (belongs_to (aps_freeze_dryer_models :: FreezeDryerModel , foreign_key = freeze_dried_with_model_id))]
+# [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = freeze_dried_container_model_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
+# [table_model (foreign_key ((freeze_dried_with_model_id ,) , (:: aps_freeze_dryer_models :: freeze_dryer_models :: id)))]
+# [table_model (foreign_key ((freeze_dried_container_model_id ,) , (:: aps_volumetric_container_models :: volumetric_container_models :: id)))]
+# [table_model (foreign_key ((freeze_dried_with_model_id , freeze_dried_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_freeze_dried_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
+# [table_model (foreign_key ((id , procedure_template_freeze_dried_container_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 #[table_model(default(
     aps_procedure_templates::procedure_templates::procedure_template_table_id,
     "freeze_drying_procedure_templates"
@@ -26,24 +36,20 @@ pub struct FreezeDryingProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `kelvin` column in table
-    /// `freeze_drying_procedure_templates`.
+    /// The storage temperature in Kelvin.
     #[table_model(default = 203.15f32)]
     kelvin: f32,
-    /// Field representing the `kelvin_tolerance_percentage` column in table
-    /// `freeze_drying_procedure_templates`.
+    /// Tolerance percentage for the storage temperature.
     #[table_model(default = 5f32)]
     kelvin_tolerance_percentage: f32,
-    /// Field representing the `pascal` column in table
-    /// `freeze_drying_procedure_templates`.
+    /// We use a default of 4 Pa for the pressure in the freeze-drying chamber.
     #[table_model(default = 4f32)]
     pascal: f32,
-    /// Field representing the `duration` column in table
-    /// `freeze_drying_procedure_templates`.
+    /// Duration in seconds. We use a default of 3 days (259200 seconds) for the
+    /// freeze-drying procedure.
     #[table_model(default = 259200f32)]
     duration: f32,
-    /// Field representing the `freeze_dried_with_model_id` column in table
-    /// `freeze_drying_procedure_templates`.
+    /// The device used for the freeze drying procedure.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_freeze_dried_with_model_id
@@ -57,8 +63,7 @@ pub struct FreezeDryingProcedureTemplate {
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_freeze_dried_with_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `freeze_dried_container_model_id` column in table
-    /// `freeze_drying_procedure_templates`.
+    /// The container that is being freeze_dried.
     #[same_as(
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_freeze_dried_container_model_id
@@ -82,12 +87,6 @@ pub struct FreezeDryingProcedureTemplate {
     freeze_drying_procedure_templates::id,
     freeze_drying_procedure_templates::procedure_template_freeze_dried_container_model_id
 );
-:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: id) -> (:: aps_procedure_templates :: procedure_templates :: id));
-:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: freeze_dried_with_model_id) -> (:: aps_freeze_dryer_models :: freeze_dryer_models :: id));
-:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: freeze_dried_container_model_id) -> (:: aps_volumetric_container_models :: volumetric_container_models :: id));
-:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: freeze_dried_with_model_id , freeze_drying_procedure_templates :: freeze_dried_container_model_id) -> (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: id , freeze_drying_procedure_templates :: procedure_template_freeze_dried_with_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
-:: diesel_builders :: prelude :: fk ! ((freeze_drying_procedure_templates :: id , freeze_drying_procedure_templates :: procedure_template_freeze_dried_container_model_id) -> (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id));
 impl ::diesel_builders::ValidateColumn<freeze_drying_procedure_templates::kelvin>
     for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -179,12 +178,13 @@ impl ::diesel_builders::ValidateColumn<freeze_drying_procedure_templates::durati
         Ok(())
     }
 }
-impl diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
     for FreezeDryingProcedureTemplate
 {
     fn get_column_ref(
         &self,
-    ) -> &<freeze_drying_procedure_templates::id as diesel_builders::Typed>::ColumnType {
+    ) -> &<freeze_drying_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
         &self.id
     }
 }

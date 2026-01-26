@@ -19,6 +19,7 @@ aps-procedure_template_asset_models.workspace = true
 aps-procedures.workspace = true
 aps-volumetric_container_models.workspace = true
 aps-volumetric_containers.workspace = true
+procedure-like = { path = "../../crates/procedure-like" }
 
 [lints]
 workspace = true

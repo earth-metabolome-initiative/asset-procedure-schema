@@ -7,15 +7,22 @@
     PartialOrd,
     Eq,
     PartialEq,
-    serde :: Serialize,
-    serde :: Deserialize,
-    diesel :: Queryable,
-    diesel :: Selectable,
-    diesel :: Identifiable,
-    diesel_builders :: prelude :: TableModel,
+    :: serde :: Serialize,
+    :: serde :: Deserialize,
+    :: diesel :: Queryable,
+    :: diesel :: Selectable,
+    :: diesel :: Identifiable,
+    :: diesel :: Associations,
+    :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `assets` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_asset_tables :: AssetTable , foreign_key = asset_table_id))]
+# [diesel (belongs_to (aps_asset_models :: AssetModel , foreign_key = model_id))]
+# [table_model (foreign_key ((asset_table_id ,) , (:: aps_asset_tables :: asset_tables :: id)))]
+# [table_model (foreign_key ((model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
+# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
+# [table_model (foreign_key ((editor_id ,) , (:: aps_users :: users :: id)))]
 # [diesel (table_name = assets)]
 pub struct Asset {
     /// Field representing the `id` column in table `assets`.
@@ -54,10 +61,6 @@ pub struct Asset {
 }
 ::diesel_builders::prelude::unique_index!(assets::id, assets::model_id);
 ::diesel_builders::prelude::unique_index!(assets::name, assets::model_id);
-:: diesel_builders :: prelude :: fk ! ((assets :: asset_table_id) -> (:: aps_asset_tables :: asset_tables :: id));
-:: diesel_builders :: prelude :: fk ! ((assets :: model_id) -> (:: aps_asset_models :: asset_models :: id));
-:: diesel_builders :: prelude :: fk ! ((assets :: creator_id) -> (:: aps_users :: users :: id));
-:: diesel_builders :: prelude :: fk ! ((assets :: editor_id) -> (:: aps_users :: users :: id));
 impl ::diesel_builders::ValidateColumn<assets::name>
     for <assets::table as ::diesel_builders::TableExt>::NewValues
 {
