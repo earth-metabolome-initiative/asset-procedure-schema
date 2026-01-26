@@ -83,11 +83,7 @@ impl<'listener, C> GPBListener<'listener, C> {
         self.predecessor_procedure.as_ref()
     }
 
-    pub(super) fn register_ptam_pam_pair(
-        &mut self,
-        ptam_id: Uuid,
-        pam_id: Uuid,
-    ) {
+    pub(super) fn register_ptam_pam_pair(&mut self, ptam_id: Uuid, pam_id: Uuid) {
         self.procedure_asset_models.insert(ptam_id, pam_id);
     }
 

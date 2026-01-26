@@ -1,7 +1,9 @@
 //! Crate defining the `ProcedureLike` trait, which is implemented by items that
 //! behave like procedures.
 
-use diesel_builders::{DescendantWithSelf, NestedTables, TableExt, TryGetDynamicColumn, TypedColumn};
+use diesel_builders::{
+    DescendantWithSelf, NestedTables, TableExt, TryGetDynamicColumn, TypedColumn,
+};
 
 /// Trait for items that behave like procedures.
 pub trait ProcedureTableLike:

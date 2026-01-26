@@ -77,7 +77,6 @@ where
     pub fn listener_mut(&mut self) -> &mut L {
         &mut self.listener
     }
-
 }
 
 impl ProcedureTemplateGraph {
