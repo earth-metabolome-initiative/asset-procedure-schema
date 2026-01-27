@@ -5,24 +5,16 @@ use std::{convert::Infallible, fmt::Debug};
 use aps_procedure_template_asset_models::ProcedureTemplateAssetModel;
 use aps_procedure_templates::*;
 
-use crate::{PTGListener, ProcedureTemplateGraph};
+use crate::PTGListener;
 #[derive(Debug, Clone, Copy)]
-pub(super) struct GPPListener<'listener> {
-    graph: &'listener ProcedureTemplateGraph,
-}
-
-impl<'listener> GPPListener<'listener> {
-    pub(super) fn new(graph: &'listener ProcedureTemplateGraph) -> Self {
-        Self { graph }
-    }
-}
+pub(super) struct GPPListener;
 
 pub enum GPPListenerOutput<'graph> {
     NoOp,
     Template(&'graph ProcedureTemplate),
 }
 
-impl<'graph> PTGListener<'graph> for GPPListener<'graph> {
+impl<'graph> PTGListener<'graph> for GPPListener {
     type Output = GPPListenerOutput<'graph>;
     type FilteredSuccessors<I>
         = I

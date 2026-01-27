@@ -61,7 +61,7 @@ impl Ownership {
         for (i, ptam) in ptams.iter().enumerate() {
             if let Some(original_ptam) = ptam.based_on_id() {
                 let original_index = ptams
-                    .binary_search_by(|am| am.id().cmp(&original_ptam))
+                    .binary_search_by(|am| am.id().cmp(original_ptam))
                     .expect("Based on asset model not found in vocabulary");
                 edges.push((i, original_index));
             }
@@ -140,7 +140,7 @@ pub trait OwnershipLike: AsRef<Ownership> {
         self.as_ref()
             .foreign_procedure_templates
             .binary_search_by(|pt| {
-                pt.id().cmp(&procedure_template_asset_model.procedure_template_id())
+                pt.id().cmp(procedure_template_asset_model.procedure_template_id())
             })
             .ok()
             .and_then(|index| self.as_ref().foreign_procedure_templates.get(index))
@@ -195,7 +195,7 @@ pub trait OwnershipLike: AsRef<Ownership> {
             .as_ref()
             .graph
             .left_nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(&procedure_template.id()))
+            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
             .expect("Procedure template not part of ownership graph");
 
         self.as_ref().graph.successors(procedure_template_id).map(|ptam_id| {

@@ -97,7 +97,7 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
             return Err(GuidedProcedureError::UnexpectedBuilder {
                 expected: T::TABLE_NAME,
                 found: template.procedure_template_table_id().to_owned(),
-                template: template.clone(),
+                template: Box::new(template.clone()),
             }
             .into());
         }
@@ -188,7 +188,7 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
         // (PAM column, PTAM column, asset model column)
         let mut procedure2pam_fks = procedure2pam_ptam_fks
             .into_iter()
-            .zip(procedure2pam_am_fks.into_iter())
+            .zip(procedure2pam_am_fks)
             .map(|((pam_column, (ptam_column,)), (other_pam_column, (asset_model_column,)))| {
                 assert_eq!(
                     pam_column, other_pam_column,
@@ -320,7 +320,7 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
     pub fn finish(mut self) -> Result<(), GuidedProcedureError> {
         if let Some(result) = self.next() {
             let (_, template) = result.unwrap();
-            Err(GuidedProcedureError::UnprocessedBuilder(template.clone()))
+            Err(GuidedProcedureError::UnprocessedBuilder(Box::new(template.clone())))
         } else {
             Ok(())
         }

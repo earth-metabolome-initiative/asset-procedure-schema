@@ -2,18 +2,12 @@
 
 use std::{collections::HashMap, fmt::Debug};
 
-use aps_procedure_asset_models::*;
 use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::*;
 use aps_procedures::*;
 use aps_users::User;
 use diesel::Identifiable;
-use diesel_builders::{
-    BuildableTable, BuilderError, ColumnTyped, DescendantOf, DescendantWithSelf, GetColumn, Insert,
-    NestedTables, TableBuilder, ValueTyped,
-};
 use rosetta_uuid::Uuid;
-use validation_errors::ValidationError;
 
 use crate::{
     PTGListener, ProcedureTemplateGraph, guided_procedure::error::InternalGuidedProcedureError,
@@ -46,7 +40,7 @@ impl<C> GPBListener<'_, C> {
             self.graph.ptam_by_primary_key(ptam_id).expect("PTAM not found in graph");
         let reference_ptam: &ProcedureTemplateAssetModel =
             self.graph.reference_based_on_alias(parents, ptam).expect("Alias not found in graph");
-        self.procedure_asset_models.get(&reference_ptam.id()).copied()
+        self.procedure_asset_models.get(reference_ptam.id()).copied()
     }
 }
 

@@ -16,19 +16,18 @@ use crate::{
 /// Struct providing functionalities to help the user concretely build a
 /// procedure.
 pub struct GuidedProcedurePseudocode<'graph> {
-    visitor: PTGVisitor<'graph, ProcedureTemplateGraph, GPPListener<'graph>>,
+    visitor: PTGVisitor<'graph, ProcedureTemplateGraph, GPPListener>,
 }
 
 impl<'graph> GuidedProcedurePseudocode<'graph> {
     /// Creates a new `GuidedProcedurePseudocodeBuilder` instance.
-    #[must_use]
     pub fn new(
         graph: &'graph ProcedureTemplateGraph,
     ) -> Result<Self, GuidedProcedurePseudocodeError> {
         if !graph.is_simple_path() {
             return Err(GuidedProcedurePseudocodeError::NotASimplePath);
         }
-        Ok(Self { visitor: PTGVisitor::new(graph, GPPListener::new(graph)) })
+        Ok(Self { visitor: PTGVisitor::new(graph, GPPListener) })
     }
 
     /// Writes out the guided procedure pseudocode.

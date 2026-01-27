@@ -45,7 +45,7 @@ impl Hierarchy {
         let procedure_template = Rc::new(procedure_template.clone());
         let (mut procedure_nodes, edges) = load_subprocedure_templates(&procedure_template, conn)?;
         procedure_nodes.push(procedure_template);
-        procedure_nodes.sort_unstable_by(|a, b| a.id().cmp(&b.id()));
+        procedure_nodes.sort_unstable_by(|a, b| a.id().cmp(b.id()));
         procedure_nodes.dedup();
         let procedure_nodes = SortedVec::try_from(procedure_nodes).unwrap();
         let mut numerical_edges = edges
@@ -90,7 +90,7 @@ pub trait HierarchyLike: AsRef<Hierarchy> {
 
     /// Returns a reference to the root procedure template name.
     fn root_procedure_template_name(&self) -> &str {
-        &self.root_procedure_template().name()
+        self.root_procedure_template().name()
     }
 
     /// Returns whether the provided procedure template is a leaf in the
@@ -105,7 +105,7 @@ pub trait HierarchyLike: AsRef<Hierarchy> {
             .as_ref()
             .hierarchy
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(&procedure_template.id()))
+            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
             .expect("Procedure template not part of hierarchy graph");
 
         !self.as_ref().hierarchy.has_successors(procedure_template_id)
@@ -126,7 +126,7 @@ pub trait HierarchyLike: AsRef<Hierarchy> {
         self.as_ref()
             .hierarchy
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(&procedure_template.id()))
+            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
             .expect("Procedure template not part of hierarchy graph")
     }
 }

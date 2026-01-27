@@ -54,7 +54,7 @@ impl Hierarchy {
                 if self
                     .hierarchy
                     .nodes_vocabulary()
-                    .binary_search_by(|pt| pt.id().cmp(&ptam.procedure_template_id()))
+                    .binary_search_by(|pt| pt.id().cmp(ptam.procedure_template_id()))
                     .is_err()
                 {
                     let ptam_owner = ptam.procedure_template(conn)?;

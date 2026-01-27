@@ -87,7 +87,7 @@ impl TaskGraph {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(&procedure_template.id()))
+            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
             .expect("Procedure template not part of task graph");
         self.graph.has_successors(procedure_template_id)
     }
@@ -111,7 +111,7 @@ impl TaskGraph {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(&procedure_template.id()))
+            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
             .expect("Procedure template not part of task graph");
         self.graph
             .successors(procedure_template_id)
@@ -134,7 +134,7 @@ impl TaskGraph {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(&procedure_template.id()))
+            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
             .expect("Procedure template not part of task graph");
         self.graph.has_predecessors(procedure_template_id)
     }
@@ -158,7 +158,7 @@ impl TaskGraph {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(&procedure_template.id()))
+            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
             .expect("Procedure template not part of task graph");
         self.graph
             .predecessors(procedure_template_id)
