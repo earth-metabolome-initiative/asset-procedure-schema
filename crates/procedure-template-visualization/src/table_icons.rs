@@ -1,9 +1,10 @@
 //! Submodule defining font-awesom icons for tables.
 
-use core_structures::{AssetModel, ProcedureTemplate};
+use aps_asset_models::{AssetModel, GetAssetModelAssetModelTableId};
+use aps_procedure_templates::{GetProcedureTemplateProcedureTemplateTableId, ProcedureTemplate};
 
 pub(crate) fn asset_model_icon(asset_model: &AssetModel) -> Option<&'static str> {
-    Some(match asset_model.most_concrete_table.as_str() {
+    Some(match asset_model.asset_model_table_id().as_str() {
         "digital_asset_models" => "fa:fa-file",
         "organism_models" => "fa:fa-bacterium",
         "phone_models" => "fa:fa-mobile-screen-button",
@@ -22,7 +23,7 @@ pub(crate) fn asset_model_icon(asset_model: &AssetModel) -> Option<&'static str>
 pub(crate) fn procedure_template_icon(
     procedure_template: &ProcedureTemplate,
 ) -> Option<&'static str> {
-    Some(match procedure_template.most_concrete_table.as_str() {
+    Some(match procedure_template.procedure_template_table_id().as_str() {
         "disposal_procedure_templates" => "fa:fa-trash",
         "photograph_procedure_templates" => "fa:fa-camera",
         "packaging_procedure_templates" => "fa:fa-gifts",

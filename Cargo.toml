@@ -7,6 +7,7 @@ members = [
   "crates/asset-traits",
   "crates/aps-test-utils",
   "crates/procedure-template-visitor",
+  "crates/procedure-template-visualization",
   "crates/procedure-like",
   "aps/aps-aliquoting_procedure_templates",
   "aps/aps-aliquoting_procedures",
@@ -122,6 +123,7 @@ sql-procedure-rules = { path = "crates/sql-procedure-rules" }
 asset-traits = { path = "crates/asset-traits" }
 aps-test-utils = { path = "crates/aps-test-utils" }
 procedure-template-visitor = { path = "crates/procedure-template-visitor" }
+procedure-template-visualization = { path = "crates/procedure-template-visualization" }
 procedure-like = { path = "crates/procedure-like" }
 aps-aliquoting_procedure_templates = { path = "aps/aps-aliquoting_procedure_templates" }
 aps-aliquoting_procedures = { path = "aps/aps-aliquoting_procedures" }

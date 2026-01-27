@@ -4,9 +4,21 @@ version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
-mermaid-builder.workspace = true
+mermaid-builder = "0.1.2"
 diesel.workspace = true
-guided_procedures.workspace = true
+diesel-builders.workspace = true
+procedure-template-visitor.workspace = true
+aps-procedure_templates.workspace = true
+aps-procedure_template_asset_models.workspace = true
+aps-asset_models.workspace = true
+aps-parent_procedure_templates.workspace = true
+aps-next_procedure_templates.workspace = true
+aps-users.workspace = true
+aps-asset_compatibility_rules.workspace = true
+aps-procedure_asset_models.workspace = true
+aps-procedures.workspace = true
+aps-reused_procedure_template_asset_models.workspace = true
+thiserror = "2.0"
 
 [lints]
 workspace = true

@@ -1,7 +1,7 @@
 //! Submodule providing a module to generate the default procedure template
 //! class.
 
-use mermaid::prelude::{Color, StyleClassBuilder, StyleProperty};
+use mermaid_builder::prelude::{Color, StyleClassBuilder, StyleProperty};
 
 pub(super) fn procedure_fill_color() -> Color {
     Color::from((236, 237, 238))

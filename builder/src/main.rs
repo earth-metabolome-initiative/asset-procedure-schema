@@ -117,6 +117,8 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
                 TomlDependency::new("aps-test-utils").path("crates/aps-test-utils")?,
                 TomlDependency::new("procedure-template-visitor")
                     .path("crates/procedure-template-visitor")?,
+                TomlDependency::new("procedure-template-visualization")
+                    .path("crates/procedure-template-visualization")?,
                 TomlDependency::new("procedure-like").path("crates/procedure-like")?,
             ])
             .into();

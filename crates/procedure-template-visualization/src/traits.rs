@@ -1,6 +1,6 @@
 //! Submodule defining visualization traits for core structures.
 
-use mermaid::traits::Diagram;
+use mermaid_builder::traits::Diagram;
 
 /// A trait for DB types that can be converted into a Mermaid diagram.
 pub trait MermaidDB<C> {

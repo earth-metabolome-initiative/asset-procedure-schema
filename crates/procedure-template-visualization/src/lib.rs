@@ -1,9 +1,7 @@
 #![doc = include_str!("../README.md")]
 
-mod asset_models;
 mod errors;
 mod procedure_templates_vis;
-pub use asset_models::asset_model_hierarchy;
 pub use errors::Error;
 mod traits;
 pub use traits::MermaidDB;

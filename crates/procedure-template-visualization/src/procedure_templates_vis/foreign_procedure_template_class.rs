@@ -1,7 +1,7 @@
 //! Submodule providing a module to generate the foreign procedure template
 //! class.
 
-use mermaid::prelude::{StyleClassBuilder, StyleProperty};
+use mermaid_builder::prelude::{StyleClassBuilder, StyleProperty};
 
 pub(super) const FOREIGN_PROCEDURE_TEMPLATE_CLASS_NAME: &str = "foreign_procedure_template";
 

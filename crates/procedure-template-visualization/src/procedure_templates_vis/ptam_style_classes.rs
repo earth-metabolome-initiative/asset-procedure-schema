@@ -1,26 +1,27 @@
 //! Submodule providing a method returning the procedure template asset
 //! models [`StyleClass`] objects.
 
-use core_structures::ProcedureTemplateAssetModel;
-use guided_procedures::{OwnershipLike, ProcedureTemplateGraph};
-use mermaid::{
+use aps_procedure_template_asset_models::ProcedureTemplateAssetModel;
+use diesel::Identifiable;
+use mermaid_builder::{
     prelude::{Color, FlowchartBuilder, StyleClassBuilder, StyleProperty, Unit},
     traits::DiagramBuilder,
 };
+use procedure_template_visitor::{OwnershipLike, ProcedureTemplateGraph};
 
 pub(super) fn ptam_node_class_name(ptam: &ProcedureTemplateAssetModel) -> String {
-    format!("ptam_node_{}", ptam.id)
+    format!("ptam_node_{}", ptam.id())
 }
 
 pub(super) fn ptam_edge_class_name(ptam: &ProcedureTemplateAssetModel) -> String {
-    format!("ptam_edge_{}", ptam.id)
+    format!("ptam_edge_{}", ptam.id())
 }
 
 pub(super) fn ptam_classes<'graph, I>(
     graph: &'graph ProcedureTemplateGraph,
     ptams: I,
     builder: &mut FlowchartBuilder,
-) -> Result<(), mermaid::FlowchartError>
+) -> Result<(), mermaid_builder::Error>
 where
     I: Iterator<Item = &'graph ProcedureTemplateAssetModel>,
 {

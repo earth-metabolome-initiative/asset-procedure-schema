@@ -1,18 +1,37 @@
 //! Submodule providing an illustration of a procedure and its subprocedures
 //! using a Flowchart Diagram in Mermaid syntax.
 
-use std::rc::Rc;
+use std::{hash::Hash, rc::Rc};
 
-use core_structures::{ProcedureTemplate, ProcedureTemplateAssetModel};
-use diesel::PgConnection;
-use guided_procedures::{HierarchyLike, OwnershipLike, PTGListener, ProcedureTemplateGraph};
-use mermaid::{
+use aps_next_procedure_templates::{
+    FKNextProcedureTemplatesPredecessorId, FKNextProcedureTemplatesSuccessorId,
+    NextProcedureTemplate, next_procedure_templates,
+};
+use aps_parent_procedure_templates::{
+    FKParentProcedureTemplatesChildId, ParentProcedureTemplate, parent_procedure_templates,
+};
+use aps_procedure_template_asset_models::{
+    FKProcedureTemplateAssetModelsAssetModelId, FKProcedureTemplateAssetModelsProcedureTemplateId,
+    GetProcedureTemplateAssetModelName, ProcedureTemplateAssetModel,
+};
+use aps_procedure_templates::{GetProcedureTemplateName, ProcedureTemplate};
+use aps_reused_procedure_template_asset_models::{
+    FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId,
+    FKReusedProcedureTemplateAssetModelsProcedureTemplateId, ReusedProcedureTemplateAssetModel,
+    reused_procedure_template_asset_models,
+};
+use diesel::Identifiable;
+use diesel_builders::LoadMany;
+use mermaid_builder::{
     prelude::{
         ArrowShape, ConfigurationBuilder, DiagramBuilder, Direction, Flowchart, FlowchartBuilder,
         FlowchartConfigurationBuilder, FlowchartEdgeBuilder, FlowchartNode, FlowchartNodeBuilder,
         FlowchartNodeShape, LineStyle, Renderer, StyleClass, StyleProperty, Unit,
     },
     traits::{EdgeBuilder, NodeBuilder},
+};
+use procedure_template_visitor::{
+    HierarchyLike, OwnershipLike, PTGListener, ProcedureTemplateGraph,
 };
 
 mod foreign_procedure_template_class;
@@ -40,7 +59,7 @@ impl<'graph> ProcedureTemplateVisualization<'graph> {
             FlowchartConfigurationBuilder::default()
                 .renderer(Renderer::EclipseLayoutKernel)
                 .direction(Direction::TopToBottom)
-                .title(&graph.root_procedure_template_name())?,
+                .title(graph.root_procedure_template_name())?,
         )?;
 
         ptam_style_classes::ptam_classes(graph, graph.root_and_foreign_ptams(), &mut builder)?;
@@ -85,8 +104,8 @@ impl<'graph> ProcedureTemplateVisualization<'graph> {
         self.builder.get_node_by_id(node_id).unwrap_or_else(|| {
             panic!(
                 "PT node {node_id} for \"{}\" with parents [{}] not found",
-                child.name,
-                parents.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", ")
+                child.name(),
+                parents.iter().map(|p| p.name().as_str()).collect::<Vec<_>>().join(", ")
             )
         })
     }
@@ -100,37 +119,36 @@ impl<'graph> ProcedureTemplateVisualization<'graph> {
         self.builder.get_node_by_id(node_id).unwrap_or_else(|| {
             panic!(
                 "PTAM node {node_id} for \"{}\" with parents {} not found",
-                ptam.name,
-                parents.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", ")
+                ptam.name(),
+                parents.iter().map(|p| p.name().as_str()).collect::<Vec<_>>().join(", ")
             )
         })
     }
 }
 
-fn procedure_template_hash<I, PT1, PT2>(parents: I, child: PT1) -> u64
+fn procedure_template_hash<I, PT>(parents: I, child: impl Hash) -> u64
 where
-    I: IntoIterator<Item = PT2>,
-    PT1: AsRef<ProcedureTemplate>,
-    PT2: AsRef<ProcedureTemplate>,
+    I: IntoIterator<Item = PT>,
+    PT: Hash,
 {
-    use std::hash::{Hash, Hasher};
+    use std::hash::Hasher;
     let mut hasher = std::collections::hash_map::DefaultHasher::new();
     for pt in parents {
-        pt.as_ref().hash(&mut hasher);
+        pt.hash(&mut hasher);
     }
-    child.as_ref().hash(&mut hasher);
+    child.hash(&mut hasher);
     hasher.finish()
 }
 
-fn procedure_template_asset_model_hash<PT, I>(pts: I, ptam: &ProcedureTemplateAssetModel) -> u64
+fn procedure_template_asset_model_hash<PT, I>(pts: I, ptam: impl Hash) -> u64
 where
     I: IntoIterator<Item = PT>,
-    PT: AsRef<ProcedureTemplate>,
+    PT: Hash,
 {
-    use std::hash::{Hash, Hasher};
+    use std::hash::Hasher;
     let mut hasher = std::collections::hash_map::DefaultHasher::new();
     for pt in pts {
-        pt.as_ref().hash(&mut hasher);
+        pt.hash(&mut hasher);
     }
     ptam.hash(&mut hasher);
     hasher.finish()
@@ -148,9 +166,9 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
         &mut self,
         foreign_procedure_template: &ProcedureTemplate,
     ) -> Result<(), Self::Error> {
-        let procedure_name = procedure_template_icon(foreign_procedure_template_id).map_or_else(
-            || format!("*{}*", foreign_procedure_template.name),
-            |icon| format!("{} *{}*", icon, foreign_procedure_template.name),
+        let procedure_name = procedure_template_icon(foreign_procedure_template).map_or_else(
+            || format!("*{}*", foreign_procedure_template.name()),
+            |icon| format!("{} *{}*", icon, foreign_procedure_template.name()),
         );
 
         let mut node_builder = FlowchartNodeBuilder::default()
@@ -164,14 +182,14 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
             .unwrap()
             .style_property(StyleProperty::StrokeDasharray(5, 5))
             .unwrap();
-        for foreign_ptam in self.graph.foreign_ptams_of(foreign_procedure_template_id) {
+        for foreign_ptam in self.graph.foreign_ptams_of(foreign_procedure_template) {
             let foreign_ptam_node = self.builder.node(
                 FlowchartNodeBuilder::default()
                     .id(procedure_template_asset_model_hash(
-                        std::iter::once(foreign_procedure_template_id),
+                        std::iter::once(foreign_procedure_template),
                         foreign_ptam,
                     ))
-                    .label(format!("*{}*", foreign_ptam.name))?
+                    .label(format!("*{}*", foreign_ptam.name()))?
                     .shape(FlowchartNodeShape::LRParallelogram)
                     .style_class(self.ptam_node_class(foreign_ptam))
                     .unwrap(),
@@ -203,8 +221,8 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
     ) -> Result<(), Self::Error> {
         let node_id = procedure_template_hash(parents, child);
         let procedure_name = procedure_template_icon(child).map_or_else(
-            || format!("*{}*", child.name),
-            |icon| format!("{} *{}*", icon, child.name),
+            || format!("*{}*", child.name()),
+            |icon| format!("{} *{}*", icon, child.name()),
         );
 
         let mut node_builder = FlowchartNodeBuilder::default()
@@ -278,7 +296,7 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
         parents: &[&ProcedureTemplate],
         child: &ProcedureTemplate,
     ) -> Result<(), Self::Error> {
-        println!("{}Leaving procedure template: {}", "\t".repeat(parents.len()), child.name);
+        println!("{}Leaving procedure template: {}", "\t".repeat(parents.len()), child.name());
 
         let mut node_builder = self.node_builders_stack.pop().unwrap();
 
@@ -310,25 +328,25 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
     ) -> Result<(), Self::Error> {
         let asset_model_id = self.graph.asset_model_of(ptam);
         let label = if let Some(icon) = asset_model_icon(asset_model_id) {
-            format!("{} {}", icon, ptam.name)
+            format!("{} {}", icon, ptam.name())
         } else {
-            ptam.name.clone()
+            ptam.name().to_string()
         };
 
         let maybe_foreign_owner = self.graph.foreign_procedure_template_of(ptam);
         let (shape, reference_ptam) = if maybe_foreign_owner.is_some() {
             (FlowchartNodeShape::LRParallelogram, ptam)
         } else {
-            (if ptam.procedure_template == leaf.procedure_template {
+            (if ptam.id() == leaf.id() {
                 FlowchartNodeShape::Rectangle
             } else {
                 FlowchartNodeShape::Hexagon
             }, self.graph
             .reference_based_on_alias(parents, ptam)
             .unwrap_or_else(|| panic!("Expected PTAM \"{}\" from leaf PT \"{}\" to be either foreign-owned or have a reference based on alias using parents [{}]",
-                ptam.name,
-                leaf.name,
-                parents.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", "))))
+                ptam.name(),
+                leaf.name(),
+                parents.iter().map(|p| p.name().to_owned()).collect::<Vec<_>>().join(", "))))
         };
 
         let procedure_template_asset_model_node_builder = FlowchartNodeBuilder::default()
@@ -355,7 +373,7 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
         // If the procedure template asset model is not owned by the current
         // procedure template, we draw a dashed edge to indicate that it is a
         // reference to another procedure template asset model.
-        if ptam.procedure_template != leaf.procedure_template {
+        if ptam.id() != leaf.id() {
             if let Some(foreign_owner) = maybe_foreign_owner {
                 // We find the foreign owner procedure template.
                 self.builder.edge(
@@ -391,11 +409,24 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
     }
 }
 
-impl MermaidDB<PgConnection> for ProcedureTemplate {
+impl<C> MermaidDB<C> for ProcedureTemplate
+where
+    (reused_procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
+    ReusedProcedureTemplateAssetModel:
+        FKReusedProcedureTemplateAssetModelsProcedureTemplateId<C>
+            + FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId<C>,
+    (parent_procedure_templates::parent_id,): LoadMany<C>,
+    (next_procedure_templates::parent_id,): LoadMany<C>,
+    ParentProcedureTemplate: FKParentProcedureTemplatesChildId<C>,
+    NextProcedureTemplate:
+        FKNextProcedureTemplatesPredecessorId<C> + FKNextProcedureTemplatesSuccessorId<C>,
+    ProcedureTemplateAssetModel: FKProcedureTemplateAssetModelsProcedureTemplateId<C>
+        + FKProcedureTemplateAssetModelsAssetModelId<C>,
+{
     type Diagram = Flowchart;
     type Error = crate::Error;
 
-    fn to_mermaid(&self, conn: &mut PgConnection) -> Result<Self::Diagram, Self::Error> {
+    fn to_mermaid(&self, conn: &mut C) -> Result<Self::Diagram, Self::Error> {
         let graph = ProcedureTemplateGraph::new(self, conn)?;
         let mut visualization = ProcedureTemplateVisualization::new(&graph)?;
         graph.visit_with(&mut visualization).collect::<Result<(), Self::Error>>()?;
