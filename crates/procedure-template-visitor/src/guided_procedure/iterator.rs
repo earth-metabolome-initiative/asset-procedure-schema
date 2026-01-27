@@ -66,17 +66,12 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
             + From<BuilderError<T::Error>>
             + From<diesel::result::Error>
             + From<<T as TableExt>::Error>
+            + From<<TableBuilder<T> as ValidateColumn<procedures::procedure_template_id>>::Error>
             + From<<TableBuilder<T> as ValidateColumn<procedures::parent_procedure_id>>::Error>
             + From<<TableBuilder<T> as ValidateColumn<procedures::predecessor_procedure_id>>::Error>
             + From<<TableBuilder<T> as ValidateColumn<procedures::parent_procedure_template_id>>::Error>
             + From<<TableBuilder<T> as ValidateColumn<procedures::predecessor_procedure_template_id>>::Error>,
-        TableBuilder<T>: SetProcedureProcedureTemplateId
-            + SetProcedureCreatorId
-            + SetProcedureEditorId
-            + TrySetProcedureParentProcedureId
-            + TrySetProcedureParentProcedureTemplateId
-            + TrySetProcedurePredecessorProcedureId
-            + TrySetProcedurePredecessorProcedureTemplateId
+        TableBuilder<T>: ProcedureTableBuilder
             + TrySetDynamicColumn
             + Insert<C, Table=T>,
         <T::NestedAncestorsWithSelf as NestedTables>::NestedModels:
@@ -116,7 +111,7 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
         )?;
 
         let mut procedure_builder = T::builder()
-            .procedure_template_id(template.get_column::<procedure_templates::id>())
+            .try_procedure_template_id(template.get_column::<procedure_templates::id>())?
             .creator_id(self.author().get_column::<users::id>())
             .editor_id(self.author().get_column::<users::id>());
 
