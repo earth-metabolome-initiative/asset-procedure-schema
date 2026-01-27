@@ -1,9 +1,12 @@
 //! Submodule defining the `ProcedureTemplateNode` trait, which helps construct
 //! the edges between procedure templates, including parent-child relationships.
 
+use aps_asset_models::*;
 use aps_next_procedure_templates::*;
 use aps_parent_procedure_templates::*;
+use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::procedure_templates;
+use aps_reused_procedure_template_asset_models::*;
 use aps_users::users;
 use diesel::associations::HasTable;
 use diesel_builders::{BuildableTable, DescendantOf, GetColumn, Insert, TableBuilder};
@@ -13,6 +16,221 @@ use diesel_builders::{BuildableTable, DescendantOf, GetColumn, Insert, TableBuil
 pub trait ProcedureTemplateNode:
     HasTable<Table: DescendantOf<procedure_templates::table>> + GetColumn<procedure_templates::id>
 {
+    /// Registers the provided asset models as used in this procedure template,
+    /// creating the necessary entries in the `procedure_template_asset_models`
+    /// table.
+    ///
+    /// This is only meant to be used when using directly procedure templates,
+    /// and not any other derivative procedure template table which would have
+    /// these relationships managed automatically by triggers in the database.
+    /// These methods are primarely for testing purposes or certain edge cases.
+    ///
+    /// # Arguments
+    ///
+    /// * `asset_models` - An iterator over asset models to be registered.
+    /// * `conn` - A mutable reference to the database connection.
+    ///
+    /// # Errors
+    ///
+    /// * If the insertion fails, a `diesel::result::Error` is returned.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use aps_asset_models::asset_models;
+    /// use aps_procedure_template_asset_models::*;
+    /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
+    /// use diesel::associations::Identifiable;
+    /// use procedure_traits::ProcedureTemplateNode;
+    /// let mut conn = aps_conn();
+    /// let test_user = user(&mut conn);
+    /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
+    /// let test_asset_model1 = asset_model("Asset Model 1", &test_user, &mut conn);
+    /// let test_asset_model2 = asset_model("Asset Model 2", &test_user, &mut conn);
+    /// let ptams = test_procedure_template
+    ///     .requires([&test_asset_model1, &test_asset_model2], &mut conn)
+    ///     .expect("Failed to register asset models for procedure template");
+    /// assert_eq!(ptams.len(), 2);
+    /// assert_eq!(ptams[0].procedure_template_id(), test_procedure_template.id());
+    /// assert_eq!(ptams[0].asset_model_id(), test_asset_model1.id());
+    /// assert_eq!(ptams[1].procedure_template_id(), test_procedure_template.id());
+    /// assert_eq!(ptams[1].asset_model_id(), test_asset_model2.id());
+    /// ```
+    fn requires<C, AMS>(
+        &self,
+        asset_models: AMS,
+        conn: &mut C,
+    ) -> Result<Vec<ProcedureTemplateAssetModel>, diesel::result::Error>
+    where
+        TableBuilder<aps_procedure_template_asset_models::procedure_template_asset_models::table>:
+            Insert<C>,
+        AMS: IntoIterator<Item: AssetModelTableModel>,
+    {
+        let mut ptams = Vec::new();
+        for asset_model in asset_models {
+            ptams.push(aps_procedure_template_asset_models::procedure_template_asset_models::table::builder()
+                .procedure_template_id(self.get_column())
+                .try_name(asset_model.name())?
+                .asset_model_id(
+                    <AMS::Item as GetColumn<aps_asset_models::asset_models::id>>::get_column(
+                        &asset_model,
+                    ),
+                )
+                .insert(conn)?);
+        }
+        Ok(ptams)
+    }
+
+    /// Variant of `requires` that receives an array of length N and returns an array of length N.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use aps_asset_models::asset_models;
+    /// use aps_procedure_template_asset_models::*;
+    /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
+    /// use diesel::associations::Identifiable;
+    /// use procedure_traits::ProcedureTemplateNode;
+    /// let mut conn = aps_conn();
+    /// let test_user = user(&mut conn);
+    /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
+    /// let test_asset_model1 = asset_model("Asset Model 1", &test_user, &mut conn);
+    /// let test_asset_model2 = asset_model("Asset Model 2", &test_user, &mut conn);
+    /// let [ptam1, ptam2] = test_procedure_template
+    ///     .requires_n([&test_asset_model1, &test_asset_model2], &mut conn)
+    ///     .expect("Failed to register asset models for procedure template");
+    /// assert_eq!(ptam1.procedure_template_id(), test_procedure_template.id());
+    /// assert_eq!(ptam1.asset_model_id(), test_asset_model1.id());
+    /// assert_eq!(ptam2.procedure_template_id(), test_procedure_template.id());
+    /// assert_eq!(ptam2.asset_model_id(), test_asset_model2.id());
+    /// ```
+    fn requires_n<C, AM, const N: usize>(
+        &self,
+        asset_models: [AM; N],
+        conn: &mut C,
+    ) -> Result<[ProcedureTemplateAssetModel; N], diesel::result::Error>
+    where
+        TableBuilder<aps_procedure_template_asset_models::procedure_template_asset_models::table>:
+            Insert<C>,
+        AM: AssetModelTableModel,
+    {
+         let ptams = self.requires(asset_models, conn)?;
+         Ok(ptams.try_into().expect("Vector size should match array size N"))
+    }
+
+    /// Registers the provided procedure template asset models as re-used in
+    /// this procedure template, creating the necessary entries in the
+    /// `reused_procedure_template_asset_models` table.
+    ///
+    /// This is only meant to be used when using directly procedure templates,
+    /// and not any other derivative procedure template table which would have
+    /// these relationships managed automatically by triggers in the database.
+    /// These methods are primarely for testing purposes or certain edge cases.
+    ///
+    /// # Arguments
+    ///
+    /// * `procedure_template_asset_models` - An iterator over procedure
+    ///   template asset models to be registered.
+    /// * `conn` - A mutable reference to the database connection.
+    ///
+    /// # Errors
+    ///
+    /// * If the insertion fails, a `diesel::result::Error` is returned.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use aps_asset_models::asset_models;
+    /// use aps_procedure_template_asset_models::*;
+    /// use aps_reused_procedure_template_asset_models::*;
+    /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
+    /// use diesel::associations::Identifiable;
+    /// use procedure_traits::ProcedureTemplateNode;
+    /// let mut conn = aps_conn();
+    /// let test_user = user(&mut conn);
+    /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
+    /// let test_asset_model1 = asset_model("Asset Model 1", &test_user, &mut conn);
+    /// let test_asset_model2 = asset_model("Asset Model 2", &test_user, &mut conn);
+    /// let ptams = test_procedure_template
+    ///     .requires([&test_asset_model1, &test_asset_model2], &mut conn)
+    ///     .expect("Failed to register asset models for procedure template");
+    /// let another_procedure_template = procedure_template("Another Procedure", &test_user, &mut conn);
+    /// let reused_ptams = another_procedure_template
+    ///     .reuses(&ptams, &mut conn)
+    ///     .expect("Failed to register reused procedure template asset models");
+    /// assert_eq!(reused_ptams.len(), 2);
+    /// assert_eq!(reused_ptams[0].procedure_template_id(), another_procedure_template.id());
+    /// assert_eq!(reused_ptams[0].procedure_template_asset_model_id(), ptams[0].id());
+    /// assert_eq!(reused_ptams[1].procedure_template_id(), another_procedure_template.id());
+    /// assert_eq!(reused_ptams[1].procedure_template_asset_model_id(), ptams[1].id());
+    /// ```
+    fn reuses<C, PTAMS>(
+        &self,
+        procedure_template_asset_models: PTAMS,
+        conn: &mut C,
+    ) -> Result<Vec<ReusedProcedureTemplateAssetModel>, diesel::result::Error>
+    where
+        TableBuilder<aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table>:
+            Insert<C>,
+        PTAMS: IntoIterator<Item: ProcedureTemplateAssetModelTableModel>,
+    {
+        let mut ptams = Vec::new();
+        for asset_model in procedure_template_asset_models {
+            // TODO: Remove expect once <https://github.com/diesel-rs/diesel/pull/4952> is merged
+            ptams.push(aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table::builder()
+                .procedure_template_id(self.get_column())
+                .procedure_template_asset_model_id(
+                    <PTAMS::Item as GetColumn<aps_procedure_template_asset_models::procedure_template_asset_models::id>>::get_column(
+                        &asset_model,
+                    ),
+                )
+                .insert(conn).expect("Failed to create reused procedure template asset model, remove this expect once the PR #4952 is merged"));
+        }
+        Ok(ptams)
+    }
+
+    /// Variant of `reuses` that receives an array of length N and returns an array of length N.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use aps_asset_models::asset_models;
+    /// use aps_procedure_template_asset_models::*;
+    /// use aps_reused_procedure_template_asset_models::*;
+    /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
+    /// use diesel::associations::Identifiable;
+    /// use procedure_traits::ProcedureTemplateNode;
+    /// let mut conn = aps_conn();
+    /// let test_user = user(&mut conn);
+    /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
+    /// let test_asset_model1 = asset_model("Asset Model 1", &test_user, &mut conn);
+    /// let test_asset_model2 = asset_model("Asset Model 2", &test_user, &mut conn);
+    /// let ptams = test_procedure_template
+    ///     .requires([&test_asset_model1, &test_asset_model2], &mut conn)
+    ///     .expect("Failed to register asset models for procedure template");
+    /// let another_procedure_template = procedure_template("Another Procedure", &test_user, &mut conn);
+    /// let [reused1, reused2] = another_procedure_template
+    ///     .reuses_n([&ptams[0], &ptams[1]], &mut conn)
+    ///     .expect("Failed to register reused procedure template asset models");
+    /// assert_eq!(reused1.procedure_template_id(), another_procedure_template.id());
+    /// assert_eq!(reused1.procedure_template_asset_model_id(), ptams[0].id());
+    /// assert_eq!(reused2.procedure_template_id(), another_procedure_template.id());
+    /// assert_eq!(reused2.procedure_template_asset_model_id(), ptams[1].id());
+    /// ```
+    fn reuses_n<C, PTAM, const N: usize>(
+        &self,
+        procedure_template_asset_models: [PTAM; N],
+        conn: &mut C,
+    ) -> Result<[ReusedProcedureTemplateAssetModel; N], diesel::result::Error>
+    where
+        TableBuilder<aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table>:
+            Insert<C>,
+        PTAM: ProcedureTemplateAssetModelTableModel,
+    {
+        let ptams = self.reuses(procedure_template_asset_models, conn)?;
+        Ok(ptams.try_into().expect("Vector size should match array size N"))
+    }
+
     /// Creates a new parent-child relationship for procedure templates.
     ///
     /// # Arguments

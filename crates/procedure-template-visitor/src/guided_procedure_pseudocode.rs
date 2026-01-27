@@ -21,6 +21,32 @@ pub struct GuidedProcedurePseudocode<'graph> {
 
 impl<'graph> GuidedProcedurePseudocode<'graph> {
     /// Creates a new `GuidedProcedurePseudocodeBuilder` instance.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `graph` - A reference to the `ProcedureTemplateGraph` representing the
+    ///   procedure template structure.
+    /// 
+    /// # Returns
+    /// 
+    /// A new instance of `GuidedProcedurePseudocode`.
+    /// 
+    /// # Errors
+    /// 
+    /// * `GuidedProcedurePseudocodeError::NotASimplePath` - If the provided graph
+    ///   is not a simple path.
+    /// 
+    /// # Examples
+    /// 
+    /// ```rust
+    /// use aps_test_utils::{aps_conn, pizza_procedure_template, user};
+    /// use procedure_template_visitor::GuidedProcedurePseudocode;
+    /// 
+    /// let mut conn = aps_conn();
+    /// let author = user(&mut conn);
+    /// let procedure_template = pizza_procedure_template(&author, &mut conn);
+    /// 
+    /// ```
     pub fn new(
         graph: &'graph ProcedureTemplateGraph,
     ) -> Result<Self, GuidedProcedurePseudocodeError> {

@@ -45,6 +45,25 @@ impl ProcedureTemplateGraph {
     ///
     /// * Returns a `diesel::result::Error` if there is an issue querying the
     ///   database.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use aps_test_utils::{aps_conn, pizza_procedure_template, user};
+    /// use procedure_template_visitor::ProcedureTemplateGraph;
+    ///
+    /// let mut conn = aps_conn();
+    /// let author = user(&mut conn);
+    /// let procedure_template = pizza_procedure_template(&author, &mut conn);
+    /// let procedure_template_graph =
+    ///     ProcedureTemplateGraph::new(&procedure_template, &mut conn).unwrap();
+    /// assert!(procedure_template_graph.is_simple_path());
+    /// assert_eq!(
+    ///     procedure_template_graph.number_of_procedure_templates(),
+    ///     4,
+    ///     "There are four procedure templates in the pizza procedure template graph."
+    /// );
+    /// ```
     pub fn new<C>(
         procedure_template: &ProcedureTemplate,
         conn: &mut C,
@@ -91,6 +110,12 @@ impl ProcedureTemplateGraph {
                 if let Some(tg) = tg_opt { tg.is_simple_path() } else { true }
             },
         )
+    }
+
+    /// Returns the number of procedure templates in the graph.
+    #[must_use]
+    pub fn number_of_procedure_templates(&self) -> usize {
+        self.hierarchy.number_of_procedure_templates()
     }
 
     /// Returns whether the provided procedure template asset model is owned by

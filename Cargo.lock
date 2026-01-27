@@ -1654,11 +1654,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-container_models",
+ "aps-physical_asset_models",
  "aps-procedure_templates",
  "aps-users",
+ "asset-traits",
  "diesel",
  "diesel-builders",
  "pg2sqlite",
+ "procedure-traits",
 ]
 
 [[package]]
@@ -1818,6 +1821,7 @@ dependencies = [
  "aps-asset_models",
  "aps-container_compatibility_rules",
  "aps-container_models",
+ "aps-physical_asset_models",
  "aps-test-utils",
  "aps-users",
  "diesel",
@@ -2744,7 +2748,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#a67d760bc84052e82a18dc780009c52e0d2b1743"
+source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#5ce49e42de20ff681c61329415c3b84dcc0218c1"
 dependencies = [
  "git2",
  "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits)",
@@ -2847,6 +2851,7 @@ dependencies = [
  "aps-procedure_templates",
  "aps-procedures",
  "aps-reused_procedure_template_asset_models",
+ "aps-test-utils",
  "aps-users",
  "diesel",
  "diesel-builders",
@@ -2882,9 +2887,12 @@ dependencies = [
 name = "procedure-traits"
 version = "0.1.0"
 dependencies = [
+ "aps-asset_models",
  "aps-next_procedure_templates",
  "aps-parent_procedure_templates",
+ "aps-procedure_template_asset_models",
  "aps-procedure_templates",
+ "aps-reused_procedure_template_asset_models",
  "aps-test-utils",
  "aps-users",
  "diesel",

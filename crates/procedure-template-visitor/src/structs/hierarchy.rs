@@ -92,6 +92,12 @@ pub trait HierarchyLike: AsRef<Hierarchy> {
     fn root_procedure_template_name(&self) -> &str {
         self.root_procedure_template().name()
     }
+    
+    /// Returns the number of procedure templates in the hierarchy.
+    #[must_use]
+    fn number_of_procedure_templates(&self) -> usize {
+        self.as_ref().hierarchy.number_of_nodes()
+    }
 
     /// Returns whether the provided procedure template is a leaf in the
     /// hierarchy (i.e., it has no sub-procedure templates).

@@ -9,6 +9,7 @@ diesel.workspace = true
 diesel-builders.workspace = true
 rosetta_uuid.workspace = true
 thiserror = "2.0"
+aps-test-utils.workspace = true
 aps-procedure_templates.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-asset_models.workspace = true

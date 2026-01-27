@@ -8,11 +8,14 @@ aps-procedure_templates.workspace = true
 aps-users.workspace = true
 aps-next_procedure_templates.workspace = true
 aps-parent_procedure_templates.workspace = true
+aps-procedure_template_asset_models.workspace = true
+aps-asset_models.workspace = true
+aps-reused_procedure_template_asset_models.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
 
 [dev-dependencies]
-aps-test-utils = { path = "../aps-test-utils" }
+aps-test-utils.workspace = true
 
 [lints]
 workspace = true

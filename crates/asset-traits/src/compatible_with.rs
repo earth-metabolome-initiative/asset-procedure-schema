@@ -94,18 +94,19 @@ pub trait CanContain:
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
     /// let container_model = aps_test_utils::container_model("Container Model", &user, &mut conn);
-    /// let asset_model = aps_test_utils::asset_model("Contained Asset Model", &user, &mut conn);
+    /// let asset_model = aps_test_utils::physical_asset_model("Contained Asset Model", &user, &mut conn);
     /// let compatibility_rule = container_model
     ///     .can_contain(&asset_model, 10, &user, &mut conn)
-    ///     .expect("Failed to create container compatibility rule");
+    ///     .expect("Failed to create compatibility rule");
+    /// 
     /// assert_eq!(compatibility_rule.container_model_id(), container_model.id());
     /// assert_eq!(compatibility_rule.contained_asset_model_id(), asset_model.id());
     /// assert_eq!(*compatibility_rule.quantity(), 10);
     /// ```
     fn can_contain<C>(
         &self,
-        asset_model: impl HasTable<Table: DescendantOf<asset_models::table>>
-        + GetColumn<asset_models::id>,
+        asset_model: impl HasTable<Table: DescendantOf<aps_physical_asset_models::physical_asset_models::table>>
+        + GetColumn<aps_physical_asset_models::physical_asset_models::id>,
         quantity: i16,
         user: impl HasTable<Table: DescendantOf<users::table>> + GetColumn<users::id>,
         conn: &mut C,
