@@ -5,7 +5,7 @@ use aps_asset_models::*;
 use aps_next_procedure_templates::*;
 use aps_parent_procedure_templates::*;
 use aps_procedure_template_asset_models::*;
-use aps_procedure_templates::procedure_templates;
+use aps_procedure_templates::{ProcedureTemplateTableModel, procedure_templates};
 use aps_reused_procedure_template_asset_models::*;
 use aps_users::users;
 use diesel::associations::HasTable;
@@ -14,7 +14,9 @@ use diesel_builders::{BuildableTable, DescendantOf, GetColumn, Insert, TableBuil
 /// Trait defining the methods for managing parent-child relationships in
 /// procedure templates.
 pub trait ProcedureTemplateNode:
-    HasTable<Table: DescendantOf<procedure_templates::table>> + GetColumn<procedure_templates::id>
+    HasTable<Table: DescendantOf<procedure_templates::table>>
+    + GetColumn<procedure_templates::id>
+    + GetColumn<procedure_templates::name>
 {
     /// Registers the provided asset models as used in this procedure template,
     /// creating the necessary entries in the `procedure_template_asset_models`
@@ -69,7 +71,7 @@ pub trait ProcedureTemplateNode:
         let mut ptams = Vec::new();
         for asset_model in asset_models {
             ptams.push(aps_procedure_template_asset_models::procedure_template_asset_models::table::builder()
-                .procedure_template_id(self.get_column())
+                .procedure_template_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))
                 .try_name(asset_model.name())?
                 .asset_model_id(
                     <AMS::Item as GetColumn<aps_asset_models::asset_models::id>>::get_column(
@@ -81,7 +83,8 @@ pub trait ProcedureTemplateNode:
         Ok(ptams)
     }
 
-    /// Variant of `requires` that receives an array of length N and returns an array of length N.
+    /// Variant of `requires` that receives an array of length N and returns an
+    /// array of length N.
     ///
     /// # Example
     ///
@@ -114,8 +117,8 @@ pub trait ProcedureTemplateNode:
             Insert<C>,
         AM: AssetModelTableModel,
     {
-         let ptams = self.requires(asset_models, conn)?;
-         Ok(ptams.try_into().expect("Vector size should match array size N"))
+        let ptams = self.requires(asset_models, conn)?;
+        Ok(ptams.try_into().expect("Vector size should match array size N"))
     }
 
     /// Registers the provided procedure template asset models as re-used in
@@ -178,7 +181,7 @@ pub trait ProcedureTemplateNode:
         for asset_model in procedure_template_asset_models {
             // TODO: Remove expect once <https://github.com/diesel-rs/diesel/pull/4952> is merged
             ptams.push(aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table::builder()
-                .procedure_template_id(self.get_column())
+                .procedure_template_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))
                 .procedure_template_asset_model_id(
                     <PTAMS::Item as GetColumn<aps_procedure_template_asset_models::procedure_template_asset_models::id>>::get_column(
                         &asset_model,
@@ -189,7 +192,8 @@ pub trait ProcedureTemplateNode:
         Ok(ptams)
     }
 
-    /// Variant of `reuses` that receives an array of length N and returns an array of length N.
+    /// Variant of `reuses` that receives an array of length N and returns an
+    /// array of length N.
     ///
     /// # Example
     ///
@@ -270,7 +274,7 @@ pub trait ProcedureTemplateNode:
         TableBuilder<parent_procedure_templates::table>: Insert<C>,
     {
         Ok(parent_procedure_templates::table::builder()
-            .try_parent_id(self.get_column())?
+            .try_parent_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))?
             .try_child_id(child_procedure_template.get_column())?
             .creator_id(user.get_column())
             .insert(conn)?)
@@ -317,14 +321,20 @@ pub trait ProcedureTemplateNode:
         conn: &mut C,
     ) -> Result<NextProcedureTemplate, diesel::result::Error>
     where
-        L: GetColumn<procedure_templates::id> + ?Sized,
-        R: GetColumn<procedure_templates::id> + ?Sized,
+        L: GetColumn<procedure_templates::id> + GetColumn<procedure_templates::name> + ?Sized,
+        R: GetColumn<procedure_templates::id> + GetColumn<procedure_templates::name> + ?Sized,
         TableBuilder<next_procedure_templates::table>: Insert<C>,
     {
+        println!(
+            "Creating {} -> {} under parent {}",
+            <L as GetColumn<procedure_templates::name>>::get_column(predecessor),
+            <R as GetColumn<procedure_templates::name>>::get_column(successor),
+            <Self as GetColumn<procedure_templates::name>>::get_column(self)
+        );
         Ok(next_procedure_templates::table::builder()
-            .try_parent_id(self.get_column())?
-            .try_predecessor_id(predecessor.get_column())?
-            .try_successor_id(successor.get_column())?
+            .try_parent_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))?
+            .try_predecessor_id(<L as GetColumn<procedure_templates::id>>::get_column(predecessor))?
+            .try_successor_id(<R as GetColumn<procedure_templates::id>>::get_column(successor))?
             .creator_id(user.get_column())
             .insert(conn)?)
     }
@@ -374,9 +384,9 @@ pub trait ProcedureTemplateNode:
     ) -> Result<Vec<NextProcedureTemplate>, diesel::result::Error>
     where
         TableBuilder<next_procedure_templates::table>: Insert<C>,
-        I: IntoIterator<Item: GetColumn<procedure_templates::id>>,
+        I: IntoIterator<Item: ProcedureTemplateTableModel>,
     {
-        let mut previous: Option<Box<dyn GetColumn<procedure_templates::id>>> = None;
+        let mut previous: Option<Box<dyn ProcedureTemplateTableModel>> = None;
         let mut relations = Vec::new();
         for child in children {
             if let Some(prev) = previous {
@@ -389,7 +399,6 @@ pub trait ProcedureTemplateNode:
 }
 
 impl<T> ProcedureTemplateNode for T where
-    T: HasTable<Table: DescendantOf<procedure_templates::table>>
-        + GetColumn<procedure_templates::id>
+    T: HasTable<Table: DescendantOf<procedure_templates::table>> + ProcedureTemplateTableModel
 {
 }

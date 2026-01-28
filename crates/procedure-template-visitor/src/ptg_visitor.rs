@@ -8,7 +8,7 @@ use aps_procedure_templates::*;
 
 use crate::{
     PTGListener, ProcedureTemplateGraph,
-    structs::{HierarchyLike, OwnershipLike, TaskGraph},
+    structs::{OwnershipLike, TaskGraph},
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]

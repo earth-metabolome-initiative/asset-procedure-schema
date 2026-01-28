@@ -63,6 +63,7 @@ impl ProcedureTemplateGraph {
     ///     4,
     ///     "There are four procedure templates in the pizza procedure template graph."
     /// );
+    /// assert_eq!(&procedure_template, procedure_template_graph.root_procedure_template(),);
     /// ```
     pub fn new<C>(
         procedure_template: &ProcedureTemplate,
@@ -110,6 +111,12 @@ impl ProcedureTemplateGraph {
                 if let Some(tg) = tg_opt { tg.is_simple_path() } else { true }
             },
         )
+    }
+
+    /// Returns the root procedure template of the graph.
+    #[must_use]
+    pub fn root_procedure_template(&self) -> &ProcedureTemplate {
+        self.hierarchy.root_procedure_template()
     }
 
     /// Returns the number of procedure templates in the graph.

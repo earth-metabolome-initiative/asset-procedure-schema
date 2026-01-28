@@ -4,10 +4,23 @@ use std::{convert::Infallible, fmt::Debug};
 
 use aps_procedure_template_asset_models::ProcedureTemplateAssetModel;
 use aps_procedure_templates::*;
+use diesel_builders::TableExt;
 
 use crate::PTGListener;
 #[derive(Debug, Clone, Copy)]
-pub(super) struct GPPListener;
+pub(super) struct GPPListener {
+    /// Skip procedures which are not extensions of the `procedure_templates`
+    /// table, and therefore can always be automatically inserted without user
+    /// guidance.
+    skip_base_procedures: bool,
+}
+
+impl GPPListener {
+    /// Creates a new `GPPListener` instance.
+    pub(super) fn new(skip_base_procedures: bool) -> Self {
+        Self { skip_base_procedures }
+    }
+}
 
 pub enum GPPListenerOutput<'graph> {
     NoOp,
@@ -43,7 +56,10 @@ impl<'graph> PTGListener<'graph> for GPPListener {
         _parents: &[&'graph ProcedureTemplate],
         child: &'graph ProcedureTemplate,
     ) -> Result<Self::Output, Self::Error> {
-        if child.procedure_template_table_id() == "procedure_templates" {
+        if child.procedure_template_table_id()
+            == <procedure_templates::table as TableExt>::TABLE_NAME
+            && self.skip_base_procedures
+        {
             Ok(GPPListenerOutput::NoOp)
         } else {
             Ok(GPPListenerOutput::Template(child))

@@ -31,6 +31,8 @@ pub struct Hierarchy {
             SquareCSR2D<CSR2D<usize, usize, usize>>,
         >,
     >,
+    // The root procedure template of the hierarchy.
+    root_procedure_template: Rc<ProcedureTemplate>,
 }
 
 impl Hierarchy {
@@ -44,8 +46,8 @@ impl Hierarchy {
     {
         let procedure_template = Rc::new(procedure_template.clone());
         let (mut procedure_nodes, edges) = load_subprocedure_templates(&procedure_template, conn)?;
-        procedure_nodes.push(procedure_template);
-        procedure_nodes.sort_unstable_by(|a, b| a.id().cmp(b.id()));
+        procedure_nodes.push(procedure_template.clone());
+        procedure_nodes.sort_unstable();
         procedure_nodes.dedup();
         let procedure_nodes = SortedVec::try_from(procedure_nodes).unwrap();
         let mut numerical_edges = edges
@@ -71,7 +73,10 @@ impl Hierarchy {
             .build()
             .expect("Failed to build hierarchy graph");
         let bimatrix = GenericBiMatrix2D::new(directed);
-        Ok(Self { hierarchy: (Rc::new(procedure_nodes), bimatrix).into() })
+        Ok(Self {
+            hierarchy: (Rc::new(procedure_nodes), bimatrix).into(),
+            root_procedure_template: procedure_template,
+        })
     }
 }
 
@@ -85,14 +90,14 @@ impl AsRef<Hierarchy> for Hierarchy {
 pub trait HierarchyLike: AsRef<Hierarchy> {
     /// Returns a reference to the root procedure template of the hierarchy.
     fn root_procedure_template(&self) -> &ProcedureTemplate {
-        self.as_ref().hierarchy.nodes_vocabulary().first().expect("Hierarchy is empty").as_ref()
+        self.as_ref().root_procedure_template.as_ref()
     }
 
     /// Returns a reference to the root procedure template name.
     fn root_procedure_template_name(&self) -> &str {
         self.root_procedure_template().name()
     }
-    
+
     /// Returns the number of procedure templates in the hierarchy.
     #[must_use]
     fn number_of_procedure_templates(&self) -> usize {

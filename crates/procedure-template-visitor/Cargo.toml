@@ -21,6 +21,14 @@ aps-procedures.workspace = true
 aps-reused_procedure_template_asset_models.workspace = true
 validation-errors.workspace = true
 procedure-like.workspace = true
+syn = { version = "2.0", features = ["full", "parsing", "extra-traits"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+prettyplease = "0.2"
+
+[dev-dependencies]
+insta = { version = "1.34", features = ["yaml"] }
+serial_test = "3.0"
 
 [lints]
 workspace = true

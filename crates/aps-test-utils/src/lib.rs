@@ -308,26 +308,142 @@ pub fn pizza_procedure_template(
 
     // Next, we create the individual steps, and we use the traits defined in
     // the `procedure-traits` crate to set up the relationships between them.
-    make_pizza.child(&prepare_dough, user, conn).unwrap();
-    make_pizza.child(&add_toppings, user, conn).unwrap();
-    make_pizza.child(&bake_pizza, user, conn).unwrap();
     make_pizza
         .extend([prepare_dough, add_toppings, bake_pizza], user, conn)
-        .map_err(|e| {
-            println!("Error extending 'Make a Pizza' procedure template: {:?}", e);
-            if let diesel::result::Error::DatabaseError(_, info) = &e {
-                println!("Database error details: {}", info.message());
-                println!("Database error details: {}", info.details().unwrap_or("No details"));
-                println!("Database error hint: {}", info.hint().unwrap_or("No hint"));
-                println!(
-                    "Database error constraint: {}",
-                    info.constraint_name().unwrap_or("No constraint")
-                );
-                println!("Database error table: {}", info.table_name().unwrap_or("No table"));
-                println!("Database error column: {}", info.column_name().unwrap_or("No column"));
-            }
-            panic!("Failed to extend 'Make a Pizza' procedure template: {}", e);
-        })
+        .expect("Failed to extend 'Make a Pizza' procedure template");
+    make_pizza
+}
+
+/// Creates a procedure template which has child procedures, creating
+/// a forking sequence of steps which share some of the procedure template
+/// asset models between them.
+///
+/// To facilitate the semantic understanding of the procedure template and its
+/// procedures, we use the example of making a pizza, which involves multiple
+/// steps that can be represented as procedures. The forking step will be the
+/// choice of different toppings.
+///
+/// # Arguments
+///
+/// * `user` - The user creating the procedure template and procedures.
+/// * `conn` - A mutable reference to the database connection where the
+///   procedure template and procedures will be created.
+///
+/// # Panics
+///
+/// * If the procedure template or procedure creation fails.
+///
+/// # Example
+///
+/// ```rust
+/// use aps_test_utils::{aps_conn, pizza_four_season_procedure_template, user};
+/// let mut conn = aps_conn();
+/// let test_user = user(&mut conn);
+/// let _pizza_template = pizza_four_season_procedure_template(&test_user, &mut conn);
+/// ```
+pub fn pizza_four_season_procedure_template(
+    user: &aps_users::User,
+    conn: &mut SqliteConnection,
+) -> aps_procedure_templates::ProcedureTemplate {
+    use procedure_traits::ProcedureTemplateNode;
+
+    // First, we create the parent procedure template for making a pizza.
+    let make_pizza = procedure_template("Make a Pizza", user, conn);
+
+    // We create the asset models involved in the procedure template.
+    let dough_model = asset_model("Pizza Dough", user, conn);
+    let mozzarella_model = asset_model("Mozzarella Cheese", user, conn);
+    let mushrooms_model = asset_model("Mushrooms", user, conn);
+    let artichokes_model = asset_model("Artichokes", user, conn);
+    let ham_model = asset_model("Ham", user, conn);
+    let tofu_model = asset_model("Tofu", user, conn);
+    let olives_model = asset_model("Olives", user, conn);
+    let veg_pizza_model = asset_model("Vegetarian Pizza", user, conn);
+    let omni_pizza_model = asset_model("Omnivore Pizza", user, conn);
+    let oven_model = asset_model("Oven", user, conn);
+
+    // We create each step.
+
+    // Step zero: Heat the oven.
+    let heat_oven = procedure_template("Heat Oven", user, conn);
+    let [oven_model_ptam] = heat_oven.requires_n([&oven_model], conn).unwrap();
+
+    // Step half: Prepare the ingredients and cut them as needed.
+    let prepare_ingredients = procedure_template("Prepare Ingredients", user, conn);
+    let [
+        mozzarella_model_ptam,
+        mushrooms_model_ptam,
+        artichokes_model_ptam,
+        ham_model_ptam,
+        tofu_model_ptam,
+        olives_model_ptam,
+    ] = prepare_ingredients
+        .requires_n(
+            [
+                &mozzarella_model,
+                &mushrooms_model,
+                &artichokes_model,
+                &ham_model,
+                &tofu_model,
+                &olives_model,
+            ],
+            conn,
+        )
         .unwrap();
+
+    // First step: Prepare the dough.
+    let prepare_dough = procedure_template("Prepare Dough", user, conn);
+    let [dough_ptam] = prepare_dough.requires_n([&dough_model], conn).unwrap();
+
+    // Second step, option 1: Add vegetarian toppings.
+    let add_vegetarian_toppings = procedure_template("Vegetarian Toppings", user, conn);
+    let [veg_pizza_model_ptam] =
+        add_vegetarian_toppings.requires_n([&veg_pizza_model], conn).unwrap();
+    add_vegetarian_toppings
+        .reuses(
+            [
+                &mozzarella_model_ptam,
+                &mushrooms_model_ptam,
+                &artichokes_model_ptam,
+                &tofu_model_ptam,
+                &olives_model_ptam,
+                &dough_ptam,
+            ],
+            conn,
+        )
+        .unwrap();
+    // Second step, option 2: Add omnivore toppings.
+    let add_omnivore_toppings = procedure_template("Omnivore Toppings", user, conn);
+    let [omni_pizza_model_ptam] =
+        add_omnivore_toppings.requires_n([&omni_pizza_model], conn).unwrap();
+    add_omnivore_toppings
+        .reuses(
+            [
+                &mozzarella_model_ptam,
+                &mushrooms_model_ptam,
+                &artichokes_model_ptam,
+                &ham_model_ptam,
+                &olives_model_ptam,
+            ],
+            conn,
+        )
+        .unwrap();
+
+    // Bake the pizza.
+    let bake_veg_pizza = procedure_template("Bake Vegetarian Pizza", user, conn);
+    bake_veg_pizza.reuses([&oven_model_ptam, &veg_pizza_model_ptam], conn).unwrap();
+    let bake_omni_pizza = procedure_template("Bake Omnivore Pizza", user, conn);
+    bake_omni_pizza.reuses([&oven_model_ptam, &omni_pizza_model_ptam], conn).unwrap();
+
+    // Next, we create the individual steps, and we use the traits defined in
+    // the `procedure-traits` crate to set up the relationships between them.
+    // First, we define the sequence for the vegetarian path.
+    make_pizza
+        .extend([&heat_oven, &prepare_dough, &add_vegetarian_toppings, &bake_veg_pizza], user, conn)
+        .expect("Failed to extend 'Make a Pizza' procedure template, vegetarian path");
+    // Then, we define the sequence for the omnivore path.
+    make_pizza
+        .extend([&prepare_dough, &add_omnivore_toppings, &bake_omni_pizza], user, conn)
+        .expect("Failed to extend 'Make a Pizza' procedure template, omnivore path");
     make_pizza
 }

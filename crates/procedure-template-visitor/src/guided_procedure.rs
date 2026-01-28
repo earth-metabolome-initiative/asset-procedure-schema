@@ -17,16 +17,16 @@ pub struct GuidedProcedure<'graph, C> {
 
 impl<'graph, C> GuidedProcedure<'graph, C> {
     /// Creates a new `GuidedProcedureBuilder` instance.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `graph` - A reference to the `ProcedureTemplateGraph` representing the
     ///   procedure template structure.
     /// * `author` - A reference to the `User` who is authoring the procedure.
     /// * `connection` - A mutable reference to the database connection.
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// A new instance of `GuidedProcedure`.
     #[must_use]
     pub fn new(

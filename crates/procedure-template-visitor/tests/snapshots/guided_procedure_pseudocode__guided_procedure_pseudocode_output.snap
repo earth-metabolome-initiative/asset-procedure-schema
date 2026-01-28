@@ -1,0 +1,39 @@
+---
+source: crates/procedure-template-visitor/tests/guided_procedure_pseudocode.rs
+expression: pseudocode
+---
+let make_a_pizza = GuidedProcedure::new()
+    .author(author)
+    .graph(&procedure_graph)
+    .connection(portal_conn)
+    .try_into()?;
+make_a_pizza
+    .and_then::<
+        procedure_templates,
+        core::convert::Infallible,
+    >(|mut builder, conn| {
+        todo!("Implement the logic for \"Make a Pizza\"");
+        Ok(builder)
+    })?
+    .and_then::<
+        procedure_templates,
+        core::convert::Infallible,
+    >(|mut builder, conn| {
+        todo!("Implement the logic for \"Prepare Dough\"");
+        Ok(builder)
+    })?
+    .and_then::<
+        procedure_templates,
+        core::convert::Infallible,
+    >(|mut builder, conn| {
+        todo!("Implement the logic for \"Add Toppings\"");
+        Ok(builder)
+    })?
+    .and_then::<
+        procedure_templates,
+        core::convert::Infallible,
+    >(|mut builder, conn| {
+        todo!("Implement the logic for \"Bake Pizza\"");
+        Ok(builder)
+    })?
+    .finish()?;
