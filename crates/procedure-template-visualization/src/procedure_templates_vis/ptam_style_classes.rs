@@ -1,5 +1,5 @@
 //! Submodule providing a method returning the procedure template asset
-//! models [`StyleClass`] objects.
+//! models `StyleClass` objects.
 
 use aps_procedure_template_asset_models::ProcedureTemplateAssetModel;
 use diesel::Identifiable;
