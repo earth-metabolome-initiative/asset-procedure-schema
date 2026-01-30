@@ -1,6 +1,6 @@
 CREATE TABLE procedure_asset_models (
 	-- The ID of this procedure_id asset.
-	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY DEFAULT uuidv7(),
 	-- The ID of the procedure_id this asset is used in.
 	procedure_id UUID NOT NULL REFERENCES procedures(id),
 	-- The procedure_id template of the procedure_id this asset is used in.

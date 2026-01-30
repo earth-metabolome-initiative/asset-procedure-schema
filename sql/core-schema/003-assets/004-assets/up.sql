@@ -2,7 +2,7 @@
 -- and facilitate DAG traversal.
 CREATE TABLE asset_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
 CREATE TABLE assets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     asset_table_id TEXT DEFAULT 'assets' NOT NULL REFERENCES asset_tables(id),
     name VARCHAR(255) CHECK (name <> ''),
     description TEXT CHECK (description <> ''),
@@ -18,3 +18,14 @@ CREATE TABLE assets (
     UNIQUE (name, model_id)
 );
 INSERT INTO asset_tables (id) VALUES ('assets') ON CONFLICT DO NOTHING;
+
+CREATE OR REPLACE FUNCTION update_assets_edited_at() RETURNS TRIGGER AS $$
+BEGIN
+    NEW.edited_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_assets_edited_at
+BEFORE UPDATE ON assets
+FOR EACH ROW EXECUTE FUNCTION update_assets_edited_at();

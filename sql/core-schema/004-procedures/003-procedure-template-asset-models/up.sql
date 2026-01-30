@@ -1,7 +1,7 @@
 -- Table to store procedure template asset models
 CREATE TABLE procedure_template_asset_models (
 	-- Identifier of the procedure template asset model
-	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY DEFAULT uuidv7(),
 	-- The name of the procedure template asset model
 	name TEXT NOT NULL CHECK (name <> ''),
 	-- Procedure template this asset model is associated with
@@ -24,6 +24,7 @@ CREATE TABLE procedure_template_asset_models (
 	-- keys from the concrete procedures to check that the asset model is correctly aligned.
 	UNIQUE (id, asset_model_id)
 );
+
 -- Table to track reused procedure template asset models across different procedure templates
 CREATE TABLE reused_procedure_template_asset_models (
 	-- Procedure template this reused asset model is associated with

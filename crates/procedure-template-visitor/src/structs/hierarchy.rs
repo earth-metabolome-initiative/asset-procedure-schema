@@ -143,3 +143,94 @@ pub trait HierarchyLike: AsRef<Hierarchy> {
 }
 
 impl<T: AsRef<Hierarchy>> HierarchyLike for T {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pizza_sequential_hierarchy() {
+        use aps_test_utils::*;
+        let mut conn = aps_conn();
+
+        let user = user(&mut conn);
+        let procedure_template = pizza_procedure_template(&user, &mut conn);
+        let hierarchy = Hierarchy::new(&procedure_template, &mut conn).unwrap();
+        assert_eq!(
+            hierarchy.number_of_procedure_templates(),
+            4,
+            "There are seven procedure templates in the pizza tree hierarchy."
+        );
+
+        // We check that the root procedure template is indeed the pizza procedure
+        // template.
+        assert_eq!(hierarchy.root_procedure_template(), &procedure_template);
+
+        // We check that the root procedure template is not a leaf.
+        assert!(!hierarchy.is_leaf(&procedure_template));
+
+        // We check that the number of neighbours of the root procedure template is 3.
+        let root_node_id = hierarchy.procedure_node_id(&procedure_template);
+        let successors: Vec<_> = hierarchy
+            .hierarchy
+            .successors(root_node_id)
+            .map(|id| hierarchy.hierarchy.nodes_vocabulary()[id].clone())
+            .collect();
+        assert_eq!(
+            successors.len(),
+            3,
+            "The root procedure template has three sub-procedure templates."
+        );
+
+        // We check that all successors are leaves.
+        for successor in successors {
+            assert!(
+                hierarchy.is_leaf(&successor),
+                "All sub-procedure templates of the root are leaves."
+            );
+        }
+    }
+
+    #[test]
+    fn test_pizza_tree_hierarchy() {
+        use aps_test_utils::*;
+        let mut conn = aps_conn();
+
+        let user = user(&mut conn);
+        let procedure_template = pizza_four_season_procedure_template(&user, &mut conn);
+        let hierarchy = Hierarchy::new(&procedure_template, &mut conn).unwrap();
+        assert_eq!(
+            hierarchy.number_of_procedure_templates(),
+            7,
+            "There are seven procedure templates in the pizza tree hierarchy."
+        );
+
+        // We check that the root procedure template is indeed the pizza tree procedure
+        // template.
+        assert_eq!(hierarchy.root_procedure_template(), &procedure_template);
+
+        // We check that the root procedure template is not a leaf.
+        assert!(!hierarchy.is_leaf(&procedure_template));
+
+        // We check that the number of neighbours of the root procedure template is 6.
+        let root_node_id = hierarchy.procedure_node_id(&procedure_template);
+        let successors: Vec<_> = hierarchy
+            .hierarchy
+            .successors(root_node_id)
+            .map(|id| hierarchy.hierarchy.nodes_vocabulary()[id].clone())
+            .collect();
+        assert_eq!(
+            successors.len(),
+            6,
+            "The root procedure template has six sub-procedure templates."
+        );
+
+        // We check that all successors are leaves.
+        for successor in successors {
+            assert!(
+                hierarchy.is_leaf(&successor),
+                "All sub-procedure templates of the root are leaves."
+            );
+        }
+    }
+}

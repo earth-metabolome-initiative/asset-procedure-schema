@@ -30,6 +30,7 @@ impl Hierarchy {
     pub(crate) fn ownership<C>(&self, conn: &mut C) -> Result<Ownership, diesel::result::Error>
     where
         (reused_procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
+        (procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
         ProcedureTemplateAssetModel: FKProcedureTemplateAssetModelsProcedureTemplateId<C>
             + FKProcedureTemplateAssetModelsAssetModelId<C>,
         ReusedProcedureTemplateAssetModel:
@@ -45,10 +46,19 @@ impl Hierarchy {
                     (*procedure_template.id(),),
                     conn,
                 )?;
+            let mut used_ptams =
+                <(procedure_template_asset_models::procedure_template_id,)>::load_many(
+                    (*procedure_template.id(),),
+                    conn,
+                )
+                .unwrap();
 
             for reused_ptam in reused_ptams {
                 let ptam = reused_ptam.procedure_template_asset_model(conn)?;
+                used_ptams.push(ptam);
+            }
 
+            for ptam in used_ptams {
                 // If the owner of the procedure template asset model is not in
                 // the hierarchy, add it to the foreign procedure templates.
                 if self

@@ -9,7 +9,9 @@ use aps_procedure_templates::{ProcedureTemplateTableModel, procedure_templates};
 use aps_reused_procedure_template_asset_models::*;
 use aps_users::users;
 use diesel::associations::HasTable;
-use diesel_builders::{BuildableTable, DescendantOf, GetColumn, Insert, TableBuilder};
+use diesel_builders::{
+    BuildableTable, DescendantOf, GetColumn, Insert, MayGetColumn, TableBuilder,
+};
 
 /// Trait defining the methods for managing parent-child relationships in
 /// procedure templates.
@@ -70,15 +72,21 @@ pub trait ProcedureTemplateNode:
     {
         let mut ptams = Vec::new();
         for asset_model in asset_models {
-            ptams.push(aps_procedure_template_asset_models::procedure_template_asset_models::table::builder()
+            let builder = aps_procedure_template_asset_models::procedure_template_asset_models::table::builder()
                 .procedure_template_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))
                 .try_name(asset_model.name())?
                 .asset_model_id(
                     <AMS::Item as GetColumn<aps_asset_models::asset_models::id>>::get_column(
                         &asset_model,
                     ),
-                )
-                .insert(conn)?);
+                );
+            println!(
+                "Creating with ID {:?}",
+                <TableBuilder<procedure_template_asset_models::table> as MayGetColumn<
+                    procedure_template_asset_models::id,
+                >>::may_get_column(&builder)
+            );
+            ptams.push(builder.insert(conn).unwrap());
         }
         Ok(ptams)
     }
@@ -336,7 +344,8 @@ pub trait ProcedureTemplateNode:
             .try_predecessor_id(<L as GetColumn<procedure_templates::id>>::get_column(predecessor))?
             .try_successor_id(<R as GetColumn<procedure_templates::id>>::get_column(successor))?
             .creator_id(user.get_column())
-            .insert(conn)?)
+            .insert(conn)
+            .unwrap())
     }
 
     /// Creates sequential relationships between a series of procedure

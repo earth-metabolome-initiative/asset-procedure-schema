@@ -13,6 +13,7 @@ use aps_parent_procedure_templates::{
 use aps_procedure_template_asset_models::{
     FKProcedureTemplateAssetModelsAssetModelId, FKProcedureTemplateAssetModelsProcedureTemplateId,
     GetProcedureTemplateAssetModelName, ProcedureTemplateAssetModel,
+    procedure_template_asset_models,
 };
 use aps_procedure_templates::{GetProcedureTemplateName, ProcedureTemplate};
 use aps_reused_procedure_template_asset_models::{
@@ -412,6 +413,7 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
 impl<C> MermaidDB<C> for ProcedureTemplate
 where
     (reused_procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
+    (procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
     ReusedProcedureTemplateAssetModel:
         FKReusedProcedureTemplateAssetModelsProcedureTemplateId<C>
             + FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId<C>,

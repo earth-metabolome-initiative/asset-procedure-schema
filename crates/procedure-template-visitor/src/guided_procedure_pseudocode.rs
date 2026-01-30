@@ -77,8 +77,7 @@ impl<'graph> GuidedProcedurePseudocode<'graph> {
     ///     .expect("Failed to create ProcedureTemplateGraph");
     /// let guided_pseudocode = GuidedProcedurePseudocode::new(&graph, false)
     ///     .expect("Failed to create GuidedProcedurePseudocode");
-    /// let pseudocode = guided_pseudocode.pseudocode::<Infallible>().unwrap();
-    /// println!("{}", pseudocode);
+    /// let _pseudocode = guided_pseudocode.pseudocode::<Infallible>().unwrap();
     /// ```
     pub fn pseudocode<E>(mut self) -> Result<String, GuidedProcedurePseudocodeError> {
         let root_procedure_template = self.visitor.graph().root_procedure_template();

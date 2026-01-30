@@ -3,7 +3,7 @@
 CREATE TABLE procedure_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
 CREATE TABLE procedures (
 	-- The ID of this procedure.
-	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY DEFAULT uuidv7(),
 	-- The procedure_id template of this procedure.
 	procedure_template_id UUID NOT NULL REFERENCES procedure_templates(id),
 	-- The parent_id procedure_id (if any) of this procedure.
@@ -95,3 +95,14 @@ CREATE TABLE procedures (
 	)
 );
 INSERT INTO procedure_tables (id) VALUES ('procedures') ON CONFLICT DO NOTHING;
+
+CREATE OR REPLACE FUNCTION update_procedures_edited_at() RETURNS TRIGGER AS $$
+BEGIN
+    NEW.edited_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_procedures_edited_at
+BEFORE UPDATE ON procedures
+FOR EACH ROW EXECUTE FUNCTION update_procedures_edited_at();

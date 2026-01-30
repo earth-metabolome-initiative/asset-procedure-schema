@@ -1,13 +1,15 @@
 //! Test utilities for APS crates.
 
 use aps_asset_models::*;
+use aps_container_models::{ContainerModel, container_models};
+use aps_physical_asset_models::{PhysicalAssetModel, physical_asset_models};
 use aps_procedure_templates::*;
 use aps_users::*;
 use diesel::{Connection, SqliteConnection, connection::SimpleConnection};
 use diesel_builders::{TableBuilder, prelude::*};
 use pg2sqlite::{
     prelude::{Pg2Sqlite, Pg2SqliteOptions},
-    traits::TranslationOptions,
+    traits::{TranslationOptions, UuidRepresentation},
 };
 
 /// Creates an in-memory SQLite connection by translating the PostgreSQL
@@ -32,7 +34,12 @@ pub fn aps_conn() -> SqliteConnection {
     .join("../../");
     let translated = Pg2Sqlite::ups(root)
         .expect("Failed to get PostgreSQL migrations")
-        .translate(&Pg2SqliteOptions::default().remove_unsupported_check_constraints())
+        .translate(
+            &Pg2SqliteOptions::default()
+                .remove_unsupported_check_constraints()
+                .with_uuid_representation(UuidRepresentation::Blob)
+                .use_pure_sql_for_uuid(),
+        )
         .expect("Failed to translate the PostgreSQL schema");
     let mut connection = SqliteConnection::establish(":memory:")
         .expect("Failed to create in-memory SQLite database");
@@ -112,7 +119,14 @@ pub fn asset_model<C>(name: &str, user: &aps_users::User, conn: &mut C) -> Asset
 where
     TableBuilder<users::table>: Insert<C>,
     TableBuilder<asset_models::table>: Insert<C>,
+    (asset_models::name,): LoadFirst<C>,
 {
+    // We try to load an existing asset model with the same name to avoid duplicates
+    // in tests that create multiple asset models with the same name.
+    if let Ok(existing) = <(asset_models::name,)>::load_first((name,), conn) {
+        return existing;
+    }
+
     asset_models::table::builder()
         .try_name(name)
         .expect("Failed to set asset model name")
@@ -150,11 +164,15 @@ pub fn physical_asset_model<C>(
     name: &str,
     user: &aps_users::User,
     conn: &mut C,
-) -> aps_physical_asset_models::PhysicalAssetModel
+) -> (AssetModel, (PhysicalAssetModel,))
 where
-    TableBuilder<users::table>: Insert<C>,
     TableBuilder<aps_physical_asset_models::physical_asset_models::table>: Insert<C>,
+    (asset_models::name,): LoadNestedFirst<physical_asset_models::table, C>,
 {
+    if let Ok(existing) = <(asset_models::name,)>::load_nested_first((name,), conn) {
+        return existing;
+    }
+
     aps_physical_asset_models::physical_asset_models::table::builder()
         .try_name(name)
         .expect("Failed to set physical asset model name")
@@ -162,7 +180,7 @@ where
         .expect("Failed to set physical asset model description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
-        .insert(conn)
+        .insert_nested(conn)
         .expect("Failed to create test physical asset model")
 }
 
@@ -191,19 +209,23 @@ pub fn container_model<C>(
     name: &str,
     user: &aps_users::User,
     conn: &mut C,
-) -> aps_container_models::ContainerModel
+) -> (AssetModel, (PhysicalAssetModel, (ContainerModel,)))
 where
-    TableBuilder<users::table>: Insert<C>,
-    TableBuilder<aps_container_models::container_models::table>: Insert<C>,
+    TableBuilder<container_models::table>: Insert<C>,
+    (asset_models::name,): LoadNestedFirst<container_models::table, C>,
 {
-    aps_container_models::container_models::table::builder()
+    if let Ok(existing) = <(asset_models::name,)>::load_nested_first((name,), conn) {
+        return existing;
+    }
+
+    container_models::table::builder()
         .try_name(name)
         .expect("Failed to set container model name")
         .try_description("A test container model")
         .expect("Failed to set container model description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
-        .insert(conn)
+        .insert_nested(conn)
         .expect("Failed to create test container model")
 }
 
@@ -228,16 +250,17 @@ where
 /// let test_user = user(&mut conn);
 /// let _test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
 /// ```
-pub fn procedure_template<C>(
-    name: &str,
-    user: &aps_users::User,
-    conn: &mut C,
-) -> aps_procedure_templates::ProcedureTemplate
+pub fn procedure_template<C>(name: &str, user: &aps_users::User, conn: &mut C) -> ProcedureTemplate
 where
     TableBuilder<users::table>: Insert<C>,
-    TableBuilder<aps_procedure_templates::procedure_templates::table>: Insert<C>,
+    TableBuilder<procedure_templates::table>: Insert<C>,
+    (procedure_templates::name,): LoadFirst<C>,
 {
-    aps_procedure_templates::procedure_templates::table::builder()
+    if let Ok(existing) = <(procedure_templates::name,)>::load_first((name,), conn) {
+        return existing;
+    }
+
+    procedure_templates::table::builder()
         .try_name(name)
         .expect("Failed to set procedure template name")
         .try_description("A test procedure template")
@@ -277,7 +300,7 @@ where
 pub fn pizza_procedure_template(
     user: &aps_users::User,
     conn: &mut SqliteConnection,
-) -> aps_procedure_templates::ProcedureTemplate {
+) -> ProcedureTemplate {
     use procedure_traits::ProcedureTemplateNode;
 
     // First, we create the parent procedure template for making a pizza.
@@ -344,11 +367,11 @@ pub fn pizza_procedure_template(
 pub fn pizza_four_season_procedure_template(
     user: &aps_users::User,
     conn: &mut SqliteConnection,
-) -> aps_procedure_templates::ProcedureTemplate {
+) -> ProcedureTemplate {
     use procedure_traits::ProcedureTemplateNode;
 
     // First, we create the parent procedure template for making a pizza.
-    let make_pizza = procedure_template("Make a Pizza", user, conn);
+    let make_pizza = procedure_template("Make a Four Seasons Pizza", user, conn);
 
     // We create the asset models involved in the procedure template.
     let dough_model = asset_model("Pizza Dough", user, conn);

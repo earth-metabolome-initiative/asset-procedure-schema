@@ -63,7 +63,16 @@ impl ProcedureTemplateGraph {
     ///     4,
     ///     "There are four procedure templates in the pizza procedure template graph."
     /// );
-    /// assert_eq!(&procedure_template, procedure_template_graph.root_procedure_template(),);
+    /// assert_eq!(
+    ///     &procedure_template,
+    ///     procedure_template_graph.root_procedure_template(),
+    ///     "The root procedure template is the pizza procedure template."
+    /// );
+    /// assert_eq!(
+    ///     procedure_template_graph.number_of_procedure_template_asset_models(),
+    ///     8,
+    ///     "There are four procedure template asset models in the pizza procedure template graph."
+    /// );
     /// ```
     pub fn new<C>(
         procedure_template: &ProcedureTemplate,
@@ -71,6 +80,7 @@ impl ProcedureTemplateGraph {
     ) -> Result<Self, diesel::result::Error>
     where
         (reused_procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
+        (procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
         ReusedProcedureTemplateAssetModel:
             FKReusedProcedureTemplateAssetModelsProcedureTemplateId<C>
                 + FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId<C>,
@@ -104,6 +114,27 @@ impl AsRef<Ownership> for ProcedureTemplateGraph {
 impl ProcedureTemplateGraph {
     /// Returns whether the associated procedure template graph is a simple path
     /// which does not branch.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use aps_test_utils::{
+    ///     aps_conn, pizza_four_season_procedure_template, pizza_procedure_template, user,
+    /// };
+    /// use procedure_template_visitor::ProcedureTemplateGraph;
+    ///
+    /// let mut conn = aps_conn();
+    /// let author = user(&mut conn);
+    /// let procedure_template = pizza_procedure_template(&author, &mut conn);
+    /// let procedure_template_graph =
+    ///     ProcedureTemplateGraph::new(&procedure_template, &mut conn).unwrap();
+    /// assert!(procedure_template_graph.is_simple_path());
+    ///
+    /// let procedure_template = pizza_four_season_procedure_template(&author, &mut conn);
+    /// let procedure_template_graph =
+    ///     ProcedureTemplateGraph::new(&procedure_template, &mut conn).unwrap();
+    /// assert!(!procedure_template_graph.is_simple_path());
+    /// ```
     #[must_use]
     pub fn is_simple_path(&self) -> bool {
         self.task_graphs.iter().all(
@@ -123,6 +154,12 @@ impl ProcedureTemplateGraph {
     #[must_use]
     pub fn number_of_procedure_templates(&self) -> usize {
         self.hierarchy.number_of_procedure_templates()
+    }
+
+    /// Returns the number of procedure template asset models in the graph.
+    #[must_use]
+    pub fn number_of_procedure_template_asset_models(&self) -> usize {
+        self.ownership.number_of_procedure_template_asset_models()
     }
 
     /// Returns whether the provided procedure template asset model is owned by
@@ -257,7 +294,12 @@ impl ProcedureTemplateGraph {
             } else {
                 // If the current node does not have predecessors, it means we need to move to
                 // the parent's predecessors.
-                let (grand_parent, parents) = parents.split_last().unwrap();
+                let Some((grand_parent, parents)) = parents.split_last() else {
+                    unreachable!(
+                        "There must be a grand parent if the parent has no predecessors for `{}`.",
+                        current.name()
+                    )
+                };
                 let grand_parent_task_graph = self.task_graph_of(grand_parent).expect(
                     "Grand parent procedure template must have a task graph if the parent's does not.",
                 );

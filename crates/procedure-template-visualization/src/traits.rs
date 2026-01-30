@@ -19,5 +19,19 @@ pub trait MermaidDB<C> {
     ///
     /// * If the conversion to a Mermaid diagram fails.
     /// * If the database connection fails.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use std::convert::Infallible;
+    ///
+    /// use aps_test_utils::{aps_conn, pizza_procedure_template, user};
+    /// use procedure_template_visualization::MermaidDB;
+    ///
+    /// let mut conn = aps_conn();
+    /// let author = user(&mut conn);
+    /// let procedure_template = pizza_procedure_template(&author, &mut conn);
+    /// let _diagram = procedure_template.to_mermaid(&mut conn).expect("Cannot make mermaid pizza!");
+    /// ```
     fn to_mermaid(&self, conn: &mut C) -> Result<Self::Diagram, Self::Error>;
 }

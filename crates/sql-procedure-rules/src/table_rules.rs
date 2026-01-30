@@ -15,3 +15,5 @@ mod reused_procedure_template_asset_models_foreign_key;
 pub use reused_procedure_template_asset_models_foreign_key::ReusedProcedureTemplateAssetModelsForeignKey;
 mod reused_procedure_template_asset_models_trigger;
 pub use reused_procedure_template_asset_models_trigger::ReusedProcedureTemplateAssetModelsTrigger;
+mod update_timestamp_trigger;
+pub use update_timestamp_trigger::UpdateTimestampTrigger;

@@ -3,7 +3,7 @@
 CREATE TABLE procedure_template_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
 CREATE TABLE procedure_templates (
 	-- Identifier of the procedure_id template
-	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY DEFAULT uuidv7(),
 	-- The most concrete table variant descendant of this procedure_id template,
 	-- which allows for rapidly determining the type of a procedure_id template
 	-- without having to execute multiple queries.
@@ -28,3 +28,14 @@ CREATE TABLE procedure_templates (
 	CHECK (name <> description)
 );
 INSERT INTO procedure_template_tables (id) VALUES ('procedure_templates') ON CONFLICT DO NOTHING;
+
+CREATE OR REPLACE FUNCTION update_procedure_templates_edited_at() RETURNS TRIGGER AS $$
+BEGIN
+    NEW.edited_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_procedure_templates_edited_at
+BEFORE UPDATE ON procedure_templates
+FOR EACH ROW EXECUTE FUNCTION update_procedure_templates_edited_at();

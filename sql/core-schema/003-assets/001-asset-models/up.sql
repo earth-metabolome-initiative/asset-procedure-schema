@@ -2,7 +2,7 @@
 -- and facilitate DAG traversal.
 CREATE TABLE asset_model_tables (id TEXT PRIMARY KEY CHECK (id <> ''));
 CREATE TABLE asset_models (
-	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	id UUID PRIMARY KEY DEFAULT uuidv7(),
 	asset_model_table_id TEXT DEFAULT 'asset_models' NOT NULL REFERENCES asset_model_tables(id),
 	name VARCHAR(255) NOT NULL UNIQUE CHECK (name <> ''),
 	description TEXT NOT NULL CHECK (description <> ''),
@@ -17,6 +17,18 @@ CREATE TABLE asset_models (
 	UNIQUE (id, parent_model_id)
 );
 INSERT INTO asset_model_tables (id) VALUES ('asset_models') ON CONFLICT DO NOTHING;
+
+CREATE OR REPLACE FUNCTION update_asset_models_edited_at() RETURNS TRIGGER AS $$
+BEGIN
+    NEW.edited_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_asset_models_edited_at
+BEFORE UPDATE ON asset_models
+FOR EACH ROW EXECUTE FUNCTION update_asset_models_edited_at();
+
 CREATE TABLE asset_model_ancestors (
 	descendant_model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,
 	ancestor_model_id UUID NOT NULL REFERENCES asset_models(id) ON DELETE CASCADE,

@@ -35,6 +35,7 @@ pub fn register_procedure_constraints<DB: sql_traits::traits::DatabaseLike + 'st
     constrainer.register_table_rule(Box::new(
         table_rules::ProcedureTemplateDescendantNaming::<DB>::default(),
     ));
+    constrainer.register_table_rule(Box::new(table_rules::UpdateTimestampTrigger::<DB>::default()));
 
     constrainer
         .register_column_rule(Box::new(column_rules::AssetColumnNaming::<DB::Column>::default()));
