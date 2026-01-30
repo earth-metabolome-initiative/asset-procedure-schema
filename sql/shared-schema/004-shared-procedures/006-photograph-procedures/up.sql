@@ -141,4 +141,4 @@ CREATE TABLE photograph_procedures (
 	-- We check that the `procedure_photograph` is associated to the `photograph`.
 	FOREIGN KEY (photograph_id, photograph_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('photograph_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('photograph_procedures') ON CONFLICT DO NOTHING;

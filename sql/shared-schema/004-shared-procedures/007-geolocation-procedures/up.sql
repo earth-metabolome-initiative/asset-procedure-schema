@@ -108,4 +108,4 @@ CREATE TABLE geopositioning_procedures (
 	-- We check that the `procedure_geopositioned_with` is associated to the `geopositioned_with`.
 	FOREIGN KEY (geopositioned_with_id, geopositioned_with_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('geopositioning_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('geopositioning_procedures') ON CONFLICT DO NOTHING;

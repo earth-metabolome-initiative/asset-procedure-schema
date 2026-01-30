@@ -4,7 +4,7 @@
 //! procedure_template_{am}).
 
 use sql_rules::{error::RuleErrorInfo, prelude::*};
-use sql_traits::traits::{DatabaseLike, TableLike, UniqueIndexLike};
+use sql_traits::traits::{DatabaseLike, TableLike};
 
 use crate::{
     column_rules::PROCEDURE_TEMPLATE_ASSET_MODELS_TABLE_NAME,

@@ -144,4 +144,4 @@ CREATE TABLE centrifuge_procedures (
 		centrifuged_with_model_id
 	) REFERENCES procedure_asset_models(id, asset_model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('centrifuge_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('centrifuge_procedures') ON CONFLICT DO NOTHING;

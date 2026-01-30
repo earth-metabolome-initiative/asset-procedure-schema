@@ -142,4 +142,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER aliquoting_procedure_templates_rptam_insert_trigger
 AFTER INSERT ON aliquoting_procedure_templates
 FOR EACH ROW EXECUTE FUNCTION aliquoting_procedure_templates_rptam_insert_fn();
-INSERT INTO procedure_tables (id) VALUES ('aliquoting_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('aliquoting_procedures') ON CONFLICT DO NOTHING;

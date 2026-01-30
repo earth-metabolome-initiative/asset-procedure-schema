@@ -155,4 +155,4 @@ CREATE TABLE pouring_procedures (
 	FOREIGN KEY (procedure_measured_with_id, measured_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
 	FOREIGN KEY (measured_with_id, measured_with_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('pouring_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('pouring_procedures') ON CONFLICT DO NOTHING;

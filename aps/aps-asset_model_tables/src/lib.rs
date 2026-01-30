@@ -1,4 +1,4 @@
-//! Auto-generated crate for the `asset_model_tables` table.
+//! Auto-generated crate for the `ownables` table.
 #[derive(
     Clone,
     Default,
@@ -17,13 +17,13 @@
 )]
 /// and facilitate DAG traversal.
 # [table_model (error = :: validation_errors :: ValidationError)]
-# [diesel (table_name = asset_model_tables)]
+# [diesel (table_name = ownables)]
 pub struct AssetModelTable {
     /// and facilitate DAG traversal.
     id: String,
 }
-impl ::diesel_builders::ValidateColumn<asset_model_tables::id>
-    for <asset_model_tables::table as ::diesel_builders::TableExt>::NewValues
+impl ::diesel_builders::ValidateColumn<ownables::id>
+    for <ownables::table as ::diesel_builders::TableExt>::NewValues
 {
     type Error = ::validation_errors::ValidationError;
     #[inline]
@@ -31,8 +31,8 @@ impl ::diesel_builders::ValidateColumn<asset_model_tables::id>
         use diesel::Column;
         if id.is_empty() {
             return Err(::validation_errors::ValidationError::empty(
-                "asset_model_tables",
-                crate::asset_model_tables::id::NAME,
+                "ownables",
+                crate::ownables::id::NAME,
             ));
         }
         Ok(())

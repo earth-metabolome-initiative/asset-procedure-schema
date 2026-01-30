@@ -150,4 +150,4 @@ CREATE TABLE supernatant_procedures (
 		procedure_template_transferred_with_model_id
 	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('supernatant_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('supernatant_procedures') ON CONFLICT DO NOTHING;

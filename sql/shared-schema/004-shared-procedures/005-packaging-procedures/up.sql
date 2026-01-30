@@ -106,4 +106,4 @@ CREATE TABLE packaging_procedures (
 	-- We check that the `procedure_sample` is associated to the `sample_model`.
 	FOREIGN KEY (procedure_sample_id, sample_model_id) REFERENCES procedure_asset_models(id, asset_model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('packaging_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('packaging_procedures') ON CONFLICT DO NOTHING;

@@ -121,4 +121,4 @@ CREATE TABLE freezing_procedures (
 	FOREIGN KEY (procedure_frozen_with_id, frozen_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
 	FOREIGN KEY (frozen_with_id, frozen_with_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('freezing_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('freezing_procedures') ON CONFLICT DO NOTHING;

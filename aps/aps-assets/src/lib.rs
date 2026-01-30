@@ -17,9 +17,9 @@
 )]
 /// Struct representing a row in the `assets` table.
 # [table_model (error = :: validation_errors :: ValidationError)]
-# [diesel (belongs_to (aps_asset_tables :: AssetTable , foreign_key = asset_table_id))]
+# [diesel (belongs_to (aps_ownables :: AssetTable , foreign_key = asset_table_id))]
 # [diesel (belongs_to (aps_asset_models :: AssetModel , foreign_key = model_id))]
-# [table_model (foreign_key ((asset_table_id ,) , (:: aps_asset_tables :: asset_tables :: id)))]
+# [table_model (foreign_key ((asset_table_id ,) , (:: aps_ownables :: ownables :: id)))]
 # [table_model (foreign_key ((model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
 # [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
 # [table_model (foreign_key ((editor_id ,) , (:: aps_users :: users :: id)))]

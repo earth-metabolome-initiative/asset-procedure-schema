@@ -142,4 +142,4 @@ CREATE TABLE freeze_drying_procedures (
 		freeze_dried_with_model_id
 	) REFERENCES procedure_asset_models(id, asset_model_id)
 );
-INSERT INTO procedure_tables (id) VALUES ('freeze_drying_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO ownable_tables (id) VALUES ('freeze_drying_procedures') ON CONFLICT DO NOTHING;

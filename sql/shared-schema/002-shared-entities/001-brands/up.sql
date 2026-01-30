@@ -1,6 +1,6 @@
 CREATE TABLE brands (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
-    name TEXT NOT NULL CHECK (name <> ''),
+    name TEXT NOT NULL CHECK (name <> '' AND length(name) <= 255),
     creator_id UUID NOT NULL REFERENCES users(id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     editor_id UUID NOT NULL REFERENCES users(id),

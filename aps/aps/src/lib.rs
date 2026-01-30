@@ -5,9 +5,7 @@ pub use aps_aliquoting_procedure_templates::{
 pub use aps_aliquoting_procedures::{self, AliquotingProcedure, aliquoting_procedures};
 pub use aps_asset_compatibility_rules::{self, AssetCompatibilityRule, asset_compatibility_rules};
 pub use aps_asset_model_ancestors::{self, AssetModelAncestor, asset_model_ancestors};
-pub use aps_asset_model_tables::{self, AssetModelTable, asset_model_tables};
 pub use aps_asset_models::{self, AssetModel, asset_models};
-pub use aps_asset_tables::{self, AssetTable, asset_tables};
 pub use aps_assets::{self, Asset, assets};
 pub use aps_ball_mill_machine_models::{self, BallMillMachineModel, ball_mill_machine_models};
 pub use aps_ball_mill_machines::{self, BallMillMachine, ball_mill_machines};
@@ -102,6 +100,7 @@ pub use aps_harvesting_procedure_templates::{
 };
 pub use aps_harvesting_procedures::{self, HarvestingProcedure, harvesting_procedures};
 pub use aps_next_procedure_templates::{self, NextProcedureTemplate, next_procedure_templates};
+pub use aps_ownables::{self, AssetModelTable, AssetTable, ownables};
 pub use aps_packaging_models::{self, PackagingModel, packaging_models};
 pub use aps_packaging_procedure_templates::{
     self, PackagingProcedureTemplate, packaging_procedure_templates,
