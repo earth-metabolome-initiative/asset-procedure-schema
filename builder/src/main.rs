@@ -120,8 +120,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
                 TomlDependency::new("procedure-template-visualization")
                     .path("crates/procedure-template-visualization")?,
                 TomlDependency::new("procedure-like").path("crates/procedure-like")?,
-                TomlDependency::new("pg-docker-migrations")
-                    .path("crates/pg-docker-migrations")?
+                TomlDependency::new("pg-docker-migrations").path("crates/pg-docker-migrations")?,
             ])
             .into();
 

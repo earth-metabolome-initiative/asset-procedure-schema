@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 
 use diesel::Connection;
+use rosetta_uuid::Uuid;
 use testcontainers::{
     ContainerAsync, GenericImage, ImageExt, TestcontainersError,
     core::{IntoContainerPort, WaitFor},
@@ -103,17 +104,18 @@ pub async fn connect<C: Connection>(
     Ok((docker, conn))
 }
 
-/// Setups a docker container, connects to the database, and applies migrations from the specified directory.
-/// 
+/// Setups a docker container, connects to the database, and applies migrations
+/// from the specified directory.
+///
 /// # Arguments
-/// 
+///
 /// * `database_name` - The name of the database.
 /// * `port` - The port of the database.
 /// * `migrations_dir` - The directory containing the migrations.
 /// * `last_migration` - The last migration to apply, optional.
-/// 
+///
 /// # Errors
-/// 
+///
 /// * If the connection cannot be established.
 /// * If the container cannot be started.
 /// * If the migrations cannot be applied.
@@ -133,7 +135,7 @@ pub async fn setup_database_with_rls_migrations<C: Connection, P: AsRef<std::pat
     port: u16,
     migrations_dir: P,
     last_migration: Option<P>,
-    user: &Uuid
+    user: &Uuid,
 ) -> Result<(ContainerAsync<GenericImage>, C), Box<dyn std::error::Error>> {
     let (docker, conn) = connect::<C>(database_name, port).await?;
     todo!()

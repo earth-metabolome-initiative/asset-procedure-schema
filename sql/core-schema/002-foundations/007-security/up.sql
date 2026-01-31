@@ -1,62 +1,111 @@
 
--- Function to check if a user can access a specific owner's data
--- This effectively replaces get_accessible_owner_ids with a boolean check
--- optimized for RLS and supporting system-wide roles.
-CREATE OR REPLACE FUNCTION can_access_owner(user_uuid UUID, target_owner_id UUID)
-RETURNS BOOLEAN
+-- Function to get the user's maximum role on a specific owner
+-- Returns: 0=None, 1=Anonymous (unused), 2=Viewer, 3=Editor, 4=Admin
+CREATE OR REPLACE FUNCTION get_owner_role(user_uuid UUID, target_owner_id UUID)
+RETURNS SMALLINT
 LANGUAGE plpgsql
 SECURITY DEFINER
+STABLE
 AS $$
 DECLARE
-    u_role SMALLINT;
+    max_role SMALLINT := 0;
 BEGIN
-    -- 1. Check System Admin
-    -- User with role_id >= 4 (Admin) in user_system_roles has full access
-    SELECT role_id INTO u_role FROM user_system_roles WHERE user_id = user_uuid;
-    
-    IF COALESCE(u_role, 0) >= 4 THEN
-        RETURN TRUE;
-    END IF;
-
-    -- 2. Direct Identity Check (Am I the owner?)
+    -- 1. Direct Identity (Am I the owner?)
     IF user_uuid = target_owner_id THEN
-        RETURN TRUE;
+        RETURN 4; -- Admin
     END IF;
 
-    -- 3. Team Membership & Grants
-    -- Check if user is a member of the target owner (if it's a team)
-    -- OR if access is granted via owner_grants
-    RETURN EXISTS (
-        WITH my_identities AS (
-            SELECT user_uuid AS id
-            UNION
-            SELECT team_id AS id
-            FROM team_members
-            WHERE member_id = user_uuid
-        )
-        SELECT 1
-        FROM my_identities
-        WHERE id = target_owner_id -- I am the owner (member of the owning team)
-        UNION
-        SELECT 1
+    -- 2. Team Membership & Grants
+    -- Calculate max role based on team membership (implicit Admin) and explicit grants
+    SELECT COALESCE(MAX(role_val), 0) INTO max_role
+    FROM (
+        -- A. Permissions from being a member of the target owner (if it is a team)
+        -- If I am a member of Team X, and Team X is the Target, I have Admin rights (4)
+        SELECT 4 as role_val
+        FROM team_members
+        WHERE team_id = target_owner_id AND member_id = user_uuid
+        
+        UNION ALL
+        
+        -- B. Permissions from Grants
+        -- Check grants given to Me or My Teams for the target_owner_id
+        SELECT role_id as role_val
         FROM owner_grants
         WHERE granted_owner_id = target_owner_id
-          AND grantee_owner_id IN (SELECT id FROM my_identities)
-    );
+        AND grantee_owner_id IN (
+            SELECT user_uuid -- Me
+            UNION ALL
+            SELECT team_id FROM team_members WHERE member_id = user_uuid -- My Teams
+        )
+    ) as sub;
+
+    RETURN max_role;
 END;
 $$;
 
 -- Enable RLS on Ownables
 ALTER TABLE ownables ENABLE ROW LEVEL SECURITY;
 
--- Policy: Users can see/edit ownables if they are the owner OR have been granted access to the owner
--- Note: This controls SELECT, INSERT, UPDATE, DELETE.
--- Fine-grained control (Viewer vs Editor) requires checking the 'role' in owner_grants,
--- which matches the specific operation.
--- For now, this is a coarse "Access" policy.
-CREATE POLICY ownables_access_policy ON ownables
-FOR ALL
+-- -----------------------------------------------------------------------------
+-- Policies (Permissions based on Role)
+-- -----------------------------------------------------------------------------
+
+-- SELECT: Requires Viewer (2) or higher
+CREATE POLICY ownables_select_policy ON ownables
+FOR SELECT
 TO PUBLIC
 USING (
-    can_access_owner(auth_current_user_id(), owner_id)
+    get_owner_role(auth_current_user_id(), owner_id) >= 2
 );
+
+-- INSERT: Requires Editor (3) or higher on the target owner
+CREATE POLICY ownables_insert_policy ON ownables
+FOR INSERT
+TO PUBLIC
+WITH CHECK (
+    get_owner_role(auth_current_user_id(), owner_id) >= 3
+);
+
+-- UPDATE: Requires Editor (3) or higher
+CREATE POLICY ownables_update_policy ON ownables
+FOR UPDATE
+TO PUBLIC
+USING (
+    get_owner_role(auth_current_user_id(), owner_id) >= 3
+)
+WITH CHECK (
+    get_owner_role(auth_current_user_id(), owner_id) >= 3
+);
+
+-- DELETE: Requires Admin (4) (or Owner/Team Member)
+CREATE POLICY ownables_delete_policy ON ownables
+FOR DELETE
+TO PUBLIC
+USING (
+    get_owner_role(auth_current_user_id(), owner_id) >= 4
+);
+
+-- -----------------------------------------------------------------------------
+-- Admin Role & Policies (Postgres Only)
+-- -----------------------------------------------------------------------------
+
+-- Safely create the 'app_admin' role if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'app_admin') THEN
+        CREATE ROLE app_admin WITH LOGIN;
+    END IF;
+END
+$$;
+
+-- Grant broad permissions to the admin role
+-- Note: 'ALTER DEFAULT PRIVILEGES' might be needed for future tables in a production setup
+GRANT ALL ON ALL TABLES IN SCHEMA public TO app_admin;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO app_admin;
+
+-- Admin Policy: Allow full unrestricted access to ownables
+CREATE POLICY admin_all_access ON ownables
+    FOR ALL
+    TO app_admin
+    USING (TRUE)
+    WITH CHECK (TRUE);

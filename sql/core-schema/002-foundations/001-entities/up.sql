@@ -29,9 +29,7 @@ CREATE TABLE entities (
     ),
     -- Privacy Level (1=Public, 2=Viewer, 3=Editor, 4=Admin)
     -- Defines the minimum role required to view the entity.
-    minimum_role_id SMALLINT NOT NULL DEFAULT 1 CHECK (
-        minimum_role_id BETWEEN 1 AND 4
-    ) REFERENCES roles(id),
+    minimum_role_id SMALLINT NOT NULL DEFAULT 1 REFERENCES roles(id),
     -- Time of creation, using UTC timezone
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     -- Time of last edit, using UTC timezone

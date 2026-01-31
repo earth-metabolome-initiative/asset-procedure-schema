@@ -3470,6 +3470,7 @@ name = "pg-docker-migrations"
 version = "0.1.0"
 dependencies = [
  "diesel",
+ "rosetta_uuid",
  "testcontainers",
 ]
 

@@ -6,7 +6,7 @@ edition.workspace = true
 [dependencies]
 testcontainers = { version = "0.26.3" }
 diesel.workspace = true
-uuid.workspace = true
+rosetta_uuid.workspace = true
 
 [lints]
 workspace = true
