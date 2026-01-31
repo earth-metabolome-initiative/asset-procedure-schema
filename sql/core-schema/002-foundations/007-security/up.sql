@@ -1,25 +1,50 @@
 
--- Function to get all owner IDs that a user has access to
--- This relies on the fact that `team_members` is flattened by triggers
-CREATE OR REPLACE FUNCTION get_accessible_owner_ids(user_uuid UUID) RETURNS SETOF UUID AS $$
+-- Function to check if a user can access a specific owner's data
+-- This effectively replaces get_accessible_owner_ids with a boolean check
+-- optimized for RLS and supporting system-wide roles.
+CREATE OR REPLACE FUNCTION can_access_owner(user_uuid UUID, target_owner_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    u_role SMALLINT;
 BEGIN
-    RETURN QUERY
-    WITH my_identities AS (
-        -- The user themselves
-        SELECT user_uuid AS id
+    -- 1. Check System Admin
+    -- User with role_id >= 4 (Admin) in user_system_roles has full access
+    SELECT role_id INTO u_role FROM user_system_roles WHERE user_id = user_uuid;
+    
+    IF COALESCE(u_role, 0) >= 4 THEN
+        RETURN TRUE;
+    END IF;
+
+    -- 2. Direct Identity Check (Am I the owner?)
+    IF user_uuid = target_owner_id THEN
+        RETURN TRUE;
+    END IF;
+
+    -- 3. Team Membership & Grants
+    -- Check if user is a member of the target owner (if it's a team)
+    -- OR if access is granted via owner_grants
+    RETURN EXISTS (
+        WITH my_identities AS (
+            SELECT user_uuid AS id
+            UNION
+            SELECT team_id AS id
+            FROM team_members
+            WHERE member_id = user_uuid
+        )
+        SELECT 1
+        FROM my_identities
+        WHERE id = target_owner_id -- I am the owner (member of the owning team)
         UNION
-        -- Teams the user is a member of (includes parent teams due to flattening triggers)
-        SELECT team_id AS id FROM team_members WHERE member_id = user_uuid
-    )
-    -- 1. Owners the user IS (themselves + their teams)
-    SELECT id FROM my_identities
-    UNION
-    -- 2. Owners the user (or their team) has been granted access to
-    SELECT granted_owner_id 
-    FROM owner_grants 
-    WHERE grantee_owner_id IN (SELECT id FROM my_identities);
+        SELECT 1
+        FROM owner_grants
+        WHERE granted_owner_id = target_owner_id
+          AND grantee_owner_id IN (SELECT id FROM my_identities)
+    );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Enable RLS on Ownables
 ALTER TABLE ownables ENABLE ROW LEVEL SECURITY;
@@ -33,7 +58,5 @@ CREATE POLICY ownables_access_policy ON ownables
 FOR ALL
 TO PUBLIC
 USING (
-    owner_id IN (
-        SELECT get_accessible_owner_ids(auth_current_user_id())
-    )
+    can_access_owner(auth_current_user_id(), owner_id)
 );
