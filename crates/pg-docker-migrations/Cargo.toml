@@ -1,0 +1,12 @@
+[package]
+name = "pg-docker-migrations"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+testcontainers = { version = "0.26.3" }
+diesel.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

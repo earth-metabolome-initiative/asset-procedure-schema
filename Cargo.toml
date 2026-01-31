@@ -110,7 +110,7 @@ members = [
   "aps/aps-dag-asset_models",
   "aps/aps-dag-assets",
   "aps/aps-dag-procedure_templates",
-  "aps/aps-dag-procedures",
+  "aps/aps-dag-procedures", "crates/pg-docker-migrations",
 ]
 
 [workspace.package]

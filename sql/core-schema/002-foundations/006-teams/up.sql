@@ -1,9 +1,7 @@
 -- Table storing teams, extending owners
 CREATE TABLE teams (
 	-- Primary key references owners(id)
-	id UUID PRIMARY KEY REFERENCES owners(id) ON DELETE CASCADE,
-	-- The owner of this team
-	owner_id UUID NOT NULL REFERENCES owners(id) ON DELETE CASCADE,
+	id UUID PRIMARY KEY,
 	-- The parent team of this team (nullable for top-level teams)
 	parent_team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
 	-- Team name
@@ -17,10 +15,14 @@ CREATE TABLE teams (
 		AND length(description) < 8192
 	),
 	-- We check that name is not equal to description
-	CHECK (name <> description)
+	CHECK (name <> description),
+	-- Foreign key constraint to ensure id references owners
+	FOREIGN KEY (id) REFERENCES owners(id) ON DELETE CASCADE,
+	-- Foreign key constraint to ensure id references ownables
+	FOREIGN KEY (id) REFERENCES ownables(id) ON DELETE CASCADE
 );
--- Insert in the owner_tables table the 'teams' owner table
-INSERT INTO owner_tables (table_name)
+-- Insert in the table_names table the 'teams' owner table
+INSERT INTO table_names (id)
 VALUES ('teams');
 -- Table storing team members
 CREATE TABLE team_members (

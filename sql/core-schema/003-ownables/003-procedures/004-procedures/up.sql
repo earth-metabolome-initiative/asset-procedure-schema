@@ -70,12 +70,11 @@ CREATE TABLE procedures (
 	-- We check that if the previous procedure_id is specified, then the parent_id procedure_id must also be specified.
 	CHECK (
 		(
-			predecessor_procedure_id IS NULL
-			AND parent_procedure_id IS NULL
+			parent_procedure_id IS NULL
+			AND predecessor_procedure_id IS NULL
 		)
 		OR (
 			parent_procedure_id IS NOT NULL
-			AND predecessor_procedure_id IS NOT NULL
 		)
 	)
 );
