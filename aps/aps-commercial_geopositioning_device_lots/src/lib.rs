@@ -19,10 +19,11 @@
 /// Struct representing a row in the `commercial_geopositioning_device_lots`
 /// table.
 #[table_model(ancestors(
+    aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
-    aps_geopositioning_device_models::geopositioning_device_models,
-    aps_commercial_product_lots::commercial_product_lots
+    aps_commercial_product_lots::commercial_product_lots,
+    aps_geopositioning_device_models::geopositioning_device_models
 ))]
 # [diesel (belongs_to (aps_commercial_geopositioning_device_models :: CommercialGeopositioningDeviceModel , foreign_key = commercial_geopositioning_device_model_id))]
 # [diesel (belongs_to (aps_commercial_product_lots :: CommercialProductLot , foreign_key = id))]
@@ -31,7 +32,7 @@
 # [table_model (foreign_key ((id ,) , (:: aps_commercial_product_lots :: commercial_product_lots :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_geopositioning_device_models :: geopositioning_device_models :: id)))]
 #[table_model(default(
-    aps_asset_models::asset_models::asset_model_table_id,
+    aps_ownables::ownables::ownable_table_id,
     "commercial_geopositioning_device_lots"
 ))]
 # [diesel (table_name = commercial_geopositioning_device_lots)]
@@ -69,6 +70,16 @@ impl ::diesel_builders::GetColumn<aps_commercial_product_lots::commercial_produc
 }
 impl
     ::diesel_builders::GetColumn<aps_geopositioning_device_models::geopositioning_device_models::id>
+    for CommercialGeopositioningDeviceLot
+{
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_geopositioning_device_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id>
     for CommercialGeopositioningDeviceLot
 {
     fn get_column_ref(

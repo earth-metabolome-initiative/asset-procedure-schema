@@ -1,0 +1,16 @@
+[package]
+name = "aps-team_members"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+rosetta-uuid.workspace = true
+aps-teams.workspace = true
+aps-users.workspace = true
+
+[lints]
+workspace = true

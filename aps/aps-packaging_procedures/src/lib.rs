@@ -17,7 +17,7 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `packaging_procedures` table.
-#[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = sample_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = sample_model_id))]
 # [diesel (belongs_to (aps_packaging_models :: PackagingModel , foreign_key = packaged_with_model_id))]
@@ -29,7 +29,7 @@
 # [table_model (foreign_key ((packaged_with_model_id ,) , (:: aps_packaging_models :: packaging_models :: id)))]
 # [table_model (foreign_key ((procedure_template_packaged_with_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
 # [table_model (foreign_key ((packaged_with_model_id , sample_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
-#[table_model(default(aps_procedures::procedures::procedure_table_id, "packaging_procedures"))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "packaging_procedures"))]
 # [diesel (table_name = packaging_procedures)]
 pub struct PackagingProcedure {
     /// The extended `procedure`.
@@ -81,6 +81,13 @@ pub struct PackagingProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_packaged_with_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for PackagingProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<packaging_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for PackagingProcedure {
     fn get_column_ref(

@@ -8,8 +8,10 @@ edition.workspace = true
 serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
-rosetta_uuid.workspace = true
+validation-errors.workspace = true
+rosetta-uuid.workspace = true
 aps-asset_models.workspace = true
+aps-ownables.workspace = true
 
 [lints]
 workspace = true

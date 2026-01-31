@@ -8,8 +8,9 @@ edition.workspace = true
 serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
-rosetta_uuid.workspace = true
+rosetta-uuid.workspace = true
 aps-assets.workspace = true
+aps-ownables.workspace = true
 aps-physical_assets.workspace = true
 aps-volume_measuring_device_models.workspace = true
 

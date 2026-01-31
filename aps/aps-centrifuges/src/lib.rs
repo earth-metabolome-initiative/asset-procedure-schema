@@ -17,12 +17,16 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `centrifuges` table.
-#[table_model(ancestors(aps_assets::assets, aps_physical_assets::physical_assets))]
+#[table_model(ancestors(
+    aps_ownables::ownables,
+    aps_assets::assets,
+    aps_physical_assets::physical_assets
+))]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = id))]
 # [diesel (belongs_to (aps_commercial_centrifuge_lots :: CommercialCentrifugeLot , foreign_key = commercial_centrifuge_lot_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
 # [table_model (foreign_key ((commercial_centrifuge_lot_id ,) , (:: aps_commercial_centrifuge_lots :: commercial_centrifuge_lots :: id)))]
-#[table_model(default(aps_assets::assets::asset_table_id, "centrifuges"))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "centrifuges"))]
 # [diesel (table_name = centrifuges)]
 pub struct Centrifuge {
     /// Field representing the `id` column in table `centrifuges`.
@@ -36,6 +40,11 @@ pub struct Centrifuge {
     commercial_centrifuge_lot_id: ::rosetta_uuid::Uuid,
 }
 impl ::diesel_builders::GetColumn<aps_assets::assets::id> for Centrifuge {
+    fn get_column_ref(&self) -> &<centrifuges::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for Centrifuge {
     fn get_column_ref(&self) -> &<centrifuges::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }

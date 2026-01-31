@@ -66,16 +66,6 @@ CREATE TABLE procedures (
 			predecessor_procedure_id IS NOT NULL
 			AND predecessor_procedure_template_id IS NOT NULL
 		)
-	),
-	-- We check that if the previous procedure_id is specified, then the parent_id procedure_id must also be specified.
-	CHECK (
-		(
-			parent_procedure_id IS NULL
-			AND predecessor_procedure_id IS NULL
-		)
-		OR (
-			parent_procedure_id IS NOT NULL
-		)
 	)
 );
 INSERT INTO ownable_tables (id) VALUES ('procedures') ON CONFLICT DO NOTHING;

@@ -15,6 +15,7 @@
 )]
 /// Struct representing a row in the `volumetric_container_models` table.
 #[table_model(ancestors(
+    aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
     aps_container_models::container_models
@@ -22,10 +23,7 @@
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_container_models :: ContainerModel , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_container_models :: container_models :: id)))]
-#[table_model(default(
-    aps_asset_models::asset_models::asset_model_table_id,
-    "volumetric_container_models"
-))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "volumetric_container_models"))]
 # [diesel (table_name = volumetric_container_models)]
 pub struct VolumetricContainerModel {
     /// Field representing the `id` column in table
@@ -44,11 +42,7 @@ impl ::diesel_builders::ValidateColumn<volumetric_container_models::volume>
     fn validate_column(volume: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if volume <= &0f32 {
-            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
-                "volumetric_container_models",
-                crate::volumetric_container_models::volume::NAME,
-                0f64,
-            ));
+            return Err (:: validation_errors :: ValidationError :: strictly_greater_than_value (< crate :: volumetric_container_models :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: volumetric_container_models :: volume :: NAME , 0f64)) ;
         }
         Ok(())
     }
@@ -63,6 +57,13 @@ impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for Volume
 impl ::diesel_builders::GetColumn<aps_container_models::container_models::id>
     for VolumetricContainerModel
 {
+    fn get_column_ref(
+        &self,
+    ) -> &<volumetric_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for VolumetricContainerModel {
     fn get_column_ref(
         &self,
     ) -> &<volumetric_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

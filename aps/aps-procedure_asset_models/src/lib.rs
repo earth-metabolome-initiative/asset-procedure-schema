@@ -27,7 +27,7 @@
 # [diesel (table_name = procedure_asset_models)]
 pub struct ProcedureAssetModel {
     /// The ID of this procedure_id asset.
-    # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
+    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The ID of the procedure_id this asset is used in.

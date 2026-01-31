@@ -96,7 +96,9 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let validation_task = Task::new("Schema Validation");
     let mut constrainer = DefaultConstrainer::<ParserDB>::default();
     sql_procedure_rules::register_procedure_constraints(&mut constrainer);
-    constrainer.validate_schema(&db).expect("Database schema should pass all constraints");
+    constrainer
+        .validate_schema(&db)
+        .unwrap_or_else(|err| panic!("Failed to validate schema: {err}"));
     tracker.add_completed_task(validation_task);
 
     // Generate the code associated with the database

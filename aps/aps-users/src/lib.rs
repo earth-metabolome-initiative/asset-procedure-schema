@@ -13,69 +13,22 @@
     :: diesel :: Queryable,
     :: diesel :: Selectable,
     :: diesel :: Identifiable,
+    :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Table storing users of the system
-# [table_model (error = :: validation_errors :: ValidationError)]
+/// Table storing users, extending owners
+#[table_model(ancestors(aps_owners::owners))]
+# [diesel (belongs_to (aps_owners :: Owner , foreign_key = id))]
+# [table_model (foreign_key ((id ,) , (:: aps_owners :: owners :: id)))]
+#[table_model(default(aps_owners::owners::table_name_id, "users"))]
 # [diesel (table_name = users)]
 pub struct User {
-    /// Surrogate primary key for the user entity
-    # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
-    #[infallible]
+    /// Primary key references owners(id)
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Time of account creation
-    # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
-    # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    created_at: ::rosetta_timestamp::TimestampUTC,
-    /// Time of last account update
-    # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
-    # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    edited_at: ::rosetta_timestamp::TimestampUTC,
 }
-impl ::diesel_builders::ValidateColumn<users::created_at>
-    for <users::table as ::diesel_builders::TableExt>::NewValues
-{
-    type Error = ::validation_errors::ValidationError;
-    #[inline]
-    fn validate_column_in_context(
-        &self,
-        created_at: &::rosetta_timestamp::TimestampUTC,
-    ) -> Result<(), Self::Error> {
-        use diesel::Column;
-        if let Some(edited_at) =
-            <Self as diesel_builders::MayGetColumn<users::edited_at>>::may_get_column_ref(self)
-            && created_at > edited_at
-        {
-            return Err(::validation_errors::ValidationError::smaller_than(
-                "users",
-                crate::users::created_at::NAME,
-                crate::users::edited_at::NAME,
-            ));
-        }
-        Ok(())
-    }
-}
-impl ::diesel_builders::ValidateColumn<users::edited_at>
-    for <users::table as ::diesel_builders::TableExt>::NewValues
-{
-    type Error = ::validation_errors::ValidationError;
-    #[inline]
-    fn validate_column_in_context(
-        &self,
-        edited_at: &::rosetta_timestamp::TimestampUTC,
-    ) -> Result<(), Self::Error> {
-        use diesel::Column;
-        if let Some(created_at) =
-            <Self as diesel_builders::MayGetColumn<users::created_at>>::may_get_column_ref(self)
-            && created_at > edited_at
-        {
-            return Err(::validation_errors::ValidationError::smaller_than(
-                "users",
-                crate::users::created_at::NAME,
-                crate::users::edited_at::NAME,
-            ));
-        }
-        Ok(())
+impl ::diesel_builders::GetColumn<aps_owners::owners::id> for User {
+    fn get_column_ref(&self) -> &<users::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }

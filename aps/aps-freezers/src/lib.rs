@@ -17,12 +17,16 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `freezers` table.
-#[table_model(ancestors(aps_assets::assets, aps_physical_assets::physical_assets))]
+#[table_model(ancestors(
+    aps_ownables::ownables,
+    aps_assets::assets,
+    aps_physical_assets::physical_assets
+))]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = id))]
 # [diesel (belongs_to (aps_commercial_freezer_lots :: CommercialFreezerLot , foreign_key = commercial_freezer_lot_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
 # [table_model (foreign_key ((commercial_freezer_lot_id ,) , (:: aps_commercial_freezer_lots :: commercial_freezer_lots :: id)))]
-#[table_model(default(aps_assets::assets::asset_table_id, "freezers"))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "freezers"))]
 # [diesel (table_name = freezers)]
 pub struct Freezer {
     /// Field representing the `id` column in table `freezers`.
@@ -36,6 +40,11 @@ pub struct Freezer {
     commercial_freezer_lot_id: ::rosetta_uuid::Uuid,
 }
 impl ::diesel_builders::GetColumn<aps_assets::assets::id> for Freezer {
+    fn get_column_ref(&self) -> &<freezers::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for Freezer {
     fn get_column_ref(&self) -> &<freezers::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }

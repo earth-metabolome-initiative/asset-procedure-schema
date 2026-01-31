@@ -9,9 +9,10 @@ serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
 validation-errors.workspace = true
-rosetta_uuid.workspace = true
+rosetta-uuid.workspace = true
 aps-asset_models.workspace = true
 aps-container_models.workspace = true
+aps-ownables.workspace = true
 aps-physical_asset_models.workspace = true
 
 [lints]

@@ -64,13 +64,10 @@ impl ::diesel_builders::ValidateColumn<container_compatibility_rules::container_
         if let Some(contained_asset_model_id) = <Self as diesel_builders::MayGetColumn<
             container_compatibility_rules::contained_asset_model_id,
         >>::may_get_column_ref(self)
-            && container_model_id == contained_asset_model_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                "container_compatibility_rules",
-                crate::container_compatibility_rules::container_model_id::NAME,
-                crate::container_compatibility_rules::contained_asset_model_id::NAME,
-            ));
+            if container_model_id == contained_asset_model_id {
+                return Err (:: validation_errors :: ValidationError :: equal (< crate :: container_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: container_compatibility_rules :: container_model_id :: NAME , crate :: container_compatibility_rules :: contained_asset_model_id :: NAME)) ;
+            }
         }
         Ok(())
     }
@@ -88,13 +85,10 @@ impl ::diesel_builders::ValidateColumn<container_compatibility_rules::contained_
         if let Some(container_model_id) = <Self as diesel_builders::MayGetColumn<
             container_compatibility_rules::container_model_id,
         >>::may_get_column_ref(self)
-            && container_model_id == contained_asset_model_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                "container_compatibility_rules",
-                crate::container_compatibility_rules::container_model_id::NAME,
-                crate::container_compatibility_rules::contained_asset_model_id::NAME,
-            ));
+            if container_model_id == contained_asset_model_id {
+                return Err (:: validation_errors :: ValidationError :: equal (< crate :: container_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: container_compatibility_rules :: container_model_id :: NAME , crate :: container_compatibility_rules :: contained_asset_model_id :: NAME)) ;
+            }
         }
         Ok(())
     }
@@ -107,11 +101,7 @@ impl ::diesel_builders::ValidateColumn<container_compatibility_rules::quantity>
     fn validate_column(quantity: &i16) -> Result<(), Self::Error> {
         use diesel::Column;
         if quantity <= &0i16 {
-            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
-                "container_compatibility_rules",
-                crate::container_compatibility_rules::quantity::NAME,
-                0f64,
-            ));
+            return Err (:: validation_errors :: ValidationError :: strictly_greater_than_value (< crate :: container_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: container_compatibility_rules :: quantity :: NAME , 0f64)) ;
         }
         Ok(())
     }

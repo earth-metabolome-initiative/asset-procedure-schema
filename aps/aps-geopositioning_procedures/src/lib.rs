@@ -12,7 +12,7 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `geopositioning_procedures` table.
-#[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = geopositioned_asset_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = geopositioned_asset_model_id))]
 # [diesel (belongs_to (aps_geopositioning_devices :: GeopositioningDevice , foreign_key = geopositioned_with_id))]
@@ -25,10 +25,7 @@
 # [table_model (foreign_key ((geopositioned_with_id ,) , (:: aps_geopositioning_devices :: geopositioning_devices :: id)))]
 # [table_model (foreign_key ((geopositioned_with_model_id ,) , (:: aps_geopositioning_device_models :: geopositioning_device_models :: id)))]
 # [table_model (foreign_key ((procedure_template_geopositioned_with_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(
-    aps_procedures::procedures::procedure_table_id,
-    "geopositioning_procedures"
-))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "geopositioning_procedures"))]
 # [diesel (table_name = geopositioning_procedures)]
 pub struct GeopositioningProcedure {
     /// Identifier of the geopositioning id, which is also a foreign key to the
@@ -89,6 +86,13 @@ pub struct GeopositioningProcedure {
     /// The latitude and longitude of the geopositioning.
     # [diesel (sql_type = :: postgis_diesel :: sql_types :: Geography)]
     location: postgis_diesel::types::GeometryContainer<postgis_diesel::types::Point>,
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for GeopositioningProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<geopositioning_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for GeopositioningProcedure {
     fn get_column_ref(

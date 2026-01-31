@@ -18,15 +18,13 @@
 )]
 /// Struct representing a row in the `ball_mill_machine_models` table.
 #[table_model(ancestors(
+    aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
-#[table_model(default(
-    aps_asset_models::asset_models::asset_model_table_id,
-    "ball_mill_machine_models"
-))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "ball_mill_machine_models"))]
 # [diesel (table_name = ball_mill_machine_models)]
 pub struct BallMillMachineModel {
     /// Field representing the `id` column in table `ball_mill_machine_models`.
@@ -34,6 +32,13 @@ pub struct BallMillMachineModel {
     id: ::rosetta_uuid::Uuid,
 }
 impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for BallMillMachineModel {
+    fn get_column_ref(
+        &self,
+    ) -> &<ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for BallMillMachineModel {
     fn get_column_ref(
         &self,
     ) -> &<ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

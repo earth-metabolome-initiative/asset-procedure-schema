@@ -14,7 +14,7 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `freezing_procedure_templates` table.
-#[table_model(ancestors(aps_procedure_templates::procedure_templates))]
+#[table_model(ancestors(aps_ownables::ownables, aps_procedure_templates::procedure_templates))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_freezer_models :: FreezerModel , foreign_key = frozen_with_model_id))]
@@ -25,10 +25,7 @@
 # [table_model (foreign_key ((frozen_with_model_id , frozen_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_frozen_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_frozen_container_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
-#[table_model(default(
-    aps_procedure_templates::procedure_templates::procedure_template_table_id,
-    "freezing_procedure_templates"
-))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "freezing_procedure_templates"))]
 # [diesel (table_name = freezing_procedure_templates)]
 pub struct FreezingProcedureTemplate {
     /// Field representing the `id` column in table
@@ -91,11 +88,7 @@ impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::kelvin>
     fn validate_column(kelvin: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin <= &0f32 {
-            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
-                "freezing_procedure_templates",
-                crate::freezing_procedure_templates::kelvin::NAME,
-                0f64,
-            ));
+            return Err (:: validation_errors :: ValidationError :: strictly_greater_than_value (< crate :: freezing_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: freezing_procedure_templates :: kelvin :: NAME , 0f64)) ;
         }
         Ok(())
     }
@@ -108,18 +101,10 @@ impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::kelvin_tole
     fn validate_column(kelvin_tolerance_percentage: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if kelvin_tolerance_percentage <= &0f32 {
-            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
-                "freezing_procedure_templates",
-                crate::freezing_procedure_templates::kelvin_tolerance_percentage::NAME,
-                0f64,
-            ));
+            return Err (:: validation_errors :: ValidationError :: strictly_greater_than_value (< crate :: freezing_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: freezing_procedure_templates :: kelvin_tolerance_percentage :: NAME , 0f64)) ;
         }
         if kelvin_tolerance_percentage > &100f32 {
-            return Err(::validation_errors::ValidationError::smaller_than_value(
-                "freezing_procedure_templates",
-                crate::freezing_procedure_templates::kelvin_tolerance_percentage::NAME,
-                100f64,
-            ));
+            return Err (:: validation_errors :: ValidationError :: smaller_than_value (< crate :: freezing_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: freezing_procedure_templates :: kelvin_tolerance_percentage :: NAME , 100f64)) ;
         }
         Ok(())
     }
@@ -132,13 +117,16 @@ impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::duration>
     fn validate_column(duration: &f32) -> Result<(), Self::Error> {
         use diesel::Column;
         if duration <= &1800f32 {
-            return Err(::validation_errors::ValidationError::strictly_greater_than_value(
-                "freezing_procedure_templates",
-                crate::freezing_procedure_templates::duration::NAME,
-                1800f64,
-            ));
+            return Err (:: validation_errors :: ValidationError :: strictly_greater_than_value (< crate :: freezing_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: freezing_procedure_templates :: duration :: NAME , 1800f64)) ;
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for FreezingProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<freezing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>

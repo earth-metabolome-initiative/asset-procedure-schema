@@ -26,7 +26,7 @@
 # [diesel (table_name = procedure_template_asset_models)]
 pub struct ProcedureTemplateAssetModel {
     /// Identifier of the procedure template asset model
-    # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
+    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
@@ -65,10 +65,10 @@ impl ::diesel_builders::ValidateColumn<procedure_template_asset_models::name>
     fn validate_column(name: &String) -> Result<(), Self::Error> {
         use diesel::Column;
         if name.is_empty() {
-            return Err(::validation_errors::ValidationError::empty(
-                "procedure_template_asset_models",
-                crate::procedure_template_asset_models::name::NAME,
-            ));
+            return Err (:: validation_errors :: ValidationError :: empty (< crate :: procedure_template_asset_models :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: procedure_template_asset_models :: name :: NAME)) ;
+        }
+        if name.len() < 255usize {
+            return Err (:: validation_errors :: ValidationError :: exceeds_max_length (< crate :: procedure_template_asset_models :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: procedure_template_asset_models :: name :: NAME , 255usize)) ;
         }
         Ok(())
     }

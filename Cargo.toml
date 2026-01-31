@@ -9,13 +9,12 @@ members = [
   "crates/procedure-template-visitor",
   "crates/procedure-template-visualization",
   "crates/procedure-like",
+  "crates/pg-docker-migrations",
   "aps/aps-aliquoting_procedure_templates",
   "aps/aps-aliquoting_procedures",
   "aps/aps-asset_compatibility_rules",
   "aps/aps-asset_model_ancestors",
-  "aps/aps-asset_model_tables",
   "aps/aps-asset_models",
-  "aps/aps-asset_tables",
   "aps/aps-assets",
   "aps/aps-ball_mill_machine_models",
   "aps/aps-ball_mill_machines",
@@ -53,6 +52,7 @@ members = [
   "aps/aps-digital_assets",
   "aps/aps-disposal_procedure_templates",
   "aps/aps-disposal_procedures",
+  "aps/aps-entities",
   "aps/aps-fractioning_procedure_templates",
   "aps/aps-fractioning_procedures",
   "aps/aps-freeze_dryer_models",
@@ -69,7 +69,12 @@ members = [
   "aps/aps-geopositioning_procedures",
   "aps/aps-harvesting_procedure_templates",
   "aps/aps-harvesting_procedures",
+  "aps/aps-namespaces",
   "aps/aps-next_procedure_templates",
+  "aps/aps-ownable_tables",
+  "aps/aps-ownables",
+  "aps/aps-owner_grants",
+  "aps/aps-owners",
   "aps/aps-packaging_models",
   "aps/aps-packaging_procedure_templates",
   "aps/aps-packaging_procedures",
@@ -81,13 +86,13 @@ members = [
   "aps/aps-physical_assets",
   "aps/aps-pouring_procedure_templates",
   "aps/aps-pouring_procedures",
+  "aps/aps-privacy_dependencies",
   "aps/aps-procedure_asset_models",
-  "aps/aps-procedure_tables",
   "aps/aps-procedure_template_asset_models",
-  "aps/aps-procedure_template_tables",
   "aps/aps-procedure_templates",
   "aps/aps-procedures",
   "aps/aps-reused_procedure_template_asset_models",
+  "aps/aps-roles",
   "aps/aps-sample_models",
   "aps/aps-sample_source_models",
   "aps/aps-sample_sources",
@@ -96,6 +101,10 @@ members = [
   "aps/aps-storage_procedures",
   "aps/aps-supernatant_procedure_templates",
   "aps/aps-supernatant_procedures",
+  "aps/aps-table_names",
+  "aps/aps-team_members",
+  "aps/aps-teams",
+  "aps/aps-tombstones",
   "aps/aps-users",
   "aps/aps-volume_measuring_device_models",
   "aps/aps-volume_measuring_devices",
@@ -107,10 +116,8 @@ members = [
   "aps/aps-weighing_procedure_templates",
   "aps/aps-weighing_procedures",
   "aps/aps",
-  "aps/aps-dag-asset_models",
-  "aps/aps-dag-assets",
-  "aps/aps-dag-procedure_templates",
-  "aps/aps-dag-procedures", "crates/pg-docker-migrations",
+  "aps/aps-dag-ownables",
+  "aps/aps-dag-owners",
 ]
 
 [workspace.package]
@@ -125,13 +132,12 @@ aps-test-utils = { path = "crates/aps-test-utils" }
 procedure-template-visitor = { path = "crates/procedure-template-visitor" }
 procedure-template-visualization = { path = "crates/procedure-template-visualization" }
 procedure-like = { path = "crates/procedure-like" }
+pg-docker-migrations = { path = "crates/pg-docker-migrations" }
 aps-aliquoting_procedure_templates = { path = "aps/aps-aliquoting_procedure_templates" }
 aps-aliquoting_procedures = { path = "aps/aps-aliquoting_procedures" }
 aps-asset_compatibility_rules = { path = "aps/aps-asset_compatibility_rules" }
 aps-asset_model_ancestors = { path = "aps/aps-asset_model_ancestors" }
-aps-asset_model_tables = { path = "aps/aps-asset_model_tables" }
 aps-asset_models = { path = "aps/aps-asset_models" }
-aps-asset_tables = { path = "aps/aps-asset_tables" }
 aps-assets = { path = "aps/aps-assets" }
 aps-ball_mill_machine_models = { path = "aps/aps-ball_mill_machine_models" }
 aps-ball_mill_machines = { path = "aps/aps-ball_mill_machines" }
@@ -169,6 +175,7 @@ aps-digital_asset_models = { path = "aps/aps-digital_asset_models" }
 aps-digital_assets = { path = "aps/aps-digital_assets" }
 aps-disposal_procedure_templates = { path = "aps/aps-disposal_procedure_templates" }
 aps-disposal_procedures = { path = "aps/aps-disposal_procedures" }
+aps-entities = { path = "aps/aps-entities" }
 aps-fractioning_procedure_templates = { path = "aps/aps-fractioning_procedure_templates" }
 aps-fractioning_procedures = { path = "aps/aps-fractioning_procedures" }
 aps-freeze_dryer_models = { path = "aps/aps-freeze_dryer_models" }
@@ -185,7 +192,12 @@ aps-geopositioning_procedure_templates = { path = "aps/aps-geopositioning_proced
 aps-geopositioning_procedures = { path = "aps/aps-geopositioning_procedures" }
 aps-harvesting_procedure_templates = { path = "aps/aps-harvesting_procedure_templates" }
 aps-harvesting_procedures = { path = "aps/aps-harvesting_procedures" }
+aps-namespaces = { path = "aps/aps-namespaces" }
 aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
+aps-ownable_tables = { path = "aps/aps-ownable_tables" }
+aps-ownables = { path = "aps/aps-ownables" }
+aps-owner_grants = { path = "aps/aps-owner_grants" }
+aps-owners = { path = "aps/aps-owners" }
 aps-packaging_models = { path = "aps/aps-packaging_models" }
 aps-packaging_procedure_templates = { path = "aps/aps-packaging_procedure_templates" }
 aps-packaging_procedures = { path = "aps/aps-packaging_procedures" }
@@ -197,13 +209,13 @@ aps-physical_asset_models = { path = "aps/aps-physical_asset_models" }
 aps-physical_assets = { path = "aps/aps-physical_assets" }
 aps-pouring_procedure_templates = { path = "aps/aps-pouring_procedure_templates" }
 aps-pouring_procedures = { path = "aps/aps-pouring_procedures" }
+aps-privacy_dependencies = { path = "aps/aps-privacy_dependencies" }
 aps-procedure_asset_models = { path = "aps/aps-procedure_asset_models" }
-aps-procedure_tables = { path = "aps/aps-procedure_tables" }
 aps-procedure_template_asset_models = { path = "aps/aps-procedure_template_asset_models" }
-aps-procedure_template_tables = { path = "aps/aps-procedure_template_tables" }
 aps-procedure_templates = { path = "aps/aps-procedure_templates" }
 aps-procedures = { path = "aps/aps-procedures" }
 aps-reused_procedure_template_asset_models = { path = "aps/aps-reused_procedure_template_asset_models" }
+aps-roles = { path = "aps/aps-roles" }
 aps-sample_models = { path = "aps/aps-sample_models" }
 aps-sample_source_models = { path = "aps/aps-sample_source_models" }
 aps-sample_sources = { path = "aps/aps-sample_sources" }
@@ -212,6 +224,10 @@ aps-storage_procedure_templates = { path = "aps/aps-storage_procedure_templates"
 aps-storage_procedures = { path = "aps/aps-storage_procedures" }
 aps-supernatant_procedure_templates = { path = "aps/aps-supernatant_procedure_templates" }
 aps-supernatant_procedures = { path = "aps/aps-supernatant_procedures" }
+aps-table_names = { path = "aps/aps-table_names" }
+aps-team_members = { path = "aps/aps-team_members" }
+aps-teams = { path = "aps/aps-teams" }
+aps-tombstones = { path = "aps/aps-tombstones" }
 aps-users = { path = "aps/aps-users" }
 aps-volume_measuring_device_models = { path = "aps/aps-volume_measuring_device_models" }
 aps-volume_measuring_devices = { path = "aps/aps-volume_measuring_devices" }
@@ -227,6 +243,7 @@ rosetta_timestamp = { git = "https://github.com/earth-metabolome-initiative/emi-
   "serde",
   "sqlite",
 ] }
+chrono = { version = "0.4.42", features = ["serde"] }
 pgrx_validation = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
@@ -241,10 +258,9 @@ diesel = { git = "https://github.com/LucaCappelletti94/diesel", branch = "future
   "extras",
 ] }
 diesel-builders = { git = "https://github.com/LucaCappelletti94/diesel-builders", branch = "main" }
-rosetta_uuid = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate", features = [
+rosetta-uuid = { version = "0.1.0", git = "https://github.com/earth-metabolome-initiative/rosetta-uuid", branch = "main", features = [
   "diesel",
   "serde",
-  "sqlite",
 ] }
 
 [workspace.lints.rust]

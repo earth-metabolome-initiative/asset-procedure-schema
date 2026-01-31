@@ -17,7 +17,7 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `disposal_procedures` table.
-#[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = disposed_asset_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = disposed_asset_model_id))]
 # [diesel (belongs_to (aps_procedure_template_asset_models :: ProcedureTemplateAssetModel , foreign_key = procedure_template_disposed_asset_model_id))]
@@ -26,7 +26,7 @@
 # [table_model (foreign_key ((disposed_asset_id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
 # [table_model (foreign_key ((disposed_asset_model_id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
 # [table_model (foreign_key ((procedure_template_disposed_asset_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(aps_procedures::procedures::procedure_table_id, "disposal_procedures"))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "disposal_procedures"))]
 # [diesel (table_name = disposal_procedures)]
 pub struct DisposalProcedure {
     /// Field representing the `id` column in table `disposal_procedures`.
@@ -59,6 +59,13 @@ pub struct DisposalProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_disposed_asset_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for DisposalProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<disposal_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for DisposalProcedure {
     fn get_column_ref(

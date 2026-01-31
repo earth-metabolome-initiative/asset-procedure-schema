@@ -1,7 +1,7 @@
 -- Table storing owners (base entity for users, teams, projects)
 CREATE TABLE owners (
 	-- Surrogate primary key for the owner entity
-	id UUID PRIMARY KEY DEFAULT uuidv7(),
+	id UUID PRIMARY KEY DEFAULT uuidv7() REFERENCES entities(id) ON DELETE CASCADE,
 	-- The type of owner (e.g., 'user', 'team', etc.)
 	table_name_id TEXT NOT NULL REFERENCES table_names(id) CHECK (
 		table_name_id <> ''

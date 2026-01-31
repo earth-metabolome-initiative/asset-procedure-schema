@@ -14,7 +14,7 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `fractioning_procedures` table.
-#[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_weighing_devices :: WeighingDevice , foreign_key = weighed_with_id))]
 # [diesel (belongs_to (aps_weighing_device_models :: WeighingDeviceModel , foreign_key = weighed_with_model_id))]
@@ -29,7 +29,7 @@
 # [table_model (foreign_key ((weighed_with_id ,) , (:: aps_weighing_devices :: weighing_devices :: id)))]
 # [table_model (foreign_key ((weighed_with_model_id ,) , (:: aps_weighing_device_models :: weighing_device_models :: id)))]
 # [table_model (foreign_key ((procedure_template_weighed_with_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(aps_procedures::procedures::procedure_table_id, "fractioning_procedures"))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "fractioning_procedures"))]
 # [diesel (table_name = fractioning_procedures)]
 pub struct FractioningProcedure {
     /// Identifier of the fractioning id, which is also a foreign key to the
@@ -137,12 +137,19 @@ impl ::diesel_builders::ValidateColumn<fractioning_procedures::mass>
         use diesel::Column;
         if mass <= &0f32 {
             return Err(::validation_errors::ValidationError::strictly_greater_than_value(
-                "fractioning_procedures",
+                <crate::fractioning_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::fractioning_procedures::mass::NAME,
                 0f64,
             ));
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for FractioningProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<fractioning_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for FractioningProcedure {

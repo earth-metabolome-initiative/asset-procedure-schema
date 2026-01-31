@@ -6,7 +6,7 @@ edition.workspace = true
 [dependencies]
 diesel.workspace = true
 diesel-builders.workspace = true
-rosetta_uuid.workspace = true
+rosetta-uuid.workspace = true
 
 [lints]
 workspace = true

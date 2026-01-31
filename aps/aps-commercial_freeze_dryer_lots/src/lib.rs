@@ -18,10 +18,11 @@
 )]
 /// Struct representing a row in the `commercial_freeze_dryer_lots` table.
 #[table_model(ancestors(
+    aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
-    aps_freeze_dryer_models::freeze_dryer_models,
-    aps_commercial_product_lots::commercial_product_lots
+    aps_commercial_product_lots::commercial_product_lots,
+    aps_freeze_dryer_models::freeze_dryer_models
 ))]
 # [diesel (belongs_to (aps_commercial_freeze_dryer_models :: CommercialFreezeDryerModel , foreign_key = commercial_freeze_dryer_model_id))]
 # [diesel (belongs_to (aps_commercial_product_lots :: CommercialProductLot , foreign_key = id))]
@@ -29,10 +30,7 @@
 # [table_model (foreign_key ((commercial_freeze_dryer_model_id ,) , (:: aps_commercial_freeze_dryer_models :: commercial_freeze_dryer_models :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_commercial_product_lots :: commercial_product_lots :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_freeze_dryer_models :: freeze_dryer_models :: id)))]
-#[table_model(default(
-    aps_asset_models::asset_models::asset_model_table_id,
-    "commercial_freeze_dryer_lots"
-))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "commercial_freeze_dryer_lots"))]
 # [diesel (table_name = commercial_freeze_dryer_lots)]
 pub struct CommercialFreezeDryerLot {
     /// Field representing the `id` column in table
@@ -65,6 +63,13 @@ impl ::diesel_builders::GetColumn<aps_commercial_product_lots::commercial_produc
 impl ::diesel_builders::GetColumn<aps_freeze_dryer_models::freeze_dryer_models::id>
     for CommercialFreezeDryerLot
 {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_freeze_dryer_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for CommercialFreezeDryerLot {
     fn get_column_ref(
         &self,
     ) -> &<commercial_freeze_dryer_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {

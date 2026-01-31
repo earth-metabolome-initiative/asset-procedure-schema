@@ -17,7 +17,7 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `harvesting_procedures` table.
-#[table_model(ancestors(aps_procedures::procedures))]
+#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
 # [diesel (belongs_to (aps_sample_sources :: SampleSource , foreign_key = sample_source_id))]
 # [diesel (belongs_to (aps_sample_source_models :: SampleSourceModel , foreign_key = sample_source_model_id))]
 # [diesel (belongs_to (aps_samples :: Sample , foreign_key = sample_id))]
@@ -30,7 +30,7 @@
 # [table_model (foreign_key ((sample_id ,) , (:: aps_samples :: samples :: id)))]
 # [table_model (foreign_key ((sample_model_id ,) , (:: aps_sample_models :: sample_models :: id)))]
 # [table_model (foreign_key ((procedure_template_sample_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(aps_procedures::procedures::procedure_table_id, "harvesting_procedures"))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "harvesting_procedures"))]
 # [diesel (table_name = harvesting_procedures)]
 pub struct HarvestingProcedure {
     /// Identifier of the harvesting id, which is also a foreign key to the
@@ -87,6 +87,13 @@ pub struct HarvestingProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_sample_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for HarvestingProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<harvesting_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for HarvestingProcedure {
     fn get_column_ref(

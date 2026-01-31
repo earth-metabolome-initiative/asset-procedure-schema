@@ -21,7 +21,7 @@
 # [diesel (table_name = brands)]
 pub struct Brand {
     /// Field representing the `id` column in table `brands`.
-    # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
+    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
@@ -53,8 +53,15 @@ impl ::diesel_builders::ValidateColumn<brands::name>
         use diesel::Column;
         if name.is_empty() {
             return Err(::validation_errors::ValidationError::empty(
-                "brands",
+                <crate::brands::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::brands::name::NAME,
+            ));
+        }
+        if name.len() <= 255usize {
+            return Err(::validation_errors::ValidationError::exceeds_max_length(
+                <crate::brands::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::brands::name::NAME,
+                255usize,
             ));
         }
         Ok(())
@@ -72,13 +79,14 @@ impl ::diesel_builders::ValidateColumn<brands::created_at>
         use diesel::Column;
         if let Some(edited_at) =
             <Self as diesel_builders::MayGetColumn<brands::edited_at>>::may_get_column_ref(self)
-            && created_at > edited_at
         {
-            return Err(::validation_errors::ValidationError::smaller_than(
-                "brands",
-                crate::brands::created_at::NAME,
-                crate::brands::edited_at::NAME,
-            ));
+            if created_at > edited_at {
+                return Err(::validation_errors::ValidationError::smaller_than(
+                    <crate::brands::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::brands::created_at::NAME,
+                    crate::brands::edited_at::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -95,13 +103,14 @@ impl ::diesel_builders::ValidateColumn<brands::edited_at>
         use diesel::Column;
         if let Some(created_at) =
             <Self as diesel_builders::MayGetColumn<brands::created_at>>::may_get_column_ref(self)
-            && created_at > edited_at
         {
-            return Err(::validation_errors::ValidationError::smaller_than(
-                "brands",
-                crate::brands::created_at::NAME,
-                crate::brands::edited_at::NAME,
-            ));
+            if created_at > edited_at {
+                return Err(::validation_errors::ValidationError::smaller_than(
+                    <crate::brands::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::brands::created_at::NAME,
+                    crate::brands::edited_at::NAME,
+                ));
+            }
         }
         Ok(())
     }

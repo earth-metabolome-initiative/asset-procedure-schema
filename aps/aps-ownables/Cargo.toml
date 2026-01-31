@@ -1,0 +1,19 @@
+[package]
+name = "aps-ownables"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+validation-errors.workspace = true
+rosetta-uuid.workspace = true
+rosetta_timestamp.workspace = true
+aps-ownable_tables.workspace = true
+aps-owners.workspace = true
+aps-users.workspace = true
+
+[lints]
+workspace = true

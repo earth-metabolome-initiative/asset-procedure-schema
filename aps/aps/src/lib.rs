@@ -71,6 +71,7 @@ pub use aps_disposal_procedure_templates::{
     self, DisposalProcedureTemplate, disposal_procedure_templates,
 };
 pub use aps_disposal_procedures::{self, DisposalProcedure, disposal_procedures};
+pub use aps_entities::{self, Entity, entities};
 pub use aps_fractioning_procedure_templates::{
     self, FractioningProcedureTemplate, fractioning_procedure_templates,
 };
@@ -99,8 +100,12 @@ pub use aps_harvesting_procedure_templates::{
     self, HarvestingProcedureTemplate, harvesting_procedure_templates,
 };
 pub use aps_harvesting_procedures::{self, HarvestingProcedure, harvesting_procedures};
+pub use aps_namespaces::{self, Namespace, namespaces};
 pub use aps_next_procedure_templates::{self, NextProcedureTemplate, next_procedure_templates};
-pub use aps_ownables::{self, AssetModelTable, AssetTable, ownables};
+pub use aps_ownable_tables::{self, OwnableTable, ownable_tables};
+pub use aps_ownables::{self, Ownable, ownables};
+pub use aps_owner_grants::{self, OwnerGrant, owner_grants};
+pub use aps_owners::{self, Owner, owners};
 pub use aps_packaging_models::{self, PackagingModel, packaging_models};
 pub use aps_packaging_procedure_templates::{
     self, PackagingProcedureTemplate, packaging_procedure_templates,
@@ -120,17 +125,17 @@ pub use aps_pouring_procedure_templates::{
     self, PouringProcedureTemplate, pouring_procedure_templates,
 };
 pub use aps_pouring_procedures::{self, PouringProcedure, pouring_procedures};
+pub use aps_privacy_dependencies::{self, PrivacyDependency, privacy_dependencies};
 pub use aps_procedure_asset_models::{self, ProcedureAssetModel, procedure_asset_models};
-pub use aps_procedure_tables::{self, ProcedureTable, procedure_tables};
 pub use aps_procedure_template_asset_models::{
     self, ProcedureTemplateAssetModel, procedure_template_asset_models,
 };
-pub use aps_procedure_template_tables::{self, ProcedureTemplateTable, procedure_template_tables};
 pub use aps_procedure_templates::{self, ProcedureTemplate, procedure_templates};
 pub use aps_procedures::{self, Procedure, procedures};
 pub use aps_reused_procedure_template_asset_models::{
     self, ReusedProcedureTemplateAssetModel, reused_procedure_template_asset_models,
 };
+pub use aps_roles::{self, Role, roles};
 pub use aps_sample_models::{self, SampleModel, sample_models};
 pub use aps_sample_source_models::{self, SampleSourceModel, sample_source_models};
 pub use aps_sample_sources::{self, SampleSource, sample_sources};
@@ -143,6 +148,10 @@ pub use aps_supernatant_procedure_templates::{
     self, SupernatantProcedureTemplate, supernatant_procedure_templates,
 };
 pub use aps_supernatant_procedures::{self, SupernatantProcedure, supernatant_procedures};
+pub use aps_table_names::{self, TableName, table_names};
+pub use aps_team_members::{self, TeamMember, team_members};
+pub use aps_teams::{self, Team, teams};
+pub use aps_tombstones::{self, Tombstone, tombstones};
 pub use aps_users::{self, User, users};
 pub use aps_volume_measuring_device_models::{
     self, VolumeMeasuringDeviceModel, volume_measuring_device_models,

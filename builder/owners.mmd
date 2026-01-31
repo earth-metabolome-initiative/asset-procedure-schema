@@ -1,0 +1,18 @@
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: owners
+---
+flowchart TB
+  v0@{shape: rounded, label: "teams"}
+  style v0 rx: 3px, ry: 3px 
+  v1@{shape: rounded, label: "users"}
+  style v1 rx: 3px, ry: 3px 
+  v2@{shape: rounded, label: "owners"}
+  style v2 rx: 3px, ry: 3px 
+  v0 ---> v2
+  v0 ---> v0
+  v1 ---> v2

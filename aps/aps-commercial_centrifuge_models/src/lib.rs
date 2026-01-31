@@ -18,19 +18,17 @@
 )]
 /// Struct representing a row in the `commercial_centrifuge_models` table.
 #[table_model(ancestors(
+    aps_ownables::ownables,
     aps_asset_models::asset_models,
-    aps_physical_asset_models::physical_asset_models,
     aps_commercial_products::commercial_products,
+    aps_physical_asset_models::physical_asset_models,
     aps_centrifuge_models::centrifuge_models
 ))]
 # [diesel (belongs_to (aps_commercial_products :: CommercialProduct , foreign_key = id))]
 # [table_model (foreign_key ((centrifuge_model_id ,) , (:: aps_centrifuge_models :: centrifuge_models :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_centrifuge_models :: centrifuge_models :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_commercial_products :: commercial_products :: id)))]
-#[table_model(default(
-    aps_asset_models::asset_models::asset_model_table_id,
-    "commercial_centrifuge_models"
-))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "commercial_centrifuge_models"))]
 # [diesel (table_name = commercial_centrifuge_models)]
 pub struct CommercialCentrifugeModel {
     /// Field representing the `id` column in table
@@ -65,6 +63,13 @@ impl ::diesel_builders::GetColumn<aps_centrifuge_models::centrifuge_models::id>
 impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
     for CommercialCentrifugeModel
 {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for CommercialCentrifugeModel {
     fn get_column_ref(
         &self,
     ) -> &<commercial_centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

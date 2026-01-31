@@ -8,10 +8,11 @@ edition.workspace = true
 serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
-rosetta_uuid.workspace = true
+rosetta-uuid.workspace = true
 aps-asset_models.workspace = true
 aps-commercial_product_lots.workspace = true
 aps-commercial_products.workspace = true
+aps-ownables.workspace = true
 aps-physical_asset_models.workspace = true
 
 [lints]

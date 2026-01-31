@@ -17,6 +17,7 @@
 )]
 /// Struct representing a row in the `commercial_product_lots` table.
 #[table_model(ancestors(
+    aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
@@ -25,10 +26,7 @@
 # [diesel (belongs_to (aps_commercial_products :: CommercialProduct , foreign_key = product_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
 # [table_model (foreign_key ((product_model_id ,) , (:: aps_commercial_products :: commercial_products :: id)))]
-#[table_model(default(
-    aps_asset_models::asset_models::asset_model_table_id,
-    "commercial_product_lots"
-))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "commercial_product_lots"))]
 # [diesel (table_name = commercial_product_lots)]
 pub struct CommercialProductLot {
     /// Field representing the `id` column in table `commercial_product_lots`.
@@ -58,14 +56,28 @@ impl ::diesel_builders::ValidateColumn<commercial_product_lots::lot>
         use diesel::Column;
         if lot.is_empty() {
             return Err(::validation_errors::ValidationError::empty(
-                "commercial_product_lots",
+                <crate::commercial_product_lots::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::commercial_product_lots::lot::NAME,
+            ));
+        }
+        if lot.len() <= 255usize {
+            return Err(::validation_errors::ValidationError::exceeds_max_length(
+                <crate::commercial_product_lots::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::commercial_product_lots::lot::NAME,
+                255usize,
             ));
         }
         Ok(())
     }
 }
 impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for CommercialProductLot {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_product_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for CommercialProductLot {
     fn get_column_ref(
         &self,
     ) -> &<commercial_product_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {

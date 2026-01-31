@@ -16,22 +16,18 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `procedure_templates` table.
+#[table_model(ancestors(aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
-# [diesel (belongs_to (aps_procedure_template_tables :: ProcedureTemplateTable , foreign_key = procedure_template_table_id))]
-# [table_model (foreign_key ((procedure_template_table_id ,) , (:: aps_procedure_template_tables :: procedure_template_tables :: id)))]
-# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
-# [table_model (foreign_key ((editor_id ,) , (:: aps_users :: users :: id)))]
+# [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
+# [table_model (foreign_key ((id ,) , (:: aps_ownables :: ownables :: id)))]
+#[table_model(default(aps_ownables::ownables::ownable_table_id, "procedure_templates"))]
 # [diesel (table_name = procedure_templates)]
 pub struct ProcedureTemplate {
     /// Identifier of the procedure_id template
-    # [table_model (default = :: rosetta_uuid :: Uuid :: new_v4 ())]
+    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// without having to execute multiple queries.
-    #[table_model(default = "procedure_templates")]
-    #[infallible]
-    procedure_template_table_id: String,
     /// Version of the procedure_id template.
     #[table_model(default = 1i32)]
     #[infallible]
@@ -40,22 +36,6 @@ pub struct ProcedureTemplate {
     name: String,
     /// Human-readable description of the procedure_id template
     description: String,
-    /// The user who created this procedure_id template
-    #[infallible]
-    # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    creator_id: ::rosetta_uuid::Uuid,
-    /// The timestamp when this procedure_id template was created
-    # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
-    # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    created_at: ::rosetta_timestamp::TimestampUTC,
-    /// The user who last updated this procedure_id template
-    #[infallible]
-    # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    editor_id: ::rosetta_uuid::Uuid,
-    /// The timestamp when this procedure_id template was last updated
-    # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
-    # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    edited_at: ::rosetta_timestamp::TimestampUTC,
     /// Whether this procedure_id template is deprecated and should not be used
     /// for new procedures
     #[table_model(default = false)]
@@ -72,8 +52,15 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::name>
         use diesel::Column;
         if name.is_empty() {
             return Err(::validation_errors::ValidationError::empty(
-                "procedure_templates",
+                <crate::procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::procedure_templates::name::NAME,
+            ));
+        }
+        if name.len() < 255usize {
+            return Err(::validation_errors::ValidationError::exceeds_max_length(
+                <crate::procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::procedure_templates::name::NAME,
+                255usize,
             ));
         }
         Ok(())
@@ -87,13 +74,14 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::name>
         if let Some(description) = <Self as diesel_builders::MayGetColumn<
             procedure_templates::description,
         >>::may_get_column_ref(self)
-            && name == description
         {
-            return Err(::validation_errors::ValidationError::equal(
-                "procedure_templates",
-                crate::procedure_templates::name::NAME,
-                crate::procedure_templates::description::NAME,
-            ));
+            if name == description {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedure_templates::name::NAME,
+                    crate::procedure_templates::description::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -107,8 +95,15 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::description>
         use diesel::Column;
         if description.is_empty() {
             return Err(::validation_errors::ValidationError::empty(
-                "procedure_templates",
+                <crate::procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::procedure_templates::description::NAME,
+            ));
+        }
+        if description.len() < 8192usize {
+            return Err(::validation_errors::ValidationError::exceeds_max_length(
+                <crate::procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::procedure_templates::description::NAME,
+                8192usize,
             ));
         }
         Ok(())
@@ -121,62 +116,22 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::description>
             <Self as diesel_builders::MayGetColumn<procedure_templates::name>>::may_get_column_ref(
                 self,
             )
-            && name == description
         {
-            return Err(::validation_errors::ValidationError::equal(
-                "procedure_templates",
-                crate::procedure_templates::name::NAME,
-                crate::procedure_templates::description::NAME,
-            ));
+            if name == description {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedure_templates::name::NAME,
+                    crate::procedure_templates::description::NAME,
+                ));
+            }
         }
         Ok(())
     }
 }
-impl ::diesel_builders::ValidateColumn<procedure_templates::created_at>
-    for <procedure_templates::table as ::diesel_builders::TableExt>::NewValues
-{
-    type Error = ::validation_errors::ValidationError;
-    #[inline]
-    fn validate_column_in_context(
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for ProcedureTemplate {
+    fn get_column_ref(
         &self,
-        created_at: &::rosetta_timestamp::TimestampUTC,
-    ) -> Result<(), Self::Error> {
-        use diesel::Column;
-        if let Some(edited_at) = <Self as diesel_builders::MayGetColumn<
-            procedure_templates::edited_at,
-        >>::may_get_column_ref(self)
-            && created_at > edited_at
-        {
-            return Err(::validation_errors::ValidationError::smaller_than(
-                "procedure_templates",
-                crate::procedure_templates::created_at::NAME,
-                crate::procedure_templates::edited_at::NAME,
-            ));
-        }
-        Ok(())
-    }
-}
-impl ::diesel_builders::ValidateColumn<procedure_templates::edited_at>
-    for <procedure_templates::table as ::diesel_builders::TableExt>::NewValues
-{
-    type Error = ::validation_errors::ValidationError;
-    #[inline]
-    fn validate_column_in_context(
-        &self,
-        edited_at: &::rosetta_timestamp::TimestampUTC,
-    ) -> Result<(), Self::Error> {
-        use diesel::Column;
-        if let Some(created_at) = <Self as diesel_builders::MayGetColumn<
-            procedure_templates::created_at,
-        >>::may_get_column_ref(self)
-            && created_at > edited_at
-        {
-            return Err(::validation_errors::ValidationError::smaller_than(
-                "procedure_templates",
-                crate::procedure_templates::created_at::NAME,
-                crate::procedure_templates::edited_at::NAME,
-            ));
-        }
-        Ok(())
+    ) -> &<procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }

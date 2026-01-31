@@ -1,0 +1,459 @@
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: ownables
+---
+flowchart TB
+  v0@{shape: rounded, label: "aliquoting_procedure_templates"}
+  style v0 rx: 3px, ry: 3px 
+  v1@{shape: rounded, label: "aliquoting_procedures"}
+  style v1 rx: 3px, ry: 3px 
+  v2@{shape: rounded, label: "asset_models"}
+  style v2 rx: 3px, ry: 3px 
+  v3@{shape: rounded, label: "assets"}
+  style v3 rx: 3px, ry: 3px 
+  v4@{shape: rounded, label: "ball_mill_machine_models"}
+  style v4 rx: 3px, ry: 3px 
+  v5@{shape: rounded, label: "ball_mill_machines"}
+  style v5 rx: 3px, ry: 3px 
+  v6@{shape: rounded, label: "ball_mill_procedure_templates"}
+  style v6 rx: 3px, ry: 3px 
+  v7@{shape: rounded, label: "ball_mill_procedures"}
+  style v7 rx: 3px, ry: 3px 
+  v8@{shape: rounded, label: "bead_models"}
+  style v8 rx: 3px, ry: 3px 
+  v9@{shape: rounded, label: "camera_models"}
+  style v9 rx: 3px, ry: 3px 
+  v10@{shape: rounded, label: "cameras"}
+  style v10 rx: 3px, ry: 3px 
+  v11@{shape: rounded, label: "centrifuge_models"}
+  style v11 rx: 3px, ry: 3px 
+  v12@{shape: rounded, label: "centrifuge_procedure_templates"}
+  style v12 rx: 3px, ry: 3px 
+  v13@{shape: rounded, label: "centrifuge_procedures"}
+  style v13 rx: 3px, ry: 3px 
+  v14@{shape: rounded, label: "centrifuges"}
+  style v14 rx: 3px, ry: 3px 
+  v15@{shape: rounded, label: "commercial_ball_mill_machine_lots"}
+  style v15 rx: 3px, ry: 3px 
+  v16@{shape: rounded, label: "commercial_ball_mill_machine_models"}
+  style v16 rx: 3px, ry: 3px 
+  v17@{shape: rounded, label: "commercial_camera_lots"}
+  style v17 rx: 3px, ry: 3px 
+  v18@{shape: rounded, label: "commercial_camera_models"}
+  style v18 rx: 3px, ry: 3px 
+  v19@{shape: rounded, label: "commercial_centrifuge_lots"}
+  style v19 rx: 3px, ry: 3px 
+  v20@{shape: rounded, label: "commercial_centrifuge_models"}
+  style v20 rx: 3px, ry: 3px 
+  v21@{shape: rounded, label: "commercial_freeze_dryer_lots"}
+  style v21 rx: 3px, ry: 3px 
+  v22@{shape: rounded, label: "commercial_freeze_dryer_models"}
+  style v22 rx: 3px, ry: 3px 
+  v23@{shape: rounded, label: "commercial_freezer_lots"}
+  style v23 rx: 3px, ry: 3px 
+  v24@{shape: rounded, label: "commercial_freezer_models"}
+  style v24 rx: 3px, ry: 3px 
+  v25@{shape: rounded, label: "commercial_geopositioning_device_lots"}
+  style v25 rx: 3px, ry: 3px 
+  v26@{shape: rounded, label: "commercial_geopositioning_device_models"}
+  style v26 rx: 3px, ry: 3px 
+  v27@{shape: rounded, label: "commercial_product_lots"}
+  style v27 rx: 3px, ry: 3px 
+  v28@{shape: rounded, label: "commercial_products"}
+  style v28 rx: 3px, ry: 3px 
+  v29@{shape: rounded, label: "container_models"}
+  style v29 rx: 3px, ry: 3px 
+  v30@{shape: rounded, label: "container_sealer_models"}
+  style v30 rx: 3px, ry: 3px 
+  v31@{shape: rounded, label: "container_sealing_procedure_templates"}
+  style v31 rx: 3px, ry: 3px 
+  v32@{shape: rounded, label: "container_sealing_procedures"}
+  style v32 rx: 3px, ry: 3px 
+  v33@{shape: rounded, label: "containers"}
+  style v33 rx: 3px, ry: 3px 
+  v34@{shape: rounded, label: "digital_asset_models"}
+  style v34 rx: 3px, ry: 3px 
+  v35@{shape: rounded, label: "digital_assets"}
+  style v35 rx: 3px, ry: 3px 
+  v36@{shape: rounded, label: "disposal_procedure_templates"}
+  style v36 rx: 3px, ry: 3px 
+  v37@{shape: rounded, label: "disposal_procedures"}
+  style v37 rx: 3px, ry: 3px 
+  v38@{shape: rounded, label: "fractioning_procedure_templates"}
+  style v38 rx: 3px, ry: 3px 
+  v39@{shape: rounded, label: "fractioning_procedures"}
+  style v39 rx: 3px, ry: 3px 
+  v40@{shape: rounded, label: "freeze_dryer_models"}
+  style v40 rx: 3px, ry: 3px 
+  v41@{shape: rounded, label: "freeze_dryers"}
+  style v41 rx: 3px, ry: 3px 
+  v42@{shape: rounded, label: "freeze_drying_procedure_templates"}
+  style v42 rx: 3px, ry: 3px 
+  v43@{shape: rounded, label: "freeze_drying_procedures"}
+  style v43 rx: 3px, ry: 3px 
+  v44@{shape: rounded, label: "freezer_models"}
+  style v44 rx: 3px, ry: 3px 
+  v45@{shape: rounded, label: "freezers"}
+  style v45 rx: 3px, ry: 3px 
+  v46@{shape: rounded, label: "freezing_procedure_templates"}
+  style v46 rx: 3px, ry: 3px 
+  v47@{shape: rounded, label: "freezing_procedures"}
+  style v47 rx: 3px, ry: 3px 
+  v48@{shape: rounded, label: "geopositioning_device_models"}
+  style v48 rx: 3px, ry: 3px 
+  v49@{shape: rounded, label: "geopositioning_devices"}
+  style v49 rx: 3px, ry: 3px 
+  v50@{shape: rounded, label: "geopositioning_procedure_templates"}
+  style v50 rx: 3px, ry: 3px 
+  v51@{shape: rounded, label: "geopositioning_procedures"}
+  style v51 rx: 3px, ry: 3px 
+  v52@{shape: rounded, label: "harvesting_procedure_templates"}
+  style v52 rx: 3px, ry: 3px 
+  v53@{shape: rounded, label: "harvesting_procedures"}
+  style v53 rx: 3px, ry: 3px 
+  v54@{shape: rounded, label: "namespaces"}
+  style v54 rx: 3px, ry: 3px 
+  v55@{shape: rounded, label: "packaging_models"}
+  style v55 rx: 3px, ry: 3px 
+  v56@{shape: rounded, label: "packaging_procedure_templates"}
+  style v56 rx: 3px, ry: 3px 
+  v57@{shape: rounded, label: "packaging_procedures"}
+  style v57 rx: 3px, ry: 3px 
+  v58@{shape: rounded, label: "photograph_procedure_templates"}
+  style v58 rx: 3px, ry: 3px 
+  v59@{shape: rounded, label: "photograph_procedures"}
+  style v59 rx: 3px, ry: 3px 
+  v60@{shape: rounded, label: "photographs"}
+  style v60 rx: 3px, ry: 3px 
+  v61@{shape: rounded, label: "physical_asset_models"}
+  style v61 rx: 3px, ry: 3px 
+  v62@{shape: rounded, label: "physical_assets"}
+  style v62 rx: 3px, ry: 3px 
+  v63@{shape: rounded, label: "pouring_procedure_templates"}
+  style v63 rx: 3px, ry: 3px 
+  v64@{shape: rounded, label: "pouring_procedures"}
+  style v64 rx: 3px, ry: 3px 
+  v65@{shape: rounded, label: "procedure_templates"}
+  style v65 rx: 3px, ry: 3px 
+  v66@{shape: rounded, label: "procedures"}
+  style v66 rx: 3px, ry: 3px 
+  v67@{shape: rounded, label: "sample_models"}
+  style v67 rx: 3px, ry: 3px 
+  v68@{shape: rounded, label: "sample_source_models"}
+  style v68 rx: 3px, ry: 3px 
+  v69@{shape: rounded, label: "sample_sources"}
+  style v69 rx: 3px, ry: 3px 
+  v70@{shape: rounded, label: "samples"}
+  style v70 rx: 3px, ry: 3px 
+  v71@{shape: rounded, label: "storage_procedure_templates"}
+  style v71 rx: 3px, ry: 3px 
+  v72@{shape: rounded, label: "storage_procedures"}
+  style v72 rx: 3px, ry: 3px 
+  v73@{shape: rounded, label: "supernatant_procedure_templates"}
+  style v73 rx: 3px, ry: 3px 
+  v74@{shape: rounded, label: "supernatant_procedures"}
+  style v74 rx: 3px, ry: 3px 
+  v75@{shape: rounded, label: "teams"}
+  style v75 rx: 3px, ry: 3px 
+  v76@{shape: rounded, label: "volume_measuring_device_models"}
+  style v76 rx: 3px, ry: 3px 
+  v77@{shape: rounded, label: "volume_measuring_devices"}
+  style v77 rx: 3px, ry: 3px 
+  v78@{shape: rounded, label: "volumetric_container_models"}
+  style v78 rx: 3px, ry: 3px 
+  v79@{shape: rounded, label: "volumetric_containers"}
+  style v79 rx: 3px, ry: 3px 
+  v80@{shape: rounded, label: "weighed_container_models"}
+  style v80 rx: 3px, ry: 3px 
+  v81@{shape: rounded, label: "weighing_device_models"}
+  style v81 rx: 3px, ry: 3px 
+  v82@{shape: rounded, label: "weighing_devices"}
+  style v82 rx: 3px, ry: 3px 
+  v83@{shape: rounded, label: "weighing_procedure_templates"}
+  style v83 rx: 3px, ry: 3px 
+  v84@{shape: rounded, label: "weighing_procedures"}
+  style v84 rx: 3px, ry: 3px 
+  v85@{shape: rounded, label: "ownables"}
+  style v85 rx: 3px, ry: 3px 
+  v0 ---> v65
+  v0 ---> v76
+  v0 ---> v78
+  v1 ---> v0
+  v1 ---> v66
+  v1 ---> v76
+  v1 ---> v77
+  v1 ---> v79
+  v2 ---> v2
+  v2 ---> v54
+  v2 ---> v85
+  v3 ---> v2
+  v3 ---> v85
+  v4 ---> v61
+  v5 ---> v3
+  v5 ---> v15
+  v5 ---> v62
+  v6 ---> v4
+  v6 ---> v8
+  v6 ---> v65
+  v6 ---> v78
+  v7 ---> v3
+  v7 ---> v4
+  v7 ---> v5
+  v7 ---> v6
+  v7 ---> v8
+  v7 ---> v66
+  v7 ---> v78
+  v7 ---> v79
+  v8 ---> v61
+  v9 ---> v61
+  v10 ---> v3
+  v10 ---> v17
+  v10 ---> v62
+  v11 ---> v61
+  v12 ---> v11
+  v12 ---> v65
+  v12 ---> v78
+  v13 ---> v3
+  v13 ---> v11
+  v13 ---> v12
+  v13 ---> v14
+  v13 ---> v66
+  v13 ---> v78
+  v13 ---> v79
+  v14 ---> v3
+  v14 ---> v19
+  v14 ---> v62
+  v15 ---> v2
+  v15 ---> v4
+  v15 ---> v16
+  v15 ---> v27
+  v16 ---> v2
+  v16 ---> v4
+  v16 ---> v28
+  v17 ---> v2
+  v17 ---> v9
+  v17 ---> v18
+  v17 ---> v27
+  v18 ---> v2
+  v18 ---> v9
+  v18 ---> v28
+  v19 ---> v2
+  v19 ---> v11
+  v19 ---> v20
+  v19 ---> v27
+  v20 ---> v2
+  v20 ---> v11
+  v20 ---> v28
+  v21 ---> v2
+  v21 ---> v22
+  v21 ---> v27
+  v21 ---> v40
+  v22 ---> v2
+  v22 ---> v28
+  v22 ---> v40
+  v23 ---> v2
+  v23 ---> v24
+  v23 ---> v27
+  v23 ---> v44
+  v24 ---> v2
+  v24 ---> v28
+  v24 ---> v44
+  v25 ---> v2
+  v25 ---> v26
+  v25 ---> v27
+  v25 ---> v48
+  v26 ---> v2
+  v26 ---> v28
+  v26 ---> v48
+  v27 ---> v2
+  v27 ---> v28
+  v27 ---> v61
+  v28 ---> v2
+  v29 ---> v61
+  v30 ---> v61
+  v31 ---> v30
+  v31 ---> v65
+  v31 ---> v78
+  v32 ---> v3
+  v32 ---> v30
+  v32 ---> v31
+  v32 ---> v66
+  v32 ---> v78
+  v32 ---> v79
+  v33 ---> v3
+  v33 ---> v29
+  v33 ---> v62
+  v34 ---> v2
+  v35 ---> v3
+  v35 ---> v34
+  v36 ---> v61
+  v36 ---> v65
+  v37 ---> v3
+  v37 ---> v36
+  v37 ---> v61
+  v37 ---> v62
+  v37 ---> v66
+  v38 ---> v65
+  v38 ---> v78
+  v38 ---> v81
+  v39 ---> v3
+  v39 ---> v38
+  v39 ---> v66
+  v39 ---> v78
+  v39 ---> v79
+  v39 ---> v81
+  v39 ---> v82
+  v40 ---> v61
+  v41 ---> v3
+  v41 ---> v21
+  v41 ---> v62
+  v42 ---> v40
+  v42 ---> v65
+  v42 ---> v78
+  v43 ---> v3
+  v43 ---> v40
+  v43 ---> v41
+  v43 ---> v42
+  v43 ---> v66
+  v43 ---> v78
+  v43 ---> v79
+  v44 ---> v61
+  v45 ---> v3
+  v45 ---> v23
+  v45 ---> v62
+  v46 ---> v44
+  v46 ---> v65
+  v46 ---> v78
+  v47 ---> v3
+  v47 ---> v44
+  v47 ---> v45
+  v47 ---> v46
+  v47 ---> v66
+  v47 ---> v78
+  v47 ---> v79
+  v48 ---> v61
+  v49 ---> v3
+  v49 ---> v25
+  v49 ---> v62
+  v50 ---> v48
+  v50 ---> v61
+  v50 ---> v65
+  v51 ---> v3
+  v51 ---> v48
+  v51 ---> v49
+  v51 ---> v50
+  v51 ---> v61
+  v51 ---> v62
+  v51 ---> v66
+  v52 ---> v65
+  v52 ---> v67
+  v52 ---> v68
+  v53 ---> v3
+  v53 ---> v52
+  v53 ---> v66
+  v53 ---> v67
+  v53 ---> v68
+  v53 ---> v69
+  v53 ---> v70
+  v54 ---> v85
+  v55 ---> v61
+  v56 ---> v55
+  v56 ---> v61
+  v56 ---> v65
+  v57 ---> v3
+  v57 ---> v55
+  v57 ---> v56
+  v57 ---> v61
+  v57 ---> v62
+  v57 ---> v66
+  v58 ---> v9
+  v58 ---> v34
+  v58 ---> v61
+  v58 ---> v65
+  v59 ---> v3
+  v59 ---> v9
+  v59 ---> v10
+  v59 ---> v34
+  v59 ---> v58
+  v59 ---> v60
+  v59 ---> v61
+  v59 ---> v62
+  v59 ---> v66
+  v60 ---> v35
+  v61 ---> v2
+  v62 ---> v3
+  v62 ---> v61
+  v63 ---> v65
+  v63 ---> v76
+  v63 ---> v78
+  v64 ---> v3
+  v64 ---> v63
+  v64 ---> v66
+  v64 ---> v76
+  v64 ---> v77
+  v64 ---> v78
+  v64 ---> v79
+  v65 ---> v85
+  v66 ---> v85
+  v66 ---> v65
+  v66 ---> v66
+  v67 ---> v61
+  v67 ---> v68
+  v68 ---> v61
+  v69 ---> v3
+  v69 ---> v62
+  v69 ---> v68
+  v70 ---> v3
+  v70 ---> v62
+  v70 ---> v67
+  v70 ---> v68
+  v70 ---> v69
+  v71 ---> v29
+  v71 ---> v61
+  v71 ---> v65
+  v72 ---> v3
+  v72 ---> v29
+  v72 ---> v33
+  v72 ---> v61
+  v72 ---> v62
+  v72 ---> v66
+  v72 ---> v71
+  v73 ---> v65
+  v73 ---> v76
+  v73 ---> v78
+  v74 ---> v3
+  v74 ---> v66
+  v74 ---> v73
+  v74 ---> v76
+  v74 ---> v77
+  v74 ---> v78
+  v74 ---> v79
+  v75 ---> v85
+  v75 ---> v75
+  v76 ---> v61
+  v77 ---> v3
+  v77 ---> v62
+  v77 ---> v76
+  v78 ---> v29
+  v79 ---> v3
+  v79 ---> v33
+  v79 ---> v78
+  v80 ---> v29
+  v81 ---> v61
+  v82 ---> v3
+  v82 ---> v62
+  v82 ---> v81
+  v83 ---> v61
+  v83 ---> v65
+  v83 ---> v81
+  v84 ---> v3
+  v84 ---> v61
+  v84 ---> v62
+  v84 ---> v66
+  v84 ---> v81
+  v84 ---> v82
+  v84 ---> v83
