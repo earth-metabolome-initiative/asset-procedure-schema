@@ -3,14 +3,12 @@ use aps_asset_compatibility_rules::*;
 use aps_asset_models::asset_models;
 use aps_container_compatibility_rules::*;
 use aps_container_models::*;
+use aps_ownables::*;
 use aps_users::users;
-use diesel::associations::HasTable;
-use diesel_builders::{BuildableTable, DescendantOf, GetColumn, TableBuilder, prelude::*};
+use diesel_builders::{BuildableTable, GetColumn, TableBuilder, prelude::*};
 
 /// A trait for asset models that can be compatible with other asset models.
-pub trait CompatibleWith:
-    HasTable<Table: DescendantOf<asset_models::table>> + GetColumn<asset_models::id>
-{
+pub trait CompatibleWith: GetColumn<asset_models::id> {
     /// Creates a new `AssetCompatibilityRule` linking the current trackable
     /// with another
     ///
@@ -31,8 +29,10 @@ pub trait CompatibleWith:
     ///
     /// ```rust
     /// use aps_asset_compatibility_rules::*;
+    /// use aps_asset_models::asset_models;
     /// use asset_traits::CompatibleWith;
     /// use diesel::associations::Identifiable;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
     /// let asset_model_a = aps_test_utils::asset_model("Model A", &user, &mut conn);
@@ -40,13 +40,19 @@ pub trait CompatibleWith:
     /// let compatibility_rule = asset_model_a
     ///     .compatible_with(&asset_model_b, &user, &mut conn)
     ///     .expect("Failed to create compatibility rule");
-    /// assert_eq!(compatibility_rule.left_asset_model_id(), asset_model_a.id());
-    /// assert_eq!(compatibility_rule.right_asset_model_id(), asset_model_b.id());
+    /// assert_eq!(
+    ///     compatibility_rule.left_asset_model_id(),
+    ///     asset_model_a.get_column_ref::<asset_models::id>()
+    /// );
+    /// assert_eq!(
+    ///     compatibility_rule.right_asset_model_id(),
+    ///     asset_model_b.get_column_ref::<asset_models::id>()
+    /// );
     /// ```
     fn compatible_with<C>(
         &self,
         other: impl CompatibleWith,
-        creator: impl HasTable<Table: DescendantOf<users::table>> + GetColumn<users::id>,
+        creator: impl GetColumn<users::id>,
         conn: &mut C,
     ) -> Result<AssetCompatibilityRule, diesel::result::Error>
     where
@@ -56,19 +62,16 @@ pub trait CompatibleWith:
             .try_left_asset_model_id(self.get_column())?
             .try_right_asset_model_id(other.get_column())?
             .creator_id(creator.get_column())
+            .editor_id(creator.get_column())
+            .owner_id(creator.get_column())
             .insert(conn)?)
     }
 }
 
-impl<T> CompatibleWith for T where
-    T: HasTable<Table: DescendantOf<asset_models::table>> + GetColumn<asset_models::id>
-{
-}
+impl<T> CompatibleWith for T where T: GetColumn<asset_models::id> {}
 
 /// A trait for container models that can contain other asset models.
-pub trait CanContain:
-    HasTable<Table: DescendantOf<container_models::table>> + GetColumn<container_models::id>
-{
+pub trait CanContain: GetColumn<container_models::id> {
     /// Creates a new `AssetCompatibilityRule` linking the current trackable
     /// with another
     ///
@@ -89,8 +92,11 @@ pub trait CanContain:
     ///
     /// ```rust
     /// use aps_container_compatibility_rules::*;
+    /// use aps_container_models::container_models;
+    /// use aps_physical_asset_models::physical_asset_models;
     /// use asset_traits::CanContain;
     /// use diesel::associations::Identifiable;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
     /// let container_model = aps_test_utils::container_model("Container Model", &user, &mut conn);
@@ -100,17 +106,21 @@ pub trait CanContain:
     ///     .can_contain(&asset_model, 10, &user, &mut conn)
     ///     .expect("Failed to create compatibility rule");
     ///
-    /// assert_eq!(compatibility_rule.container_model_id(), container_model.id());
-    /// assert_eq!(compatibility_rule.contained_asset_model_id(), asset_model.id());
+    /// assert_eq!(
+    ///     compatibility_rule.container_model_id(),
+    ///     container_model.get_column_ref::<container_models::id>()
+    /// );
+    /// assert_eq!(
+    ///     compatibility_rule.contained_asset_model_id(),
+    ///     asset_model.get_column_ref::<physical_asset_models::id>()
+    /// );
     /// assert_eq!(*compatibility_rule.quantity(), 10);
     /// ```
     fn can_contain<C>(
         &self,
-        asset_model: impl HasTable<
-            Table: DescendantOf<aps_physical_asset_models::physical_asset_models::table>,
-        > + GetColumn<aps_physical_asset_models::physical_asset_models::id>,
+        asset_model: impl GetColumn<aps_physical_asset_models::physical_asset_models::id>,
         quantity: i16,
-        user: impl HasTable<Table: DescendantOf<users::table>> + GetColumn<users::id>,
+        user: impl GetColumn<users::id>,
         conn: &mut C,
     ) -> Result<ContainerCompatibilityRule, diesel::result::Error>
     where
@@ -121,11 +131,10 @@ pub trait CanContain:
             .try_contained_asset_model_id(asset_model.get_column())?
             .try_quantity(quantity)?
             .creator_id(user.get_column())
+            .editor_id(user.get_column())
+            .owner_id(user.get_column())
             .insert(conn)?)
     }
 }
 
-impl<T> CanContain for T where
-    T: HasTable<Table: DescendantOf<container_models::table>> + GetColumn<container_models::id>
-{
-}
+impl<T> CanContain for T where T: GetColumn<container_models::id> {}

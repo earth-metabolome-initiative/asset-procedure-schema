@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_volumetric_containers :: VolumetricContainer , foreign_key = capped_container_id))]
 # [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = sealable_container_model_id))]
 # [diesel (belongs_to (aps_container_sealer_models :: ContainerSealerModel , foreign_key = sealed_with_model_id))]
@@ -39,14 +40,17 @@ pub struct ContainerSealingProcedure {
     /// Identifier of the capping id, which is also a foreign key to the general
     /// procedure.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// We enforce that the model of this procedure_id must be a capping
     /// procedure_id template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     capping_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The container being capped, which must be a volumetric container.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     capped_container_id: ::rosetta_uuid::Uuid,
     /// The model of the container being capped.
@@ -54,6 +58,7 @@ pub struct ContainerSealingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_capped_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sealable_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model describing the `capped_container`.
@@ -61,10 +66,12 @@ pub struct ContainerSealingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_capped_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sealable_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset describing the `capped_container`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_capped_container_id: ::rosetta_uuid::Uuid,
     /// The cap being used, which must be a cap model.
@@ -72,6 +79,7 @@ pub struct ContainerSealingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_capped_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sealed_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model describing the
@@ -80,10 +88,12 @@ pub struct ContainerSealingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_capped_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sealed_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset describing the `capped_with_model`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_capped_with_id: ::rosetta_uuid::Uuid,
 }

@@ -17,6 +17,7 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
@@ -152,6 +153,16 @@ impl ::diesel_builders::ValidateColumn<freeze_drying_procedure_templates::durati
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for FreezeDryingProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<freeze_drying_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for FreezeDryingProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<freeze_drying_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType

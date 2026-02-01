@@ -83,18 +83,6 @@ fn establish_connection_to_postgres<C: Connection>(
 ///
 /// * If the connection cannot be established.
 /// * If the container cannot be started.
-///
-/// # Example
-///
-/// ```rust
-/// use diesel::PgConnection;
-/// use pg_docker_migrations::connect;
-///
-/// #[tokio::main]
-/// async fn main() {
-///     let (docker, conn) = connect::<PgConnection>("test_db", 6437).await.unwrap();
-/// }
-/// ```
 pub async fn connect<C: Connection>(
     database_name: &str,
     port: u16,

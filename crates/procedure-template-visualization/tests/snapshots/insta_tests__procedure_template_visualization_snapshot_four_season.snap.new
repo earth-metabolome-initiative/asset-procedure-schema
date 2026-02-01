@@ -1,0 +1,149 @@
+---
+source: crates/procedure-template-visualization/tests/insta_tests.rs
+assertion_line: 99
+expression: diagram
+---
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: Make a Four Seasons Pizza
+---
+flowchart TB
+  classDef ptam_node_019c1b0d-e115-7000-8981-e1c8d62105b1 rx: 2px, ry: 2px,stroke-dasharray: 5, 5,fill: #efa8a8,stroke: #d62727
+  classDef ptam_edge_019c1b0d-e115-7000-8981-e1c8d62105b1 stroke-dasharray: 5, 5,stroke: #d62727,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e115-7000-a101-16a2f428171c rx: 2px, ry: 2px,stroke-dasharray: 5, 5,fill: #efd3a8,stroke: #d69127
+  classDef ptam_edge_019c1b0d-e115-7000-a101-16a2f428171c stroke-dasharray: 5, 5,stroke: #d69127,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e115-7003-bcd9-7cb24317b5da rx: 2px, ry: 2px,stroke-dasharray: 5, 5,fill: #e1efa8,stroke: #b4d627
+  classDef ptam_edge_019c1b0d-e115-7003-bcd9-7cb24317b5da stroke-dasharray: 5, 5,stroke: #b4d627,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e115-7005-927e-2e3ea4eebf04 rx: 2px, ry: 2px,stroke-dasharray: 5, 5,fill: #b6efa8,stroke: #49d627
+  classDef ptam_edge_019c1b0d-e115-7005-927e-2e3ea4eebf04 stroke-dasharray: 5, 5,stroke: #49d627,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e115-7009-b183-ae36e207f132 rx: 2px, ry: 2px,stroke-dasharray: 5, 5,fill: #a8efc4,stroke: #27d66c
+  classDef ptam_edge_019c1b0d-e115-7009-b183-ae36e207f132 stroke-dasharray: 5, 5,stroke: #27d66c,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e115-7009-be2e-2994343722e6 rx: 2px, ry: 2px,stroke-dasharray: 5, 5,fill: #a8efef,stroke: #27d6d6
+  classDef ptam_edge_019c1b0d-e115-7009-be2e-2994343722e6 stroke-dasharray: 5, 5,stroke: #27d6d6,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e116-7007-bd5a-98aa132ffeb8 rx: 2px, ry: 2px,fill: #a8c4ef,stroke: #276cd6
+  classDef ptam_edge_019c1b0d-e116-7007-bd5a-98aa132ffeb8 stroke: #276cd6,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e116-700c-a130-dd075a1f977e rx: 2px, ry: 2px,fill: #b6a8ef,stroke: #4927d6
+  classDef ptam_edge_019c1b0d-e116-700c-a130-dd075a1f977e stroke: #4927d6,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e117-7004-8e66-0eb6d8e3764b rx: 2px, ry: 2px,fill: #e1a8ef,stroke: #b427d6
+  classDef ptam_edge_019c1b0d-e117-7004-8e66-0eb6d8e3764b stroke: #b427d6,stroke-width: 2px
+  classDef ptam_node_019c1b0d-e117-700a-b57d-4b7bc2e54540 rx: 2px, ry: 2px,fill: #efa8d3,stroke: #d62791
+  classDef ptam_edge_019c1b0d-e117-700a-b57d-4b7bc2e54540 stroke: #d62791,stroke-width: 2px
+  classDef procedure_arrow stroke: #1a1a1a
+  subgraph v16158002109166742243 ["`*Heat Oven*`"]
+    v1634400805095992084@{shape: rect, label: "Oven 2"}
+    class v1634400805095992084 ptam_node_019c1b0d-e116-7007-bd5a-98aa132ffeb8
+  end
+  style v16158002109166742243 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v15444779395759994784 ["`*Prepare Dough 2*`"]
+    v112150629894574929@{shape: rect, label: "Pizza Dough 2"}
+    class v112150629894574929 ptam_node_019c1b0d-e116-700c-a130-dd075a1f977e
+  end
+  style v15444779395759994784 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v12431962871650439339 ["`*Omnivore Toppings*`"]
+    v4358358465942142097@{shape: lean-r, label: "Ham"}
+    class v4358358465942142097 ptam_node_019c1b0d-e115-7003-bcd9-7cb24317b5da
+    v4528005735574989180@{shape: rect, label: "Omnivore Pizza"}
+    class v4528005735574989180 ptam_node_019c1b0d-e117-700a-b57d-4b7bc2e54540
+    v17523623573055750908@{shape: lean-r, label: "Olives"}
+    class v17523623573055750908 ptam_node_019c1b0d-e115-7000-8981-e1c8d62105b1
+    v17545120305104779897@{shape: lean-r, label: "Mushrooms"}
+    class v17545120305104779897 ptam_node_019c1b0d-e115-7009-be2e-2994343722e6
+    v17767944814637683665@{shape: lean-r, label: "Mozzarella Cheese 2"}
+    class v17767944814637683665 ptam_node_019c1b0d-e115-7005-927e-2e3ea4eebf04
+    v17888742627127908906@{shape: lean-r, label: "Artichokes"}
+    class v17888742627127908906 ptam_node_019c1b0d-e115-7000-a101-16a2f428171c
+  end
+  style v12431962871650439339 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v1152320841072419150 ["`*Vegetarian Toppings*`"]
+    v1319322483939573324@{shape: lean-r, label: "Tofu"}
+    class v1319322483939573324 ptam_node_019c1b0d-e115-7009-b183-ae36e207f132
+    v5463659477899050790@{shape: lean-r, label: "Artichokes"}
+    class v5463659477899050790 ptam_node_019c1b0d-e115-7000-a101-16a2f428171c
+    v7764143446582529646@{shape: rect, label: "Vegetarian Pizza"}
+    class v7764143446582529646 ptam_node_019c1b0d-e117-7004-8e66-0eb6d8e3764b
+    v11921889631610418498@{shape: lean-r, label: "Mushrooms"}
+    class v11921889631610418498 ptam_node_019c1b0d-e115-7009-be2e-2994343722e6
+    v15238980765896250336@{shape: lean-r, label: "Olives"}
+    class v15238980765896250336 ptam_node_019c1b0d-e115-7000-8981-e1c8d62105b1
+    v15736600088948192843@{shape: hex, label: "Pizza Dough 2"}
+    class v15736600088948192843 ptam_node_019c1b0d-e116-700c-a130-dd075a1f977e
+    v16448880652950009199@{shape: lean-r, label: "Mozzarella Cheese 2"}
+    class v16448880652950009199 ptam_node_019c1b0d-e115-7005-927e-2e3ea4eebf04
+  end
+  style v1152320841072419150 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v5493323626650542189 ["`*Bake Omnivore Pizza*`"]
+    v1059127730527563404@{shape: hex, label: "Omnivore Pizza"}
+    class v1059127730527563404 ptam_node_019c1b0d-e117-700a-b57d-4b7bc2e54540
+    v14451685542896618159@{shape: hex, label: "Oven 2"}
+    class v14451685542896618159 ptam_node_019c1b0d-e116-7007-bd5a-98aa132ffeb8
+  end
+  style v5493323626650542189 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v9549533056496241708 ["`*Bake Vegetarian Pizza*`"]
+    v10503559339629477539@{shape: hex, label: "Oven 2"}
+    class v10503559339629477539 ptam_node_019c1b0d-e116-7007-bd5a-98aa132ffeb8
+    v16270913339384589568@{shape: hex, label: "Vegetarian Pizza"}
+    class v16270913339384589568 ptam_node_019c1b0d-e117-7004-8e66-0eb6d8e3764b
+  end
+  style v9549533056496241708 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v32 ["`**Required Procedures**`"]
+    subgraph v6 ["`*Prepare Ingredients*`"]
+      v368297996737150633@{shape: lean-r, label: "*Artichokes*"}
+      class v368297996737150633 ptam_node_019c1b0d-e115-7000-a101-16a2f428171c
+      v1377431176735036783@{shape: lean-r, label: "*Tofu*"}
+      class v1377431176735036783 ptam_node_019c1b0d-e115-7009-b183-ae36e207f132
+      v4683403808890306631@{shape: lean-r, label: "*Olives*"}
+      class v4683403808890306631 ptam_node_019c1b0d-e115-7000-8981-e1c8d62105b1
+      v7923780462942619753@{shape: lean-r, label: "*Mushrooms*"}
+      class v7923780462942619753 ptam_node_019c1b0d-e115-7009-be2e-2994343722e6
+      v17111427400406347555@{shape: lean-r, label: "*Mozzarella Cheese 2*"}
+      class v17111427400406347555 ptam_node_019c1b0d-e115-7005-927e-2e3ea4eebf04
+      v17995313376997812196@{shape: lean-r, label: "*Ham*"}
+      class v17995313376997812196 ptam_node_019c1b0d-e115-7003-bcd9-7cb24317b5da
+    end
+    style v6 rx: 3px, ry: 3px , fill: #e6e7e9 , stroke: #d0cecd , stroke-dasharray: 5, 5 
+  end
+  style v32 fill: #ecedee , stroke: #d5d4d3 , rx: 3px, ry: 3px , stroke-dasharray: 5, 5 
+  v16158002109166742243 e0@---> v15444779395759994784
+  class e0 procedure_arrow
+  v7923780462942619753 e1@-.- v17545120305104779897
+  class e1 ptam_edge_019c1b0d-e115-7009-be2e-2994343722e6
+  v17111427400406347555 e2@-.- v17767944814637683665
+  class e2 ptam_edge_019c1b0d-e115-7005-927e-2e3ea4eebf04
+  v17995313376997812196 e3@-.- v4358358465942142097
+  class e3 ptam_edge_019c1b0d-e115-7003-bcd9-7cb24317b5da
+  v368297996737150633 e4@-.- v17888742627127908906
+  class e4 ptam_edge_019c1b0d-e115-7000-a101-16a2f428171c
+  v4683403808890306631 e5@-.- v17523623573055750908
+  class e5 ptam_edge_019c1b0d-e115-7000-8981-e1c8d62105b1
+  v15444779395759994784 e6@---> v12431962871650439339
+  class e6 procedure_arrow
+  v7923780462942619753 e7@-.- v11921889631610418498
+  class e7 ptam_edge_019c1b0d-e115-7009-be2e-2994343722e6
+  v1377431176735036783 e8@-.- v1319322483939573324
+  class e8 ptam_edge_019c1b0d-e115-7009-b183-ae36e207f132
+  v17111427400406347555 e9@-.- v16448880652950009199
+  class e9 ptam_edge_019c1b0d-e115-7005-927e-2e3ea4eebf04
+  v112150629894574929 e10@-.- v15736600088948192843
+  class e10 ptam_edge_019c1b0d-e116-700c-a130-dd075a1f977e
+  v368297996737150633 e11@-.- v5463659477899050790
+  class e11 ptam_edge_019c1b0d-e115-7000-a101-16a2f428171c
+  v4683403808890306631 e12@-.- v15238980765896250336
+  class e12 ptam_edge_019c1b0d-e115-7000-8981-e1c8d62105b1
+  v15444779395759994784 e13@---> v1152320841072419150
+  class e13 procedure_arrow
+  v4528005735574989180 e14@-.- v1059127730527563404
+  class e14 ptam_edge_019c1b0d-e117-700a-b57d-4b7bc2e54540
+  v1634400805095992084 e15@-.- v14451685542896618159
+  class e15 ptam_edge_019c1b0d-e116-7007-bd5a-98aa132ffeb8
+  v12431962871650439339 e16@---> v5493323626650542189
+  class e16 procedure_arrow
+  v7764143446582529646 e17@-.- v16270913339384589568
+  class e17 ptam_edge_019c1b0d-e117-7004-8e66-0eb6d8e3764b
+  v1634400805095992084 e18@-.- v10503559339629477539
+  class e18 ptam_edge_019c1b0d-e116-7007-bd5a-98aa132ffeb8
+  v1152320841072419150 e19@---> v9549533056496241708
+  class e19 procedure_arrow

@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_volumetric_containers :: VolumetricContainer , foreign_key = frozen_container_id))]
 # [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = frozen_container_model_id))]
 # [diesel (belongs_to (aps_freezers :: Freezer , foreign_key = frozen_with_id))]
@@ -41,15 +42,18 @@ pub struct FreezingProcedure {
     /// Identifier of the freezing id, which is also a foreign key to the
     /// general procedure.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The template of this procedure_id should be a freezing procedure_id
     /// template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freezing_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The container that is being frozen, which must be a volumetric
     /// container.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     frozen_container_id: ::rosetta_uuid::Uuid,
     /// The model of the container being frozen, which must be a container
@@ -58,6 +62,7 @@ pub struct FreezingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_frozen_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     frozen_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -66,14 +71,17 @@ pub struct FreezingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_frozen_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_frozen_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `frozen_container`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_frozen_container_id: ::rosetta_uuid::Uuid,
     /// The freezer used for the freezing procedure. This field is optional, as
     /// the freezer might not necessarily be tracked.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     frozen_with_id: Option<::rosetta_uuid::Uuid>,
     /// The model of the freezer used, which must be a freezer model.
@@ -81,6 +89,7 @@ pub struct FreezingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_frozen_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     frozen_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -89,10 +98,12 @@ pub struct FreezingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_frozen_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_frozen_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `frozen_with`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_frozen_with_id: ::rosetta_uuid::Uuid,
 }

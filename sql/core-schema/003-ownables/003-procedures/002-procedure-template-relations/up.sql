@@ -7,6 +7,8 @@ CREATE TABLE parent_procedure_templates (
 	-- There can only be a single relationship between a parent_id and a child_id
 	UNIQUE (parent_id, child_id)
 );
+INSERT INTO table_names (id) VALUES ('parent_procedure_templates') ON CONFLICT DO NOTHING;
+
 CREATE TABLE next_procedure_templates (
 	id UUID PRIMARY KEY REFERENCES ownables(id) ON DELETE CASCADE,
 	-- The parent_id procedure_id template
@@ -28,6 +30,7 @@ CREATE TABLE next_procedure_templates (
 	-- We enforce that the predecessor and successor are not the same
 	CHECK (predecessor_id <> successor_id)
 );
+INSERT INTO table_names (id) VALUES ('next_procedure_templates') ON CONFLICT DO NOTHING;
 
 -- Trigger function to ensure parent-child relationships exist for sequential steps.
 --
@@ -38,22 +41,84 @@ CREATE TABLE next_procedure_templates (
 -- This maintains consistency between the sequential ordering of steps and the 
 -- hierarchical structure of the procedure.
 CREATE OR REPLACE FUNCTION ensure_parent_procedure_templates() RETURNS TRIGGER LANGUAGE plpgsql AS $$ 
+DECLARE
+    v_new_id UUID;
+    v_owner_id UUID;
+    v_creator_id UUID;
+    v_minimum_role_id SMALLINT;
 BEGIN 
+    -- Fetch context from the ownable/entity associated with the sequential step being created
+    SELECT o.owner_id, o.creator_id, e.minimum_role_id
+    INTO v_owner_id, v_creator_id, v_minimum_role_id
+    FROM ownables o
+    JOIN entities e ON o.id = e.id
+    WHERE o.id = NEW.id;
+
     -- Insert predecessor parent relationship if it doesn't already exist.
-    -- We use ON CONFLICT DO NOTHING to avoid errors if the relationship was already established.
-    INSERT INTO parent_procedure_templates (parent_id, child_id, creator_id)
-    VALUES (NEW.parent_id, NEW.predecessor_id, NEW.creator_id) 
-    ON CONFLICT (parent_id, child_id) DO NOTHING;
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM parent_procedure_templates 
+        WHERE parent_id = NEW.parent_id AND child_id = NEW.predecessor_id
+    ) THEN
+        v_new_id := uuidv7();
+
+        -- Create Entity
+        INSERT INTO entities (id, table_name_id, minimum_role_id) 
+        VALUES (v_new_id, 'parent_procedure_templates', v_minimum_role_id);
+
+        -- Create Ownable
+        INSERT INTO ownables (id, owner_id, creator_id, editor_id)
+        VALUES (v_new_id, v_owner_id, v_creator_id, v_creator_id);
+
+        -- Create Relation
+        INSERT INTO parent_procedure_templates (id, parent_id, child_id)
+        VALUES (v_new_id, NEW.parent_id, NEW.predecessor_id);
+    END IF;
 
     -- Insert successor parent relationship if it doesn't already exist.
-    -- We use ON CONFLICT DO NOTHING to avoid errors if the relationship was already established.
-    INSERT INTO parent_procedure_templates (parent_id, child_id, creator_id)
-    VALUES (NEW.parent_id, NEW.successor_id, NEW.creator_id) 
-    ON CONFLICT (parent_id, child_id) DO NOTHING;
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM parent_procedure_templates 
+        WHERE parent_id = NEW.parent_id AND child_id = NEW.successor_id
+    ) THEN
+        v_new_id := uuidv7();
+
+        -- Create Entity
+        INSERT INTO entities (id, table_name_id, minimum_role_id) 
+        VALUES (v_new_id, 'parent_procedure_templates', v_minimum_role_id);
+
+        -- Create Ownable
+        INSERT INTO ownables (id, owner_id, creator_id, editor_id)
+        VALUES (v_new_id, v_owner_id, v_creator_id, v_creator_id);
+
+        -- Create Relation
+        INSERT INTO parent_procedure_templates (id, parent_id, child_id)
+        VALUES (v_new_id, NEW.parent_id, NEW.successor_id);
+    END IF;
     
     RETURN NEW;
 END;
 $$;
+/*
+Expected Translation:
+
+WITH context AS (
+    SELECT o.owner_id, o.creator_id, e.minimum_role_id
+    FROM ownables o
+    JOIN entities e ON o.id = e.id
+    WHERE o.id = NEW.id
+)
+INSERT INTO entities (id, table_name_id, minimum_role_id)
+SELECT uuidv7(), 'parent_procedure_templates', context.minimum_role_id
+FROM context
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM parent_procedure_templates 
+    WHERE parent_id = NEW.parent_id AND child_id = NEW.predecessor_id
+);
+
+... (Followed by INSERTs for ownables and parent_procedure_templates using the generated ID)
+*/
 
 -- Trigger to execute `ensure_parent_procedure_templates` before insertion into `next_procedure_templates`.
 -- It runs BEFORE INSERT so that the parent-child relationships are guaranteed to exist 

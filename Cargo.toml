@@ -69,6 +69,7 @@ members = [
   "aps/aps-geopositioning_procedures",
   "aps/aps-harvesting_procedure_templates",
   "aps/aps-harvesting_procedures",
+  "aps/aps-namespaced_ownables",
   "aps/aps-namespaces",
   "aps/aps-next_procedure_templates",
   "aps/aps-ownables",
@@ -190,6 +191,7 @@ aps-geopositioning_procedure_templates = { path = "aps/aps-geopositioning_proced
 aps-geopositioning_procedures = { path = "aps/aps-geopositioning_procedures" }
 aps-harvesting_procedure_templates = { path = "aps/aps-harvesting_procedure_templates" }
 aps-harvesting_procedures = { path = "aps/aps-harvesting_procedures" }
+aps-namespaced_ownables = { path = "aps/aps-namespaced_ownables" }
 aps-namespaces = { path = "aps/aps-namespaces" }
 aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
 aps-ownables = { path = "aps/aps-ownables" }
@@ -235,7 +237,7 @@ aps-weighing_device_models = { path = "aps/aps-weighing_device_models" }
 aps-weighing_devices = { path = "aps/aps-weighing_devices" }
 aps-weighing_procedure_templates = { path = "aps/aps-weighing_procedure_templates" }
 aps-weighing_procedures = { path = "aps/aps-weighing_procedures" }
-rosetta_timestamp = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate", features = [
+rosetta-utc = { version = "0.1.0", git = "https://github.com/earth-metabolome-initiative/rosetta-utc", branch = "main", features = [
   "diesel",
   "serde",
   "sqlite",
@@ -255,7 +257,7 @@ diesel = { git = "https://github.com/LucaCappelletti94/diesel", branch = "future
   "extras",
 ] }
 diesel-builders = { git = "https://github.com/LucaCappelletti94/diesel-builders", branch = "main" }
-rosetta-uuid = { version = "0.1.0", git = "https://github.com/earth-metabolome-initiative/rosetta-uuid", branch = "main", features = [
+rosetta-uuid = { version = "0.1.2", git = "https://github.com/earth-metabolome-initiative/rosetta-uuid", branch = "main", features = [
   "diesel",
   "serde",
   "sqlite",

@@ -23,6 +23,7 @@
     aps_assets::assets,
     aps_physical_assets::physical_assets
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = id))]
 # [diesel (belongs_to (aps_weighing_device_models :: WeighingDeviceModel , foreign_key = weighing_device_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
@@ -32,10 +33,12 @@
 pub struct WeighingDevice {
     /// Field representing the `id` column in table `weighing_devices`.
     #[same_as(aps_physical_assets::physical_assets::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The model of the weighing device.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighing_device_model_id: ::rosetta_uuid::Uuid,
 }

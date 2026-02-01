@@ -23,12 +23,14 @@
     aps_assets::assets,
     aps_digital_assets::digital_assets
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_digital_assets :: DigitalAsset , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_digital_assets :: digital_assets :: id)))]
 #[table_model(default(aps_entities::entities::table_name_id, "photographs"))]
 # [diesel (table_name = photographs)]
 pub struct Photograph {
     /// Field representing the `id` column in table `photographs`.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
 }

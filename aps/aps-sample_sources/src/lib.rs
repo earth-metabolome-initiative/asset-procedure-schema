@@ -23,6 +23,7 @@
     aps_assets::assets,
     aps_physical_assets::physical_assets
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = id))]
 # [diesel (belongs_to (aps_sample_source_models :: SampleSourceModel , foreign_key = sample_source_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
@@ -32,11 +33,13 @@
 pub struct SampleSource {
     /// Field representing the `id` column in table `sample_sources`.
     #[same_as(aps_physical_assets::physical_assets::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `sample_source_model_id` column in table
     /// `sample_sources`.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_model_id: ::rosetta_uuid::Uuid,
 }

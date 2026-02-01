@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_volumetric_containers :: VolumetricContainer , foreign_key = centrifuged_container_id))]
 # [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = centrifuged_container_model_id))]
 # [diesel (belongs_to (aps_centrifuge_models :: CentrifugeModel , foreign_key = centrifuged_with_model_id))]
@@ -41,15 +42,18 @@ pub struct CentrifugeProcedure {
     /// Identifier of the centrifuge id, which is also a foreign key to the
     /// general procedure.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// We enforce that the model of this procedure_id must be a centrifuge
     /// procedure_id template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     centrifuge_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The container that is being centrifuged, which must be a volumetric
     /// container.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     centrifuged_container_id: ::rosetta_uuid::Uuid,
     /// The model of the container that is being centrifuged.
@@ -57,6 +61,7 @@ pub struct CentrifugeProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_centrifuged_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     centrifuged_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -65,10 +70,12 @@ pub struct CentrifugeProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_centrifuged_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_centrifuged_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `centrifuged_container`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_centrifuged_container_id: ::rosetta_uuid::Uuid,
     /// The centrifuge model used for the centrifuge procedure.
@@ -76,9 +83,11 @@ pub struct CentrifugeProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_centrifuged_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     centrifuged_with_model_id: ::rosetta_uuid::Uuid,
     /// might not have been recorded at the time of performing the procedure.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     centrifuged_with_id: Option<::rosetta_uuid::Uuid>,
     /// The procedure_id template asset model associated to the
@@ -87,10 +96,12 @@ pub struct CentrifugeProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_centrifuged_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_centrifuged_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `centrifuged_with`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_centrifuged_with_id: ::rosetta_uuid::Uuid,
 }

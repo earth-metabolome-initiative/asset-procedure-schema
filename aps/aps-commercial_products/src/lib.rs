@@ -20,8 +20,10 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_asset_models::asset_models
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_asset_models :: AssetModel , foreign_key = id))]
 # [diesel (belongs_to (aps_brands :: Brand , foreign_key = brand_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_asset_models :: asset_models :: id)))]
@@ -30,9 +32,11 @@
 # [diesel (table_name = commercial_products)]
 pub struct CommercialProduct {
     /// Identifier of the commercial product
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The brand producing this commercial product
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     brand_id: ::rosetta_uuid::Uuid,
 }
@@ -44,6 +48,15 @@ impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for Commer
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for CommercialProduct {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_products::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for CommercialProduct
+{
     fn get_column_ref(
         &self,
     ) -> &<commercial_products::id as ::diesel_builders::ColumnTyped>::ColumnType {

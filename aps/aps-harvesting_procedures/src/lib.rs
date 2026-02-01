@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_sample_sources :: SampleSource , foreign_key = sample_source_id))]
 # [diesel (belongs_to (aps_sample_source_models :: SampleSourceModel , foreign_key = sample_source_model_id))]
 # [diesel (belongs_to (aps_samples :: Sample , foreign_key = sample_id))]
@@ -40,15 +41,18 @@ pub struct HarvestingProcedure {
     /// Identifier of the harvesting id, which is also a foreign key to the
     /// general procedure.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The template of this procedure_id should be a harvesting procedure_id
     /// template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     harvesting_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The sample source from which the sample is harvested, which must be a
     /// sample source asset.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_id: ::rosetta_uuid::Uuid,
     /// The model of the sample source from which the sample is harvested.
@@ -56,6 +60,7 @@ pub struct HarvestingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_sample_source_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the `sample_source`.
@@ -63,14 +68,17 @@ pub struct HarvestingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_sample_source_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_source_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `sample_source`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_sample_source_id: ::rosetta_uuid::Uuid,
     /// The sample harvested from the sample source, which must be a sample
     /// asset.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_id: ::rosetta_uuid::Uuid,
     /// The model of the sample harvested from the sample source.
@@ -78,6 +86,7 @@ pub struct HarvestingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_sample_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the `sample`.
@@ -85,10 +94,12 @@ pub struct HarvestingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_sample_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `sample`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_sample_id: ::rosetta_uuid::Uuid,
 }

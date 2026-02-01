@@ -3,6 +3,7 @@
 
 use std::rc::Rc;
 
+use aps_namespaced_ownables::*;
 use aps_parent_procedure_templates::*;
 use aps_procedure_templates::*;
 use diesel_builders::{GetColumnExt, LoadMany, NestedModel, prelude::LoadNestedFirst};

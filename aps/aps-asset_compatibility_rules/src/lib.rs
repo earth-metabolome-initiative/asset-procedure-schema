@@ -27,7 +27,6 @@
 # [diesel (table_name = asset_compatibility_rules)]
 pub struct AssetCompatibilityRule {
     /// Field representing the `id` column in table `asset_compatibility_rules`.
-    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
@@ -57,10 +56,9 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_mod
         if let Some(right_asset_model_id) = <Self as diesel_builders::MayGetColumn<
             asset_compatibility_rules::right_asset_model_id,
         >>::may_get_column_ref(self)
+            && left_asset_model_id == right_asset_model_id
         {
-            if left_asset_model_id == right_asset_model_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: asset_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: asset_compatibility_rules :: left_asset_model_id :: NAME , crate :: asset_compatibility_rules :: right_asset_model_id :: NAME)) ;
-            }
+            return Err (:: validation_errors :: ValidationError :: equal (< crate :: asset_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: asset_compatibility_rules :: left_asset_model_id :: NAME , crate :: asset_compatibility_rules :: right_asset_model_id :: NAME)) ;
         }
         Ok(())
     }
@@ -78,10 +76,9 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::right_asset_mo
         if let Some(left_asset_model_id) = <Self as diesel_builders::MayGetColumn<
             asset_compatibility_rules::left_asset_model_id,
         >>::may_get_column_ref(self)
+            && left_asset_model_id == right_asset_model_id
         {
-            if left_asset_model_id == right_asset_model_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: asset_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: asset_compatibility_rules :: left_asset_model_id :: NAME , crate :: asset_compatibility_rules :: right_asset_model_id :: NAME)) ;
-            }
+            return Err (:: validation_errors :: ValidationError :: equal (< crate :: asset_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: asset_compatibility_rules :: left_asset_model_id :: NAME , crate :: asset_compatibility_rules :: right_asset_model_id :: NAME)) ;
         }
         Ok(())
     }

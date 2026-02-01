@@ -17,6 +17,7 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
@@ -188,6 +189,15 @@ impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::bead_count
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for BallMillProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<ball_mill_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for BallMillProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<ball_mill_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {

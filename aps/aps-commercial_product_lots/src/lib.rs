@@ -19,6 +19,7 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
@@ -79,6 +80,15 @@ impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for Commer
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for CommercialProductLot {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_product_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for CommercialProductLot
+{
     fn get_column_ref(
         &self,
     ) -> &<commercial_product_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {

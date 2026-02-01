@@ -2,6 +2,8 @@
 
 use aps_asset_models::*;
 use aps_container_models::container_models;
+use aps_namespaced_ownables::*;
+use aps_namespaces::*;
 use aps_ownables::*;
 use aps_physical_asset_models::physical_asset_models;
 use aps_procedure_templates::*;
@@ -12,6 +14,14 @@ use pg2sqlite::{
     prelude::{Pg2Sqlite, Pg2SqliteOptions},
     traits::{TranslationOptions, UuidRepresentation},
 };
+
+#[declare_sql_function]
+extern "SQL" {
+    /// Generates a UUID v4
+    fn uuidv4() -> Binary;
+    /// Generates a UUID v7
+    fn uuidv7() -> Binary;
+}
 
 /// Creates an in-memory SQLite connection by translating the PostgreSQL
 /// schema from the asset-procedure-schema repository.
@@ -39,7 +49,7 @@ pub fn aps_conn() -> SqliteConnection {
             &Pg2SqliteOptions::default()
                 .remove_unsupported_check_constraints()
                 .with_uuid_representation(UuidRepresentation::Blob)
-                .use_pure_sql_for_uuid(),
+                .with_uuid_function_name("uuidv7".to_string()),
         )
         .expect("Failed to translate the PostgreSQL schema");
     let mut connection = SqliteConnection::establish(":memory:")
@@ -59,6 +69,11 @@ pub fn aps_conn() -> SqliteConnection {
     diesel::sql_query("PRAGMA journal_mode = WAL")
         .execute(&mut connection)
         .expect("Failed to set journal mode to WAL");
+
+    uuidv4_utils::register_impl(&connection, rosetta_uuid::Uuid::new_v4)
+        .expect("Failed to register uuidv4");
+    uuidv7_utils::register_impl(&connection, rosetta_uuid::Uuid::utc_v7)
+        .expect("Failed to register uuidv7");
 
     for translated_migration in translated.iter() {
         let sql = translated_migration.to_string();
@@ -95,6 +110,52 @@ where
     users::table::builder().insert(conn).expect("Failed to create test user")
 }
 
+/// Creates and returns a namespace in the provided connection for testing
+/// purposes.
+///
+/// # Arguments
+///
+/// * `name` - The name of the namespace to be created.
+/// * `user` - The user creating the namespace.
+/// * `conn` - A mutable reference to the database connection where the
+///   namespace will be created.
+///
+/// # Panics
+///
+/// * If the namespace creation fails.
+///
+/// # Example
+///
+/// ```rust
+/// use aps_test_utils::{aps_conn, namespace, user};
+/// let mut conn = aps_conn();
+///
+/// let test_user = user(&mut conn);
+/// let _test_namespace = namespace("Test Namespace", &test_user, &mut conn);
+/// ```
+pub fn namespace<C>(
+    name: &str,
+    user: &aps_users::User,
+    conn: &mut C,
+) -> NestedModel<namespaces::table>
+where
+    TableBuilder<namespaces::table>: Insert<C>,
+    (namespaces::name,): LoadNestedFirst<namespaces::table, C>,
+{
+    if let Ok(existing) = <(namespaces::name,)>::load_nested_first((name,), conn) {
+        return existing;
+    }
+
+    namespaces::table::builder()
+        .try_name(name)
+        .expect("Failed to set namespace name")
+        .owner_id(user.get_column::<users::id>())
+        .creator_id(user.get_column::<users::id>())
+        .editor_id(user.get_column::<users::id>())
+        .insert_nested(conn)
+        .expect("Failed to create test namespace")
+}
+
 /// Creates and returns an asset model with the given name in the provided
 /// connection for testing purposes.
 ///
@@ -124,11 +185,21 @@ pub fn asset_model<C>(
 where
     TableBuilder<users::table>: Insert<C>,
     TableBuilder<asset_models::table>: Insert<C>,
-    (asset_models::name,): LoadNestedFirst<asset_models::table, C>,
+    TableBuilder<namespaces::table>: Insert<C>,
+    (namespaces::name,): LoadNestedFirst<namespaces::table, C>,
+    (namespaced_ownables::namespace_id, (namespaced_ownables::name,)):
+        LoadNestedFirst<asset_models::table, C>,
 {
+    let test_namespace = namespace("aps-test-utils", user, conn);
+
     // We try to load an existing asset model with the same name to avoid duplicates
     // in tests that create multiple asset models with the same name.
-    if let Ok(existing) = <(asset_models::name,)>::load_nested_first((name,), conn) {
+    if let Ok(existing) =
+        <(namespaced_ownables::namespace_id, (namespaced_ownables::name,))>::load_nested_first(
+            (test_namespace.get_column::<namespaces::id>(), (name,)),
+            conn,
+        )
+    {
         return existing;
     }
 
@@ -139,6 +210,8 @@ where
         .expect("Failed to set asset model description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
+        .owner_id(user.get_column::<users::id>())
+        .namespace_id(test_namespace.get_column::<namespaces::id>())
         .insert_nested(conn)
         .expect("Failed to create test asset model")
 }
@@ -171,20 +244,31 @@ pub fn physical_asset_model<C>(
     conn: &mut C,
 ) -> NestedModel<physical_asset_models::table>
 where
-    TableBuilder<aps_physical_asset_models::physical_asset_models::table>: Insert<C>,
-    (asset_models::name,): LoadNestedFirst<physical_asset_models::table, C>,
+    TableBuilder<physical_asset_models::table>: Insert<C>,
+    TableBuilder<namespaces::table>: Insert<C>,
+    (namespaces::name,): LoadNestedFirst<namespaces::table, C>,
+    (namespaced_ownables::namespace_id, (namespaced_ownables::name,)):
+        LoadNestedFirst<physical_asset_models::table, C>,
 {
-    if let Ok(existing) = <(asset_models::name,)>::load_nested_first((name,), conn) {
+    let test_namespace = namespace("aps-test-utils", user, conn);
+    if let Ok(existing) =
+        <(namespaced_ownables::namespace_id, (namespaced_ownables::name,))>::load_nested_first(
+            (test_namespace.get_column::<namespaces::id>(), (name,)),
+            conn,
+        )
+    {
         return existing;
     }
 
-    aps_physical_asset_models::physical_asset_models::table::builder()
+    physical_asset_models::table::builder()
         .try_name(name)
         .expect("Failed to set physical asset model name")
         .try_description("A test physical asset model")
         .expect("Failed to set physical asset model description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
+        .owner_id(user.get_column::<users::id>())
+        .namespace_id(test_namespace.get_column::<namespaces::id>())
         .insert_nested(conn)
         .expect("Failed to create test physical asset model")
 }
@@ -217,9 +301,18 @@ pub fn container_model<C>(
 ) -> NestedModel<container_models::table>
 where
     TableBuilder<container_models::table>: Insert<C>,
-    (asset_models::name,): LoadNestedFirst<container_models::table, C>,
+    TableBuilder<namespaces::table>: Insert<C>,
+    (namespaces::name,): LoadNestedFirst<namespaces::table, C>,
+    (namespaced_ownables::namespace_id, (namespaced_ownables::name,)):
+        LoadNestedFirst<container_models::table, C>,
 {
-    if let Ok(existing) = <(asset_models::name,)>::load_nested_first((name,), conn) {
+    let test_namespace = namespace("aps-test-utils", user, conn);
+    if let Ok(existing) =
+        <(namespaced_ownables::namespace_id, (namespaced_ownables::name,))>::load_nested_first(
+            (test_namespace.get_column::<namespaces::id>(), (name,)),
+            conn,
+        )
+    {
         return existing;
     }
 
@@ -230,6 +323,8 @@ where
         .expect("Failed to set container model description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
+        .owner_id(user.get_column::<users::id>())
+        .namespace_id(test_namespace.get_column::<namespaces::id>())
         .insert_nested(conn)
         .expect("Failed to create test container model")
 }
@@ -262,9 +357,18 @@ pub fn procedure_template<C>(
 ) -> NestedModel<procedure_templates::table>
 where
     TableBuilder<procedure_templates::table>: Insert<C>,
-    (procedure_templates::name,): LoadNestedFirst<procedure_templates::table, C>,
+    TableBuilder<namespaces::table>: Insert<C>,
+    (namespaces::name,): LoadNestedFirst<namespaces::table, C>,
+    (namespaced_ownables::namespace_id, (namespaced_ownables::name,)):
+        LoadNestedFirst<procedure_templates::table, C>,
 {
-    if let Ok(existing) = <(procedure_templates::name,)>::load_nested_first((name,), conn) {
+    let test_namespace = namespace("aps-test-utils", user, conn);
+    if let Ok(existing) =
+        <(namespaced_ownables::namespace_id, (namespaced_ownables::name,))>::load_nested_first(
+            (test_namespace.get_column::<namespaces::id>(), (name,)),
+            conn,
+        )
+    {
         return existing;
     }
 
@@ -275,6 +379,8 @@ where
         .expect("Failed to set procedure template description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
+        .owner_id(user.get_column::<users::id>())
+        .namespace_id(test_namespace.get_column::<namespaces::id>())
         .insert_nested(conn)
         .expect("Failed to create test procedure template")
 }
@@ -387,9 +493,9 @@ pub fn pizza_four_season_procedure_template(
     let make_pizza = procedure_template("Make a Four Seasons Pizza", user, conn);
 
     // We create the asset models involved in the procedure template.
-    let dough_model: NestedModel<asset_models::table> = asset_model("Pizza Dough", user, conn);
+    let dough_model: NestedModel<asset_models::table> = asset_model("Pizza Dough 2", user, conn);
     let mozzarella_model: NestedModel<asset_models::table> =
-        asset_model("Mozzarella Cheese", user, conn);
+        asset_model("Mozzarella Cheese 2", user, conn);
     let mushrooms_model: NestedModel<asset_models::table> = asset_model("Mushrooms", user, conn);
     let artichokes_model: NestedModel<asset_models::table> = asset_model("Artichokes", user, conn);
     let ham_model: NestedModel<asset_models::table> = asset_model("Ham", user, conn);
@@ -399,7 +505,7 @@ pub fn pizza_four_season_procedure_template(
         asset_model("Vegetarian Pizza", user, conn);
     let omni_pizza_model: NestedModel<asset_models::table> =
         asset_model("Omnivore Pizza", user, conn);
-    let oven_model: NestedModel<asset_models::table> = asset_model("Oven", user, conn);
+    let oven_model: NestedModel<asset_models::table> = asset_model("Oven 2", user, conn);
 
     // We create each step.
 
@@ -434,7 +540,7 @@ pub fn pizza_four_season_procedure_template(
 
     // First step: Prepare the dough.
     let prepare_dough: NestedModel<procedure_templates::table> =
-        procedure_template("Prepare Dough", user, conn);
+        procedure_template("Prepare Dough 2", user, conn);
     let [dough_ptam] = prepare_dough.requires_n([&dough_model], conn).unwrap();
 
     // Second step, option 1: Add vegetarian toppings.

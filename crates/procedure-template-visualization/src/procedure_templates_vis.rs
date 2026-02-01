@@ -4,6 +4,7 @@
 use std::{hash::Hash, rc::Rc};
 
 use aps_asset_models::asset_models;
+use aps_namespaced_ownables::*;
 use aps_next_procedure_templates::{
     FKNextProcedureTemplatesPredecessorId, FKNextProcedureTemplatesSuccessorId,
     NextProcedureTemplate, next_procedure_templates,
@@ -16,7 +17,7 @@ use aps_procedure_template_asset_models::{
     GetProcedureTemplateAssetModelName, GetProcedureTemplateAssetModelProcedureTemplateId,
     ProcedureTemplateAssetModel, procedure_template_asset_models,
 };
-use aps_procedure_templates::{GetProcedureTemplateName, ProcedureTemplate, procedure_templates};
+use aps_procedure_templates::{ProcedureTemplate, procedure_templates};
 use aps_reused_procedure_template_asset_models::{
     FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId,
     FKReusedProcedureTemplateAssetModelsProcedureTemplateId, ReusedProcedureTemplateAssetModel,

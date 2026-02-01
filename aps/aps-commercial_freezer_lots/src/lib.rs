@@ -20,11 +20,13 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
     aps_commercial_product_lots::commercial_product_lots,
     aps_freezer_models::freezer_models
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_commercial_freezer_models :: CommercialFreezerModel , foreign_key = commercial_freezer_model_id))]
 # [diesel (belongs_to (aps_commercial_product_lots :: CommercialProductLot , foreign_key = id))]
 # [diesel (belongs_to (aps_freezer_models :: FreezerModel , foreign_key = id))]
@@ -36,11 +38,13 @@
 pub struct CommercialFreezerLot {
     /// Field representing the `id` column in table `commercial_freezer_lots`.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `commercial_freezer_model_id` column in table
     /// `commercial_freezer_lots`.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     commercial_freezer_model_id: ::rosetta_uuid::Uuid,
 }
@@ -68,6 +72,15 @@ impl ::diesel_builders::GetColumn<aps_entities::entities::id> for CommercialFree
     }
 }
 impl ::diesel_builders::GetColumn<aps_freezer_models::freezer_models::id> for CommercialFreezerLot {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_freezer_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for CommercialFreezerLot
+{
     fn get_column_ref(
         &self,
     ) -> &<commercial_freezer_lots::id as ::diesel_builders::ColumnTyped>::ColumnType {

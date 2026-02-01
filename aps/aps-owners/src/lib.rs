@@ -18,13 +18,14 @@
 )]
 /// Table storing owners (base entity for users, teams, projects)
 #[table_model(ancestors(aps_entities::entities))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_entities :: Entity , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_entities :: entities :: id)))]
 #[table_model(default(aps_entities::entities::table_name_id, "owners"))]
 # [diesel (table_name = owners)]
 pub struct Owner {
     /// Surrogate primary key for the owner entity
-    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
 }

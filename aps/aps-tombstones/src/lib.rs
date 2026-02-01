@@ -29,9 +29,9 @@ pub struct Tombstone {
     /// The name of the table from which the entity was deleted.
     table_name_id: String,
     /// The timestamp when the entity was deleted.
-    # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
-    # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    deleted_at: ::rosetta_timestamp::TimestampUTC,
+    # [table_model (default = :: rosetta_utc :: TimestampUTC :: default ())]
+    # [diesel (sql_type = :: rosetta_utc :: diesel_impls :: TimestampUTC)]
+    deleted_at: ::rosetta_utc::TimestampUTC,
 }
 impl ::diesel_builders::ValidateColumn<tombstones::table_name_id>
     for <tombstones::table as ::diesel_builders::TableExt>::NewValues
@@ -61,9 +61,9 @@ impl ::diesel_builders::ValidateColumn<tombstones::deleted_at>
 {
     type Error = ::validation_errors::ValidationError;
     #[inline]
-    fn validate_column(deleted_at: &::rosetta_timestamp::TimestampUTC) -> Result<(), Self::Error> {
+    fn validate_column(deleted_at: &::rosetta_utc::TimestampUTC) -> Result<(), Self::Error> {
         use diesel::Column;
-        if deleted_at >= ::chrono::Utc::now() {
+        if *deleted_at >= ::rosetta_utc::TimestampUTC::now() {
             return Err(::validation_errors::ValidationError::in_the_future(
                 <crate::tombstones::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::tombstones::deleted_at::NAME,

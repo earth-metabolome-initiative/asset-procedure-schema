@@ -8,12 +8,14 @@ edition.workspace = true
 serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
+validation-errors.workspace = true
 rosetta-uuid.workspace = true
 aps-asset_models.workspace = true
 aps-ball_mill_machine_models.workspace = true
 aps-commercial_ball_mill_machine_models.workspace = true
 aps-commercial_product_lots.workspace = true
 aps-entities.workspace = true
+aps-namespaced_ownables.workspace = true
 aps-ownables.workspace = true
 aps-physical_asset_models.workspace = true
 

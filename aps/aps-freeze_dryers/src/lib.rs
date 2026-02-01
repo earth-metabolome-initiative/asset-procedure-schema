@@ -23,6 +23,7 @@
     aps_assets::assets,
     aps_physical_assets::physical_assets
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = id))]
 # [diesel (belongs_to (aps_commercial_freeze_dryer_lots :: CommercialFreezeDryerLot , foreign_key = commercial_freeze_dryer_lot_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
@@ -32,11 +33,13 @@
 pub struct FreezeDryer {
     /// Field representing the `id` column in table `freeze_dryers`.
     #[same_as(aps_physical_assets::physical_assets::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `commercial_freeze_dryer_lot_id` column in table
     /// `freeze_dryers`.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     commercial_freeze_dryer_lot_id: ::rosetta_uuid::Uuid,
 }

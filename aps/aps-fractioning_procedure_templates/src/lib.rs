@@ -17,6 +17,7 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
 # [table_model (error = :: validation_errors :: ValidationError)]
@@ -127,6 +128,15 @@ impl ::diesel_builders::ValidateColumn<fractioning_procedure_templates::toleranc
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for FractioningProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<fractioning_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for FractioningProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<fractioning_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {

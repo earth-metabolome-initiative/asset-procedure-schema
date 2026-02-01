@@ -68,14 +68,13 @@ impl ::diesel_builders::ValidateColumn<assets::name>
         <Self as ::diesel_builders::ValidateColumn<assets::name>>::validate_column(name)?;
         if let Some(description) =
             <Self as diesel_builders::MayGetColumn<assets::description>>::may_get_column_ref(self)
+            && description.as_ref().is_some_and(|description| name == description)
         {
-            if description.as_ref().is_some_and(|description| name == description) {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::assets::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::assets::name::NAME,
-                    crate::assets::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::assets::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::assets::name::NAME,
+                crate::assets::description::NAME,
+            ));
         }
         Ok(())
     }
@@ -110,14 +109,13 @@ impl ::diesel_builders::ValidateColumn<assets::description>
         )?;
         if let Some(name) =
             <Self as diesel_builders::MayGetColumn<assets::name>>::may_get_column_ref(self)
+            && name.as_ref().is_some_and(|name| name == description)
         {
-            if name.as_ref().is_some_and(|name| name == description) {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::assets::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::assets::name::NAME,
-                    crate::assets::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::assets::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::assets::name::NAME,
+                crate::assets::description::NAME,
+            ));
         }
         Ok(())
     }

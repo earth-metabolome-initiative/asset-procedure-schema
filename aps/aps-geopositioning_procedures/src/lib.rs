@@ -17,6 +17,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = geopositioned_asset_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = geopositioned_asset_model_id))]
 # [diesel (belongs_to (aps_geopositioning_devices :: GeopositioningDevice , foreign_key = geopositioned_with_id))]
@@ -35,14 +36,17 @@ pub struct GeopositioningProcedure {
     /// Identifier of the geopositioning id, which is also a foreign key to the
     /// general procedure.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The template of this procedure_id should be a geopositioning
     /// procedure_id template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     geopositioning_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The asset being geopositioned, which must be a physical asset.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     geopositioned_asset_id: ::rosetta_uuid::Uuid,
     /// The model of the asset being geopositioned.
@@ -50,6 +54,7 @@ pub struct GeopositioningProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_geopositioned_asset_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     geopositioned_asset_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -58,14 +63,17 @@ pub struct GeopositioningProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_geopositioned_asset_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_geopositioned_asset_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `geopositioned_asset`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_geopositioned_asset_id: ::rosetta_uuid::Uuid,
     /// The positioning device used for geopositioning. This field is optional,
     /// as the positioning device might not necessarily be tracked.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     geopositioned_with_id: Option<::rosetta_uuid::Uuid>,
     /// The model of the positioning device used for geopositioning.
@@ -73,10 +81,12 @@ pub struct GeopositioningProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_geopositioned_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     geopositioned_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `geopositioned_with`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_geopositioned_with_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -85,9 +95,11 @@ pub struct GeopositioningProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_geopositioned_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_geopositioned_with_model_id: ::rosetta_uuid::Uuid,
     /// The latitude and longitude of the geopositioning.
+    #[infallible]
     # [diesel (sql_type = :: postgis_diesel :: sql_types :: Geography)]
     location: postgis_diesel::types::GeometryContainer<postgis_diesel::types::Point>,
 }

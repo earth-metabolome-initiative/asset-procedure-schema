@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = disposed_asset_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = disposed_asset_model_id))]
 # [diesel (belongs_to (aps_procedure_template_asset_models :: ProcedureTemplateAssetModel , foreign_key = procedure_template_disposed_asset_model_id))]
@@ -35,13 +36,16 @@
 pub struct DisposalProcedure {
     /// Field representing the `id` column in table `disposal_procedures`.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The model of the procedure.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     disposal_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The disposed asset is the one that is being disposed_asset_id of.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     disposed_asset_id: Option<::rosetta_uuid::Uuid>,
     /// The model of the disposed asset.
@@ -49,6 +53,7 @@ pub struct DisposalProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_disposed_asset_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     disposed_asset_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -57,10 +62,12 @@ pub struct DisposalProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_disposed_asset_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_disposed_asset_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `disposed_asset`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_disposed_asset_id: ::rosetta_uuid::Uuid,
 }

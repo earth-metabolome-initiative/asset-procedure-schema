@@ -11,7 +11,7 @@ diesel.workspace = true
 validation-errors.workspace = true
 rosetta-uuid.workspace = true
 aps-entities.workspace = true
-aps-namespaces.workspace = true
+aps-namespaced_ownables.workspace = true
 aps-ownables.workspace = true
 
 [lints]

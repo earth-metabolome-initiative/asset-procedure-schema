@@ -17,6 +17,7 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
     aps_container_models::container_models
@@ -68,6 +69,15 @@ impl ::diesel_builders::GetColumn<aps_container_models::container_models::id>
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for WeighedContainerModel {
+    fn get_column_ref(
+        &self,
+    ) -> &<weighed_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for WeighedContainerModel
+{
     fn get_column_ref(
         &self,
     ) -> &<weighed_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

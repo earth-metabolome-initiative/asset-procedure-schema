@@ -10,6 +10,7 @@ aps-users.workspace = true
 aps-physical_asset_models.workspace = true
 aps-container_compatibility_rules.workspace = true
 aps-asset_compatibility_rules.workspace = true
+aps-ownables.workspace = true
 diesel-builders.workspace = true
 validation-errors.workspace = true
 diesel.workspace = true

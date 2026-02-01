@@ -20,8 +20,10 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_packaging_models :: PackagingModel , foreign_key = packaged_with_model_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = sample_model_id))]
@@ -36,6 +38,7 @@
 pub struct PackagingProcedureTemplate {
     /// Field representing the `id` column in table
     /// `packaging_procedure_templates`.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `packaged_with_model_id` column in table
@@ -44,11 +47,13 @@ pub struct PackagingProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_packaged_with_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     packaged_with_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `procedure_template_packaged_with_model_id`
     /// column in table `packaging_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_packaged_with_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `sample_model_id` column in table
@@ -57,11 +62,13 @@ pub struct PackagingProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_sample_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `procedure_template_sample_model_id` column in
     /// table `packaging_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_model_id: ::rosetta_uuid::Uuid,
 }
@@ -74,6 +81,15 @@ pub struct PackagingProcedureTemplate {
     packaging_procedure_templates::procedure_template_sample_model_id
 );
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for PackagingProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<packaging_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for PackagingProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<packaging_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {

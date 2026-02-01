@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_volume_measuring_devices :: VolumeMeasuringDevice , foreign_key = measured_with_id))]
 # [diesel (belongs_to (aps_volume_measuring_device_models :: VolumeMeasuringDeviceModel , foreign_key = measured_with_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_procedures :: procedures :: id)))]
@@ -40,13 +41,16 @@
 pub struct PouringProcedure {
     /// The extended `procedure`.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The procedure_id template of the extended `procedure`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     pouring_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The container from which the liquid is poured.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     poured_from_id: ::rosetta_uuid::Uuid,
     /// The model of the container from which the liquid is poured.
@@ -54,6 +58,7 @@ pub struct PouringProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_poured_from_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     poured_from_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the `poured_from`.
@@ -61,14 +66,17 @@ pub struct PouringProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_poured_from_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_poured_from_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `poured_from`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_poured_from_id: ::rosetta_uuid::Uuid,
     /// The actual measuring device (if known) used to measure the liquid
     /// volume.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     measured_with_id: Option<::rosetta_uuid::Uuid>,
     /// The model of the measuring device.
@@ -76,6 +84,7 @@ pub struct PouringProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_measured_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     measured_with_model_id: Option<::rosetta_uuid::Uuid>,
     /// The procedure_id template asset model associated to the
@@ -84,13 +93,16 @@ pub struct PouringProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_measured_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_measured_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `measured_with`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_measured_with_id: ::rosetta_uuid::Uuid,
     /// The container into which the liquid is poured.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     poured_into_id: ::rosetta_uuid::Uuid,
     /// The model of the container into which the liquid is poured.
@@ -98,6 +110,7 @@ pub struct PouringProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_poured_into_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     poured_into_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the `poured_into`.
@@ -105,10 +118,12 @@ pub struct PouringProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_poured_into_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_poured_into_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `poured_into`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_poured_into_id: ::rosetta_uuid::Uuid,
 }

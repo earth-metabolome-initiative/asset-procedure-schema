@@ -64,6 +64,7 @@ aps-geopositioning_procedure_templates.workspace = true
 aps-geopositioning_procedures.workspace = true
 aps-harvesting_procedure_templates.workspace = true
 aps-harvesting_procedures.workspace = true
+aps-namespaced_ownables.workspace = true
 aps-namespaces.workspace = true
 aps-next_procedure_templates.workspace = true
 aps-ownables.workspace = true

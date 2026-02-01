@@ -24,14 +24,13 @@
 # [diesel (table_name = namespaces)]
 pub struct Namespace {
     /// Surrogate primary key for the namespace entity
-    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Name of the namespace
     name: String,
     /// Description of the namespace
-    description: String,
+    description: Option<String>,
 }
 ::diesel_builders::prelude::unique_index!(namespaces::name);
 impl ::diesel_builders::ValidateColumn<namespaces::name>
@@ -63,14 +62,13 @@ impl ::diesel_builders::ValidateColumn<namespaces::name>
         if let Some(description) = <Self as diesel_builders::MayGetColumn<
             namespaces::description,
         >>::may_get_column_ref(self)
+            && description.as_ref().is_some_and(|description| name == description)
         {
-            if name == description {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::namespaces::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::namespaces::name::NAME,
-                    crate::namespaces::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::namespaces::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::namespaces::name::NAME,
+                crate::namespaces::description::NAME,
+            ));
         }
         Ok(())
     }
@@ -105,14 +103,13 @@ impl ::diesel_builders::ValidateColumn<namespaces::description>
         )?;
         if let Some(name) =
             <Self as diesel_builders::MayGetColumn<namespaces::name>>::may_get_column_ref(self)
+            && name == description
         {
-            if name == description {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::namespaces::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::namespaces::name::NAME,
-                    crate::namespaces::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::namespaces::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::namespaces::name::NAME,
+                crate::namespaces::description::NAME,
+            ));
         }
         Ok(())
     }

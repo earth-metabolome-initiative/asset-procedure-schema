@@ -45,14 +45,13 @@ impl ::diesel_builders::ValidateColumn<privacy_dependencies::child_id>
         if let Some(parent_id) = <Self as diesel_builders::MayGetColumn<
             privacy_dependencies::parent_id,
         >>::may_get_column_ref(self)
+            && child_id == parent_id
         {
-            if child_id == parent_id {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::privacy_dependencies::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::privacy_dependencies::child_id::NAME,
-                    crate::privacy_dependencies::parent_id::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::privacy_dependencies::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::privacy_dependencies::child_id::NAME,
+                crate::privacy_dependencies::parent_id::NAME,
+            ));
         }
         Ok(())
     }
@@ -70,14 +69,13 @@ impl ::diesel_builders::ValidateColumn<privacy_dependencies::parent_id>
         if let Some(child_id) = <Self as diesel_builders::MayGetColumn<
             privacy_dependencies::child_id,
         >>::may_get_column_ref(self)
+            && child_id == parent_id
         {
-            if child_id == parent_id {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::privacy_dependencies::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::privacy_dependencies::child_id::NAME,
-                    crate::privacy_dependencies::parent_id::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::privacy_dependencies::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::privacy_dependencies::child_id::NAME,
+                crate::privacy_dependencies::parent_id::NAME,
+            ));
         }
         Ok(())
     }

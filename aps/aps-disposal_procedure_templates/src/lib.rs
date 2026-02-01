@@ -20,8 +20,10 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = disposed_asset_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
@@ -32,6 +34,7 @@
 pub struct DisposalProcedureTemplate {
     /// Field representing the `id` column in table
     /// `disposal_procedure_templates`.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The disposed asset asset model being disposed of.
@@ -39,10 +42,12 @@ pub struct DisposalProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_disposed_asset_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     disposed_asset_model_id: ::rosetta_uuid::Uuid,
     /// The associated procedure_id asset model for the disposed asset.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_disposed_asset_model_id: ::rosetta_uuid::Uuid,
 }
@@ -51,6 +56,15 @@ pub struct DisposalProcedureTemplate {
     disposal_procedure_templates::procedure_template_disposed_asset_model_id
 );
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for DisposalProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<disposal_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for DisposalProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<disposal_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {

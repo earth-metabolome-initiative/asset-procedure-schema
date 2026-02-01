@@ -8,6 +8,7 @@ edition.workspace = true
 serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
+validation-errors.workspace = true
 rosetta-uuid.workspace = true
 aps-aliquoting_procedure_templates.workspace = true
 aps-entities.workspace = true

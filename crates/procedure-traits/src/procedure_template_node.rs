@@ -2,7 +2,9 @@
 //! the edges between procedure templates, including parent-child relationships.
 
 use aps_asset_models::*;
+use aps_namespaced_ownables::{namespaced_ownables, *};
 use aps_next_procedure_templates::*;
+use aps_ownables::*;
 use aps_parent_procedure_templates::*;
 use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::{ProcedureTemplateTableModel, procedure_templates};
@@ -13,9 +15,21 @@ use diesel_builders::{
     BuildableTable, DescendantOf, GetColumn, Insert, MayGetColumn, TableBuilder,
 };
 
+/// A dynamic trait object for procedure template nodes.
+pub trait DynProcedureTemplateNode:
+    ProcedureTemplateTableModel + NamespacedOwnableTableModel
+{
+}
+/// Blanket implementation for all types that implement
+/// `ProcedureTemplateTableModel` and `NamespacedOwnableTableModel`.
+impl<T> DynProcedureTemplateNode for T where
+    T: ProcedureTemplateTableModel + NamespacedOwnableTableModel
+{
+}
+
 /// Trait defining the methods for managing parent-child relationships in
 /// procedure templates.
-pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
+pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnableTableModel {
     /// Registers the provided asset models as used in this procedure template,
     /// creating the necessary entries in the `procedure_template_asset_models`
     /// table.
@@ -64,7 +78,7 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
     where
         TableBuilder<aps_procedure_template_asset_models::procedure_template_asset_models::table>:
             Insert<C>,
-        AMS: IntoIterator<Item: AssetModelTableModel>,
+        AMS: IntoIterator<Item: AssetModelTableModel + NamespacedOwnableTableModel>,
     {
         let mut ptams = Vec::new();
         for asset_model in asset_models {
@@ -119,7 +133,7 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
     where
         TableBuilder<aps_procedure_template_asset_models::procedure_template_asset_models::table>:
             Insert<C>,
-        AM: AssetModelTableModel,
+        AM: AssetModelTableModel + NamespacedOwnableTableModel,
     {
         let ptams = self.requires(asset_models, conn)?;
         Ok(ptams.try_into().expect("Vector size should match array size N"))
@@ -183,7 +197,6 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
     {
         let mut ptams = Vec::new();
         for asset_model in procedure_template_asset_models {
-            // TODO: Remove expect once <https://github.com/diesel-rs/diesel/pull/4952> is merged
             ptams.push(aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table::builder()
                 .procedure_template_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))
                 .procedure_template_asset_model_id(
@@ -191,7 +204,7 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
                         &asset_model,
                     ),
                 )
-                .insert(conn).expect("Failed to create reused procedure template asset model, remove this expect once the PR #4952 is merged"));
+                .insert(conn)?);
         }
         Ok(ptams)
     }
@@ -325,21 +338,23 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
         conn: &mut C,
     ) -> Result<NextProcedureTemplate, diesel::result::Error>
     where
-        L: GetColumn<procedure_templates::id> + GetColumn<procedure_templates::name> + ?Sized,
-        R: GetColumn<procedure_templates::id> + GetColumn<procedure_templates::name> + ?Sized,
+        L: GetColumn<procedure_templates::id> + GetColumn<namespaced_ownables::name> + ?Sized,
+        R: GetColumn<procedure_templates::id> + GetColumn<namespaced_ownables::name> + ?Sized,
         TableBuilder<next_procedure_templates::table>: Insert<C>,
     {
         println!(
             "Creating {} -> {} under parent {}",
-            <L as GetColumn<procedure_templates::name>>::get_column(predecessor),
-            <R as GetColumn<procedure_templates::name>>::get_column(successor),
-            <Self as GetColumn<procedure_templates::name>>::get_column(self)
+            <L as GetColumn<namespaced_ownables::name>>::get_column(predecessor),
+            <R as GetColumn<namespaced_ownables::name>>::get_column(successor),
+            <Self as GetColumn<namespaced_ownables::name>>::get_column(self)
         );
         Ok(next_procedure_templates::table::builder()
             .try_parent_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))?
             .try_predecessor_id(<L as GetColumn<procedure_templates::id>>::get_column(predecessor))?
             .try_successor_id(<R as GetColumn<procedure_templates::id>>::get_column(successor))?
             .creator_id(user.get_column())
+            .editor_id(user.get_column())
+            .owner_id(user.get_column())
             .insert(conn)
             .unwrap())
     }
@@ -389,9 +404,9 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
     ) -> Result<Vec<NextProcedureTemplate>, diesel::result::Error>
     where
         TableBuilder<next_procedure_templates::table>: Insert<C>,
-        I: IntoIterator<Item: ProcedureTemplateTableModel>,
+        I: IntoIterator<Item: DynProcedureTemplateNode>,
     {
-        let mut previous: Option<Box<dyn ProcedureTemplateTableModel>> = None;
+        let mut previous: Option<Box<dyn DynProcedureTemplateNode>> = None;
         let mut relations = Vec::new();
         for child in children {
             if let Some(prev) = previous {
@@ -403,4 +418,7 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
     }
 }
 
-impl<T> ProcedureTemplateNode for T where T: ProcedureTemplateTableModel {}
+impl<T> ProcedureTemplateNode for T where
+    T: ProcedureTemplateTableModel + NamespacedOwnableTableModel
+{
+}

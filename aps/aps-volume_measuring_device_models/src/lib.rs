@@ -20,9 +20,11 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
 #[table_model(default(aps_entities::entities::table_name_id, "volume_measuring_device_models"))]
@@ -30,6 +32,7 @@
 pub struct VolumeMeasuringDeviceModel {
     /// Field representing the `id` column in table
     /// `volume_measuring_device_models`.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
 }
@@ -43,6 +46,15 @@ impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id>
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for VolumeMeasuringDeviceModel {
+    fn get_column_ref(
+        &self,
+    ) -> &<volume_measuring_device_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for VolumeMeasuringDeviceModel
+{
     fn get_column_ref(
         &self,
     ) -> &<volume_measuring_device_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

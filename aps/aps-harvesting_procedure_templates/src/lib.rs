@@ -20,8 +20,10 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_sample_source_models :: SampleSourceModel , foreign_key = sample_source_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_procedure_templates :: procedure_templates :: id)))]
@@ -34,6 +36,7 @@
 pub struct HarvestingProcedureTemplate {
     /// Identifier of the harvesting procedure_id template, which is also a
     /// foreign key to the general procedure_id template.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Sample source model from which the sample is taken.
@@ -41,11 +44,13 @@ pub struct HarvestingProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_sample_source_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `procedure_template_sample_source_model_id`
     /// column in table `harvesting_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_source_model_id: ::rosetta_uuid::Uuid,
     /// Sample model harvested from the sample source model.
@@ -53,11 +58,13 @@ pub struct HarvestingProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_sample_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `procedure_template_sample_model_id` column in
     /// table `harvesting_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_model_id: ::rosetta_uuid::Uuid,
 }
@@ -70,6 +77,15 @@ pub struct HarvestingProcedureTemplate {
     harvesting_procedure_templates::procedure_template_sample_model_id
 );
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for HarvestingProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<harvesting_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for HarvestingProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<harvesting_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {

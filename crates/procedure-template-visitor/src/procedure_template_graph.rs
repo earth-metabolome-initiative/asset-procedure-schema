@@ -2,6 +2,7 @@
 //! methods.
 
 use aps_asset_models::asset_models;
+use aps_namespaced_ownables::*;
 use aps_next_procedure_templates::*;
 use aps_parent_procedure_templates::*;
 use aps_procedure_template_asset_models::*;

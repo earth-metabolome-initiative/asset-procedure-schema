@@ -55,10 +55,9 @@ impl ::diesel_builders::ValidateColumn<parent_procedure_templates::parent_id>
         if let Some(child_id) = <Self as diesel_builders::MayGetColumn<
             parent_procedure_templates::child_id,
         >>::may_get_column_ref(self)
+            && parent_id == child_id
         {
-            if parent_id == child_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: parent_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: parent_procedure_templates :: parent_id :: NAME , crate :: parent_procedure_templates :: child_id :: NAME)) ;
-            }
+            return Err (:: validation_errors :: ValidationError :: equal (< crate :: parent_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: parent_procedure_templates :: parent_id :: NAME , crate :: parent_procedure_templates :: child_id :: NAME)) ;
         }
         Ok(())
     }
@@ -76,10 +75,9 @@ impl ::diesel_builders::ValidateColumn<parent_procedure_templates::child_id>
         if let Some(parent_id) = <Self as diesel_builders::MayGetColumn<
             parent_procedure_templates::parent_id,
         >>::may_get_column_ref(self)
+            && parent_id == child_id
         {
-            if parent_id == child_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: parent_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: parent_procedure_templates :: parent_id :: NAME , crate :: parent_procedure_templates :: child_id :: NAME)) ;
-            }
+            return Err (:: validation_errors :: ValidationError :: equal (< crate :: parent_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: parent_procedure_templates :: parent_id :: NAME , crate :: parent_procedure_templates :: child_id :: NAME)) ;
         }
         Ok(())
     }

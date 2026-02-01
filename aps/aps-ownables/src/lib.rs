@@ -18,6 +18,7 @@
 )]
 /// Table storing ownables (base entity for ownable assets, procedures, etc.)
 #[table_model(ancestors(aps_entities::entities))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_entities :: Entity , foreign_key = id))]
 # [diesel (belongs_to (aps_owners :: Owner , foreign_key = owner_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_entities :: entities :: id)))]
@@ -28,16 +29,19 @@
 # [diesel (table_name = ownables)]
 pub struct Ownable {
     /// Surrogate primary key for the ownable entity
-    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Owner of the ownable entity
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     owner_id: ::rosetta_uuid::Uuid,
     /// Creator of the ownable entity
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     creator_id: ::rosetta_uuid::Uuid,
     /// Editor of the ownable entity
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     editor_id: ::rosetta_uuid::Uuid,
 }

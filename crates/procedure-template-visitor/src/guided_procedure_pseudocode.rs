@@ -5,7 +5,7 @@ mod error;
 mod iterator;
 mod listener;
 use aps_entities::GetEntityTableNameId;
-use aps_procedure_templates::*;
+use aps_namespaced_ownables::*;
 use listener::GPPListener;
 use quote::{format_ident, quote};
 

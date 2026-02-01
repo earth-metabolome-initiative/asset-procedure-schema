@@ -18,6 +18,7 @@
 )]
 /// Struct representing a row in the `physical_assets` table.
 #[table_model(ancestors(aps_entities::entities, aps_ownables::ownables, aps_assets::assets))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = physical_asset_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_assets :: assets :: id)))]
 # [table_model (foreign_key ((physical_asset_model_id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
@@ -26,11 +27,13 @@
 pub struct PhysicalAsset {
     /// Field representing the `id` column in table `physical_assets`.
     #[same_as(aps_assets::assets::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `physical_asset_model_id` column in table
     /// `physical_assets`.
     #[same_as(aps_assets::assets::model_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     physical_asset_model_id: ::rosetta_uuid::Uuid,
 }

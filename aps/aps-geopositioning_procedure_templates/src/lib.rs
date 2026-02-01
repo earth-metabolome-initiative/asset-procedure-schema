@@ -20,8 +20,10 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_geopositioning_device_models :: GeopositioningDeviceModel , foreign_key = geopositioned_with_model_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = geopositioned_asset_model_id))]
@@ -38,6 +40,7 @@
 pub struct GeopositioningProcedureTemplate {
     /// Field representing the `id` column in table
     /// `geopositioning_procedure_templates`.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The device used for geopositioning.
@@ -45,11 +48,13 @@ pub struct GeopositioningProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_geopositioned_with_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     geopositioned_with_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `procedure_template_geopositioned_with_model_id`
     /// column in table `geopositioning_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_geopositioned_with_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `geopositioned_asset_model_id` column in table
@@ -58,11 +63,13 @@ pub struct GeopositioningProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_geopositioned_asset_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     geopositioned_asset_model_id: ::rosetta_uuid::Uuid,
     /// Field representing the `procedure_template_geopositioned_asset_model_id`
     /// column in table `geopositioning_procedure_templates`.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_geopositioned_asset_model_id: ::rosetta_uuid::Uuid,
 }
@@ -75,6 +82,16 @@ pub struct GeopositioningProcedureTemplate {
     geopositioning_procedure_templates::procedure_template_geopositioned_asset_model_id
 );
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for GeopositioningProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<geopositioning_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for GeopositioningProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<geopositioning_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType

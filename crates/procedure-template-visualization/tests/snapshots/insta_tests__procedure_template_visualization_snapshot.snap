@@ -1,0 +1,49 @@
+---
+source: crates/procedure-template-visualization/tests/insta_tests.rs
+expression: anonymize_mermaid(&diagram.to_string())
+---
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: Make a Pizza
+---
+flowchart TB
+  classDef ptam_node_UUID_0 rx: 2px, ry: 2px,fill: #efa8a8,stroke: #d62727
+  classDef ptam_edge_UUID_0 stroke: #d62727,stroke-width: 2px
+  classDef ptam_node_UUID_1 rx: 2px, ry: 2px,fill: #ccefa8,stroke: #80d627
+  classDef ptam_node_UUID_2 rx: 2px, ry: 2px,fill: #a8efef,stroke: #27d6d6
+  classDef ptam_edge_UUID_2 stroke: #27d6d6,stroke-width: 2px
+  classDef ptam_node_UUID_3 rx: 2px, ry: 2px,fill: #cba8ef,stroke: #7d27d6
+  classDef procedure_arrow stroke: #1a1a1a
+  subgraph v0 ["`*Prepare Dough*`"]
+    v1@{shape: rect, label: "Pizza Dough"}
+    class v1 ptam_node_UUID_2
+  end
+  style v0 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v2 ["`*Add Toppings*`"]
+    v3@{shape: rect, label: "Pizza"}
+    class v3 ptam_node_UUID_0
+    v4@{shape: rect, label: "Pizza Toppings"}
+    class v4 ptam_node_UUID_1
+    v5@{shape: hex, label: "Pizza Dough"}
+    class v5 ptam_node_UUID_2
+  end
+  style v2 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  subgraph v6 ["`*Bake Pizza*`"]
+    v7@{shape: hex, label: "Pizza"}
+    class v7 ptam_node_UUID_0
+    v8@{shape: rect, label: "Oven"}
+    class v8 ptam_node_UUID_3
+  end
+  style v6 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
+  v1 e0@-.- v5
+  class e0 ptam_edge_UUID_2
+  v0 e1@---> v2
+  class e1 procedure_arrow
+  v3 e2@-.- v7
+  class e2 ptam_edge_UUID_0
+  v2 e3@---> v6
+  class e3 procedure_arrow

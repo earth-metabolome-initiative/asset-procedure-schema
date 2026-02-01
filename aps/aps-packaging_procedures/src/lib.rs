@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = sample_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = sample_model_id))]
 # [diesel (belongs_to (aps_packaging_models :: PackagingModel , foreign_key = packaged_with_model_id))]
@@ -38,13 +39,16 @@
 pub struct PackagingProcedure {
     /// The extended `procedure`.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The procedure_id template of the extended `procedure`.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     packaging_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The sample being packaged, which must be a physical asset.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_id: ::rosetta_uuid::Uuid,
     /// The model of the sample being packaged, which must be a physical asset
@@ -53,6 +57,7 @@ pub struct PackagingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_sample_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the `sample`.
@@ -60,10 +65,12 @@ pub struct PackagingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_sample_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_sample_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `sample`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_sample_id: ::rosetta_uuid::Uuid,
     /// The packaging used for packaging, which must be a packaging model.
@@ -71,6 +78,7 @@ pub struct PackagingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_packaged_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     packaged_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -79,10 +87,12 @@ pub struct PackagingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_packaged_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_packaged_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `packaged_with_model`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_packaged_with_id: ::rosetta_uuid::Uuid,
 }

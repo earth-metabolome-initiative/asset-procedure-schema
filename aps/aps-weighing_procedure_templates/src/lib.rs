@@ -20,8 +20,10 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_procedure_templates::procedure_templates
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = weighed_asset_model_id))]
 # [diesel (belongs_to (aps_weighing_device_models :: WeighingDeviceModel , foreign_key = weighed_with_model_id))]
@@ -35,6 +37,7 @@
 pub struct WeighingProcedureTemplate {
     /// Identifier of the weighing procedure_id template, which is also a a
     /// foreign key to the general procedure_id template table.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The asset model being weighed.
@@ -42,11 +45,13 @@ pub struct WeighingProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_weighed_asset_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_asset_model_id: ::rosetta_uuid::Uuid,
     /// The sample container model should always be an asset model that is
     /// compatible with the procedure_id template.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_weighed_asset_model_id: ::rosetta_uuid::Uuid,
     /// The model of the instrument to be used for weighing.
@@ -54,11 +59,13 @@ pub struct WeighingProcedureTemplate {
         aps_procedure_template_asset_models::procedure_template_asset_models::asset_model_id,
         procedure_template_weighed_with_model_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     weighed_with_model_id: ::rosetta_uuid::Uuid,
     /// The instrument model used for weighing should always be an asset model
     /// that is compatible with the procedure_id template.
     #[discretionary(aps_procedure_template_asset_models::procedure_template_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_weighed_with_model_id: ::rosetta_uuid::Uuid,
 }
@@ -71,6 +78,15 @@ pub struct WeighingProcedureTemplate {
     weighing_procedure_templates::procedure_template_weighed_with_model_id
 );
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for WeighingProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<weighing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for WeighingProcedureTemplate
+{
     fn get_column_ref(
         &self,
     ) -> &<weighing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {

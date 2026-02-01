@@ -20,11 +20,13 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_asset_models::asset_models,
     aps_commercial_products::commercial_products,
     aps_physical_asset_models::physical_asset_models,
     aps_centrifuge_models::centrifuge_models
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_commercial_products :: CommercialProduct , foreign_key = id))]
 # [table_model (foreign_key ((centrifuge_model_id ,) , (:: aps_centrifuge_models :: centrifuge_models :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_centrifuge_models :: centrifuge_models :: id)))]
@@ -35,11 +37,13 @@ pub struct CommercialCentrifugeModel {
     /// Field representing the `id` column in table
     /// `commercial_centrifuge_models`.
     #[same_as(aps_asset_models::asset_models::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `centrifuge_model_id` column in table
     /// `commercial_centrifuge_models`.
     #[same_as(aps_asset_models::asset_models::parent_model_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     centrifuge_model_id: ::rosetta_uuid::Uuid,
 }
@@ -71,6 +75,15 @@ impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_products::
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for CommercialCentrifugeModel {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for CommercialCentrifugeModel
+{
     fn get_column_ref(
         &self,
     ) -> &<commercial_centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

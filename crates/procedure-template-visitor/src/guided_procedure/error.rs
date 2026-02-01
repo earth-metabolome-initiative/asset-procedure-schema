@@ -2,6 +2,7 @@
 //! `GuidedProcedure`.
 
 use aps_entities::GetEntityTableNameId;
+use aps_namespaced_ownables::*;
 use aps_procedure_templates::*;
 use diesel_builders::NestedModel;
 

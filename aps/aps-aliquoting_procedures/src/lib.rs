@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_volume_measuring_devices :: VolumeMeasuringDevice , foreign_key = aliquoted_with_id))]
 # [diesel (belongs_to (aps_volume_measuring_device_models :: VolumeMeasuringDeviceModel , foreign_key = aliquoted_with_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_procedures :: procedures :: id)))]
@@ -38,14 +39,17 @@
 pub struct AliquotingProcedure {
     /// Field representing the `id` column in table `aliquoting_procedures`.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// We enforce that the model of this procedure must be an aliquoting
     /// procedure template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     aliquoting_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The identifier of the instrument used for aliquoting.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     aliquoted_with_id: Option<::rosetta_uuid::Uuid>,
     /// The identifier of the instrument model used for aliquoting.
@@ -53,6 +57,7 @@ pub struct AliquotingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_aliquoted_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     aliquoted_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure template asset model associated to the `aliquoted_with`.
@@ -60,14 +65,17 @@ pub struct AliquotingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_aliquoted_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_aliquoted_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure asset associated to the `aliquoted_with`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_aliquoted_with_id: ::rosetta_uuid::Uuid,
     /// The container being aliquoted, which must be a volumetric container
     /// model.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     aliquoted_from_id: ::rosetta_uuid::Uuid,
     /// The procedure template asset model associated to the `aliquoted_from`.
@@ -75,14 +83,17 @@ pub struct AliquotingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_aliquoted_from_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_aliquoted_from_model_id: ::rosetta_uuid::Uuid,
     /// The procedure asset associated to the `aliquoted_from`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_aliquoted_from_id: ::rosetta_uuid::Uuid,
     /// The container receiving the aliquot, which must be a volumetric
     /// container model.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     aliquoted_into_id: ::rosetta_uuid::Uuid,
     /// The procedure template asset model associated to the `aliquoted_into`.
@@ -90,10 +101,12 @@ pub struct AliquotingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_aliquoted_into_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_aliquoted_into_model_id: ::rosetta_uuid::Uuid,
     /// The procedure asset associated to the `aliquoted_into`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_aliquoted_into_id: ::rosetta_uuid::Uuid,
 }

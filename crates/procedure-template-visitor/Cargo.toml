@@ -17,6 +17,7 @@ aps-parent_procedure_templates.workspace = true
 aps-next_procedure_templates.workspace = true
 aps-users.workspace = true
 aps-ownables.workspace = true
+aps-namespaced_ownables.workspace = true
 aps-procedure_asset_models.workspace = true
 aps-procedures.workspace = true
 aps-reused_procedure_template_asset_models.workspace = true

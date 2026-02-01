@@ -22,6 +22,7 @@
     aps_ownables::ownables,
     aps_procedures::procedures
 ))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_volumetric_containers :: VolumetricContainer , foreign_key = freeze_dried_container_id))]
 # [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = freeze_dried_container_model_id))]
 # [diesel (belongs_to (aps_freeze_dryers :: FreezeDryer , foreign_key = freeze_dried_with_id))]
@@ -41,15 +42,18 @@ pub struct FreezeDryingProcedure {
     /// Identifier of the freeze drying id, which is also a foreign key to the
     /// general procedure.
     #[same_as(aps_procedures::procedures::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The template of this procedure_id should be a freeze drying procedure_id
     /// template.
     #[same_as(aps_procedures::procedures::procedure_template_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freeze_drying_procedure_template_id: ::rosetta_uuid::Uuid,
     /// The container that is being freeze dried, which must be a volumetric
     /// container.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freeze_dried_container_id: ::rosetta_uuid::Uuid,
     /// The container model that is being freeze dried, which must be a
@@ -58,6 +62,7 @@ pub struct FreezeDryingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_freeze_dried_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freeze_dried_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -66,14 +71,17 @@ pub struct FreezeDryingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_freeze_dried_container_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_freeze_dried_container_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `freeze_dried_container`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_freeze_dried_container_id: ::rosetta_uuid::Uuid,
     /// The freeze drier used for the freeze drying procedure. This field is
     /// optional, as the freeze drier might not necessarily be tracked.
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freeze_dried_with_id: Option<::rosetta_uuid::Uuid>,
     /// The model of the freeze drier used, which must be a freeze drier model.
@@ -81,6 +89,7 @@ pub struct FreezeDryingProcedure {
         aps_procedure_asset_models::procedure_asset_models::asset_model_id,
         procedure_freeze_dried_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     freeze_dried_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id template asset model associated to the
@@ -89,10 +98,12 @@ pub struct FreezeDryingProcedure {
         aps_procedure_asset_models::procedure_asset_models::procedure_template_asset_model_id,
         procedure_freeze_dried_with_id
     )]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_template_freeze_dried_with_model_id: ::rosetta_uuid::Uuid,
     /// The procedure_id asset associated to the `freeze_dried_with`.
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_freeze_dried_with_id: ::rosetta_uuid::Uuid,
 }

@@ -18,6 +18,7 @@
 )]
 /// Struct representing a row in the `digital_assets` table.
 #[table_model(ancestors(aps_entities::entities, aps_ownables::ownables, aps_assets::assets))]
+# [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_digital_asset_models :: DigitalAssetModel , foreign_key = digital_asset_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_assets :: assets :: id)))]
 # [table_model (foreign_key ((digital_asset_model_id ,) , (:: aps_digital_asset_models :: digital_asset_models :: id)))]
@@ -26,11 +27,13 @@
 pub struct DigitalAsset {
     /// Field representing the `id` column in table `digital_assets`.
     #[same_as(aps_assets::assets::id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// Field representing the `digital_asset_model_id` column in table
     /// `digital_assets`.
     #[same_as(aps_assets::assets::model_id)]
+    #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     digital_asset_model_id: ::rosetta_uuid::Uuid,
 }

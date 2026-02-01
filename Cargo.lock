@@ -95,6 +95,7 @@ dependencies = [
  "aps-geopositioning_procedures",
  "aps-harvesting_procedure_templates",
  "aps-harvesting_procedures",
+ "aps-namespaced_ownables",
  "aps-namespaces",
  "aps-next_procedure_templates",
  "aps-ownables",
@@ -147,6 +148,7 @@ name = "aps-aliquoting_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -178,6 +180,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -210,7 +213,7 @@ name = "aps-asset_models"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
- "aps-namespaces",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -241,12 +244,14 @@ dependencies = [
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -262,6 +267,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -272,6 +278,7 @@ dependencies = [
  "aps-ball_mill_machine_models",
  "aps-bead_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -306,6 +313,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -314,6 +322,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -344,12 +353,14 @@ dependencies = [
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -365,6 +376,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -375,12 +387,14 @@ dependencies = [
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -390,6 +404,7 @@ dependencies = [
  "aps-asset_compatibility_rules",
  "aps-centrifuge_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -423,6 +438,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -438,6 +454,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -449,12 +466,14 @@ dependencies = [
  "aps-commercial_ball_mill_machine_models",
  "aps-commercial_product_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -465,12 +484,14 @@ dependencies = [
  "aps-ball_mill_machine_models",
  "aps-commercial_products",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -482,12 +503,14 @@ dependencies = [
  "aps-commercial_camera_models",
  "aps-commercial_product_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -498,12 +521,14 @@ dependencies = [
  "aps-camera_models",
  "aps-commercial_products",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -515,12 +540,14 @@ dependencies = [
  "aps-commercial_centrifuge_models",
  "aps-commercial_product_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -531,12 +558,14 @@ dependencies = [
  "aps-centrifuge_models",
  "aps-commercial_products",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -548,12 +577,14 @@ dependencies = [
  "aps-commercial_product_lots",
  "aps-entities",
  "aps-freeze_dryer_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -564,12 +595,14 @@ dependencies = [
  "aps-commercial_products",
  "aps-entities",
  "aps-freeze_dryer_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -581,12 +614,14 @@ dependencies = [
  "aps-commercial_product_lots",
  "aps-entities",
  "aps-freezer_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -597,12 +632,14 @@ dependencies = [
  "aps-commercial_products",
  "aps-entities",
  "aps-freezer_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -614,12 +651,14 @@ dependencies = [
  "aps-commercial_product_lots",
  "aps-entities",
  "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -630,12 +669,14 @@ dependencies = [
  "aps-commercial_products",
  "aps-entities",
  "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -648,6 +689,7 @@ dependencies = [
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -667,12 +709,14 @@ dependencies = [
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -696,12 +740,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -710,12 +756,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -725,6 +773,7 @@ dependencies = [
  "aps-asset_compatibility_rules",
  "aps-container_sealer_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -734,6 +783,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -756,6 +806,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -771,6 +822,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -836,6 +888,7 @@ dependencies = [
  "aps-geopositioning_procedures",
  "aps-harvesting_procedure_templates",
  "aps-harvesting_procedures",
+ "aps-namespaced_ownables",
  "aps-namespaces",
  "aps-next_procedure_templates",
  "aps-ownables",
@@ -886,6 +939,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -906,6 +960,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -913,6 +968,7 @@ name = "aps-disposal_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -922,6 +978,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -942,6 +999,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -952,8 +1010,8 @@ dependencies = [
  "aps-table_names",
  "diesel",
  "diesel-builders",
+ "rosetta-utc",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
  "validation-errors",
 ]
@@ -963,6 +1021,7 @@ name = "aps-fractioning_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1005,12 +1064,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1026,6 +1087,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1035,6 +1097,7 @@ dependencies = [
  "aps-asset_compatibility_rules",
  "aps-entities",
  "aps-freeze_dryer_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1068,6 +1131,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1076,12 +1140,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1097,6 +1163,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1106,6 +1173,7 @@ dependencies = [
  "aps-asset_compatibility_rules",
  "aps-entities",
  "aps-freezer_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1139,6 +1207,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1147,12 +1216,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1168,6 +1239,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1176,6 +1248,7 @@ version = "0.1.0"
 dependencies = [
  "aps-entities",
  "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -1185,6 +1258,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1208,6 +1282,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1215,6 +1290,7 @@ name = "aps-harvesting_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1225,6 +1301,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1247,6 +1324,21 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-namespaced_ownables"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
+ "aps-namespaces",
+ "aps-ownables",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1288,6 +1380,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1312,6 +1405,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1320,12 +1414,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1334,6 +1430,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-packaging_models",
  "aps-physical_asset_models",
@@ -1344,6 +1441,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1366,6 +1464,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1389,6 +1488,7 @@ dependencies = [
  "aps-camera_models",
  "aps-digital_asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -1398,6 +1498,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1422,6 +1523,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1436,6 +1538,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1444,11 +1547,13 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1463,6 +1568,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1470,6 +1576,7 @@ name = "aps-pouring_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1503,6 +1610,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1550,6 +1658,7 @@ name = "aps-procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -1603,6 +1712,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-sample_source_models",
@@ -1610,6 +1720,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1618,12 +1729,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1639,6 +1752,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1656,6 +1770,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1665,6 +1780,7 @@ dependencies = [
  "aps-asset_compatibility_rules",
  "aps-container_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -1698,6 +1814,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1705,6 +1822,7 @@ name = "aps-supernatant_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1738,6 +1856,7 @@ dependencies = [
  "procedure-like",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1782,6 +1901,8 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-container_models",
+ "aps-namespaced_ownables",
+ "aps-namespaces",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_templates",
@@ -1791,6 +1912,7 @@ dependencies = [
  "diesel-builders",
  "pg2sqlite",
  "procedure-traits",
+ "rosetta-uuid",
 ]
 
 [[package]]
@@ -1800,8 +1922,8 @@ dependencies = [
  "aps-table_names",
  "diesel",
  "diesel-builders",
+ "rosetta-utc",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
  "validation-errors",
 ]
@@ -1816,6 +1938,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1824,12 +1947,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1845,6 +1970,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1854,6 +1980,7 @@ dependencies = [
  "aps-asset_models",
  "aps-container_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1877,6 +2004,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1886,6 +2014,7 @@ dependencies = [
  "aps-asset_models",
  "aps-container_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1901,12 +2030,14 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1922,6 +2053,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1929,6 +2061,7 @@ name = "aps-weighing_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -1939,6 +2072,7 @@ dependencies = [
  "diesel-builders",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
 ]
 
 [[package]]
@@ -1981,6 +2115,7 @@ dependencies = [
  "aps-asset_models",
  "aps-container_compatibility_rules",
  "aps-container_models",
+ "aps-ownables",
  "aps-physical_asset_models",
  "aps-test-utils",
  "aps-users",
@@ -2723,8 +2858,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ff2abc00be7fca6ebc474524697ae276ad847ad0a6b3faa4bcb027e9a4614ad0"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -3541,7 +3678,7 @@ dependencies = [
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#38da01e2250e961d3c4894f42a395993269c5843"
+source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#4184be9c01a59ddf65855410eb4069a7fbce546f"
 dependencies = [
  "git2",
  "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits)",
@@ -3695,6 +3832,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-next_procedure_templates",
  "aps-ownables",
  "aps-parent_procedure_templates",
@@ -3727,6 +3865,7 @@ dependencies = [
  "aps-asset_compatibility_rules",
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-next_procedure_templates",
  "aps-ownables",
  "aps-parent_procedure_templates",
@@ -3739,8 +3878,10 @@ dependencies = [
  "aps-users",
  "diesel",
  "diesel-builders",
+ "insta",
  "mermaid-builder",
  "procedure-template-visitor",
+ "regex",
  "thiserror",
 ]
 
@@ -3749,7 +3890,10 @@ name = "procedure-traits"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
  "aps-next_procedure_templates",
+ "aps-ownables",
  "aps-parent_procedure_templates",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -3959,24 +4103,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "rosetta-uuid"
+name = "rosetta-utc"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/rosetta-uuid?branch=main#ec1b2e9fb9b19bc8f901552681b9e60ea07378c3"
+source = "git+https://github.com/earth-metabolome-initiative/rosetta-utc?branch=main#a6130674f0c9aaacd7f6d6dd71e33b53cacb55bf"
 dependencies = [
  "chrono",
  "diesel",
  "serde",
- "uuid",
 ]
 
 [[package]]
-name = "rosetta_timestamp"
-version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/emi-monorepo?branch=postgres-crate#3b46a15cdea306968a411966142bae47f02eb3f0"
+name = "rosetta-uuid"
+version = "0.1.2"
+source = "git+https://github.com/earth-metabolome-initiative/rosetta-uuid?branch=main#994dc37e657a7f406f3a2307834129746dd78db6"
 dependencies = [
  "chrono",
  "diesel",
+ "getrandom 0.2.17",
  "serde",
+ "uuid",
 ]
 
 [[package]]
@@ -4123,9 +4268,9 @@ dependencies = [
 
 [[package]]
 name = "schemars"
-version = "1.2.0"
+version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54e910108742c57a770f492731f99be216a52fadd361b06c8fb59d74ccc267d2"
+checksum = "a2b42f36aa1cd011945615b92222f6bf73c599a102a300334cd7f8dbeec726cc"
 dependencies = [
  "dyn-clone",
  "ref-cast",
@@ -4246,7 +4391,7 @@ dependencies = [
  "indexmap 1.9.3",
  "indexmap 2.13.0",
  "schemars 0.9.0",
- "schemars 1.2.0",
+ "schemars 1.2.1",
  "serde_core",
  "serde_json",
  "serde_with_macros",
@@ -4365,7 +4510,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#ef94083f8e4abcb6092273aa85cd25689a526629"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#9828f0dc5383ff681b234684238c96dcd3fa50e5"
 dependencies = [
  "geometric-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/geometric-traits?branch=main)",
  "git2",
@@ -4378,7 +4523,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-traits#ef94083f8e4abcb6092273aa85cd25689a526629"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits#9828f0dc5383ff681b234684238c96dcd3fa50e5"
 dependencies = [
  "geometric-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/geometric-traits?branch=main)",
  "git2",
@@ -4399,7 +4544,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#5d5ae34f2e08e2a6506fcd655a55c5bf7b4729c3"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#cdc270ccc896fb222280c5b95f8888a81e81dc7c"
 dependencies = [
  "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
 ]
@@ -4535,7 +4680,7 @@ checksum = "0bf256ce5efdfa370213c1dabab5935a12e49f2c58d15e9eac2870d3b4f27263"
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#5d5ae34f2e08e2a6506fcd655a55c5bf7b4729c3"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#cdc270ccc896fb222280c5b95f8888a81e81dc7c"
 dependencies = [
  "chrono",
  "enumflags2",
@@ -5734,6 +5879,6 @@ dependencies = [
 
 [[package]]
 name = "zmij"
-version = "1.0.18"
+version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1966f8ac2c1f76987d69a74d0e0f929241c10e78136434e3be70ff7f58f64214"
+checksum = "3ff05f8caa9038894637571ae6b9e29466c1f4f829d26c9b28f869a29cbe3445"
