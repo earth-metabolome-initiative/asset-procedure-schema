@@ -10,10 +10,7 @@ use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::{ProcedureTemplateTableModel, procedure_templates};
 use aps_reused_procedure_template_asset_models::*;
 use aps_users::users;
-use diesel::associations::HasTable;
-use diesel_builders::{
-    BuildableTable, DescendantOf, GetColumn, Insert, MayGetColumn, TableBuilder,
-};
+use diesel_builders::{BuildableTable, GetColumn, Insert, MayGetColumn, TableBuilder};
 
 /// A dynamic trait object for procedure template nodes.
 pub trait DynProcedureTemplateNode:
@@ -53,8 +50,9 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_asset_models::asset_models;
     /// use aps_procedure_template_asset_models::*;
+    /// use aps_procedure_templates::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel::associations::Identifiable;
+    /// use diesel_builders::prelude::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
@@ -65,10 +63,22 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     ///     .requires([&test_asset_model1, &test_asset_model2], &mut conn)
     ///     .expect("Failed to register asset models for procedure template");
     /// assert_eq!(ptams.len(), 2);
-    /// assert_eq!(ptams[0].procedure_template_id(), test_procedure_template.id());
-    /// assert_eq!(ptams[0].asset_model_id(), test_asset_model1.id());
-    /// assert_eq!(ptams[1].procedure_template_id(), test_procedure_template.id());
-    /// assert_eq!(ptams[1].asset_model_id(), test_asset_model2.id());
+    /// assert_eq!(
+    ///     ptams[0].procedure_template_id(),
+    ///     test_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     ptams[0].asset_model_id(),
+    ///     test_asset_model1.get_column_ref::<aps_asset_models::asset_models::id>()
+    /// );
+    /// assert_eq!(
+    ///     ptams[1].procedure_template_id(),
+    ///     test_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     ptams[1].asset_model_id(),
+    ///     test_asset_model2.get_column_ref::<aps_asset_models::asset_models::id>()
+    /// );
     /// ```
     fn requires<C, AMS>(
         &self,
@@ -109,8 +119,9 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_asset_models::asset_models;
     /// use aps_procedure_template_asset_models::*;
+    /// use aps_procedure_templates::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel::associations::Identifiable;
+    /// use diesel_builders::prelude::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
@@ -120,10 +131,22 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// let [ptam1, ptam2] = test_procedure_template
     ///     .requires_n([&test_asset_model1, &test_asset_model2], &mut conn)
     ///     .expect("Failed to register asset models for procedure template");
-    /// assert_eq!(ptam1.procedure_template_id(), test_procedure_template.id());
-    /// assert_eq!(ptam1.asset_model_id(), test_asset_model1.id());
-    /// assert_eq!(ptam2.procedure_template_id(), test_procedure_template.id());
-    /// assert_eq!(ptam2.asset_model_id(), test_asset_model2.id());
+    /// assert_eq!(
+    ///     ptam1.procedure_template_id(),
+    ///     test_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     ptam1.asset_model_id(),
+    ///     test_asset_model1.get_column_ref::<aps_asset_models::asset_models::id>()
+    /// );
+    /// assert_eq!(
+    ///     ptam2.procedure_template_id(),
+    ///     test_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     ptam2.asset_model_id(),
+    ///     test_asset_model2.get_column_ref::<aps_asset_models::asset_models::id>()
+    /// );
     /// ```
     fn requires_n<C, AM, const N: usize>(
         &self,
@@ -163,9 +186,10 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_asset_models::asset_models;
     /// use aps_procedure_template_asset_models::*;
+    /// use aps_procedure_templates::*;
     /// use aps_reused_procedure_template_asset_models::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel::associations::Identifiable;
+    /// use diesel_builders::prelude::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
@@ -180,10 +204,22 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     ///     .reuses(&ptams, &mut conn)
     ///     .expect("Failed to register reused procedure template asset models");
     /// assert_eq!(reused_ptams.len(), 2);
-    /// assert_eq!(reused_ptams[0].procedure_template_id(), another_procedure_template.id());
-    /// assert_eq!(reused_ptams[0].procedure_template_asset_model_id(), ptams[0].id());
-    /// assert_eq!(reused_ptams[1].procedure_template_id(), another_procedure_template.id());
-    /// assert_eq!(reused_ptams[1].procedure_template_asset_model_id(), ptams[1].id());
+    /// assert_eq!(
+    ///     reused_ptams[0].procedure_template_id(),
+    ///     another_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     reused_ptams[0].procedure_template_asset_model_id(),
+    ///     ptams[0].get_column_ref::<procedure_template_asset_models::id>()
+    /// );
+    /// assert_eq!(
+    ///     reused_ptams[1].procedure_template_id(),
+    ///     another_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     reused_ptams[1].procedure_template_asset_model_id(),
+    ///     ptams[1].get_column_ref::<procedure_template_asset_models::id>()
+    /// );
     /// ```
     fn reuses<C, PTAMS>(
         &self,
@@ -217,9 +253,10 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_asset_models::asset_models;
     /// use aps_procedure_template_asset_models::*;
+    /// use aps_procedure_templates::*;
     /// use aps_reused_procedure_template_asset_models::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel::associations::Identifiable;
+    /// use diesel_builders::prelude::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
@@ -233,10 +270,22 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// let [reused1, reused2] = another_procedure_template
     ///     .reuses_n([&ptams[0], &ptams[1]], &mut conn)
     ///     .expect("Failed to register reused procedure template asset models");
-    /// assert_eq!(reused1.procedure_template_id(), another_procedure_template.id());
-    /// assert_eq!(reused1.procedure_template_asset_model_id(), ptams[0].id());
-    /// assert_eq!(reused2.procedure_template_id(), another_procedure_template.id());
-    /// assert_eq!(reused2.procedure_template_asset_model_id(), ptams[1].id());
+    /// assert_eq!(
+    ///     reused1.procedure_template_id(),
+    ///     another_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     reused1.procedure_template_asset_model_id(),
+    ///     ptams[0].get_column_ref::<procedure_template_asset_models::id>()
+    /// );
+    /// assert_eq!(
+    ///     reused2.procedure_template_id(),
+    ///     another_procedure_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     reused2.procedure_template_asset_model_id(),
+    ///     ptams[1].get_column_ref::<procedure_template_asset_models::id>()
+    /// );
     /// ```
     fn reuses_n<C, PTAM, const N: usize>(
         &self,
@@ -269,6 +318,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_parent_procedure_templates::*;
     /// use diesel::associations::Identifiable;
+    /// use diesel_builders::prelude::*;
+    /// use aps_procedure_templates::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
@@ -277,14 +328,19 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// let parent_child_relation = parent_template
     ///     .child(&child_template, &user, &mut conn)
     ///     .expect("Failed to create parent-child relationship");
-    /// assert_eq!(parent_child_relation.parent_id(), parent_template.id());
-    /// assert_eq!(parent_child_relation.child_id(), child_template.id());
+    /// assert_eq!(
+    ///     parent_child_relation.parent_id(),
+    ///     parent_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     parent_child_relation.child_id(),
+    ///     child_template.get_column_ref::<procedure_templates::id>()
+    /// );
     /// ```
     fn child<C>(
         &self,
-        child_procedure_template: impl HasTable<Table: DescendantOf<procedure_templates::table>>
-        + GetColumn<procedure_templates::id>,
-        user: impl HasTable<Table: DescendantOf<users::table>> + GetColumn<users::id>,
+        child_procedure_template: impl GetColumn<procedure_templates::id>,
+        user: impl GetColumn<users::id>,
         conn: &mut C,
     ) -> Result<ParentProcedureTemplate, diesel::result::Error>
     where
@@ -294,6 +350,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
             .try_parent_id(<Self as GetColumn<procedure_templates::id>>::get_column(self))?
             .try_child_id(child_procedure_template.get_column())?
             .creator_id(user.get_column())
+            .editor_id(user.get_column())
+            .owner_id(user.get_column())
             .insert(conn)?)
     }
 
@@ -314,7 +372,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     ///
     /// ```rust
     /// use aps_next_procedure_templates::*;
-    /// use diesel::associations::Identifiable;
+    /// use aps_procedure_templates::*;
+    /// use diesel_builders::prelude::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
@@ -326,15 +385,24 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// let next_relation = parent_template
     ///     .append(&predecessor_template, &successor_template, &user, &mut conn)
     ///     .expect("Failed to create next procedure relationship");
-    /// assert_eq!(next_relation.parent_id(), parent_template.id());
-    /// assert_eq!(next_relation.predecessor_id(), predecessor_template.id());
-    /// assert_eq!(next_relation.successor_id(), successor_template.id());
+    /// assert_eq!(
+    ///     next_relation.parent_id(),
+    ///     parent_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     next_relation.predecessor_id(),
+    ///     predecessor_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(
+    ///     next_relation.successor_id(),
+    ///     successor_template.get_column_ref::<procedure_templates::id>()
+    /// );
     /// ```
     fn append<C, L, R>(
         &self,
         predecessor: &L,
         successor: &R,
-        user: impl HasTable<Table: DescendantOf<users::table>> + GetColumn<users::id>,
+        user: impl GetColumn<users::id>,
         conn: &mut C,
     ) -> Result<NextProcedureTemplate, diesel::result::Error>
     where
@@ -376,8 +444,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     ///
     /// ```rust
     /// use aps_next_procedure_templates::*;
-    /// use diesel::associations::Identifiable;
-    /// use diesel_builders::GetColumn;
+    /// use aps_procedure_templates::*;
+    /// use diesel_builders::prelude::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
@@ -389,17 +457,23 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     ///     .extend([&child1, &child2, &child3], &user, &mut conn)
     ///     .expect("Failed to create sequential relationships");
     /// assert_eq!(relations.len(), 2);
-    /// assert_eq!(relations[0].predecessor_id(), child1.id());
-    /// assert_eq!(relations[0].successor_id(), child2.id());
-    /// assert_eq!(relations[0].parent_id(), parent_template.id());
-    /// assert_eq!(relations[1].predecessor_id(), child2.id());
-    /// assert_eq!(relations[1].successor_id(), child3.id());
-    /// assert_eq!(relations[1].parent_id(), parent_template.id());
+    /// assert_eq!(relations[0].predecessor_id(), child1.get_column_ref::<procedure_templates::id>());
+    /// assert_eq!(relations[0].successor_id(), child2.get_column_ref::<procedure_templates::id>());
+    /// assert_eq!(
+    ///     relations[0].parent_id(),
+    ///     parent_template.get_column_ref::<procedure_templates::id>()
+    /// );
+    /// assert_eq!(relations[1].predecessor_id(), child2.get_column_ref::<procedure_templates::id>());
+    /// assert_eq!(relations[1].successor_id(), child3.get_column_ref::<procedure_templates::id>());
+    /// assert_eq!(
+    ///     relations[1].parent_id(),
+    ///     parent_template.get_column_ref::<procedure_templates::id>()
+    /// );
     /// ```
     fn extend<I, C>(
         &self,
         children: I,
-        user: impl HasTable<Table: DescendantOf<users::table>> + GetColumn<users::id>,
+        user: impl GetColumn<users::id>,
         conn: &mut C,
     ) -> Result<Vec<NextProcedureTemplate>, diesel::result::Error>
     where

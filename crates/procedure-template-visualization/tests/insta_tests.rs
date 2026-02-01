@@ -1,6 +1,6 @@
 //! Tests for procedure template visualization.
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use aps_procedure_templates::procedure_templates;
 use aps_test_utils::{
@@ -12,8 +12,8 @@ use regex::Regex;
 
 fn anonymize_mermaid(diagram: &str) -> String {
     let mut result = diagram.to_string();
-    let mut uuid_map = HashMap::new();
-    let mut node_map = HashMap::new();
+    let mut uuid_map = BTreeMap::new();
+    let mut node_map = BTreeMap::new();
     let mut uuid_counter = 0;
     let mut node_counter = 0;
 

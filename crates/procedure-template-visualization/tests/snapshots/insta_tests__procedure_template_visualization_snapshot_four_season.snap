@@ -34,115 +34,115 @@ flowchart TB
   classDef procedure_arrow stroke: #1a1a1a
   subgraph v0 ["`*Heat Oven*`"]
     v1@{shape: rect, label: "Oven 2"}
-    class v1 ptam_node_UUID_7
+    class v1 ptam_node_UUID_9
   end
   style v0 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
   subgraph v2 ["`*Prepare Dough 2*`"]
     v3@{shape: rect, label: "Pizza Dough 2"}
-    class v3 ptam_node_UUID_6
+    class v3 ptam_node_UUID_7
   end
   style v2 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
   subgraph v4 ["`*Vegetarian Toppings*`"]
-    v5@{shape: lean-r, label: "Olives"}
-    class v5 ptam_node_UUID_1
-    v6@{shape: lean-r, label: "Artichokes"}
+    v5@{shape: rect, label: "Vegetarian Pizza"}
+    class v5 ptam_node_UUID_8
+    v6@{shape: lean-r, label: "Mozzarella Cheese 2"}
     class v6 ptam_node_UUID_4
-    v7@{shape: hex, label: "Pizza Dough 2"}
-    class v7 ptam_node_UUID_6
-    v8@{shape: lean-r, label: "Mushrooms"}
-    class v8 ptam_node_UUID_3
+    v7@{shape: lean-r, label: "Artichokes"}
+    class v7 ptam_node_UUID_0
+    v8@{shape: hex, label: "Pizza Dough 2"}
+    class v8 ptam_node_UUID_7
     v9@{shape: lean-r, label: "Tofu"}
-    class v9 ptam_node_UUID_0
-    v10@{shape: rect, label: "Vegetarian Pizza"}
-    class v10 ptam_node_UUID_8
-    v11@{shape: lean-r, label: "Mozzarella Cheese 2"}
-    class v11 ptam_node_UUID_2
+    class v9 ptam_node_UUID_3
+    v10@{shape: lean-r, label: "Mushrooms"}
+    class v10 ptam_node_UUID_2
+    v11@{shape: lean-r, label: "Olives"}
+    class v11 ptam_node_UUID_5
   end
   style v4 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
   subgraph v12 ["`*Omnivore Toppings*`"]
-    v13@{shape: lean-r, label: "Artichokes"}
-    class v13 ptam_node_UUID_4
-    v14@{shape: lean-r, label: "Ham"}
-    class v14 ptam_node_UUID_5
-    v15@{shape: lean-r, label: "Mushrooms"}
-    class v15 ptam_node_UUID_3
-    v16@{shape: lean-r, label: "Mozzarella Cheese 2"}
-    class v16 ptam_node_UUID_2
-    v17@{shape: rect, label: "Omnivore Pizza"}
-    class v17 ptam_node_UUID_9
+    v13@{shape: lean-r, label: "Ham"}
+    class v13 ptam_node_UUID_1
+    v14@{shape: rect, label: "Omnivore Pizza"}
+    class v14 ptam_node_UUID_6
+    v15@{shape: lean-r, label: "Mozzarella Cheese 2"}
+    class v15 ptam_node_UUID_4
+    v16@{shape: lean-r, label: "Artichokes"}
+    class v16 ptam_node_UUID_0
+    v17@{shape: lean-r, label: "Mushrooms"}
+    class v17 ptam_node_UUID_2
     v18@{shape: lean-r, label: "Olives"}
-    class v18 ptam_node_UUID_1
+    class v18 ptam_node_UUID_5
   end
   style v12 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
   subgraph v19 ["`*Bake Vegetarian Pizza*`"]
-    v20@{shape: hex, label: "Vegetarian Pizza"}
-    class v20 ptam_node_UUID_8
-    v21@{shape: hex, label: "Oven 2"}
-    class v21 ptam_node_UUID_7
+    v20@{shape: hex, label: "Oven 2"}
+    class v20 ptam_node_UUID_9
+    v21@{shape: hex, label: "Vegetarian Pizza"}
+    class v21 ptam_node_UUID_8
   end
   style v19 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
   subgraph v22 ["`*Bake Omnivore Pizza*`"]
     v23@{shape: hex, label: "Omnivore Pizza"}
-    class v23 ptam_node_UUID_9
+    class v23 ptam_node_UUID_6
     v24@{shape: hex, label: "Oven 2"}
-    class v24 ptam_node_UUID_7
+    class v24 ptam_node_UUID_9
   end
   style v22 rx: 3px, ry: 3px , fill: #e3e5e6 , stroke: #cdcccb 
   subgraph v25 ["`**Required Procedures**`"]
     subgraph v26 ["`*Prepare Ingredients*`"]
-      v27@{shape: lean-r, label: "*Mozzarella Cheese 2*"}
-      class v27 ptam_node_UUID_2
+      v27@{shape: lean-r, label: "*Ham*"}
+      class v27 ptam_node_UUID_1
       v28@{shape: lean-r, label: "*Artichokes*"}
-      class v28 ptam_node_UUID_4
-      v29@{shape: lean-r, label: "*Mushrooms*"}
-      class v29 ptam_node_UUID_3
-      v30@{shape: lean-r, label: "*Olives*"}
-      class v30 ptam_node_UUID_1
-      v31@{shape: lean-r, label: "*Tofu*"}
-      class v31 ptam_node_UUID_0
-      v32@{shape: lean-r, label: "*Ham*"}
-      class v32 ptam_node_UUID_5
+      class v28 ptam_node_UUID_0
+      v29@{shape: lean-r, label: "*Olives*"}
+      class v29 ptam_node_UUID_5
+      v30@{shape: lean-r, label: "*Tofu*"}
+      class v30 ptam_node_UUID_3
+      v31@{shape: lean-r, label: "*Mushrooms*"}
+      class v31 ptam_node_UUID_2
+      v32@{shape: lean-r, label: "*Mozzarella Cheese 2*"}
+      class v32 ptam_node_UUID_4
     end
     style v26 rx: 3px, ry: 3px , fill: #e6e7e9 , stroke: #d0cecd , stroke-dasharray: 5, 5 
   end
   style v25 fill: #ecedee , stroke: #d5d4d3 , rx: 3px, ry: 3px , stroke-dasharray: 5, 5 
   v0 e0@---> v2
   class e0 procedure_arrow
-  v28 e1@-.- v6
-  class e1 ptam_edge_UUID_4
-  v29 e2@-.- v8
-  class e2 ptam_edge_UUID_3
-  v27 e3@-.- v11
-  class e3 ptam_edge_UUID_2
-  v30 e4@-.- v5
-  class e4 ptam_edge_UUID_1
-  v31 e5@-.- v9
-  class e5 ptam_edge_UUID_0
-  v3 e6@-.- v7
-  class e6 ptam_edge_UUID_6
+  v29 e1@-.- v11
+  class e1 ptam_edge_UUID_5
+  v3 e2@-.- v8
+  class e2 ptam_edge_UUID_7
+  v32 e3@-.- v6
+  class e3 ptam_edge_UUID_4
+  v30 e4@-.- v9
+  class e4 ptam_edge_UUID_3
+  v31 e5@-.- v10
+  class e5 ptam_edge_UUID_2
+  v28 e6@-.- v7
+  class e6 ptam_edge_UUID_0
   v2 e7@---> v4
   class e7 procedure_arrow
-  v32 e8@-.- v14
+  v29 e8@-.- v18
   class e8 ptam_edge_UUID_5
-  v28 e9@-.- v13
+  v32 e9@-.- v15
   class e9 ptam_edge_UUID_4
-  v29 e10@-.- v15
-  class e10 ptam_edge_UUID_3
-  v27 e11@-.- v16
-  class e11 ptam_edge_UUID_2
-  v30 e12@-.- v18
-  class e12 ptam_edge_UUID_1
+  v31 e10@-.- v17
+  class e10 ptam_edge_UUID_2
+  v27 e11@-.- v13
+  class e11 ptam_edge_UUID_1
+  v28 e12@-.- v16
+  class e12 ptam_edge_UUID_0
   v2 e13@---> v12
   class e13 procedure_arrow
-  v1 e14@-.- v21
-  class e14 ptam_edge_UUID_7
-  v10 e15@-.- v20
-  class e15 ptam_edge_UUID_8
+  v5 e14@-.- v21
+  class e14 ptam_edge_UUID_8
+  v1 e15@-.- v20
+  class e15 ptam_edge_UUID_9
   v4 e16@---> v19
   class e16 procedure_arrow
-  v17 e17@-.- v23
-  class e17 ptam_edge_UUID_9
+  v14 e17@-.- v23
+  class e17 ptam_edge_UUID_6
   v1 e18@-.- v24
-  class e18 ptam_edge_UUID_7
+  class e18 ptam_edge_UUID_9
   v12 e19@---> v22
   class e19 procedure_arrow
