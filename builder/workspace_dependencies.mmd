@@ -11,12 +11,10 @@ erDiagram
   v3["asset model ancestors"]
   v11["brands"]
   v32["container compatibility rules"]
-  v42["entities"]
+  v42["entities DAG"]
   v60["next procedure templates"]
   v61["ownable tables"]
-  v62["ownables DAG"]
   v63["owner grants"]
-  v64["owners DAG"]
   v68["parent procedure templates"]
   v76["privacy dependencies"]
   v77["procedure asset models"]
@@ -26,31 +24,24 @@ erDiagram
   v91["table names"]
   v92["team members"]
   v94["tombstones"]
-  v62 ||--|| v78 : "depends on"
-  v62 ||--|| v81 : "depends on"
-  v62 ||--|| v77 : "depends on"
-  v2 ||--|| v62 : "depends on"
-  v2 ||--|| v64 : "depends on"
-  v3 ||--|| v62 : "depends on"
-  v11 ||--|| v64 : "depends on"
-  v62 ||--|| v11 : "depends on"
-  v32 ||--|| v62 : "depends on"
-  v32 ||--|| v64 : "depends on"
+  v42 ||--|| v78 : "depends on"
+  v42 ||--|| v81 : "depends on"
+  v42 ||--|| v77 : "depends on"
+  v2 ||--|| v42 : "depends on"
+  v3 ||--|| v42 : "depends on"
+  v11 ||--|| v42 : "depends on"
+  v32 ||--|| v42 : "depends on"
   v42 ||--|| v82 : "depends on"
   v42 ||--|| v91 : "depends on"
   v60 ||--|| v68 : "depends on"
-  v60 ||--|| v62 : "depends on"
-  v60 ||--|| v64 : "depends on"
-  v62 ||--|| v61 : "depends on"
-  v62 ||--|| v64 : "depends on"
-  v63 ||--|| v64 : "depends on"
+  v60 ||--|| v42 : "depends on"
+  v42 ||--|| v61 : "depends on"
+  v63 ||--|| v42 : "depends on"
   v63 ||--|| v82 : "depends on"
-  v64 ||--|| v91 : "depends on"
-  v68 ||--|| v62 : "depends on"
-  v68 ||--|| v64 : "depends on"
+  v68 ||--|| v42 : "depends on"
   v76 ||--|| v42 : "depends on"
   v77 ||--|| v3 : "depends on"
   v77 ||--|| v78 : "depends on"
   v81 ||--|| v78 : "depends on"
-  v92 ||--|| v64 : "depends on"
+  v92 ||--|| v42 : "depends on"
   v94 ||--|| v91 : "depends on"

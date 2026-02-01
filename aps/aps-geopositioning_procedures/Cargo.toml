@@ -11,6 +11,7 @@ diesel.workspace = true
 postgis_diesel.workspace = true
 rosetta-uuid.workspace = true
 aps-assets.workspace = true
+aps-entities.workspace = true
 aps-geopositioning_device_models.workspace = true
 aps-geopositioning_devices.workspace = true
 aps-geopositioning_procedure_templates.workspace = true

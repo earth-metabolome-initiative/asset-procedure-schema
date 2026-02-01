@@ -147,6 +147,7 @@ dependencies = [
 name = "aps-aliquoting_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -165,6 +166,7 @@ name = "aps-aliquoting_procedures"
 version = "0.1.0"
 dependencies = [
  "aps-aliquoting_procedure_templates",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
@@ -208,6 +210,7 @@ dependencies = [
 name = "aps-asset_models"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-namespaces",
  "aps-ownables",
  "diesel",
@@ -222,6 +225,7 @@ name = "aps-assets"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -237,6 +241,7 @@ dependencies = [
  "aps-asset_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -251,6 +256,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-commercial_ball_mill_machine_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -266,6 +272,7 @@ dependencies = [
  "aps-asset_compatibility_rules",
  "aps-ball_mill_machine_models",
  "aps-bead_models",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -288,6 +295,7 @@ dependencies = [
  "aps-ball_mill_machines",
  "aps-ball_mill_procedure_templates",
  "aps-bead_models",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
@@ -306,6 +314,7 @@ name = "aps-bead_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -335,6 +344,7 @@ dependencies = [
  "aps-asset_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -349,6 +359,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-commercial_camera_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -364,6 +375,7 @@ dependencies = [
  "aps-asset_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -378,6 +390,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-centrifuge_models",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -399,6 +412,7 @@ dependencies = [
  "aps-centrifuge_models",
  "aps-centrifuge_procedure_templates",
  "aps-centrifuges",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
@@ -418,6 +432,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-commercial_centrifuge_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -434,6 +449,7 @@ dependencies = [
  "aps-ball_mill_machine_models",
  "aps-commercial_ball_mill_machine_models",
  "aps-commercial_product_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -449,6 +465,7 @@ dependencies = [
  "aps-asset_models",
  "aps-ball_mill_machine_models",
  "aps-commercial_products",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -465,6 +482,7 @@ dependencies = [
  "aps-camera_models",
  "aps-commercial_camera_models",
  "aps-commercial_product_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -480,6 +498,7 @@ dependencies = [
  "aps-asset_models",
  "aps-camera_models",
  "aps-commercial_products",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -496,6 +515,7 @@ dependencies = [
  "aps-centrifuge_models",
  "aps-commercial_centrifuge_models",
  "aps-commercial_product_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -511,6 +531,7 @@ dependencies = [
  "aps-asset_models",
  "aps-centrifuge_models",
  "aps-commercial_products",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -526,6 +547,7 @@ dependencies = [
  "aps-asset_models",
  "aps-commercial_freeze_dryer_models",
  "aps-commercial_product_lots",
+ "aps-entities",
  "aps-freeze_dryer_models",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -541,6 +563,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-commercial_products",
+ "aps-entities",
  "aps-freeze_dryer_models",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -557,6 +580,7 @@ dependencies = [
  "aps-asset_models",
  "aps-commercial_freezer_models",
  "aps-commercial_product_lots",
+ "aps-entities",
  "aps-freezer_models",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -572,6 +596,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-commercial_products",
+ "aps-entities",
  "aps-freezer_models",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -588,6 +613,7 @@ dependencies = [
  "aps-asset_models",
  "aps-commercial_geopositioning_device_models",
  "aps-commercial_product_lots",
+ "aps-entities",
  "aps-geopositioning_device_models",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -603,6 +629,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-commercial_products",
+ "aps-entities",
  "aps-geopositioning_device_models",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -618,6 +645,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-commercial_products",
+ "aps-entities",
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
@@ -636,6 +664,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-brands",
+ "aps-entities",
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
@@ -667,6 +696,7 @@ name = "aps-container_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -680,6 +710,7 @@ name = "aps-container_sealer_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -694,6 +725,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-container_sealer_models",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -713,6 +745,7 @@ dependencies = [
  "aps-assets",
  "aps-container_sealer_models",
  "aps-container_sealing_procedure_templates",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
@@ -732,6 +765,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-container_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -741,108 +775,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-dag-ownables"
-version = "0.1.0"
-dependencies = [
- "aps-aliquoting_procedure_templates",
- "aps-aliquoting_procedures",
- "aps-asset_compatibility_rules",
- "aps-asset_model_ancestors",
- "aps-asset_models",
- "aps-assets",
- "aps-ball_mill_machine_models",
- "aps-ball_mill_machines",
- "aps-ball_mill_procedure_templates",
- "aps-ball_mill_procedures",
- "aps-bead_models",
- "aps-camera_models",
- "aps-cameras",
- "aps-centrifuge_models",
- "aps-centrifuge_procedure_templates",
- "aps-centrifuge_procedures",
- "aps-centrifuges",
- "aps-commercial_ball_mill_machine_lots",
- "aps-commercial_ball_mill_machine_models",
- "aps-commercial_camera_lots",
- "aps-commercial_camera_models",
- "aps-commercial_centrifuge_lots",
- "aps-commercial_centrifuge_models",
- "aps-commercial_freeze_dryer_lots",
- "aps-commercial_freeze_dryer_models",
- "aps-commercial_freezer_lots",
- "aps-commercial_freezer_models",
- "aps-commercial_geopositioning_device_lots",
- "aps-commercial_geopositioning_device_models",
- "aps-commercial_product_lots",
- "aps-commercial_products",
- "aps-container_compatibility_rules",
- "aps-container_models",
- "aps-container_sealer_models",
- "aps-container_sealing_procedure_templates",
- "aps-container_sealing_procedures",
- "aps-containers",
- "aps-digital_asset_models",
- "aps-digital_assets",
- "aps-disposal_procedure_templates",
- "aps-disposal_procedures",
- "aps-fractioning_procedure_templates",
- "aps-fractioning_procedures",
- "aps-freeze_dryer_models",
- "aps-freeze_dryers",
- "aps-freeze_drying_procedure_templates",
- "aps-freeze_drying_procedures",
- "aps-freezer_models",
- "aps-freezers",
- "aps-freezing_procedure_templates",
- "aps-freezing_procedures",
- "aps-geopositioning_device_models",
- "aps-geopositioning_devices",
- "aps-geopositioning_procedure_templates",
- "aps-geopositioning_procedures",
- "aps-harvesting_procedure_templates",
- "aps-harvesting_procedures",
- "aps-namespaces",
- "aps-next_procedure_templates",
- "aps-ownables",
- "aps-packaging_models",
- "aps-packaging_procedure_templates",
- "aps-packaging_procedures",
- "aps-parent_procedure_templates",
- "aps-photograph_procedure_templates",
- "aps-photograph_procedures",
- "aps-photographs",
- "aps-physical_asset_models",
- "aps-physical_assets",
- "aps-pouring_procedure_templates",
- "aps-pouring_procedures",
- "aps-procedure_asset_models",
- "aps-procedure_template_asset_models",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-reused_procedure_template_asset_models",
- "aps-sample_models",
- "aps-sample_source_models",
- "aps-sample_sources",
- "aps-samples",
- "aps-storage_procedure_templates",
- "aps-storage_procedures",
- "aps-supernatant_procedure_templates",
- "aps-supernatant_procedures",
- "aps-team_members",
- "aps-teams",
- "aps-volume_measuring_device_models",
- "aps-volume_measuring_devices",
- "aps-volumetric_container_models",
- "aps-volumetric_containers",
- "aps-weighed_container_models",
- "aps-weighing_device_models",
- "aps-weighing_devices",
- "aps-weighing_procedure_templates",
- "aps-weighing_procedures",
-]
-
-[[package]]
-name = "aps-dag-owners"
+name = "aps-dag-entities"
 version = "0.1.0"
 dependencies = [
  "aps-aliquoting_procedure_templates",
@@ -887,6 +820,7 @@ dependencies = [
  "aps-digital_assets",
  "aps-disposal_procedure_templates",
  "aps-disposal_procedures",
+ "aps-entities",
  "aps-fractioning_procedure_templates",
  "aps-fractioning_procedures",
  "aps-freeze_dryer_models",
@@ -919,6 +853,7 @@ dependencies = [
  "aps-physical_assets",
  "aps-pouring_procedure_templates",
  "aps-pouring_procedures",
+ "aps-privacy_dependencies",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -951,6 +886,7 @@ name = "aps-digital_asset_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -965,6 +901,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-digital_asset_models",
+ "aps-entities",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -976,6 +913,7 @@ dependencies = [
 name = "aps-disposal_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -993,6 +931,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-disposal_procedure_templates",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-physical_assets",
@@ -1024,6 +963,7 @@ dependencies = [
 name = "aps-fractioning_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1042,6 +982,7 @@ name = "aps-fractioning_procedures"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-fractioning_procedure_templates",
  "aps-ownables",
  "aps-procedure_asset_models",
@@ -1064,6 +1005,7 @@ name = "aps-freeze_dryer_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1078,6 +1020,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-commercial_freeze_dryer_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -1091,6 +1034,7 @@ name = "aps-freeze_drying_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
+ "aps-entities",
  "aps-freeze_dryer_models",
  "aps-ownables",
  "aps-procedure_template_asset_models",
@@ -1110,6 +1054,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-assets",
+ "aps-entities",
  "aps-freeze_dryer_models",
  "aps-freeze_dryers",
  "aps-freeze_drying_procedure_templates",
@@ -1131,6 +1076,7 @@ name = "aps-freezer_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1145,6 +1091,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-commercial_freezer_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -1158,6 +1105,7 @@ name = "aps-freezing_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
+ "aps-entities",
  "aps-freezer_models",
  "aps-ownables",
  "aps-procedure_template_asset_models",
@@ -1177,6 +1125,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-assets",
+ "aps-entities",
  "aps-freezer_models",
  "aps-freezers",
  "aps-freezing_procedure_templates",
@@ -1198,6 +1147,7 @@ name = "aps-geopositioning_device_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1212,6 +1162,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-commercial_geopositioning_device_lots",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -1224,6 +1175,7 @@ dependencies = [
 name = "aps-geopositioning_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-geopositioning_device_models",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -1241,6 +1193,7 @@ name = "aps-geopositioning_procedures"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-geopositioning_device_models",
  "aps-geopositioning_devices",
  "aps-geopositioning_procedure_templates",
@@ -1262,6 +1215,7 @@ dependencies = [
 name = "aps-harvesting_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1279,6 +1233,7 @@ name = "aps-harvesting_procedures"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-harvesting_procedure_templates",
  "aps-ownables",
  "aps-procedure_asset_models",
@@ -1299,6 +1254,7 @@ dependencies = [
 name = "aps-namespaces"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -1336,6 +1292,7 @@ dependencies = [
 name = "aps-ownables"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownable_tables",
  "aps-owners",
  "aps-users",
@@ -1364,6 +1321,7 @@ dependencies = [
 name = "aps-owners"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-table_names",
  "diesel",
  "diesel-builders",
@@ -1378,6 +1336,7 @@ name = "aps-packaging_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1391,6 +1350,7 @@ name = "aps-packaging_procedure_templates"
 version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
+ "aps-entities",
  "aps-ownables",
  "aps-packaging_models",
  "aps-physical_asset_models",
@@ -1409,6 +1369,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-packaging_models",
  "aps-packaging_procedure_templates",
@@ -1444,6 +1405,7 @@ version = "0.1.0"
 dependencies = [
  "aps-camera_models",
  "aps-digital_asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -1463,6 +1425,7 @@ dependencies = [
  "aps-camera_models",
  "aps-cameras",
  "aps-digital_asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-photograph_procedure_templates",
  "aps-photographs",
@@ -1484,6 +1447,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-digital_assets",
+ "aps-entities",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -1496,6 +1460,7 @@ name = "aps-physical_asset_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -1508,6 +1473,7 @@ name = "aps-physical_assets"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1520,6 +1486,7 @@ dependencies = [
 name = "aps-pouring_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1538,6 +1505,7 @@ name = "aps-pouring_procedures"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-pouring_procedure_templates",
  "aps-procedure_asset_models",
@@ -1598,6 +1566,7 @@ dependencies = [
 name = "aps-procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -1610,6 +1579,7 @@ dependencies = [
 name = "aps-procedures"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-next_procedure_templates",
  "aps-ownables",
  "aps-parent_procedure_templates",
@@ -1649,6 +1619,7 @@ name = "aps-sample_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-sample_source_models",
@@ -1663,6 +1634,7 @@ name = "aps-sample_source_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1676,6 +1648,7 @@ name = "aps-sample_sources"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "aps-sample_source_models",
@@ -1690,6 +1663,7 @@ name = "aps-samples"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "aps-sample_models",
@@ -1707,6 +1681,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-container_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -1727,6 +1702,7 @@ dependencies = [
  "aps-assets",
  "aps-container_models",
  "aps-containers",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-physical_assets",
@@ -1745,6 +1721,7 @@ dependencies = [
 name = "aps-supernatant_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
@@ -1763,6 +1740,7 @@ name = "aps-supernatant_procedures"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
@@ -1805,6 +1783,7 @@ dependencies = [
 name = "aps-teams"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-owners",
  "diesel",
@@ -1847,6 +1826,7 @@ dependencies = [
 name = "aps-users"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-owners",
  "diesel",
  "diesel-builders",
@@ -1859,6 +1839,7 @@ name = "aps-volume_measuring_device_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1872,6 +1853,7 @@ name = "aps-volume_measuring_devices"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "aps-volume_measuring_device_models",
@@ -1887,6 +1869,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-container_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1902,6 +1885,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-containers",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "aps-volumetric_container_models",
@@ -1917,6 +1901,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-container_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1931,6 +1916,7 @@ name = "aps-weighing_device_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1944,6 +1930,7 @@ name = "aps-weighing_devices"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_assets",
  "aps-weighing_device_models",
@@ -1957,6 +1944,7 @@ dependencies = [
 name = "aps-weighing_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_template_asset_models",
@@ -1974,6 +1962,7 @@ name = "aps-weighing_procedures"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-entities",
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-physical_assets",

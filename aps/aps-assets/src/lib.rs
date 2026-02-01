@@ -16,13 +16,13 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `assets` table.
-#[table_model(ancestors(aps_ownables::ownables))]
+#[table_model(ancestors(aps_entities::entities, aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
 # [diesel (belongs_to (aps_asset_models :: AssetModel , foreign_key = model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_ownables :: ownables :: id)))]
 # [table_model (foreign_key ((model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "assets"))]
+#[table_model(default(aps_entities::entities::table_name_id, "assets"))]
 # [diesel (table_name = assets)]
 pub struct Asset {
     /// Field representing the `id` column in table `assets`.
@@ -120,6 +120,11 @@ impl ::diesel_builders::ValidateColumn<assets::description>
             }
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for Asset {
+    fn get_column_ref(&self) -> &<assets::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for Asset {

@@ -16,9 +16,13 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Table storing owners (base entity for users, teams, projects)
+#[table_model(ancestors(aps_entities::entities))]
 # [table_model (error = :: validation_errors :: ValidationError)]
+# [diesel (belongs_to (aps_entities :: Entity , foreign_key = id))]
 # [diesel (belongs_to (aps_table_names :: TableName , foreign_key = table_name_id))]
+# [table_model (foreign_key ((id ,) , (:: aps_entities :: entities :: id)))]
 # [table_model (foreign_key ((table_name_id ,) , (:: aps_table_names :: table_names :: id)))]
+#[table_model(default(aps_entities::entities::table_name_id, "owners"))]
 # [diesel (table_name = owners)]
 pub struct Owner {
     /// Surrogate primary key for the owner entity
@@ -106,5 +110,10 @@ impl ::diesel_builders::ValidateColumn<owners::edited_at>
             }
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for Owner {
+    fn get_column_ref(&self) -> &<owners::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }

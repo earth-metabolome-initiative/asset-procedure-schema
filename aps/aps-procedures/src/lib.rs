@@ -17,7 +17,7 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `procedures` table.
-#[table_model(ancestors(aps_ownables::ownables))]
+#[table_model(ancestors(aps_entities::entities, aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_ownables :: ownables :: id)))]
@@ -30,7 +30,7 @@
 # [table_model (foreign_key ((predecessor_procedure_id , predecessor_procedure_template_id ,) , (procedures :: id , procedures :: procedure_template_id)))]
 # [table_model (foreign_key ((parent_procedure_template_id , procedure_template_id ,) , (:: aps_parent_procedure_templates :: parent_procedure_templates :: parent_id , :: aps_parent_procedure_templates :: parent_procedure_templates :: child_id)))]
 # [table_model (foreign_key ((parent_procedure_template_id , predecessor_procedure_template_id , procedure_template_id ,) , (:: aps_next_procedure_templates :: next_procedure_templates :: parent_id , :: aps_next_procedure_templates :: next_procedure_templates :: predecessor_id , :: aps_next_procedure_templates :: next_procedure_templates :: successor_id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "procedures"))]
 # [diesel (table_name = procedures)]
 pub struct Procedure {
     /// The ID of this procedure.
@@ -158,12 +158,6 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_id>
                 ));
             }
         }
-        if let Some(predecessor_procedure_id) = <Self as diesel_builders::MayGetColumn<
-            procedures::predecessor_procedure_id,
-        >>::may_get_column_ref(self)
-        {
-            true?;
-        }
         Ok(())
     }
 }
@@ -213,12 +207,6 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_id>
                 ));
             }
         }
-        if let Some(parent_procedure_id) = <Self as diesel_builders::MayGetColumn<
-            procedures::parent_procedure_id,
-        >>::may_get_column_ref(self)
-        {
-            parent_procedure_id.is_some()?;
-        }
         Ok(())
     }
 }
@@ -245,6 +233,11 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_templat
             }
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for Procedure {
+    fn get_column_ref(&self) -> &<procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for Procedure {

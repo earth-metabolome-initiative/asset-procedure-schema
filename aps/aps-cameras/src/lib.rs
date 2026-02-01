@@ -18,6 +18,7 @@
 )]
 /// Struct representing a row in the `cameras` table.
 #[table_model(ancestors(
+    aps_entities::entities,
     aps_ownables::ownables,
     aps_assets::assets,
     aps_physical_assets::physical_assets
@@ -26,7 +27,7 @@
 # [diesel (belongs_to (aps_commercial_camera_lots :: CommercialCameraLot , foreign_key = commercial_camera_lot_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
 # [table_model (foreign_key ((commercial_camera_lot_id ,) , (:: aps_commercial_camera_lots :: commercial_camera_lots :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "cameras"))]
+#[table_model(default(aps_entities::entities::table_name_id, "cameras"))]
 # [diesel (table_name = cameras)]
 pub struct Camera {
     /// Field representing the `id` column in table `cameras`.
@@ -40,6 +41,11 @@ pub struct Camera {
     commercial_camera_lot_id: ::rosetta_uuid::Uuid,
 }
 impl ::diesel_builders::GetColumn<aps_assets::assets::id> for Camera {
+    fn get_column_ref(&self) -> &<cameras::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for Camera {
     fn get_column_ref(&self) -> &<cameras::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }

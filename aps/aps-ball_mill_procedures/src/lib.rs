@@ -17,7 +17,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `ball_mill_procedures` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedures::procedures
+))]
 # [diesel (belongs_to (aps_bead_models :: BeadModel , foreign_key = bead_model_id))]
 # [diesel (belongs_to (aps_ball_mill_machine_models :: BallMillMachineModel , foreign_key = milled_with_model_id))]
 # [diesel (belongs_to (aps_ball_mill_machines :: BallMillMachine , foreign_key = milled_with_id))]
@@ -36,7 +40,7 @@
 # [table_model (foreign_key ((milled_with_model_id , milled_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
 # [table_model (foreign_key ((milled_with_model_id , bead_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
 # [table_model (foreign_key ((bead_model_id , milled_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "ball_mill_procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "ball_mill_procedures"))]
 # [diesel (table_name = ball_mill_procedures)]
 pub struct BallMillProcedure {
     /// Field representing the `id` column in table `ball_mill_procedures`.
@@ -111,6 +115,13 @@ pub struct BallMillProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_milled_container_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for BallMillProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<ball_mill_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for BallMillProcedure {
     fn get_column_ref(

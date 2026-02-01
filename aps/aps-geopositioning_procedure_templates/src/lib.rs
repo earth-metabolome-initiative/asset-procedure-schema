@@ -17,7 +17,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `geopositioning_procedure_templates` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedure_templates::procedure_templates))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedure_templates::procedure_templates
+))]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_geopositioning_device_models :: GeopositioningDeviceModel , foreign_key = geopositioned_with_model_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = geopositioned_asset_model_id))]
@@ -27,7 +31,7 @@
 # [table_model (foreign_key ((id , procedure_template_geopositioned_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_geopositioned_asset_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 #[table_model(default(
-    aps_ownables::ownables::ownable_table_id,
+    aps_entities::entities::table_name_id,
     "geopositioning_procedure_templates"
 ))]
 # [diesel (table_name = geopositioning_procedure_templates)]
@@ -70,6 +74,14 @@ pub struct GeopositioningProcedureTemplate {
     geopositioning_procedure_templates::id,
     geopositioning_procedure_templates::procedure_template_geopositioned_asset_model_id
 );
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for GeopositioningProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<geopositioning_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
+        &self.id
+    }
+}
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for GeopositioningProcedureTemplate {
     fn get_column_ref(
         &self,

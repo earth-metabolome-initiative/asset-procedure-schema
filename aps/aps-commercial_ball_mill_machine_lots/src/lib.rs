@@ -18,6 +18,7 @@
 )]
 /// Struct representing a row in the `commercial_ball_mill_machine_lots` table.
 #[table_model(ancestors(
+    aps_entities::entities,
     aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
@@ -30,10 +31,7 @@
 # [table_model (foreign_key ((commercial_ball_mill_machine_model_id ,) , (:: aps_commercial_ball_mill_machine_models :: commercial_ball_mill_machine_models :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_commercial_product_lots :: commercial_product_lots :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_ball_mill_machine_models :: ball_mill_machine_models :: id)))]
-#[table_model(default(
-    aps_ownables::ownables::ownable_table_id,
-    "commercial_ball_mill_machine_lots"
-))]
+#[table_model(default(aps_entities::entities::table_name_id, "commercial_ball_mill_machine_lots"))]
 # [diesel (table_name = commercial_ball_mill_machine_lots)]
 pub struct CommercialBallMillMachineLot {
     /// Field representing the `id` column in table
@@ -70,6 +68,14 @@ impl ::diesel_builders::GetColumn<aps_ball_mill_machine_models::ball_mill_machin
 impl ::diesel_builders::GetColumn<aps_commercial_product_lots::commercial_product_lots::id>
     for CommercialBallMillMachineLot
 {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_ball_mill_machine_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
+    {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for CommercialBallMillMachineLot {
     fn get_column_ref(
         &self,
     ) -> &<commercial_ball_mill_machine_lots::id as ::diesel_builders::ColumnTyped>::ColumnType

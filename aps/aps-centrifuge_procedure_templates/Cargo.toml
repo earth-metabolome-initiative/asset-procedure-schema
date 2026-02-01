@@ -12,6 +12,7 @@ validation-errors.workspace = true
 rosetta-uuid.workspace = true
 aps-asset_compatibility_rules.workspace = true
 aps-centrifuge_models.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 aps-procedure_template_asset_models.workspace = true
 aps-procedure_templates.workspace = true

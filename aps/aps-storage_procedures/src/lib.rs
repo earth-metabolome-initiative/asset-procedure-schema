@@ -17,7 +17,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `storage_procedures` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedures::procedures
+))]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = stored_asset_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = stored_asset_model_id))]
 # [diesel (belongs_to (aps_containers :: Container , foreign_key = stored_into_id))]
@@ -31,7 +35,7 @@
 # [table_model (foreign_key ((stored_into_model_id ,) , (:: aps_container_models :: container_models :: id)))]
 # [table_model (foreign_key ((procedure_template_stored_into_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
 # [table_model (foreign_key ((stored_into_model_id , stored_asset_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "storage_procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "storage_procedures"))]
 # [diesel (table_name = storage_procedures)]
 pub struct StorageProcedure {
     /// Identifier of the storage id, which is also a foreign key to the general
@@ -87,6 +91,13 @@ pub struct StorageProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_stored_into_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for StorageProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<storage_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for StorageProcedure {
     fn get_column_ref(

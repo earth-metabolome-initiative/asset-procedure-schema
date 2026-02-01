@@ -10,6 +10,7 @@ diesel-builders.workspace = true
 diesel.workspace = true
 validation-errors.workspace = true
 rosetta-uuid.workspace = true
+aps-entities.workspace = true
 aps-next_procedure_templates.workspace = true
 aps-ownables.workspace = true
 aps-parent_procedure_templates.workspace = true

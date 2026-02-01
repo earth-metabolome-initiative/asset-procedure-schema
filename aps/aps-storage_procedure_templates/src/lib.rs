@@ -14,7 +14,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `storage_procedure_templates` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedure_templates::procedure_templates))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedure_templates::procedure_templates
+))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_container_models :: ContainerModel , foreign_key = stored_into_model_id))]
@@ -25,7 +29,7 @@
 # [table_model (foreign_key ((stored_into_model_id , stored_asset_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_stored_into_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_stored_asset_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "storage_procedure_templates"))]
+#[table_model(default(aps_entities::entities::table_name_id, "storage_procedure_templates"))]
 # [diesel (table_name = storage_procedure_templates)]
 pub struct StorageProcedureTemplate {
     /// Field representing the `id` column in table
@@ -103,6 +107,13 @@ impl ::diesel_builders::ValidateColumn<storage_procedure_templates::kelvin_toler
             return Err (:: validation_errors :: ValidationError :: smaller_than_value (< crate :: storage_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: storage_procedure_templates :: kelvin_tolerance_percentage :: NAME , 100f64)) ;
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for StorageProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<storage_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for StorageProcedureTemplate {

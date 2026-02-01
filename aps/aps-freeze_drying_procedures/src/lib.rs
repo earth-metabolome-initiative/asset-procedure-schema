@@ -17,7 +17,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `freeze_drying_procedures` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedures::procedures
+))]
 # [diesel (belongs_to (aps_volumetric_containers :: VolumetricContainer , foreign_key = freeze_dried_container_id))]
 # [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = freeze_dried_container_model_id))]
 # [diesel (belongs_to (aps_freeze_dryers :: FreezeDryer , foreign_key = freeze_dried_with_id))]
@@ -31,7 +35,7 @@
 # [table_model (foreign_key ((freeze_dried_with_model_id ,) , (:: aps_freeze_dryer_models :: freeze_dryer_models :: id)))]
 # [table_model (foreign_key ((procedure_template_freeze_dried_with_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
 # [table_model (foreign_key ((freeze_dried_with_model_id , freeze_dried_container_model_id ,) , (:: aps_asset_compatibility_rules :: asset_compatibility_rules :: left_asset_model_id , :: aps_asset_compatibility_rules :: asset_compatibility_rules :: right_asset_model_id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "freeze_drying_procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "freeze_drying_procedures"))]
 # [diesel (table_name = freeze_drying_procedures)]
 pub struct FreezeDryingProcedure {
     /// Identifier of the freeze drying id, which is also a foreign key to the
@@ -91,6 +95,13 @@ pub struct FreezeDryingProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_freeze_dried_with_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for FreezeDryingProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<freeze_drying_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for FreezeDryingProcedure {
     fn get_column_ref(

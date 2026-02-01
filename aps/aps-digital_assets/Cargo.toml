@@ -11,6 +11,7 @@ diesel.workspace = true
 rosetta-uuid.workspace = true
 aps-assets.workspace = true
 aps-digital_asset_models.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 
 [lints]

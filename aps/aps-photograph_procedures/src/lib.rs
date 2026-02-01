@@ -17,7 +17,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `photograph_procedures` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedures::procedures
+))]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = photographed_asset_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = photographed_asset_model_id))]
 # [diesel (belongs_to (aps_cameras :: Camera , foreign_key = photographed_with_id))]
@@ -35,7 +39,7 @@
 # [table_model (foreign_key ((photograph_id ,) , (:: aps_photographs :: photographs :: id)))]
 # [table_model (foreign_key ((photograph_model_id ,) , (:: aps_digital_asset_models :: digital_asset_models :: id)))]
 # [table_model (foreign_key ((procedure_template_photograph_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "photograph_procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "photograph_procedures"))]
 # [diesel (table_name = photograph_procedures)]
 pub struct PhotographProcedure {
     /// Identifier of the photograph_id id, which is also a foreign key to the
@@ -103,6 +107,13 @@ pub struct PhotographProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_photograph_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for PhotographProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<photograph_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for PhotographProcedure {
     fn get_column_ref(

@@ -15,6 +15,7 @@
 )]
 /// Container models which have a known empty weight.
 #[table_model(ancestors(
+    aps_entities::entities,
     aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models,
@@ -23,7 +24,7 @@
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_container_models :: ContainerModel , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_container_models :: container_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "weighed_container_models"))]
+#[table_model(default(aps_entities::entities::table_name_id, "weighed_container_models"))]
 # [diesel (table_name = weighed_container_models)]
 pub struct WeighedContainerModel {
     /// Field representing the `id` column in table `weighed_container_models`.
@@ -60,6 +61,13 @@ impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for Weighe
 impl ::diesel_builders::GetColumn<aps_container_models::container_models::id>
     for WeighedContainerModel
 {
+    fn get_column_ref(
+        &self,
+    ) -> &<weighed_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for WeighedContainerModel {
     fn get_column_ref(
         &self,
     ) -> &<weighed_container_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

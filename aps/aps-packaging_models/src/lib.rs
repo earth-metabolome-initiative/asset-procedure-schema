@@ -18,13 +18,14 @@
 )]
 /// Struct representing a row in the `packaging_models` table.
 #[table_model(ancestors(
+    aps_entities::entities,
     aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
 ))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "packaging_models"))]
+#[table_model(default(aps_entities::entities::table_name_id, "packaging_models"))]
 # [diesel (table_name = packaging_models)]
 pub struct PackagingModel {
     /// Field representing the `id` column in table `packaging_models`.
@@ -32,6 +33,13 @@ pub struct PackagingModel {
     id: ::rosetta_uuid::Uuid,
 }
 impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for PackagingModel {
+    fn get_column_ref(
+        &self,
+    ) -> &<packaging_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for PackagingModel {
     fn get_column_ref(
         &self,
     ) -> &<packaging_models::id as ::diesel_builders::ColumnTyped>::ColumnType {

@@ -10,6 +10,7 @@ diesel-builders.workspace = true
 diesel.workspace = true
 rosetta-uuid.workspace = true
 aps-asset_compatibility_rules.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 aps-packaging_models.workspace = true
 aps-physical_asset_models.workspace = true

@@ -9,7 +9,7 @@ CREATE TABLE ownable_tables (
 -- Table storing ownables (base entity for ownable assets, procedures, etc.)
 CREATE TABLE ownables (
 	-- Surrogate primary key for the ownable entity
-	id UUID PRIMARY KEY DEFAULT uuidv7(),
+	id UUID PRIMARY KEY DEFAULT uuidv7() REFERENCES entities(id) ON DELETE CASCADE,
 	-- The type of ownable (e.g., 'asset', 'procedure', etc.)
 	ownable_table_id TEXT NOT NULL REFERENCES ownable_tables(id) CHECK (
 		ownable_table_id <> ''

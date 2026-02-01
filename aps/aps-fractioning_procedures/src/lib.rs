@@ -14,7 +14,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `fractioning_procedures` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedures::procedures
+))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_weighing_devices :: WeighingDevice , foreign_key = weighed_with_id))]
 # [diesel (belongs_to (aps_weighing_device_models :: WeighingDeviceModel , foreign_key = weighed_with_model_id))]
@@ -29,7 +33,7 @@
 # [table_model (foreign_key ((weighed_with_id ,) , (:: aps_weighing_devices :: weighing_devices :: id)))]
 # [table_model (foreign_key ((weighed_with_model_id ,) , (:: aps_weighing_device_models :: weighing_device_models :: id)))]
 # [table_model (foreign_key ((procedure_template_weighed_with_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "fractioning_procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "fractioning_procedures"))]
 # [diesel (table_name = fractioning_procedures)]
 pub struct FractioningProcedure {
     /// Identifier of the fractioning id, which is also a foreign key to the
@@ -143,6 +147,13 @@ impl ::diesel_builders::ValidateColumn<fractioning_procedures::mass>
             ));
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for FractioningProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<fractioning_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for FractioningProcedure {

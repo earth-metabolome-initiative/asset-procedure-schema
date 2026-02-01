@@ -17,7 +17,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `pouring_procedures` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedures::procedures
+))]
 # [diesel (belongs_to (aps_volume_measuring_devices :: VolumeMeasuringDevice , foreign_key = measured_with_id))]
 # [diesel (belongs_to (aps_volume_measuring_device_models :: VolumeMeasuringDeviceModel , foreign_key = measured_with_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_procedures :: procedures :: id)))]
@@ -31,7 +35,7 @@
 # [table_model (foreign_key ((poured_into_id ,) , (:: aps_volumetric_containers :: volumetric_containers :: id)))]
 # [table_model (foreign_key ((poured_into_model_id ,) , (:: aps_volumetric_container_models :: volumetric_container_models :: id)))]
 # [table_model (foreign_key ((procedure_template_poured_into_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "pouring_procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "pouring_procedures"))]
 # [diesel (table_name = pouring_procedures)]
 pub struct PouringProcedure {
     /// The extended `procedure`.
@@ -107,6 +111,13 @@ pub struct PouringProcedure {
     #[discretionary(aps_procedure_asset_models::procedure_asset_models)]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     procedure_poured_into_id: ::rosetta_uuid::Uuid,
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for PouringProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<pouring_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for PouringProcedure {
     fn get_column_ref(

@@ -14,7 +14,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `pouring_procedure_templates` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedure_templates::procedure_templates))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedure_templates::procedure_templates
+))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_volume_measuring_device_models :: VolumeMeasuringDeviceModel , foreign_key = measured_with_model_id))]
@@ -25,7 +29,7 @@
 # [table_model (foreign_key ((id , procedure_template_measured_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_poured_into_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_poured_from_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "pouring_procedure_templates"))]
+#[table_model(default(aps_entities::entities::table_name_id, "pouring_procedure_templates"))]
 # [diesel (table_name = pouring_procedure_templates)]
 pub struct PouringProcedureTemplate {
     /// Identifier of the pouring procedure_id template, which is also a foreign
@@ -100,6 +104,13 @@ impl ::diesel_builders::ValidateColumn<pouring_procedure_templates::volume>
             return Err (:: validation_errors :: ValidationError :: strictly_greater_than_value (< crate :: pouring_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: pouring_procedure_templates :: volume :: NAME , 0f64)) ;
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for PouringProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<pouring_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for PouringProcedureTemplate {

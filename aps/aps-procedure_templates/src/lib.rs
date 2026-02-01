@@ -16,11 +16,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `procedure_templates` table.
-#[table_model(ancestors(aps_ownables::ownables))]
+#[table_model(ancestors(aps_entities::entities, aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_ownables :: ownables :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "procedure_templates"))]
+#[table_model(default(aps_entities::entities::table_name_id, "procedure_templates"))]
 # [diesel (table_name = procedure_templates)]
 pub struct ProcedureTemplate {
     /// Identifier of the procedure_id template
@@ -126,6 +126,13 @@ impl ::diesel_builders::ValidateColumn<procedure_templates::description>
             }
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for ProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for ProcedureTemplate {

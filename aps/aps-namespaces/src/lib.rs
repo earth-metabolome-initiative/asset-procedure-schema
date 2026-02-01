@@ -16,11 +16,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `namespaces` table.
-#[table_model(ancestors(aps_ownables::ownables))]
+#[table_model(ancestors(aps_entities::entities, aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_ownables :: ownables :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "namespaces"))]
+#[table_model(default(aps_entities::entities::table_name_id, "namespaces"))]
 # [diesel (table_name = namespaces)]
 pub struct Namespace {
     /// Surrogate primary key for the namespace entity
@@ -115,6 +115,11 @@ impl ::diesel_builders::ValidateColumn<namespaces::description>
             }
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for Namespace {
+    fn get_column_ref(&self) -> &<namespaces::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for Namespace {

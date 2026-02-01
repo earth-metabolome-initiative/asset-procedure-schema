@@ -14,7 +14,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `fractioning_procedure_templates` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedure_templates::procedure_templates))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedure_templates::procedure_templates
+))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_procedure_templates :: ProcedureTemplate , foreign_key = id))]
 # [diesel (belongs_to (aps_weighing_device_models :: WeighingDeviceModel , foreign_key = weighed_with_model_id))]
@@ -25,10 +29,7 @@
 # [table_model (foreign_key ((id , procedure_template_weighed_with_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_fragment_container_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
 # [table_model (foreign_key ((id , procedure_template_fragment_placed_into_model_id ,) , (:: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_id , :: aps_reused_procedure_template_asset_models :: reused_procedure_template_asset_models :: procedure_template_asset_model_id)))]
-#[table_model(default(
-    aps_ownables::ownables::ownable_table_id,
-    "fractioning_procedure_templates"
-))]
+#[table_model(default(aps_entities::entities::table_name_id, "fractioning_procedure_templates"))]
 # [diesel (table_name = fractioning_procedure_templates)]
 pub struct FractioningProcedureTemplate {
     /// Identifier of the fractioning procedure_id template, which is also a
@@ -123,6 +124,13 @@ impl ::diesel_builders::ValidateColumn<fractioning_procedure_templates::toleranc
             return Err (:: validation_errors :: ValidationError :: smaller_than_value (< crate :: fractioning_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: fractioning_procedure_templates :: tolerance_percentage :: NAME , 100f64)) ;
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for FractioningProcedureTemplate {
+    fn get_column_ref(
+        &self,
+    ) -> &<fractioning_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for FractioningProcedureTemplate {

@@ -16,14 +16,14 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Table storing teams, extending owners
-#[table_model(ancestors(aps_owners::owners, aps_ownables::ownables))]
+#[table_model(ancestors(aps_entities::entities, aps_owners::owners, aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_owners :: Owner , foreign_key = id))]
 # [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
 # [table_model (foreign_key ((parent_team_id ,) , (teams :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_owners :: owners :: id)))]
 # [table_model (foreign_key ((id ,) , (:: aps_ownables :: ownables :: id)))]
-#[table_model(default(aps_owners::owners::table_name_id, "teams"))]
+#[table_model(default(aps_entities::entities::table_name_id, "teams"))]
 # [diesel (table_name = teams)]
 pub struct Team {
     /// Primary key references owners(id)
@@ -119,6 +119,11 @@ impl ::diesel_builders::ValidateColumn<teams::description>
             }
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for Team {
+    fn get_column_ref(&self) -> &<teams::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for Team {

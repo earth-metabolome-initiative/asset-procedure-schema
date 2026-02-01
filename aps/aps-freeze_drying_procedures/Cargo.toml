@@ -11,6 +11,7 @@ diesel.workspace = true
 rosetta-uuid.workspace = true
 aps-asset_compatibility_rules.workspace = true
 aps-assets.workspace = true
+aps-entities.workspace = true
 aps-freeze_dryer_models.workspace = true
 aps-freeze_dryers.workspace = true
 aps-freeze_drying_procedure_templates.workspace = true

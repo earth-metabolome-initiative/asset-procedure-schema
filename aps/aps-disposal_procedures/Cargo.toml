@@ -11,6 +11,7 @@ diesel.workspace = true
 rosetta-uuid.workspace = true
 aps-assets.workspace = true
 aps-disposal_procedure_templates.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 aps-physical_asset_models.workspace = true
 aps-physical_assets.workspace = true

@@ -18,6 +18,7 @@
 )]
 /// Struct representing a row in the `sample_sources` table.
 #[table_model(ancestors(
+    aps_entities::entities,
     aps_ownables::ownables,
     aps_assets::assets,
     aps_physical_assets::physical_assets
@@ -26,7 +27,7 @@
 # [diesel (belongs_to (aps_sample_source_models :: SampleSourceModel , foreign_key = sample_source_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_assets :: physical_assets :: id)))]
 # [table_model (foreign_key ((sample_source_model_id ,) , (:: aps_sample_source_models :: sample_source_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "sample_sources"))]
+#[table_model(default(aps_entities::entities::table_name_id, "sample_sources"))]
 # [diesel (table_name = sample_sources)]
 pub struct SampleSource {
     /// Field representing the `id` column in table `sample_sources`.
@@ -40,6 +41,13 @@ pub struct SampleSource {
     sample_source_model_id: ::rosetta_uuid::Uuid,
 }
 impl ::diesel_builders::GetColumn<aps_assets::assets::id> for SampleSource {
+    fn get_column_ref(
+        &self,
+    ) -> &<sample_sources::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for SampleSource {
     fn get_column_ref(
         &self,
     ) -> &<sample_sources::id as ::diesel_builders::ColumnTyped>::ColumnType {

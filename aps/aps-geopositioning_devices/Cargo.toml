@@ -11,6 +11,7 @@ diesel.workspace = true
 rosetta-uuid.workspace = true
 aps-assets.workspace = true
 aps-commercial_geopositioning_device_lots.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 aps-physical_assets.workspace = true
 

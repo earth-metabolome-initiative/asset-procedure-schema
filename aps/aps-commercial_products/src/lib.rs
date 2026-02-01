@@ -17,12 +17,16 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// A commercial product is an asset model produced by some brand.
-#[table_model(ancestors(aps_ownables::ownables, aps_asset_models::asset_models))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_asset_models::asset_models
+))]
 # [diesel (belongs_to (aps_asset_models :: AssetModel , foreign_key = id))]
 # [diesel (belongs_to (aps_brands :: Brand , foreign_key = brand_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_asset_models :: asset_models :: id)))]
 # [table_model (foreign_key ((brand_id ,) , (:: aps_brands :: brands :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "commercial_products"))]
+#[table_model(default(aps_entities::entities::table_name_id, "commercial_products"))]
 # [diesel (table_name = commercial_products)]
 pub struct CommercialProduct {
     /// Identifier of the commercial product
@@ -33,6 +37,13 @@ pub struct CommercialProduct {
     brand_id: ::rosetta_uuid::Uuid,
 }
 impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for CommercialProduct {
+    fn get_column_ref(
+        &self,
+    ) -> &<commercial_products::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for CommercialProduct {
     fn get_column_ref(
         &self,
     ) -> &<commercial_products::id as ::diesel_builders::ColumnTyped>::ColumnType {

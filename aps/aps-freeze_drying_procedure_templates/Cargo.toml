@@ -11,6 +11,7 @@ diesel.workspace = true
 validation-errors.workspace = true
 rosetta-uuid.workspace = true
 aps-asset_compatibility_rules.workspace = true
+aps-entities.workspace = true
 aps-freeze_dryer_models.workspace = true
 aps-ownables.workspace = true
 aps-procedure_template_asset_models.workspace = true

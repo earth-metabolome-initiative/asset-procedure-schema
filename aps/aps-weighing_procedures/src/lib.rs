@@ -14,7 +14,11 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `weighing_procedures` table.
-#[table_model(ancestors(aps_ownables::ownables, aps_procedures::procedures))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_procedures::procedures
+))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_assets :: PhysicalAsset , foreign_key = weighed_asset_id))]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = weighed_asset_model_id))]
@@ -28,7 +32,7 @@
 # [table_model (foreign_key ((weighed_with_id ,) , (:: aps_weighing_devices :: weighing_devices :: id)))]
 # [table_model (foreign_key ((weighed_with_model_id ,) , (:: aps_weighing_device_models :: weighing_device_models :: id)))]
 # [table_model (foreign_key ((procedure_template_weighed_with_model_id ,) , (:: aps_procedure_template_asset_models :: procedure_template_asset_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "weighing_procedures"))]
+#[table_model(default(aps_entities::entities::table_name_id, "weighing_procedures"))]
 # [diesel (table_name = weighing_procedures)]
 pub struct WeighingProcedure {
     /// Field representing the `id` column in table `weighing_procedures`.
@@ -112,6 +116,13 @@ impl ::diesel_builders::ValidateColumn<weighing_procedures::mass>
             ));
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for WeighingProcedure {
+    fn get_column_ref(
+        &self,
+    ) -> &<weighing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }
 impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for WeighingProcedure {

@@ -18,6 +18,7 @@
 )]
 /// Struct representing a row in the `volumetric_containers` table.
 #[table_model(ancestors(
+    aps_entities::entities,
     aps_ownables::ownables,
     aps_assets::assets,
     aps_physical_assets::physical_assets,
@@ -27,7 +28,7 @@
 # [diesel (belongs_to (aps_volumetric_container_models :: VolumetricContainerModel , foreign_key = volumetric_container_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_containers :: containers :: id)))]
 # [table_model (foreign_key ((volumetric_container_model_id ,) , (:: aps_volumetric_container_models :: volumetric_container_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "volumetric_containers"))]
+#[table_model(default(aps_entities::entities::table_name_id, "volumetric_containers"))]
 # [diesel (table_name = volumetric_containers)]
 pub struct VolumetricContainer {
     /// Field representing the `id` column in table `volumetric_containers`.
@@ -50,6 +51,13 @@ impl ::diesel_builders::GetColumn<aps_assets::assets::id> for VolumetricContaine
     }
 }
 impl ::diesel_builders::GetColumn<aps_containers::containers::id> for VolumetricContainer {
+    fn get_column_ref(
+        &self,
+    ) -> &<volumetric_containers::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for VolumetricContainer {
     fn get_column_ref(
         &self,
     ) -> &<volumetric_containers::id as ::diesel_builders::ColumnTyped>::ColumnType {

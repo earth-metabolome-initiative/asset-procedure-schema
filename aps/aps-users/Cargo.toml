@@ -9,6 +9,7 @@ serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
 rosetta-uuid.workspace = true
+aps-entities.workspace = true
 aps-owners.workspace = true
 
 [lints]

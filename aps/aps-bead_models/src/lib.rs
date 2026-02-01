@@ -15,6 +15,7 @@
 )]
 /// Struct representing a row in the `bead_models` table.
 #[table_model(ancestors(
+    aps_entities::entities,
     aps_ownables::ownables,
     aps_asset_models::asset_models,
     aps_physical_asset_models::physical_asset_models
@@ -22,7 +23,7 @@
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = id))]
 # [table_model (foreign_key ((id ,) , (:: aps_physical_asset_models :: physical_asset_models :: id)))]
-#[table_model(default(aps_ownables::ownables::ownable_table_id, "bead_models"))]
+#[table_model(default(aps_entities::entities::table_name_id, "bead_models"))]
 # [diesel (table_name = bead_models)]
 pub struct BeadModel {
     /// Field representing the `id` column in table `bead_models`.
@@ -50,6 +51,11 @@ impl ::diesel_builders::ValidateColumn<bead_models::diameter>
     }
 }
 impl ::diesel_builders::GetColumn<aps_asset_models::asset_models::id> for BeadModel {
+    fn get_column_ref(&self) -> &<bead_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for BeadModel {
     fn get_column_ref(&self) -> &<bead_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }

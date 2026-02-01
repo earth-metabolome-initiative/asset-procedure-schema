@@ -15,6 +15,7 @@ aps-ball_mill_machine_models.workspace = true
 aps-ball_mill_machines.workspace = true
 aps-ball_mill_procedure_templates.workspace = true
 aps-bead_models.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 aps-procedure_asset_models.workspace = true
 aps-procedure_template_asset_models.workspace = true

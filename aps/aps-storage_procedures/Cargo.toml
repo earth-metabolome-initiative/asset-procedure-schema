@@ -13,6 +13,7 @@ aps-asset_compatibility_rules.workspace = true
 aps-assets.workspace = true
 aps-container_models.workspace = true
 aps-containers.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 aps-physical_asset_models.workspace = true
 aps-physical_assets.workspace = true

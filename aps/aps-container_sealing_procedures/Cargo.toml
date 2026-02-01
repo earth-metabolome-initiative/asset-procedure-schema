@@ -13,6 +13,7 @@ aps-asset_compatibility_rules.workspace = true
 aps-assets.workspace = true
 aps-container_sealer_models.workspace = true
 aps-container_sealing_procedure_templates.workspace = true
+aps-entities.workspace = true
 aps-ownables.workspace = true
 aps-procedure_asset_models.workspace = true
 aps-procedure_template_asset_models.workspace = true

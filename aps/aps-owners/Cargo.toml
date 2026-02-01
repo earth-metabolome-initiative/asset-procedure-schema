@@ -11,6 +11,7 @@ diesel.workspace = true
 validation-errors.workspace = true
 rosetta-uuid.workspace = true
 rosetta_timestamp.workspace = true
+aps-entities.workspace = true
 aps-table_names.workspace = true
 
 [lints]

@@ -56,49 +56,49 @@ CREATE INDEX idx_privacy_dependencies_child ON privacy_dependencies(child_id);
 CREATE INDEX idx_privacy_dependencies_parent ON privacy_dependencies(parent_id);
 -- Trigger 1: On privacy_dependencies (Relation creation)
 -- Ensure new links don't violate privacy
-CREATE OR REPLACE FUNCTION check_dependency_compliance() RETURNS TRIGGER AS $$
-DECLARE c_role SMALLINT;
-p_role SMALLINT;
-BEGIN
-SELECT COALESCE(minimum_role_id, 0) INTO c_role
-FROM entities
-WHERE id = NEW.child_id;
-SELECT COALESCE(minimum_role_id, 0) INTO p_role
-FROM entities
-WHERE id = NEW.parent_id;
-IF c_role < p_role THEN RAISE EXCEPTION 'Privacy Violation: Child cannot be less restricted than Parent.';
-END IF;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-CREATE TRIGGER trigger_check_dependency_compliance BEFORE
-INSERT
-    OR
-UPDATE ON privacy_dependencies FOR EACH ROW EXECUTE FUNCTION check_dependency_compliance();
--- Trigger 2: On entities (Role update)
--- Ensure privacy updates don't violate existing hierarchy
-CREATE OR REPLACE FUNCTION check_entity_privacy_on_update() RETURNS TRIGGER AS $$ BEGIN -- Check Parents (I cannot become more public than any parent)
-    -- Violation if: Any Parent > New Self
-    IF EXISTS (
-        SELECT 1
-        FROM privacy_dependencies pd
-            JOIN entities p ON pd.parent_id = p.id
-        WHERE pd.child_id = NEW.id
-            AND COALESCE(p.minimum_role_id, 0) > COALESCE(NEW.minimum_role_id, 0)
-    ) THEN RAISE EXCEPTION 'Privacy Violation: Entity cannot be less restricted than its parents.';
-END IF;
--- Check Children (I cannot become more private than any child)
--- Violation if: Any Child < New Self
-IF EXISTS (
-    SELECT 1
-    FROM privacy_dependencies pd
-        JOIN entities c ON pd.child_id = c.id
-    WHERE pd.parent_id = NEW.id
-        AND COALESCE(c.minimum_role_id, 0) < COALESCE(NEW.minimum_role_id, 0)
-) THEN RAISE EXCEPTION 'Privacy Violation: Entity cannot be more restricted than its children.';
-END IF;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-CREATE TRIGGER trigger_check_entity_privacy_on_update BEFORE
-UPDATE OF minimum_role_id ON entities FOR EACH ROW EXECUTE FUNCTION check_entity_privacy_on_update();
+-- CREATE OR REPLACE FUNCTION check_dependency_compliance() RETURNS TRIGGER AS $$
+-- DECLARE c_role SMALLINT;
+-- p_role SMALLINT;
+-- BEGIN
+-- SELECT COALESCE(minimum_role_id, 0) INTO c_role
+-- FROM entities
+-- WHERE id = NEW.child_id;
+-- SELECT COALESCE(minimum_role_id, 0) INTO p_role
+-- FROM entities
+-- WHERE id = NEW.parent_id;
+-- IF c_role < p_role THEN RAISE EXCEPTION 'Privacy Violation: Child cannot be less restricted than Parent.';
+-- END IF;
+-- RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+-- CREATE TRIGGER trigger_check_dependency_compliance BEFORE
+-- INSERT
+--     OR
+-- UPDATE ON privacy_dependencies FOR EACH ROW EXECUTE FUNCTION check_dependency_compliance();
+-- -- Trigger 2: On entities (Role update)
+-- -- Ensure privacy updates don't violate existing hierarchy
+-- CREATE OR REPLACE FUNCTION check_entity_privacy_on_update() RETURNS TRIGGER AS $$ BEGIN -- Check Parents (I cannot become more public than any parent)
+--     -- Violation if: Any Parent > New Self
+--     IF EXISTS (
+--         SELECT 1
+--         FROM privacy_dependencies pd
+--             JOIN entities p ON pd.parent_id = p.id
+--         WHERE pd.child_id = NEW.id
+--             AND COALESCE(p.minimum_role_id, 0) > COALESCE(NEW.minimum_role_id, 0)
+--     ) THEN RAISE EXCEPTION 'Privacy Violation: Entity cannot be less restricted than its parents.';
+-- END IF;
+-- -- Check Children (I cannot become more private than any child)
+-- -- Violation if: Any Child < New Self
+-- IF EXISTS (
+--     SELECT 1
+--     FROM privacy_dependencies pd
+--         JOIN entities c ON pd.child_id = c.id
+--     WHERE pd.parent_id = NEW.id
+--         AND COALESCE(c.minimum_role_id, 0) < COALESCE(NEW.minimum_role_id, 0)
+-- ) THEN RAISE EXCEPTION 'Privacy Violation: Entity cannot be more restricted than its children.';
+-- END IF;
+-- RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+-- CREATE TRIGGER trigger_check_entity_privacy_on_update BEFORE
+-- UPDATE OF minimum_role_id ON entities FOR EACH ROW EXECUTE FUNCTION check_entity_privacy_on_update();

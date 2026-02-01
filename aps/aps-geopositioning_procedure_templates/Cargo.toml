@@ -9,6 +9,7 @@ serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
 rosetta-uuid.workspace = true
+aps-entities.workspace = true
 aps-geopositioning_device_models.workspace = true
 aps-ownables.workspace = true
 aps-physical_asset_models.workspace = true

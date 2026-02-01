@@ -116,8 +116,7 @@ members = [
   "aps/aps-weighing_procedure_templates",
   "aps/aps-weighing_procedures",
   "aps/aps",
-  "aps/aps-dag-ownables",
-  "aps/aps-dag-owners",
+  "aps/aps-dag-entities",
 ]
 
 [workspace.package]

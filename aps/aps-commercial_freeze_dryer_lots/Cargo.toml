@@ -12,6 +12,7 @@ rosetta-uuid.workspace = true
 aps-asset_models.workspace = true
 aps-commercial_freeze_dryer_models.workspace = true
 aps-commercial_product_lots.workspace = true
+aps-entities.workspace = true
 aps-freeze_dryer_models.workspace = true
 aps-ownables.workspace = true
 aps-physical_asset_models.workspace = true
