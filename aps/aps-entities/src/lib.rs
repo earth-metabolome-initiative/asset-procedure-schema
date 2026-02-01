@@ -56,7 +56,7 @@ impl ::diesel_builders::ValidateColumn<entities::table_name_id>
                 crate::entities::table_name_id::NAME,
             ));
         }
-        if table_name_id.len() < 255usize {
+        if table_name_id.len() > 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::entities::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::entities::table_name_id::NAME,
@@ -71,11 +71,25 @@ impl ::diesel_builders::ValidateColumn<entities::created_at>
 {
     type Error = ::validation_errors::ValidationError;
     #[inline]
+    fn validate_column(created_at: &::rosetta_timestamp::TimestampUTC) -> Result<(), Self::Error> {
+        use diesel::Column;
+        if created_at >= ::chrono::Utc::now() {
+            return Err(::validation_errors::ValidationError::in_the_future(
+                <crate::entities::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::entities::created_at::NAME,
+            ));
+        }
+        Ok(())
+    }
+    #[inline]
     fn validate_column_in_context(
         &self,
         created_at: &::rosetta_timestamp::TimestampUTC,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
+        <Self as ::diesel_builders::ValidateColumn<entities::created_at>>::validate_column(
+            created_at,
+        )?;
         if let Some(edited_at) =
             <Self as diesel_builders::MayGetColumn<entities::edited_at>>::may_get_column_ref(self)
         {
@@ -95,11 +109,25 @@ impl ::diesel_builders::ValidateColumn<entities::edited_at>
 {
     type Error = ::validation_errors::ValidationError;
     #[inline]
+    fn validate_column(edited_at: &::rosetta_timestamp::TimestampUTC) -> Result<(), Self::Error> {
+        use diesel::Column;
+        if edited_at >= ::chrono::Utc::now() {
+            return Err(::validation_errors::ValidationError::in_the_future(
+                <crate::entities::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::entities::edited_at::NAME,
+            ));
+        }
+        Ok(())
+    }
+    #[inline]
     fn validate_column_in_context(
         &self,
         edited_at: &::rosetta_timestamp::TimestampUTC,
     ) -> Result<(), Self::Error> {
         use diesel::Column;
+        <Self as ::diesel_builders::ValidateColumn<entities::edited_at>>::validate_column(
+            edited_at,
+        )?;
         if let Some(created_at) =
             <Self as diesel_builders::MayGetColumn<entities::created_at>>::may_get_column_ref(self)
         {

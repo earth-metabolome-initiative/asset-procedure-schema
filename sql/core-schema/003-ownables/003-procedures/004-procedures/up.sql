@@ -68,4 +68,4 @@ CREATE TABLE procedures (
 		)
 	)
 );
-INSERT INTO ownable_tables (id) VALUES ('procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('procedures') ON CONFLICT DO NOTHING;

@@ -102,7 +102,6 @@ pub use aps_harvesting_procedure_templates::{
 pub use aps_harvesting_procedures::{self, HarvestingProcedure, harvesting_procedures};
 pub use aps_namespaces::{self, Namespace, namespaces};
 pub use aps_next_procedure_templates::{self, NextProcedureTemplate, next_procedure_templates};
-pub use aps_ownable_tables::{self, OwnableTable, ownable_tables};
 pub use aps_ownables::{self, Ownable, ownables};
 pub use aps_owner_grants::{self, OwnerGrant, owner_grants};
 pub use aps_owners::{self, Owner, owners};

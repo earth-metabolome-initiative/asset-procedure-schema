@@ -15,11 +15,7 @@ use diesel_builders::{
 
 /// Trait defining the methods for managing parent-child relationships in
 /// procedure templates.
-pub trait ProcedureTemplateNode:
-    HasTable<Table: DescendantOf<procedure_templates::table>>
-    + GetColumn<procedure_templates::id>
-    + GetColumn<procedure_templates::name>
-{
+pub trait ProcedureTemplateNode: ProcedureTemplateTableModel {
     /// Registers the provided asset models as used in this procedure template,
     /// creating the necessary entries in the `procedure_template_asset_models`
     /// table.
@@ -407,7 +403,4 @@ pub trait ProcedureTemplateNode:
     }
 }
 
-impl<T> ProcedureTemplateNode for T where
-    T: HasTable<Table: DescendantOf<procedure_templates::table>> + ProcedureTemplateTableModel
-{
-}
+impl<T> ProcedureTemplateNode for T where T: ProcedureTemplateTableModel {}

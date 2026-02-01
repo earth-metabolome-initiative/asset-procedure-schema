@@ -42,7 +42,7 @@ CREATE TABLE weighing_procedure_templates (
 		procedure_template_weighed_with_model_id
 	)
 );
-INSERT INTO procedure_template_tables (id) VALUES ('weighing_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('weighing_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE OR REPLACE FUNCTION weighing_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_weighed_asset_model_id) ON CONFLICT DO NOTHING;

@@ -6,8 +6,7 @@ use std::rc::Rc;
 use aps_next_procedure_templates::*;
 use aps_parent_procedure_templates::*;
 use aps_procedure_templates::*;
-use diesel::Identifiable;
-use diesel_builders::LoadMany;
+use diesel_builders::{GetColumnExt, LoadMany, NestedModel, TableModel, prelude::LoadNestedFirst};
 use geometric_traits::{
     impls::GenericBiMatrix2D,
     prelude::{GenericEdgesBuilder, MonopartiteGraph, SortedVec},
@@ -32,18 +31,19 @@ impl Hierarchy {
     ///   task graph from the database.
     fn task_graph<C>(
         &self,
-        procedure_template: &ProcedureTemplate,
+        procedure_template: &NestedModel<procedure_templates::table>,
         conn: &mut C,
     ) -> Result<Option<TaskGraph>, diesel::result::Error>
     where
         (parent_procedure_templates::parent_id,): LoadMany<C>,
         (next_procedure_templates::parent_id,): LoadMany<C>,
+        (procedure_templates::id,): LoadNestedFirst<procedure_templates::table, C>,
         ParentProcedureTemplate: FKParentProcedureTemplatesChildId<C>,
         NextProcedureTemplate:
             FKNextProcedureTemplatesPredecessorId<C> + FKNextProcedureTemplatesSuccessorId<C>,
     {
         let parent_child_relations = <(parent_procedure_templates::parent_id,)>::load_many(
-            (*procedure_template.id(),),
+            (procedure_template.get_column::<procedure_templates::id>(),),
             conn,
         )?;
 
@@ -54,7 +54,7 @@ impl Hierarchy {
         let mut nodes = parent_child_relations
             .iter()
             .map(|relation| {
-                let child = relation.child(conn)?;
+                let child = relation.child(conn)?.nested(conn)?;
 
                 // We find the curresponding Rc<ProcedureTemplate> in the hierarchy's
                 // nodes vocabulary so to avoid duplicating memory allocation in the
@@ -68,19 +68,21 @@ impl Hierarchy {
 
                 Ok(rc_child)
             })
-            .collect::<Result<Vec<Rc<ProcedureTemplate>>, diesel::result::Error>>()?;
+            .collect::<Result<Vec<Rc<NestedModel<procedure_templates::table>>>, diesel::result::Error>>()?;
 
         nodes.sort_unstable();
 
         let sorted_nodes = SortedVec::try_from(nodes).unwrap();
 
-        let next_relations =
-            <(next_procedure_templates::parent_id,)>::load_many((*procedure_template.id(),), conn)?;
+        let next_relations = <(next_procedure_templates::parent_id,)>::load_many(
+            (procedure_template.get_column::<procedure_templates::id>(),),
+            conn,
+        )?;
 
         let mut edges: Vec<(usize, usize)> = Vec::new();
         for next_relation in next_relations {
-            let predecessor = next_relation.predecessor(conn)?;
-            let successor = next_relation.successor(conn)?;
+            let predecessor = next_relation.predecessor(conn)?.nested(conn)?;
+            let successor = next_relation.successor(conn)?.nested(conn)?;
 
             let source_index = sorted_nodes
                 .binary_search_by(|pt| pt.as_ref().cmp(&predecessor))
@@ -126,6 +128,7 @@ impl Hierarchy {
     where
         (parent_procedure_templates::parent_id,): LoadMany<C>,
         (next_procedure_templates::parent_id,): LoadMany<C>,
+        (procedure_templates::id,): LoadNestedFirst<procedure_templates::table, C>,
         ParentProcedureTemplate: FKParentProcedureTemplatesChildId<C>,
         NextProcedureTemplate:
             FKNextProcedureTemplatesPredecessorId<C> + FKNextProcedureTemplatesSuccessorId<C>,

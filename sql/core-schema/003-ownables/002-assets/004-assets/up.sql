@@ -6,4 +6,4 @@ CREATE TABLE assets (
     CHECK (name <> description),
     UNIQUE (id, model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('assets') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('assets') ON CONFLICT DO NOTHING;

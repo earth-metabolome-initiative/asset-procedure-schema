@@ -39,7 +39,7 @@ impl ::diesel_builders::ValidateColumn<roles::name>
                 crate::roles::name::NAME,
             ));
         }
-        if name.len() < 255usize {
+        if name.len() > 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::roles::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::roles::name::NAME,

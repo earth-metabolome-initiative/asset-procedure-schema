@@ -67,7 +67,7 @@ impl ::diesel_builders::ValidateColumn<procedure_template_asset_models::name>
         if name.is_empty() {
             return Err (:: validation_errors :: ValidationError :: empty (< crate :: procedure_template_asset_models :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: procedure_template_asset_models :: name :: NAME)) ;
         }
-        if name.len() < 255usize {
+        if name.len() > 255usize {
             return Err (:: validation_errors :: ValidationError :: exceeds_max_length (< crate :: procedure_template_asset_models :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: procedure_template_asset_models :: name :: NAME , 255usize)) ;
         }
         Ok(())

@@ -7,6 +7,7 @@ use aps_asset_models::*;
 use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::*;
 use diesel::Identifiable;
+use diesel_builders::{GetColumnExt, NestedModel, TableModel, prelude::LoadNestedFirst};
 use geometric_traits::{
     impls::{CSR2D, GenericBiMatrix2D, SquareCSR2D},
     prelude::{GenericBiGraph, GenericEdgesBuilder, GenericGraph, SortedVec},
@@ -22,15 +23,15 @@ use rosetta_uuid::Uuid;
 pub struct Ownership {
     /// Bipartite graph.
     graph: GenericBiGraph<
-        Rc<SortedVec<Rc<ProcedureTemplate>>>,
+        Rc<SortedVec<Rc<NestedModel<procedure_templates::table>>>>,
         Rc<SortedVec<ProcedureTemplateAssetModel>>,
         CSR2D<usize, usize, usize>,
     >,
     /// Foreign procedure template which were not included in the hierarchy
     /// but are referenced by the procedure templates asset models.
-    foreign_procedure_templates: SortedVec<ProcedureTemplate>,
+    foreign_procedure_templates: SortedVec<NestedModel<procedure_templates::table>>,
     /// Asset models referenced in the procedure template asset models.
-    asset_models: Vec<AssetModel>,
+    asset_models: Vec<NestedModel<asset_models::table>>,
     /// Graph describing the procedure template asset models which are
     /// based on other procedure template asset models.
     derivatives: GenericGraph<
@@ -46,15 +47,16 @@ impl Ownership {
     #[allow(clippy::type_complexity)]
     pub(super) fn new<C>(
         graph: GenericBiGraph<
-            Rc<SortedVec<Rc<ProcedureTemplate>>>,
+            Rc<SortedVec<Rc<NestedModel<procedure_templates::table>>>>,
             Rc<SortedVec<ProcedureTemplateAssetModel>>,
             CSR2D<usize, usize, usize>,
         >,
-        foreign_procedure_templates: SortedVec<ProcedureTemplate>,
+        foreign_procedure_templates: SortedVec<NestedModel<procedure_templates::table>>,
         conn: &mut C,
     ) -> Result<Self, diesel::result::Error>
     where
         ProcedureTemplateAssetModel: FKProcedureTemplateAssetModelsAssetModelId<C>,
+        (asset_models::id,): LoadNestedFirst<asset_models::table, C>,
     {
         let mut edges = Vec::new();
         let ptams = graph.right_nodes_vocabulary().clone();
@@ -72,8 +74,8 @@ impl Ownership {
 
         let asset_models = ptams
             .iter()
-            .map(|ptam| ptam.asset_model(conn))
-            .collect::<Result<Vec<AssetModel>, diesel::result::Error>>()?;
+            .map(|ptam| ptam.asset_model(conn)?.nested(conn))
+            .collect::<Result<Vec<NestedModel<asset_models::table>>, diesel::result::Error>>()?;
 
         let number_of_nodes = ptams.len();
         let directed: SquareCSR2D<CSR2D<usize, usize, usize>> = GenericEdgesBuilder::default()
@@ -108,7 +110,10 @@ pub trait OwnershipLike: AsRef<Ownership> {
     /// # Arguments
     ///
     /// * `procedure_template` - The procedure template to check.
-    fn is_foreign_procedure_template(&self, procedure_template: &ProcedureTemplate) -> bool {
+    fn is_foreign_procedure_template(
+        &self,
+        procedure_template: &NestedModel<procedure_templates::table>,
+    ) -> bool {
         self.as_ref().foreign_procedure_templates.binary_search(procedure_template).is_ok()
     }
 
@@ -122,7 +127,9 @@ pub trait OwnershipLike: AsRef<Ownership> {
 
     /// Returns an iterator over all foreign procedure templates in the
     /// ownership graph.
-    fn foreign_procedure_templates(&self) -> core::slice::Iter<'_, ProcedureTemplate> {
+    fn foreign_procedure_templates(
+        &self,
+    ) -> core::slice::Iter<'_, NestedModel<procedure_templates::table>> {
         self.as_ref().foreign_procedure_templates.iter()
     }
 
@@ -136,11 +143,12 @@ pub trait OwnershipLike: AsRef<Ownership> {
     fn foreign_procedure_template_of(
         &self,
         procedure_template_asset_model: &ProcedureTemplateAssetModel,
-    ) -> Option<&ProcedureTemplate> {
+    ) -> Option<&NestedModel<procedure_templates::table>> {
         self.as_ref()
             .foreign_procedure_templates
             .binary_search_by(|pt| {
-                pt.id().cmp(procedure_template_asset_model.procedure_template_id())
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template_asset_model.procedure_template_id())
             })
             .ok()
             .and_then(|index| self.as_ref().foreign_procedure_templates.get(index))
@@ -169,11 +177,13 @@ pub trait OwnershipLike: AsRef<Ownership> {
     ///   procedure template asset models are to be retrieved.
     fn foreign_ptams_of(
         &self,
-        procedure_template: &ProcedureTemplate,
+        procedure_template: &NestedModel<procedure_templates::table>,
     ) -> impl Iterator<Item = &ProcedureTemplateAssetModel> {
         assert!(self.is_foreign_procedure_template(procedure_template));
-        self.procedure_template_asset_models()
-            .filter(move |ptam| ptam.procedure_template_id() == procedure_template.id())
+        self.procedure_template_asset_models().filter(move |ptam| {
+            ptam.procedure_template_id()
+                == procedure_template.get_column_ref::<procedure_templates::id>()
+        })
     }
 
     /// Returns the procedure template asset models which are employed by
@@ -189,13 +199,16 @@ pub trait OwnershipLike: AsRef<Ownership> {
     /// * If the provided procedure template is not part of the ownership graph.
     fn employed_by(
         &self,
-        procedure_template: &ProcedureTemplate,
+        procedure_template: &NestedModel<procedure_templates::table>,
     ) -> impl Iterator<Item = &ProcedureTemplateAssetModel> {
         let procedure_template_id = self
             .as_ref()
             .graph
             .left_nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
+            .binary_search_by(|pt| {
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template.get_column_ref::<procedure_templates::id>())
+            })
             .expect("Procedure template not part of ownership graph");
 
         self.as_ref().graph.successors(procedure_template_id).map(|ptam_id| {
@@ -222,12 +235,17 @@ pub trait OwnershipLike: AsRef<Ownership> {
     fn asset_model_of(
         &self,
         procedure_template_asset_model: &ProcedureTemplateAssetModel,
-    ) -> &AssetModel {
+    ) -> &NestedModel<asset_models::table> {
         let ptam_id = self
             .as_ref()
             .graph
             .right_nodes_vocabulary()
-            .binary_search(procedure_template_asset_model)
+            .binary_search_by(|ptam| {
+                ptam.get_column::<procedure_template_asset_models::id>().cmp(
+                    procedure_template_asset_model
+                        .get_column_ref::<procedure_template_asset_models::id>(),
+                )
+            })
             .expect("Procedure template asset model not part of ownership graph");
 
         self.as_ref().asset_models.get(ptam_id).expect("Asset model id out of bounds")
@@ -265,10 +283,12 @@ pub trait OwnershipLike: AsRef<Ownership> {
     /// one is the true alias.
     fn reference_based_on_alias<'graph>(
         &'graph self,
-        parents: &[&ProcedureTemplate],
+        parents: &[&'graph NestedModel<procedure_templates::table>],
         procedure_template_asset_model: &'graph ProcedureTemplateAssetModel,
     ) -> Option<&'graph ProcedureTemplateAssetModel> {
-        if procedure_template_asset_model.procedure_template_id() == parents[0].id() {
+        if procedure_template_asset_model.procedure_template_id()
+            == parents[0].get_column_ref::<procedure_templates::id>()
+        {
             // If the PTAM is owned by the root procedure template, it is its own
             // certain based on alias.
             return Some(procedure_template_asset_model);
@@ -290,12 +310,14 @@ pub trait OwnershipLike: AsRef<Ownership> {
         } else {
             let mut certain_based_on_alias = None;
             for predecessor in self.as_ref().derivatives.predecessors(ptam_id) {
-                let predecessor_pt =
+                let predecessor_ptam =
                     nv.get(predecessor).expect("Procedure template asset model id out of bounds");
 
                 for parent in parents {
-                    if predecessor_pt.id() == parent.id() {
-                        certain_based_on_alias = Some(predecessor_pt);
+                    if predecessor_ptam.procedure_template_id()
+                        == parent.get_column_ref::<procedure_templates::id>()
+                    {
+                        certain_based_on_alias = Some(predecessor_ptam);
                         break;
                     }
                 }

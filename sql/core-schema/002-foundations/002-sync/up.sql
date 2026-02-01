@@ -4,19 +4,21 @@ CREATE TABLE tombstones (
     -- A deleted entity's ID, which cannot be a foreign key due to deletion.
     id UUID NOT NULL,
     -- The name of the table from which the entity was deleted.
-    table_name TEXT NOT NULL REFERENCES table_names(id) NOT NULL CHECK (
-        table_name <> ''
-        AND length(table_name) < 255
+    table_name_id TEXT NOT NULL REFERENCES table_names(id) NOT NULL CHECK (
+        table_name_id <> ''
+        AND length(table_name_id) < 255
     ),
     -- The timestamp when the entity was deleted.
-    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (
+        deleted_at <= NOW()
+    ),
     -- Composite primary key to prevent duplicate tombstones for the same entity.
-    PRIMARY KEY (id, table_name)
+    PRIMARY KEY (id, table_name_id)
 );
 -- Universal Deletion Trigger
 -- Because 'entities' is the root table, we ONLY need this trigger on 'entities'.
 CREATE OR REPLACE FUNCTION log_entity_deletion() RETURNS TRIGGER AS $$ BEGIN
-INSERT INTO tombstones (id, table_name)
+INSERT INTO tombstones (id, table_name_id)
 VALUES (OLD.id, OLD.table_name_id);
 RETURN OLD;
 END;

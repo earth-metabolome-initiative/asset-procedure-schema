@@ -75,7 +75,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER fractioning_procedure_templates_rptam_insert_trigger
 AFTER INSERT ON fractioning_procedure_templates
 FOR EACH ROW EXECUTE FUNCTION fractioning_procedure_templates_rptam_insert_fn();
-INSERT INTO procedure_template_tables (id) VALUES ('fractioning_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('fractioning_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE TABLE fractioning_procedures (
 	-- Identifier of the fractioning id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
@@ -171,4 +171,4 @@ CREATE TABLE fractioning_procedures (
 		procedure_template_weighed_with_model_id
 	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('fractioning_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('fractioning_procedures') ON CONFLICT DO NOTHING;

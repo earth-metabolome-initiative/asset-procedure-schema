@@ -1,13 +1,13 @@
 //! Submodule defining the `ProcedureTemplateGraph` structure and its associated
 //! methods.
 
+use aps_asset_models::asset_models;
 use aps_next_procedure_templates::*;
 use aps_parent_procedure_templates::*;
 use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::*;
 use aps_reused_procedure_template_asset_models::*;
-use diesel::Identifiable;
-use diesel_builders::LoadMany;
+use diesel_builders::{GetColumnExt, LoadMany, NestedModel, prelude::LoadNestedFirst};
 
 use crate::structs::{Hierarchy, HierarchyLike, Ownership, OwnershipLike, TaskGraph};
 
@@ -75,7 +75,7 @@ impl ProcedureTemplateGraph {
     /// );
     /// ```
     pub fn new<C>(
-        procedure_template: &ProcedureTemplate,
+        procedure_template: &NestedModel<procedure_templates::table>,
         conn: &mut C,
     ) -> Result<Self, diesel::result::Error>
     where
@@ -86,6 +86,8 @@ impl ProcedureTemplateGraph {
                 + FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId<C>,
         (parent_procedure_templates::parent_id,): LoadMany<C>,
         (next_procedure_templates::parent_id,): LoadMany<C>,
+        (asset_models::id,): LoadNestedFirst<asset_models::table, C>,
+        (procedure_templates::id,): LoadNestedFirst<procedure_templates::table, C>,
         ParentProcedureTemplate: FKParentProcedureTemplatesChildId<C>,
         NextProcedureTemplate:
             FKNextProcedureTemplatesPredecessorId<C> + FKNextProcedureTemplatesSuccessorId<C>,
@@ -146,7 +148,7 @@ impl ProcedureTemplateGraph {
 
     /// Returns the root procedure template of the graph.
     #[must_use]
-    pub fn root_procedure_template(&self) -> &ProcedureTemplate {
+    pub fn root_procedure_template(&self) -> &NestedModel<procedure_templates::table> {
         self.hierarchy.root_procedure_template()
     }
 
@@ -175,7 +177,8 @@ impl ProcedureTemplateGraph {
         procedure_template_asset_model: &ProcedureTemplateAssetModel,
     ) -> bool {
         let root_procedure_template = self.root_procedure_template();
-        root_procedure_template.id() == procedure_template_asset_model.procedure_template_id()
+        root_procedure_template.get_column_ref::<procedure_templates::id>()
+            == procedure_template_asset_model.procedure_template_id()
     }
 
     /// Returns whether the provided procedure template asset model is owned by
@@ -205,7 +208,10 @@ impl ProcedureTemplateGraph {
 
     /// Returns the task graph of the given procedure template, if it exists.
     #[must_use]
-    pub fn task_graph_of(&self, procedure_template: &ProcedureTemplate) -> Option<&TaskGraph> {
+    pub fn task_graph_of(
+        &self,
+        procedure_template: &NestedModel<procedure_templates::table>,
+    ) -> Option<&TaskGraph> {
         let procedure_node_id = self.procedure_node_id(procedure_template);
         self.task_graphs[procedure_node_id].as_ref()
     }
@@ -226,13 +232,15 @@ impl ProcedureTemplateGraph {
     #[must_use]
     pub fn closest_paths_to_procedure_template_using_ptam<'graph>(
         &'graph self,
-        parents: &[&'graph ProcedureTemplate],
-        parent: &'graph ProcedureTemplate,
-        current: &'graph ProcedureTemplate,
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        parent: &'graph NestedModel<procedure_templates::table>,
+        current: &'graph NestedModel<procedure_templates::table>,
         reference_ptam: &ProcedureTemplateAssetModel,
         allow_self: bool,
-    ) -> Vec<Vec<&'graph ProcedureTemplate>> {
-        let mut paths: Vec<Vec<&'graph ProcedureTemplate>> = if let Some(task_graph) =
+    ) -> Vec<Vec<&'graph NestedModel<procedure_templates::table>>> {
+        let mut paths: Vec<Vec<&'graph NestedModel<procedure_templates::table>>> = if let Some(
+            task_graph,
+        ) =
             self.task_graph_of(current)
         {
             // If this is a recursion step, we check if the current procedure is associated
@@ -241,7 +249,8 @@ impl ProcedureTemplateGraph {
             // procedure template asset model. If it is not, we continue the search
             // recursively in the parents.
 
-            let mut parents = parents.to_vec();
+            let mut parents: Vec<&'graph NestedModel<procedure_templates::table>> =
+                parents.to_vec();
             parents.push(parent);
             task_graph
                 .sink_nodes()
@@ -258,7 +267,8 @@ impl ProcedureTemplateGraph {
         } else {
             if allow_self {
                 let this_complete_parents = {
-                    let mut p = parents.to_vec();
+                    let mut p: Vec<&'graph NestedModel<procedure_templates::table>> =
+                        parents.to_vec();
                     p.push(parent);
                     p.push(current);
                     p
@@ -339,9 +349,12 @@ impl ProcedureTemplateGraph {
     #[must_use]
     pub fn root_leaf_node_of<'graph>(
         &'graph self,
-        parents: &[&'graph ProcedureTemplate],
-        procedure_template: &'graph ProcedureTemplate,
-    ) -> (Vec<&'graph ProcedureTemplate>, &'graph ProcedureTemplate) {
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        procedure_template: &'graph NestedModel<procedure_templates::table>,
+    ) -> (
+        Vec<&'graph NestedModel<procedure_templates::table>>,
+        &'graph NestedModel<procedure_templates::table>,
+    ) {
         if let Some(task_graph) = self.task_graph_of(procedure_template) {
             let root_node = task_graph.root_node();
             let mut parents = parents.to_vec();
@@ -363,9 +376,12 @@ impl ProcedureTemplateGraph {
     #[must_use]
     pub fn sink_leaf_nodes_of<'graph>(
         &'graph self,
-        parents: &[&'graph ProcedureTemplate],
-        procedure_template: &'graph ProcedureTemplate,
-    ) -> Vec<(Vec<&'graph ProcedureTemplate>, &'graph ProcedureTemplate)> {
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        procedure_template: &'graph NestedModel<procedure_templates::table>,
+    ) -> Vec<(
+        Vec<&'graph NestedModel<procedure_templates::table>>,
+        &'graph NestedModel<procedure_templates::table>,
+    )> {
         if let Some(task_graph) = self.task_graph_of(procedure_template) {
             let mut result = Vec::new();
             let mut parents = parents.to_vec();

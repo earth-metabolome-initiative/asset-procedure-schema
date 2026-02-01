@@ -54,7 +54,7 @@ CREATE TABLE aliquoting_procedure_templates (
 		procedure_template_aliquoted_with_model_id
 	)
 );
-INSERT INTO procedure_template_tables (id) VALUES ('aliquoting_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('aliquoting_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE TABLE aliquoting_procedures (
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
 	-- We enforce that the model of this procedure must be an aliquoting procedure template.
@@ -142,4 +142,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER aliquoting_procedure_templates_rptam_insert_trigger
 AFTER INSERT ON aliquoting_procedure_templates
 FOR EACH ROW EXECUTE FUNCTION aliquoting_procedure_templates_rptam_insert_fn();
-INSERT INTO ownable_tables (id) VALUES ('aliquoting_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('aliquoting_procedures') ON CONFLICT DO NOTHING;

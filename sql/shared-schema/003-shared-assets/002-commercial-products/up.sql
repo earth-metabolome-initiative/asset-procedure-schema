@@ -5,7 +5,7 @@ CREATE TABLE commercial_products (
 	-- The brand producing this commercial product
 	brand_id UUID NOT NULL REFERENCES brands(id)
 );
-INSERT INTO ownable_tables (id) VALUES ('commercial_products') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('commercial_products') ON CONFLICT DO NOTHING;
 CREATE TABLE commercial_product_lots (
 	id UUID PRIMARY KEY REFERENCES physical_asset_models(id) ON DELETE CASCADE,
 	lot TEXT NOT NULL CHECK (lot <> '' AND length(lot) <= 255),
@@ -15,4 +15,4 @@ CREATE TABLE commercial_product_lots (
 	-- The parent_id product model must be a commercial product.
 	FOREIGN KEY (id, product_model_id) REFERENCES asset_models(id, parent_model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('commercial_product_lots') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('commercial_product_lots') ON CONFLICT DO NOTHING;

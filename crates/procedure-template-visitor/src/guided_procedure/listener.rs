@@ -7,6 +7,7 @@ use aps_procedure_templates::*;
 use aps_procedures::*;
 use aps_users::User;
 use diesel::Identifiable;
+use diesel_builders::NestedModel;
 use rosetta_uuid::Uuid;
 
 use crate::{
@@ -18,13 +19,13 @@ pub(super) struct GPBListener<'listener, C> {
     graph: &'listener ProcedureTemplateGraph,
     connection: &'listener mut C,
     author: &'listener User,
-    designated_successor: Option<&'listener ProcedureTemplate>,
+    designated_successor: Option<&'listener NestedModel<procedure_templates::table>>,
     /// Stack of parent procedures corresponding to the currently visited
     /// procedure templates.
-    parent_procedures: Vec<Procedure>,
+    parent_procedures: Vec<NestedModel<procedures::table>>,
     /// The procedure that was most recently inserted, to be used as the
     /// predecessor for the next procedure to be inserted.
-    predecessor_procedure: Option<Procedure>,
+    predecessor_procedure: Option<NestedModel<procedures::table>>,
     /// Map from a procedure template asset model ID to the corresponding
     /// procedure asset model ID.
     procedure_asset_models: HashMap<Uuid, Uuid>,
@@ -33,7 +34,7 @@ pub(super) struct GPBListener<'listener, C> {
 impl<C> GPBListener<'_, C> {
     pub(super) fn procedure_asset(
         &self,
-        parents: &[&ProcedureTemplate],
+        parents: &[&NestedModel<procedure_templates::table>],
         ptam_id: Uuid,
     ) -> Option<Uuid> {
         let ptam: &ProcedureTemplateAssetModel =
@@ -69,11 +70,11 @@ impl<'listener, C> GPBListener<'listener, C> {
         self.author
     }
 
-    pub(super) fn last_parent_procedure(&self) -> Option<&Procedure> {
+    pub(super) fn last_parent_procedure(&self) -> Option<&NestedModel<procedures::table>> {
         self.parent_procedures.last()
     }
 
-    pub(super) fn predecessor_procedure(&self) -> Option<&Procedure> {
+    pub(super) fn predecessor_procedure(&self) -> Option<&NestedModel<procedures::table>> {
         self.predecessor_procedure.as_ref()
     }
 
@@ -83,7 +84,7 @@ impl<'listener, C> GPBListener<'listener, C> {
 
     pub(super) fn reference_based_on_alias(
         &self,
-        parents: &[&ProcedureTemplate],
+        parents: &'listener [&'listener NestedModel<procedure_templates::table>],
         ptam: &'listener ProcedureTemplateAssetModel,
     ) -> Option<&'listener ProcedureTemplateAssetModel> {
         self.graph.reference_based_on_alias(parents, ptam)
@@ -99,47 +100,50 @@ impl<'listener, C> GPBListener<'listener, C> {
 
     /// Pushes a provided processed procedure template onto the parents
     /// stack.
-    pub(super) fn push_parent(&mut self, procedure: Procedure) {
+    pub(super) fn push_parent(&mut self, procedure: NestedModel<procedures::table>) {
         self.parent_procedures.push(procedure);
     }
 }
 
 impl<'graph, C> PTGListener<'graph> for GPBListener<'graph, C> {
-    type Output = Option<(Vec<&'graph ProcedureTemplate>, &'graph ProcedureTemplate)>;
+    type Output = Option<(
+        Vec<&'graph NestedModel<procedure_templates::table>>,
+        &'graph NestedModel<procedure_templates::table>,
+    )>;
     type FilteredSuccessors<I>
-        = Option<&'graph ProcedureTemplate>
+        = Option<&'graph NestedModel<procedure_templates::table>>
     where
-        I: Iterator<Item = &'graph ProcedureTemplate>;
+        I: Iterator<Item = &'graph NestedModel<procedure_templates::table>>;
     type Error = InternalGuidedProcedureError<'graph>;
 
     fn enter_foreign_procedure_template(
         &mut self,
-        _foreign_procedure_template: &ProcedureTemplate,
+        _foreign_procedure_template: &NestedModel<procedure_templates::table>,
     ) -> Result<Self::Output, Self::Error> {
         Ok(None)
     }
 
     fn continue_task(
         &mut self,
-        _parents: &[&ProcedureTemplate],
-        _predecessors: &[&ProcedureTemplate],
-        _child: &ProcedureTemplate,
+        _parents: &[&NestedModel<procedure_templates::table>],
+        _predecessors: &[&NestedModel<procedure_templates::table>],
+        _child: &NestedModel<procedure_templates::table>,
     ) -> Result<(), Self::Error> {
         Ok(())
     }
 
     fn enter_procedure_template(
         &mut self,
-        parents: &[&'graph ProcedureTemplate],
-        child: &'graph ProcedureTemplate,
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        child: &'graph NestedModel<procedure_templates::table>,
     ) -> Result<Self::Output, Self::Error> {
         Ok(Some((parents.to_vec(), child)))
     }
 
     fn leave_procedure_template(
         &mut self,
-        _parents: &[&ProcedureTemplate],
-        _child: &ProcedureTemplate,
+        _parents: &[&NestedModel<procedure_templates::table>],
+        _child: &NestedModel<procedure_templates::table>,
     ) -> Result<Self::Output, Self::Error> {
         self.predecessor_procedure = self.parent_procedures.pop();
         Ok(None)
@@ -147,8 +151,8 @@ impl<'graph, C> PTGListener<'graph> for GPBListener<'graph, C> {
 
     fn enter_leaf_ptam(
         &mut self,
-        _parents: &[&ProcedureTemplate],
-        _leaf: &ProcedureTemplate,
+        _parents: &[&NestedModel<procedure_templates::table>],
+        _leaf: &NestedModel<procedure_templates::table>,
         _procedure_template_asset_model: &ProcedureTemplateAssetModel,
     ) -> Result<Self::Output, Self::Error> {
         Ok(None)
@@ -159,9 +163,9 @@ impl<'graph, C> PTGListener<'graph> for GPBListener<'graph, C> {
         successors: I,
     ) -> Result<Self::FilteredSuccessors<I>, Self::Error>
     where
-        I: Iterator<Item = &'graph ProcedureTemplate>,
+        I: Iterator<Item = &'graph NestedModel<procedure_templates::table>>,
     {
-        let successors: Vec<&ProcedureTemplate> = successors.collect();
+        let successors: Vec<&NestedModel<procedure_templates::table>> = successors.collect();
 
         Ok(match successors.as_slice() {
             [] => None,

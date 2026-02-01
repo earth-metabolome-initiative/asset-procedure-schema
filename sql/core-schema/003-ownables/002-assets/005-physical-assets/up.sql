@@ -3,4 +3,4 @@ CREATE TABLE physical_assets (
     physical_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id) ON DELETE CASCADE,
     FOREIGN KEY (id, physical_asset_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('physical_assets') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('physical_assets') ON CONFLICT DO NOTHING;

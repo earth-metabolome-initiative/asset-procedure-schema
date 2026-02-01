@@ -48,7 +48,7 @@ impl ::diesel_builders::ValidateColumn<digital_asset_models::mime_type>
                 crate::digital_asset_models::mime_type::NAME,
             ));
         }
-        if mime_type.len() <= 255usize {
+        if mime_type.len() >= 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::digital_asset_models::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::digital_asset_models::mime_type::NAME,

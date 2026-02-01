@@ -1,4 +1,4 @@
-//! Auto-generated crate for the `procedure_template_tables` table.
+//! Auto-generated crate for the `table_names` table.
 #[derive(
     Clone,
     Default,
@@ -17,13 +17,13 @@
 )]
 /// and facilitate DAG traversal.
 # [table_model (error = :: validation_errors :: ValidationError)]
-# [diesel (table_name = procedure_template_tables)]
+# [diesel (table_name = table_names)]
 pub struct ProcedureTemplateTable {
     /// and facilitate DAG traversal.
     id: String,
 }
-impl ::diesel_builders::ValidateColumn<procedure_template_tables::id>
-    for <procedure_template_tables::table as ::diesel_builders::TableExt>::NewValues
+impl ::diesel_builders::ValidateColumn<table_names::id>
+    for <table_names::table as ::diesel_builders::TableExt>::NewValues
 {
     type Error = ::validation_errors::ValidationError;
     #[inline]
@@ -31,8 +31,8 @@ impl ::diesel_builders::ValidateColumn<procedure_template_tables::id>
         use diesel::Column;
         if id.is_empty() {
             return Err(::validation_errors::ValidationError::empty(
-                "procedure_template_tables",
-                crate::procedure_template_tables::id::NAME,
+                "table_names",
+                crate::table_names::id::NAME,
             ));
         }
         Ok(())

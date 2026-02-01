@@ -71,7 +71,6 @@ members = [
   "aps/aps-harvesting_procedures",
   "aps/aps-namespaces",
   "aps/aps-next_procedure_templates",
-  "aps/aps-ownable_tables",
   "aps/aps-ownables",
   "aps/aps-owner_grants",
   "aps/aps-owners",
@@ -193,7 +192,6 @@ aps-harvesting_procedure_templates = { path = "aps/aps-harvesting_procedure_temp
 aps-harvesting_procedures = { path = "aps/aps-harvesting_procedures" }
 aps-namespaces = { path = "aps/aps-namespaces" }
 aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
-aps-ownable_tables = { path = "aps/aps-ownable_tables" }
 aps-ownables = { path = "aps/aps-ownables" }
 aps-owner_grants = { path = "aps/aps-owner_grants" }
 aps-owners = { path = "aps/aps-owners" }
@@ -260,6 +258,7 @@ diesel-builders = { git = "https://github.com/LucaCappelletti94/diesel-builders"
 rosetta-uuid = { version = "0.1.0", git = "https://github.com/earth-metabolome-initiative/rosetta-uuid", branch = "main", features = [
   "diesel",
   "serde",
+  "sqlite",
 ] }
 
 [workspace.lints.rust]

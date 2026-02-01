@@ -31,9 +31,13 @@ CREATE TABLE entities (
     -- Defines the minimum role required to view the entity.
     minimum_role_id SMALLINT NOT NULL DEFAULT 1 REFERENCES roles(id),
     -- Time of creation, using UTC timezone
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (
+        created_at <= NOW()
+    ),
     -- Time of last edit, using UTC timezone
-    edited_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    edited_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (
+        edited_at <= NOW()
+    ),
     -- Consistency check
     CHECK (created_at <= edited_at)
 );

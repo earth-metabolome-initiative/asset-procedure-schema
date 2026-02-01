@@ -122,10 +122,10 @@ pub async fn connect<C: Connection>(
 pub async fn setup_database_with_migrations<C: Connection, P: AsRef<std::path::Path>>(
     database_name: &str,
     port: u16,
-    migrations_dir: P,
-    last_migration: Option<P>,
+    _migrations_dir: P,
+    _last_migration: Option<P>,
 ) -> Result<(ContainerAsync<GenericImage>, C), Box<dyn std::error::Error>> {
-    let (docker, conn) = connect::<C>(database_name, port).await?;
+    let (_docker, _conn) = connect::<C>(database_name, port).await?;
     todo!()
 }
 
@@ -133,10 +133,10 @@ pub async fn setup_database_with_migrations<C: Connection, P: AsRef<std::path::P
 pub async fn setup_database_with_rls_migrations<C: Connection, P: AsRef<std::path::Path>>(
     database_name: &str,
     port: u16,
-    migrations_dir: P,
-    last_migration: Option<P>,
-    user: &Uuid,
+    _migrations_dir: P,
+    _last_migration: Option<P>,
+    _user: &Uuid,
 ) -> Result<(ContainerAsync<GenericImage>, C), Box<dyn std::error::Error>> {
-    let (docker, conn) = connect::<C>(database_name, port).await?;
+    let (_docker, _conn) = connect::<C>(database_name, port).await?;
     todo!()
 }

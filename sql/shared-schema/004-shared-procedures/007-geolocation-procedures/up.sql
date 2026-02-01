@@ -36,7 +36,7 @@ CREATE TABLE geopositioning_procedure_templates (
 		procedure_template_geopositioned_asset_model_id
 	)
 );
-INSERT INTO procedure_template_tables (id) VALUES ('geopositioning_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('geopositioning_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE OR REPLACE FUNCTION geopositioning_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_geopositioned_with_model_id) ON CONFLICT DO NOTHING;
@@ -108,4 +108,4 @@ CREATE TABLE geopositioning_procedures (
 	-- We check that the `procedure_geopositioned_with` is associated to the `geopositioned_with`.
 	FOREIGN KEY (geopositioned_with_id, geopositioned_with_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('geopositioning_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('geopositioning_procedures') ON CONFLICT DO NOTHING;

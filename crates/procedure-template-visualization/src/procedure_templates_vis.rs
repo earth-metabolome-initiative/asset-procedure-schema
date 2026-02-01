@@ -3,6 +3,7 @@
 
 use std::{hash::Hash, rc::Rc};
 
+use aps_asset_models::asset_models;
 use aps_next_procedure_templates::{
     FKNextProcedureTemplatesPredecessorId, FKNextProcedureTemplatesSuccessorId,
     NextProcedureTemplate, next_procedure_templates,
@@ -12,17 +13,16 @@ use aps_parent_procedure_templates::{
 };
 use aps_procedure_template_asset_models::{
     FKProcedureTemplateAssetModelsAssetModelId, FKProcedureTemplateAssetModelsProcedureTemplateId,
-    GetProcedureTemplateAssetModelName, ProcedureTemplateAssetModel,
-    procedure_template_asset_models,
+    GetProcedureTemplateAssetModelName, GetProcedureTemplateAssetModelProcedureTemplateId,
+    ProcedureTemplateAssetModel, procedure_template_asset_models,
 };
-use aps_procedure_templates::{GetProcedureTemplateName, ProcedureTemplate};
+use aps_procedure_templates::{GetProcedureTemplateName, ProcedureTemplate, procedure_templates};
 use aps_reused_procedure_template_asset_models::{
     FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId,
     FKReusedProcedureTemplateAssetModelsProcedureTemplateId, ReusedProcedureTemplateAssetModel,
     reused_procedure_template_asset_models,
 };
-use diesel::Identifiable;
-use diesel_builders::LoadMany;
+use diesel_builders::{GetColumnExt, LoadMany, NestedModel, TableModel, prelude::LoadNestedFirst};
 use mermaid_builder::{
     prelude::{
         ArrowShape, ConfigurationBuilder, DiagramBuilder, Direction, Flowchart, FlowchartBuilder,
@@ -40,11 +40,11 @@ mod procedure_template_class;
 mod ptam_style_classes;
 
 use crate::{
-    MermaidDB, asset_model_icon,
+    MermaidDB,
     procedure_templates_vis::procedure_template_class::{
         procedure_fill_color, procedure_stroke_color,
     },
-    table_icons::procedure_template_icon,
+    table_icons::table_icon,
 };
 
 struct ProcedureTemplateVisualization<'graph> {
@@ -98,8 +98,8 @@ impl<'graph> ProcedureTemplateVisualization<'graph> {
 
     fn get_pt_node(
         &self,
-        parents: &[&ProcedureTemplate],
-        child: &ProcedureTemplate,
+        parents: &[&NestedModel<procedure_templates::table>],
+        child: &NestedModel<procedure_templates::table>,
     ) -> Rc<FlowchartNode> {
         let node_id = procedure_template_hash(parents, child);
         self.builder.get_node_by_id(node_id).unwrap_or_else(|| {
@@ -113,7 +113,7 @@ impl<'graph> ProcedureTemplateVisualization<'graph> {
 
     fn get_ptam_node(
         &self,
-        parents: &[&ProcedureTemplate],
+        parents: &[&NestedModel<procedure_templates::table>],
         ptam: &ProcedureTemplateAssetModel,
     ) -> Rc<FlowchartNode> {
         let node_id = procedure_template_asset_model_hash(parents, ptam);
@@ -160,14 +160,14 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
     type FilteredSuccessors<I>
         = I
     where
-        I: Iterator<Item = &'graph ProcedureTemplate>;
+        I: Iterator<Item = &'graph NestedModel<procedure_templates::table>>;
     type Output = ();
 
     fn enter_foreign_procedure_template(
         &mut self,
-        foreign_procedure_template: &ProcedureTemplate,
+        foreign_procedure_template: &'graph NestedModel<procedure_templates::table>,
     ) -> Result<(), Self::Error> {
-        let procedure_name = procedure_template_icon(foreign_procedure_template).map_or_else(
+        let procedure_name = table_icon(foreign_procedure_template).map_or_else(
             || format!("*{}*", foreign_procedure_template.name()),
             |icon| format!("{} *{}*", icon, foreign_procedure_template.name()),
         );
@@ -209,7 +209,7 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
         successors: I,
     ) -> Result<Self::FilteredSuccessors<I>, Self::Error>
     where
-        I: Iterator<Item = &'graph ProcedureTemplate>,
+        I: Iterator<Item = &'graph NestedModel<procedure_templates::table>>,
     {
         // We always want to visit all successors.
         Ok(successors)
@@ -217,11 +217,11 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
 
     fn enter_procedure_template(
         &mut self,
-        parents: &[&ProcedureTemplate],
-        child: &ProcedureTemplate,
+        parents: &[&NestedModel<procedure_templates::table>],
+        child: &NestedModel<procedure_templates::table>,
     ) -> Result<(), Self::Error> {
         let node_id = procedure_template_hash(parents, child);
-        let procedure_name = procedure_template_icon(child).map_or_else(
+        let procedure_name = table_icon(child).map_or_else(
             || format!("*{}*", child.name()),
             |icon| format!("{} *{}*", icon, child.name()),
         );
@@ -263,9 +263,9 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
 
     fn continue_task(
         &mut self,
-        parents: &[&ProcedureTemplate],
-        predecessors: &[&ProcedureTemplate],
-        child: &ProcedureTemplate,
+        parents: &[&NestedModel<procedure_templates::table>],
+        predecessors: &[&NestedModel<procedure_templates::table>],
+        child: &NestedModel<procedure_templates::table>,
     ) -> Result<(), Self::Error> {
         if let Some(&predecessor) = predecessors.last() {
             let (root_leaf_node_parents, root_leaf_node) =
@@ -294,8 +294,8 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
 
     fn leave_procedure_template(
         &mut self,
-        parents: &[&ProcedureTemplate],
-        child: &ProcedureTemplate,
+        parents: &[&NestedModel<procedure_templates::table>],
+        child: &NestedModel<procedure_templates::table>,
     ) -> Result<(), Self::Error> {
         println!("{}Leaving procedure template: {}", "\t".repeat(parents.len()), child.name());
 
@@ -323,12 +323,12 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
 
     fn enter_leaf_ptam(
         &mut self,
-        parents: &[&ProcedureTemplate],
-        leaf: &ProcedureTemplate,
+        parents: &[&NestedModel<procedure_templates::table>],
+        leaf: &NestedModel<procedure_templates::table>,
         ptam: &ProcedureTemplateAssetModel,
     ) -> Result<(), Self::Error> {
         let asset_model_id = self.graph.asset_model_of(ptam);
-        let label = if let Some(icon) = asset_model_icon(asset_model_id) {
+        let label = if let Some(icon) = table_icon(asset_model_id) {
             format!("{} {}", icon, ptam.name())
         } else {
             ptam.name().to_string()
@@ -338,7 +338,7 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
         let (shape, reference_ptam) = if maybe_foreign_owner.is_some() {
             (FlowchartNodeShape::LRParallelogram, ptam)
         } else {
-            (if ptam.id() == leaf.id() {
+            (if ptam.procedure_template_id() == leaf.get_column_ref::<procedure_templates::id>() {
                 FlowchartNodeShape::Rectangle
             } else {
                 FlowchartNodeShape::Hexagon
@@ -374,7 +374,7 @@ impl<'graph> PTGListener<'graph> for &mut ProcedureTemplateVisualization<'graph>
         // If the procedure template asset model is not owned by the current
         // procedure template, we draw a dashed edge to indicate that it is a
         // reference to another procedure template asset model.
-        if ptam.id() != leaf.id() {
+        if ptam.procedure_template_id() != leaf.get_column_ref::<procedure_templates::id>() {
             if let Some(foreign_owner) = maybe_foreign_owner {
                 // We find the foreign owner procedure template.
                 self.builder.edge(
@@ -419,6 +419,8 @@ where
             + FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId<C>,
     (parent_procedure_templates::parent_id,): LoadMany<C>,
     (next_procedure_templates::parent_id,): LoadMany<C>,
+    (procedure_templates::id,): LoadNestedFirst<procedure_templates::table, C>,
+    (asset_models::id,): LoadNestedFirst<asset_models::table, C>,
     ParentProcedureTemplate: FKParentProcedureTemplatesChildId<C>,
     NextProcedureTemplate:
         FKNextProcedureTemplatesPredecessorId<C> + FKNextProcedureTemplatesSuccessorId<C>,
@@ -429,7 +431,8 @@ where
     type Error = crate::Error;
 
     fn to_mermaid(&self, conn: &mut C) -> Result<Self::Diagram, Self::Error> {
-        let graph = ProcedureTemplateGraph::new(self, conn)?;
+        let nested = self.nested(conn)?;
+        let graph = ProcedureTemplateGraph::new(&nested, conn)?;
         let mut visualization = ProcedureTemplateVisualization::new(&graph)?;
         graph.visit_with(&mut visualization).collect::<Result<(), Self::Error>>()?;
         if visualization.required_procedures.is_subgraph() {

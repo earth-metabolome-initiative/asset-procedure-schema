@@ -3,7 +3,7 @@
 use std::rc::Rc;
 
 use aps_procedure_templates::*;
-use diesel::Identifiable;
+use diesel_builders::{GetColumnExt, NestedModel};
 use geometric_traits::{
     impls::{CSR2D, GenericBiMatrix2D, SquareCSR2D},
     prelude::{GenericGraph, RootNodes, SinkNodes, SortedVec},
@@ -17,7 +17,7 @@ use geometric_traits::{
 pub struct TaskGraph {
     /// The task graph of the procedure template being built.
     graph: GenericGraph<
-        SortedVec<Rc<ProcedureTemplate>>,
+        SortedVec<Rc<NestedModel<procedure_templates::table>>>,
         GenericBiMatrix2D<
             SquareCSR2D<CSR2D<usize, usize, usize>>,
             SquareCSR2D<CSR2D<usize, usize, usize>>,
@@ -32,7 +32,7 @@ pub struct TaskGraph {
 impl TaskGraph {
     #[allow(clippy::type_complexity)]
     pub(super) fn new(
-        nodes: SortedVec<Rc<ProcedureTemplate>>,
+        nodes: SortedVec<Rc<NestedModel<procedure_templates::table>>>,
         edges: GenericBiMatrix2D<
             SquareCSR2D<CSR2D<usize, usize, usize>>,
             SquareCSR2D<CSR2D<usize, usize, usize>>,
@@ -41,7 +41,7 @@ impl TaskGraph {
         assert!(!nodes.is_empty(), "The task graph must have at least one node");
 
         let graph: GenericGraph<
-            SortedVec<Rc<ProcedureTemplate>>,
+            SortedVec<Rc<NestedModel<procedure_templates::table>>>,
             GenericBiMatrix2D<
                 SquareCSR2D<CSR2D<usize, usize, usize>>,
                 SquareCSR2D<CSR2D<usize, usize, usize>>,
@@ -63,12 +63,12 @@ impl TaskGraph {
     }
 
     /// Returns the root node of the task graph.
-    pub fn root_node(&self) -> &ProcedureTemplate {
+    pub fn root_node(&self) -> &NestedModel<procedure_templates::table> {
         &self.graph.nodes_vocabulary()[self.root_node_id]
     }
 
     /// Returns the sink nodes of the task graph.
-    pub fn sink_nodes(&self) -> impl Iterator<Item = &ProcedureTemplate> {
+    pub fn sink_nodes(&self) -> impl Iterator<Item = &NestedModel<procedure_templates::table>> {
         self.sink_node_ids.iter().map(|&id| self.graph.nodes_vocabulary()[id].as_ref())
     }
 
@@ -83,11 +83,17 @@ impl TaskGraph {
     ///
     /// * Panics if the provided procedure template is not part of the task
     ///   graph.
-    pub fn has_successors(&self, procedure_template: &ProcedureTemplate) -> bool {
+    pub fn has_successors(
+        &self,
+        procedure_template: &NestedModel<procedure_templates::table>,
+    ) -> bool {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
+            .binary_search_by(|pt| {
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template.get_column_ref::<procedure_templates::id>())
+            })
             .expect("Procedure template not part of task graph");
         self.graph.has_successors(procedure_template_id)
     }
@@ -106,12 +112,15 @@ impl TaskGraph {
     ///   graph.
     pub fn successors(
         &self,
-        procedure_template: &ProcedureTemplate,
-    ) -> impl Iterator<Item = &ProcedureTemplate> {
+        procedure_template: &NestedModel<procedure_templates::table>,
+    ) -> impl Iterator<Item = &NestedModel<procedure_templates::table>> {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
+            .binary_search_by(|pt| {
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template.get_column_ref::<procedure_templates::id>())
+            })
             .expect("Procedure template not part of task graph");
         self.graph
             .successors(procedure_template_id)
@@ -130,11 +139,17 @@ impl TaskGraph {
     ///
     /// * Panics if the provided procedure template is not part of the task
     ///   graph.
-    pub fn has_predecessors(&self, procedure_template: &ProcedureTemplate) -> bool {
+    pub fn has_predecessors(
+        &self,
+        procedure_template: &NestedModel<procedure_templates::table>,
+    ) -> bool {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
+            .binary_search_by(|pt| {
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template.get_column_ref::<procedure_templates::id>())
+            })
             .expect("Procedure template not part of task graph");
         self.graph.has_predecessors(procedure_template_id)
     }
@@ -153,12 +168,15 @@ impl TaskGraph {
     ///   graph.
     pub fn predecessors(
         &self,
-        procedure_template: &ProcedureTemplate,
-    ) -> impl Iterator<Item = &ProcedureTemplate> {
+        procedure_template: &NestedModel<procedure_templates::table>,
+    ) -> impl Iterator<Item = &NestedModel<procedure_templates::table>> {
         let procedure_template_id = self
             .graph
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
+            .binary_search_by(|pt| {
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template.get_column_ref::<procedure_templates::id>())
+            })
             .expect("Procedure template not part of task graph");
         self.graph
             .predecessors(procedure_template_id)

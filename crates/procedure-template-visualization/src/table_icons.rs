@@ -1,10 +1,12 @@
 //! Submodule defining font-awesom icons for tables.
 
-use aps_asset_models::{AssetModel, GetAssetModelAssetModelTableId};
-use aps_procedure_templates::{GetProcedureTemplateProcedureTemplateTableId, ProcedureTemplate};
+use aps_entities::GetEntityTableNameId;
 
-pub(crate) fn asset_model_icon(asset_model: &AssetModel) -> Option<&'static str> {
-    Some(match asset_model.asset_model_table_id().as_str() {
+pub(crate) fn table_icon<M>(model: &M) -> Option<&'static str>
+where
+    M: GetEntityTableNameId,
+{
+    Some(match model.table_name_id().as_str() {
         "digital_asset_models" => "fa:fa-file",
         "organism_models" => "fa:fa-bacterium",
         "phone_models" => "fa:fa-mobile-screen-button",
@@ -16,14 +18,6 @@ pub(crate) fn asset_model_icon(asset_model: &AssetModel) -> Option<&'static str>
         "freeze_dryer_models" => "fa:fa-icicles",
         "weighing_device_models" => "fa:fa-scale-unbalanced",
         "pipette_models" => "fa:fa-eye-dropper",
-        _ => return None,
-    })
-}
-
-pub(crate) fn procedure_template_icon(
-    procedure_template: &ProcedureTemplate,
-) -> Option<&'static str> {
-    Some(match procedure_template.procedure_template_table_id().as_str() {
         "disposal_procedure_templates" => "fa:fa-trash",
         "photograph_procedure_templates" => "fa:fa-camera",
         "packaging_procedure_templates" => "fa:fa-gifts",

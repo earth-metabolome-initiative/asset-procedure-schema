@@ -66,7 +66,6 @@ aps-harvesting_procedure_templates.workspace = true
 aps-harvesting_procedures.workspace = true
 aps-namespaces.workspace = true
 aps-next_procedure_templates.workspace = true
-aps-ownable_tables.workspace = true
 aps-ownables.workspace = true
 aps-owner_grants.workspace = true
 aps-owners.workspace = true

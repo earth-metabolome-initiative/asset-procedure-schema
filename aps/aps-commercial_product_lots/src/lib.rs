@@ -61,7 +61,7 @@ impl ::diesel_builders::ValidateColumn<commercial_product_lots::lot>
                 crate::commercial_product_lots::lot::NAME,
             ));
         }
-        if lot.len() <= 255usize {
+        if lot.len() >= 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::commercial_product_lots::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::commercial_product_lots::lot::NAME,

@@ -17,14 +17,20 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `asset_compatibility_rules` table.
+#[table_model(ancestors(aps_entities::entities, aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
-# [diesel (belongs_to (aps_users :: User , foreign_key = creator_id))]
-#[diesel(primary_key(left_asset_model_id, right_asset_model_id))]
+# [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
+# [table_model (foreign_key ((id ,) , (:: aps_ownables :: ownables :: id)))]
 # [table_model (foreign_key ((left_asset_model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
 # [table_model (foreign_key ((right_asset_model_id ,) , (:: aps_asset_models :: asset_models :: id)))]
-# [table_model (foreign_key ((creator_id ,) , (:: aps_users :: users :: id)))]
+#[table_model(default(aps_entities::entities::table_name_id, "asset_compatibility_rules"))]
 # [diesel (table_name = asset_compatibility_rules)]
 pub struct AssetCompatibilityRule {
+    /// Field representing the `id` column in table `asset_compatibility_rules`.
+    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
+    #[infallible]
+    # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
+    id: ::rosetta_uuid::Uuid,
     /// Field representing the `left_asset_model_id` column in table
     /// `asset_compatibility_rules`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
@@ -33,18 +39,11 @@ pub struct AssetCompatibilityRule {
     /// `asset_compatibility_rules`.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     right_asset_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `creator_id` column in table
-    /// `asset_compatibility_rules`.
-    #[infallible]
-    # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
-    creator_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `created_at` column in table
-    /// `asset_compatibility_rules`.
-    # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
-    #[infallible]
-    # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
-    created_at: ::rosetta_timestamp::TimestampUTC,
 }
+::diesel_builders::prelude::unique_index!(
+    asset_compatibility_rules::left_asset_model_id,
+    asset_compatibility_rules::right_asset_model_id
+);
 impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::left_asset_model_id>
     for <asset_compatibility_rules::table as ::diesel_builders::TableExt>::NewValues
 {
@@ -85,5 +84,19 @@ impl ::diesel_builders::ValidateColumn<asset_compatibility_rules::right_asset_mo
             }
         }
         Ok(())
+    }
+}
+impl ::diesel_builders::GetColumn<aps_entities::entities::id> for AssetCompatibilityRule {
+    fn get_column_ref(
+        &self,
+    ) -> &<asset_compatibility_rules::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for AssetCompatibilityRule {
+    fn get_column_ref(
+        &self,
+    ) -> &<asset_compatibility_rules::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
     }
 }

@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 
 use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::*;
+use diesel_builders::NestedModel;
 
 use crate::{
     PTGListener, ProcedureTemplateGraph,
@@ -28,20 +29,23 @@ pub struct PTGVisitor<'graph, G, L> {
     /// The listener to apply at each node.
     listener: L,
     /// Iterator over foreign procedure templates.
-    foreign_procedures_iter: core::slice::Iter<'graph, ProcedureTemplate>,
+    foreign_procedures_iter: core::slice::Iter<'graph, NestedModel<procedure_templates::table>>,
     /// Procedure template asset models employed by the current node.
     ptam_iter: Option<Vec<&'graph ProcedureTemplateAssetModel>>,
     /// Parents stack
-    parents: Vec<&'graph ProcedureTemplate>,
+    parents: Vec<&'graph NestedModel<procedure_templates::table>>,
     /// The current node being visited.
-    current_node: Option<&'graph ProcedureTemplate>,
+    current_node: Option<&'graph NestedModel<procedure_templates::table>>,
     /// The state of the current node being visited.
     current_node_state: CurrentNodeVisitState,
     /// Stores whether
     /// Stack of nodes to visit in the current task graph.
     nodes_to_visit: Vec<(
         &'graph TaskGraph,
-        VecDeque<(&'graph ProcedureTemplate, Vec<&'graph ProcedureTemplate>)>,
+        VecDeque<(
+            &'graph NestedModel<procedure_templates::table>,
+            Vec<&'graph NestedModel<procedure_templates::table>>,
+        )>,
     )>,
 }
 

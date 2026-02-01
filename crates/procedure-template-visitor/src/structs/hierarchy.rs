@@ -5,8 +5,7 @@ use std::rc::Rc;
 
 use aps_parent_procedure_templates::*;
 use aps_procedure_templates::*;
-use diesel::Identifiable;
-use diesel_builders::LoadMany;
+use diesel_builders::{GetColumnExt, LoadMany, NestedModel, prelude::LoadNestedFirst};
 use geometric_traits::{
     impls::{CSR2D, GenericBiMatrix2D, SquareCSR2D},
     prelude::{GenericEdgesBuilder, GenericGraph, SortedVec},
@@ -25,22 +24,23 @@ pub struct Hierarchy {
     /// The hierarchy of procedure templates, rooted at the procedure template
     /// being built, and including all its sub-procedure templates.
     hierarchy: GenericGraph<
-        Rc<SortedVec<Rc<ProcedureTemplate>>>,
+        Rc<SortedVec<Rc<NestedModel<procedure_templates::table>>>>,
         GenericBiMatrix2D<
             SquareCSR2D<CSR2D<usize, usize, usize>>,
             SquareCSR2D<CSR2D<usize, usize, usize>>,
         >,
     >,
     // The root procedure template of the hierarchy.
-    root_procedure_template: Rc<ProcedureTemplate>,
+    root_procedure_template: Rc<NestedModel<procedure_templates::table>>,
 }
 
 impl Hierarchy {
     pub(crate) fn new<C>(
-        procedure_template: &ProcedureTemplate,
+        procedure_template: &NestedModel<procedure_templates::table>,
         conn: &mut C,
     ) -> Result<Self, diesel::result::Error>
     where
+        (procedure_templates::id,): LoadNestedFirst<procedure_templates::table, C>,
         (parent_procedure_templates::parent_id,): LoadMany<C>,
         ParentProcedureTemplate: FKParentProcedureTemplatesChildId<C>,
     {
@@ -89,7 +89,7 @@ impl AsRef<Hierarchy> for Hierarchy {
 /// A trait for types that can provide access to a `Hierarchy`.
 pub trait HierarchyLike: AsRef<Hierarchy> {
     /// Returns a reference to the root procedure template of the hierarchy.
-    fn root_procedure_template(&self) -> &ProcedureTemplate {
+    fn root_procedure_template(&self) -> &NestedModel<procedure_templates::table> {
         self.as_ref().root_procedure_template.as_ref()
     }
 
@@ -111,12 +111,15 @@ pub trait HierarchyLike: AsRef<Hierarchy> {
     ///
     /// * Panics if the provided procedure template is not part of the
     ///   hierarchy.
-    fn is_leaf(&self, procedure_template: &ProcedureTemplate) -> bool {
+    fn is_leaf(&self, procedure_template: &NestedModel<procedure_templates::table>) -> bool {
         let procedure_template_id = self
             .as_ref()
             .hierarchy
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
+            .binary_search_by(|pt| {
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template.get_column_ref::<procedure_templates::id>())
+            })
             .expect("Procedure template not part of hierarchy graph");
 
         !self.as_ref().hierarchy.has_successors(procedure_template_id)
@@ -133,11 +136,17 @@ pub trait HierarchyLike: AsRef<Hierarchy> {
     ///
     /// * Panics if the provided procedure template is not part of the
     ///   hierarchy.
-    fn procedure_node_id(&self, procedure_template: &ProcedureTemplate) -> usize {
+    fn procedure_node_id(
+        &self,
+        procedure_template: &NestedModel<procedure_templates::table>,
+    ) -> usize {
         self.as_ref()
             .hierarchy
             .nodes_vocabulary()
-            .binary_search_by(|pt| pt.id().cmp(procedure_template.id()))
+            .binary_search_by(|pt| {
+                pt.get_column::<procedure_templates::id>()
+                    .cmp(procedure_template.get_column_ref::<procedure_templates::id>())
+            })
             .expect("Procedure template not part of hierarchy graph")
     }
 }

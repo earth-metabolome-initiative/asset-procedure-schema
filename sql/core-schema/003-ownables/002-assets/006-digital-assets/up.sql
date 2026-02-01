@@ -3,4 +3,4 @@ CREATE TABLE digital_assets (
     digital_asset_model_id UUID NOT NULL REFERENCES digital_asset_models(id) ON DELETE CASCADE,
     FOREIGN KEY (id, digital_asset_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('digital_assets') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('digital_assets') ON CONFLICT DO NOTHING;

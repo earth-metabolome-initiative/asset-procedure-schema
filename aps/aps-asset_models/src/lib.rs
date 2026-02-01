@@ -79,7 +79,7 @@ impl ::diesel_builders::ValidateColumn<asset_models::name>
                 crate::asset_models::name::NAME,
             ));
         }
-        if name.len() <= 255usize {
+        if name.len() >= 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::asset_models::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::asset_models::name::NAME,
@@ -120,7 +120,7 @@ impl ::diesel_builders::ValidateColumn<asset_models::description>
                 crate::asset_models::description::NAME,
             ));
         }
-        if description.len() < 8192usize {
+        if description.len() > 8192usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::asset_models::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::asset_models::description::NAME,

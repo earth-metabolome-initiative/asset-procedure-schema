@@ -39,7 +39,7 @@ CREATE TABLE harvesting_procedure_templates (
 		procedure_template_sample_model_id
 	)
 );
-INSERT INTO procedure_template_tables (id) VALUES ('harvesting_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('harvesting_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE OR REPLACE FUNCTION harvesting_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_sample_source_model_id) ON CONFLICT DO NOTHING;
@@ -106,4 +106,4 @@ CREATE TABLE harvesting_procedures (
 		procedure_template_sample_model_id
 	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('harvesting_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('harvesting_procedures') ON CONFLICT DO NOTHING;

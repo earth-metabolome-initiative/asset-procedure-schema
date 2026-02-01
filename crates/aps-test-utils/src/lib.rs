@@ -1,8 +1,9 @@
 //! Test utilities for APS crates.
 
 use aps_asset_models::*;
-use aps_container_models::{ContainerModel, container_models};
-use aps_physical_asset_models::{PhysicalAssetModel, physical_asset_models};
+use aps_container_models::container_models;
+use aps_ownables::*;
+use aps_physical_asset_models::physical_asset_models;
 use aps_procedure_templates::*;
 use aps_users::*;
 use diesel::{Connection, SqliteConnection, connection::SimpleConnection};
@@ -63,7 +64,7 @@ pub fn aps_conn() -> SqliteConnection {
         let sql = translated_migration.to_string();
         connection
             .batch_execute(&sql)
-            .unwrap_or_else(|_| panic!("Failed to apply translated migration:\n{}", sql));
+            .unwrap_or_else(|err| panic!("Failed to apply translated migration:\n{sql} - {err}"));
     }
 
     connection
@@ -115,15 +116,19 @@ where
 /// let test_user = user(&mut conn);
 /// let _test_asset_model = asset_model("Test Model", &test_user, &mut conn);
 /// ```
-pub fn asset_model<C>(name: &str, user: &aps_users::User, conn: &mut C) -> AssetModel
+pub fn asset_model<C>(
+    name: &str,
+    user: &aps_users::User,
+    conn: &mut C,
+) -> NestedModel<asset_models::table>
 where
     TableBuilder<users::table>: Insert<C>,
     TableBuilder<asset_models::table>: Insert<C>,
-    (asset_models::name,): LoadFirst<C>,
+    (asset_models::name,): LoadNestedFirst<asset_models::table, C>,
 {
     // We try to load an existing asset model with the same name to avoid duplicates
     // in tests that create multiple asset models with the same name.
-    if let Ok(existing) = <(asset_models::name,)>::load_first((name,), conn) {
+    if let Ok(existing) = <(asset_models::name,)>::load_nested_first((name,), conn) {
         return existing;
     }
 
@@ -134,7 +139,7 @@ where
         .expect("Failed to set asset model description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
-        .insert(conn)
+        .insert_nested(conn)
         .expect("Failed to create test asset model")
 }
 
@@ -164,7 +169,7 @@ pub fn physical_asset_model<C>(
     name: &str,
     user: &aps_users::User,
     conn: &mut C,
-) -> (AssetModel, (PhysicalAssetModel,))
+) -> NestedModel<physical_asset_models::table>
 where
     TableBuilder<aps_physical_asset_models::physical_asset_models::table>: Insert<C>,
     (asset_models::name,): LoadNestedFirst<physical_asset_models::table, C>,
@@ -209,7 +214,7 @@ pub fn container_model<C>(
     name: &str,
     user: &aps_users::User,
     conn: &mut C,
-) -> (AssetModel, (PhysicalAssetModel, (ContainerModel,)))
+) -> NestedModel<container_models::table>
 where
     TableBuilder<container_models::table>: Insert<C>,
     (asset_models::name,): LoadNestedFirst<container_models::table, C>,
@@ -250,13 +255,16 @@ where
 /// let test_user = user(&mut conn);
 /// let _test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
 /// ```
-pub fn procedure_template<C>(name: &str, user: &aps_users::User, conn: &mut C) -> ProcedureTemplate
+pub fn procedure_template<C>(
+    name: &str,
+    user: &aps_users::User,
+    conn: &mut C,
+) -> NestedModel<procedure_templates::table>
 where
-    TableBuilder<users::table>: Insert<C>,
     TableBuilder<procedure_templates::table>: Insert<C>,
-    (procedure_templates::name,): LoadFirst<C>,
+    (procedure_templates::name,): LoadNestedFirst<procedure_templates::table, C>,
 {
-    if let Ok(existing) = <(procedure_templates::name,)>::load_first((name,), conn) {
+    if let Ok(existing) = <(procedure_templates::name,)>::load_nested_first((name,), conn) {
         return existing;
     }
 
@@ -267,7 +275,7 @@ where
         .expect("Failed to set procedure template description")
         .creator_id(user.get_column::<users::id>())
         .editor_id(user.get_column::<users::id>())
-        .insert(conn)
+        .insert_nested(conn)
         .expect("Failed to create test procedure template")
 }
 
@@ -300,32 +308,37 @@ where
 pub fn pizza_procedure_template(
     user: &aps_users::User,
     conn: &mut SqliteConnection,
-) -> ProcedureTemplate {
+) -> NestedModel<procedure_templates::table> {
     use procedure_traits::ProcedureTemplateNode;
 
     // First, we create the parent procedure template for making a pizza.
-    let make_pizza = procedure_template("Make a Pizza", user, conn);
+    let make_pizza: NestedModel<procedure_templates::table> =
+        procedure_template("Make a Pizza", user, conn);
 
     // We create the asset models involved in the procedure template.
-    let dough_model = asset_model("Pizza Dough", user, conn);
-    let toppings_model = asset_model("Pizza Toppings", user, conn);
-    let pizza_model = asset_model("Pizza", user, conn);
-    let oven_model = asset_model("Oven", user, conn);
+    let dough_model: NestedModel<asset_models::table> = asset_model("Pizza Dough", user, conn);
+    let toppings_model: NestedModel<asset_models::table> =
+        asset_model("Pizza Toppings", user, conn);
+    let pizza_model: NestedModel<asset_models::table> = asset_model("Pizza", user, conn);
+    let oven_model: NestedModel<asset_models::table> = asset_model("Oven", user, conn);
 
     // We create each step.
 
     // First step: Prepare the dough.
-    let prepare_dough = procedure_template("Prepare Dough", user, conn);
+    let prepare_dough: NestedModel<procedure_templates::table> =
+        procedure_template("Prepare Dough", user, conn);
     let [dough_ptam] = prepare_dough.requires_n([&dough_model], conn).unwrap();
 
     // Second step: Add toppings.
-    let add_toppings = procedure_template("Add Toppings", user, conn);
+    let add_toppings: NestedModel<procedure_templates::table> =
+        procedure_template("Add Toppings", user, conn);
     let [_toppings_model_ptam, pizza_model_ptam] =
         add_toppings.requires_n([&toppings_model, &pizza_model], conn).unwrap();
     add_toppings.reuses([dough_ptam], conn).unwrap();
 
     // Bake the pizza.
-    let bake_pizza = procedure_template("Bake Pizza", user, conn);
+    let bake_pizza: NestedModel<procedure_templates::table> =
+        procedure_template("Bake Pizza", user, conn);
     let [_oven_model_ptam] = bake_pizza.requires_n([&oven_model], conn).unwrap();
     bake_pizza.reuses([pizza_model_ptam], conn).unwrap();
 
@@ -367,32 +380,37 @@ pub fn pizza_procedure_template(
 pub fn pizza_four_season_procedure_template(
     user: &aps_users::User,
     conn: &mut SqliteConnection,
-) -> ProcedureTemplate {
+) -> NestedModel<procedure_templates::table> {
     use procedure_traits::ProcedureTemplateNode;
 
     // First, we create the parent procedure template for making a pizza.
     let make_pizza = procedure_template("Make a Four Seasons Pizza", user, conn);
 
     // We create the asset models involved in the procedure template.
-    let dough_model = asset_model("Pizza Dough", user, conn);
-    let mozzarella_model = asset_model("Mozzarella Cheese", user, conn);
-    let mushrooms_model = asset_model("Mushrooms", user, conn);
-    let artichokes_model = asset_model("Artichokes", user, conn);
-    let ham_model = asset_model("Ham", user, conn);
-    let tofu_model = asset_model("Tofu", user, conn);
-    let olives_model = asset_model("Olives", user, conn);
-    let veg_pizza_model = asset_model("Vegetarian Pizza", user, conn);
-    let omni_pizza_model = asset_model("Omnivore Pizza", user, conn);
-    let oven_model = asset_model("Oven", user, conn);
+    let dough_model: NestedModel<asset_models::table> = asset_model("Pizza Dough", user, conn);
+    let mozzarella_model: NestedModel<asset_models::table> =
+        asset_model("Mozzarella Cheese", user, conn);
+    let mushrooms_model: NestedModel<asset_models::table> = asset_model("Mushrooms", user, conn);
+    let artichokes_model: NestedModel<asset_models::table> = asset_model("Artichokes", user, conn);
+    let ham_model: NestedModel<asset_models::table> = asset_model("Ham", user, conn);
+    let tofu_model: NestedModel<asset_models::table> = asset_model("Tofu", user, conn);
+    let olives_model: NestedModel<asset_models::table> = asset_model("Olives", user, conn);
+    let veg_pizza_model: NestedModel<asset_models::table> =
+        asset_model("Vegetarian Pizza", user, conn);
+    let omni_pizza_model: NestedModel<asset_models::table> =
+        asset_model("Omnivore Pizza", user, conn);
+    let oven_model: NestedModel<asset_models::table> = asset_model("Oven", user, conn);
 
     // We create each step.
 
     // Step zero: Heat the oven.
-    let heat_oven = procedure_template("Heat Oven", user, conn);
+    let heat_oven: NestedModel<procedure_templates::table> =
+        procedure_template("Heat Oven", user, conn);
     let [oven_model_ptam] = heat_oven.requires_n([&oven_model], conn).unwrap();
 
     // Step half: Prepare the ingredients and cut them as needed.
-    let prepare_ingredients = procedure_template("Prepare Ingredients", user, conn);
+    let prepare_ingredients: NestedModel<procedure_templates::table> =
+        procedure_template("Prepare Ingredients", user, conn);
     let [
         mozzarella_model_ptam,
         mushrooms_model_ptam,
@@ -415,11 +433,13 @@ pub fn pizza_four_season_procedure_template(
         .unwrap();
 
     // First step: Prepare the dough.
-    let prepare_dough = procedure_template("Prepare Dough", user, conn);
+    let prepare_dough: NestedModel<procedure_templates::table> =
+        procedure_template("Prepare Dough", user, conn);
     let [dough_ptam] = prepare_dough.requires_n([&dough_model], conn).unwrap();
 
     // Second step, option 1: Add vegetarian toppings.
-    let add_vegetarian_toppings = procedure_template("Vegetarian Toppings", user, conn);
+    let add_vegetarian_toppings: NestedModel<procedure_templates::table> =
+        procedure_template("Vegetarian Toppings", user, conn);
     let [veg_pizza_model_ptam] =
         add_vegetarian_toppings.requires_n([&veg_pizza_model], conn).unwrap();
     add_vegetarian_toppings
@@ -436,7 +456,8 @@ pub fn pizza_four_season_procedure_template(
         )
         .unwrap();
     // Second step, option 2: Add omnivore toppings.
-    let add_omnivore_toppings = procedure_template("Omnivore Toppings", user, conn);
+    let add_omnivore_toppings: NestedModel<procedure_templates::table> =
+        procedure_template("Omnivore Toppings", user, conn);
     let [omni_pizza_model_ptam] =
         add_omnivore_toppings.requires_n([&omni_pizza_model], conn).unwrap();
     add_omnivore_toppings
@@ -453,9 +474,11 @@ pub fn pizza_four_season_procedure_template(
         .unwrap();
 
     // Bake the pizza.
-    let bake_veg_pizza = procedure_template("Bake Vegetarian Pizza", user, conn);
+    let bake_veg_pizza: NestedModel<procedure_templates::table> =
+        procedure_template("Bake Vegetarian Pizza", user, conn);
     bake_veg_pizza.reuses([&oven_model_ptam, &veg_pizza_model_ptam], conn).unwrap();
-    let bake_omni_pizza = procedure_template("Bake Omnivore Pizza", user, conn);
+    let bake_omni_pizza: NestedModel<procedure_templates::table> =
+        procedure_template("Bake Omnivore Pizza", user, conn);
     bake_omni_pizza.reuses([&oven_model_ptam, &omni_pizza_model_ptam], conn).unwrap();
 
     // Next, we create the individual steps, and we use the traits defined in

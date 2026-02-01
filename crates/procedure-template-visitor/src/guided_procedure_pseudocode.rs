@@ -4,6 +4,7 @@
 mod error;
 mod iterator;
 mod listener;
+use aps_entities::GetEntityTableNameId;
 use aps_procedure_templates::*;
 use listener::GPPListener;
 use quote::{format_ident, quote};
@@ -94,7 +95,7 @@ impl<'graph> GuidedProcedurePseudocode<'graph> {
             let procedure_name = procedure.name();
             let msg = format!("Implement the logic for \"{procedure_name}\"");
 
-            let procedure_id_str = procedure.procedure_template_table_id();
+            let procedure_id_str = procedure.table_name_id();
             let procedure_type: syn::Type = syn::parse_str(procedure_id_str)
                 .unwrap_or_else(|_| panic!("Failed to parse procedure type: {}", procedure_id_str));
 
@@ -143,6 +144,8 @@ impl<'graph> GuidedProcedurePseudocode<'graph> {
 
 #[cfg(test)]
 mod tests {
+    use aps_procedure_templates::procedure_templates;
+    use diesel_builders::NestedModel;
 
     #[test]
     /// Tests that an error is returned when trying to create a
@@ -155,7 +158,8 @@ mod tests {
 
         let mut conn = aps_conn();
         let author = user(&mut conn);
-        let procedure_template = pizza_four_season_procedure_template(&author, &mut conn);
+        let procedure_template: NestedModel<procedure_templates::table> =
+            pizza_four_season_procedure_template(&author, &mut conn);
         let graph = ProcedureTemplateGraph::new(&procedure_template, &mut conn)
             .expect("Failed to create ProcedureTemplateGraph");
         let guided_pseudocode_result = GuidedProcedurePseudocode::new(&graph, false);

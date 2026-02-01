@@ -1,32 +1,32 @@
 # Time Report for APS Generation
 
 The total time spent on all tasks was now.
-The slowest task was `SQL Workspace Generation` which took 2 seconds, 573 ms, 824 µs and 387 ns (56.43% of all time).
+The slowest task was `Clippy Fixes` which took 3 seconds, 231 ms, 142 µs and 782 ns (48.49% of all time).
 
 | name                               | time                                 | percentage |
 |------------------------------------|--------------------------------------|------------|
-| Database Introspection             | 118 ms, 844 µs and 561 ns            | 2.61%      |
-| Schema Validation                  | 18 µs and 889 ns                     | 0.00%      |
-| SQL Workspace Generation           | 2 seconds, 573 ms, 824 µs and 387 ns | 56.43%     |
-| TOML Formatting                    | 148 ms, 824 µs and 123 ns            | 3.26%      |
-| Code Formatting (1)                | 305 ms, 604 µs and 778 ns            | 6.70%      |
-| Clippy Fixes                       | 1 second, 113 ms, 85 µs and 23 ns    | 24.40%     |
-| Code Formatting (2)                | 260 ms, 507 µs and 770 ns            | 5.71%      |
-| Workspace Dependency Visualization | 21 ms, 98 µs and 590 ns              | 0.46%      |
-| DAG Structure Visualization        | 19 ms, 495 µs and 862 ns             | 0.43%      |
+| Database Introspection             | 267 ms, 93 µs and 285 ns             | 4.01%      |
+| Schema Validation                  | 99 ms, 175 µs and 845 ns             | 1.49%      |
+| SQL Workspace Generation           | 2 seconds, 89 ms, 56 µs and 713 ns   | 31.35%     |
+| TOML Formatting                    | 382 ms, 824 µs and 580 ns            | 5.75%      |
+| Code Formatting (1)                | 328 ms, 187 µs and 852 ns            | 4.93%      |
+| Clippy Fixes                       | 3 seconds, 231 ms, 142 µs and 782 ns | 48.49%     |
+| Code Formatting (2)                | 241 ms, 104 µs and 261 ns            | 3.62%      |
+| Workspace Dependency Visualization | 12 ms, 962 µs and 589 ns             | 0.19%      |
+| DAG Structure Visualization        | 11 ms, 847 µs and 882 ns             | 0.18%      |
 
 ## Time Report for SQL Workspace Generation
 
 The total time spent on all tasks was now.
-The slowest task was `writing_crate_lib` which took 2 seconds, 60 ms, 393 µs and 613 ns (80.05% of all time).
+The slowest task was `writing_crate_lib` which took 1 second, 637 ms, 882 µs and 137 ns (78.40% of all time).
 
 | name                                     | time                                | percentage |
 |------------------------------------------|-------------------------------------|------------|
-| writing_crate_toml                       | 467 ms, 850 µs and 794 ns           | 18.18%     |
-| writing_crate_lib                        | 2 seconds, 60 ms, 393 µs and 613 ns | 80.05%     |
-| writing_sink_crate_toml                  | 843 µs and 539 ns                   | 0.03%      |
-| writing_sink_crate_lib                   | 11 ms, 687 µs and 55 ns             | 0.45%      |
-| writing_sink_crate_toml_aps-dag-entities | 897 µs and 882 ns                   | 0.03%      |
-| writing_sink_crate_lib_aps-dag-entities  | 11 ms, 73 µs and 465 ns             | 0.43%      |
-| workspace_toml                           | 20 ms, 924 µs and 737 ns            | 0.81%      |
-| workspace_rustfmt                        | 153 µs and 302 ns                   | 0.01%      |
+| writing_crate_toml                       | 412 ms, 417 µs and 785 ns           | 19.74%     |
+| writing_crate_lib                        | 1 second, 637 ms, 882 µs and 137 ns | 78.40%     |
+| writing_sink_crate_toml                  | 836 µs and 377 ns                   | 0.04%      |
+| writing_sink_crate_lib                   | 11 ms, 357 µs and 699 ns            | 0.54%      |
+| writing_sink_crate_toml_aps-dag-entities | 1 ms, 2 µs and 899 ns               | 0.05%      |
+| writing_sink_crate_lib_aps-dag-entities  | 11 ms, 147 µs and 441 ns            | 0.53%      |
+| workspace_toml                           | 14 ms, 287 µs and 886 ns            | 0.68%      |
+| workspace_rustfmt                        | 124 µs and 489 ns                   | 0.01%      |

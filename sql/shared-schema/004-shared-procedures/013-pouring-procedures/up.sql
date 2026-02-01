@@ -61,7 +61,7 @@ CREATE TABLE pouring_procedure_templates (
 		procedure_template_poured_into_model_id
 	)
 );
-INSERT INTO procedure_template_tables (id) VALUES ('pouring_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('pouring_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE OR REPLACE FUNCTION pouring_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_measured_with_model_id) ON CONFLICT DO NOTHING;
@@ -155,4 +155,4 @@ CREATE TABLE pouring_procedures (
 	FOREIGN KEY (procedure_measured_with_id, measured_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
 	FOREIGN KEY (measured_with_id, measured_with_model_id) REFERENCES assets(id, model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('pouring_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('pouring_procedures') ON CONFLICT DO NOTHING;

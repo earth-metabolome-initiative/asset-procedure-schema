@@ -35,7 +35,7 @@ impl ::diesel_builders::ValidateColumn<table_names::id>
                 crate::table_names::id::NAME,
             ));
         }
-        if id.len() < 255usize {
+        if id.len() > 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::table_names::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::table_names::id::NAME,

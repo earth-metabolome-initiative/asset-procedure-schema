@@ -52,7 +52,7 @@ impl ::diesel_builders::ValidateColumn<teams::name>
                 crate::teams::name::NAME,
             ));
         }
-        if name.len() <= 255usize {
+        if name.len() >= 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::teams::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::teams::name::NAME,
@@ -92,7 +92,7 @@ impl ::diesel_builders::ValidateColumn<teams::description>
                 crate::teams::description::NAME,
             ));
         }
-        if description.len() < 8192usize {
+        if description.len() > 8192usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::teams::table as ::diesel_builders::TableExt>::TABLE_NAME,
                 crate::teams::description::NAME,

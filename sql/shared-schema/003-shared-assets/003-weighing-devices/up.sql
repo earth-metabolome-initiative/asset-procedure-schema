@@ -1,7 +1,7 @@
 CREATE TABLE weighing_device_models (
 	id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE
 );
-INSERT INTO ownable_tables (id) VALUES ('weighing_device_models') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('weighing_device_models') ON CONFLICT DO NOTHING;
 
 CREATE TABLE weighing_devices (
 	id UUID PRIMARY KEY REFERENCES physical_assets (id) ON DELETE CASCADE,
@@ -11,4 +11,4 @@ CREATE TABLE weighing_devices (
 	-- sure that the asset is a weighing device without the possibility of a mistake.
 	FOREIGN KEY (id, weighing_device_model_id) REFERENCES assets (id, model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('weighing_devices') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('weighing_devices') ON CONFLICT DO NOTHING;

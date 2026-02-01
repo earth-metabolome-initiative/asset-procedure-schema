@@ -37,7 +37,7 @@ CREATE TABLE packaging_procedure_templates (
 		procedure_template_sample_model_id
 	)
 );
-INSERT INTO procedure_template_tables (id) VALUES ('packaging_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('packaging_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE OR REPLACE FUNCTION packaging_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_packaged_with_model_id) ON CONFLICT DO NOTHING;
@@ -106,4 +106,4 @@ CREATE TABLE packaging_procedures (
 	-- We check that the `procedure_sample` is associated to the `sample_model`.
 	FOREIGN KEY (procedure_sample_id, sample_model_id) REFERENCES procedure_asset_models(id, asset_model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('packaging_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('packaging_procedures') ON CONFLICT DO NOTHING;

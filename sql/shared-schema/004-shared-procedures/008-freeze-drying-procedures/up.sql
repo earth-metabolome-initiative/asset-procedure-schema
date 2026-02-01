@@ -70,7 +70,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER freeze_drying_procedure_templates_rptam_insert_trigger
 AFTER INSERT ON freeze_drying_procedure_templates
 FOR EACH ROW EXECUTE FUNCTION freeze_drying_procedure_templates_rptam_insert_fn();
-INSERT INTO procedure_template_tables (id) VALUES ('freeze_drying_procedure_templates') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('freeze_drying_procedure_templates') ON CONFLICT DO NOTHING;
 CREATE TABLE freeze_drying_procedures (
 	-- Identifier of the freeze drying id, which is also a foreign key to the general procedure.
 	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
@@ -142,4 +142,4 @@ CREATE TABLE freeze_drying_procedures (
 		freeze_dried_with_model_id
 	) REFERENCES procedure_asset_models(id, asset_model_id)
 );
-INSERT INTO ownable_tables (id) VALUES ('freeze_drying_procedures') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('freeze_drying_procedures') ON CONFLICT DO NOTHING;

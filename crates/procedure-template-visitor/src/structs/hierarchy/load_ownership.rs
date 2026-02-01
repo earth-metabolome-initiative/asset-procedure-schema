@@ -3,10 +3,11 @@
 
 use std::rc::Rc;
 
+use aps_asset_models::asset_models;
 use aps_procedure_template_asset_models::*;
+use aps_procedure_templates::*;
 use aps_reused_procedure_template_asset_models::*;
-use diesel::Identifiable;
-use diesel_builders::LoadMany;
+use diesel_builders::{GetColumnExt, LoadMany, NestedModel, TableModel, prelude::LoadNestedFirst};
 use geometric_traits::{
     impls::CSR2D,
     prelude::{GenericBiGraph, GenericEdgesBuilder, MonopartiteGraph, SortedVec},
@@ -31,24 +32,27 @@ impl Hierarchy {
     where
         (reused_procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
         (procedure_template_asset_models::procedure_template_id,): LoadMany<C>,
+        (procedure_templates::id,): LoadNestedFirst<procedure_templates::table, C>,
+        (asset_models::id,): LoadNestedFirst<asset_models::table, C>,
         ProcedureTemplateAssetModel: FKProcedureTemplateAssetModelsProcedureTemplateId<C>
             + FKProcedureTemplateAssetModelsAssetModelId<C>,
         ReusedProcedureTemplateAssetModel:
             FKReusedProcedureTemplateAssetModelsProcedureTemplateAssetModelId<C>,
     {
-        let mut foreign_procedure_templates = Vec::new();
+        let mut foreign_procedure_templates: Vec<NestedModel<procedure_templates::table>> =
+            Vec::new();
         let mut procedure_template_asset_models = Vec::new();
         let mut edges = Vec::new();
 
         for (i, procedure_template) in self.hierarchy.nodes_vocabulary().iter().enumerate() {
             let reused_ptams =
                 <(reused_procedure_template_asset_models::procedure_template_id,)>::load_many(
-                    (*procedure_template.id(),),
+                    (procedure_template.get_column::<procedure_templates::id>(),),
                     conn,
                 )?;
             let mut used_ptams =
                 <(procedure_template_asset_models::procedure_template_id,)>::load_many(
-                    (*procedure_template.id(),),
+                    (procedure_template.get_column::<procedure_templates::id>(),),
                     conn,
                 )
                 .unwrap();
@@ -64,10 +68,13 @@ impl Hierarchy {
                 if self
                     .hierarchy
                     .nodes_vocabulary()
-                    .binary_search_by(|pt| pt.id().cmp(ptam.procedure_template_id()))
+                    .binary_search_by(|pt| {
+                        pt.get_column::<procedure_templates::id>().cmp(ptam.procedure_template_id())
+                    })
                     .is_err()
                 {
-                    let ptam_owner = ptam.procedure_template(conn)?;
+                    let ptam_owner: NestedModel<procedure_templates::table> =
+                        ptam.procedure_template(conn)?.nested(conn)?;
                     foreign_procedure_templates.push(ptam_owner);
                 }
 

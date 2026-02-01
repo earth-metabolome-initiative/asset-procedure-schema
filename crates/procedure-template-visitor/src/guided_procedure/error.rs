@@ -1,7 +1,9 @@
 //! Submodule defining the errors which might occur when using the
 //! `GuidedProcedure`.
 
+use aps_entities::GetEntityTableNameId;
 use aps_procedure_templates::*;
+use diesel_builders::NestedModel;
 
 #[derive(Debug, thiserror::Error)]
 /// Enum representing the possible errors which might occur when using the
@@ -11,16 +13,16 @@ pub enum InternalGuidedProcedureError<'graph> {
     /// When the provided designated successor was not found in the viable
     /// successors.
     DesignatedSuccessorNotFound {
-        designated_successor: &'graph ProcedureTemplate,
-        viable_successors: Vec<&'graph ProcedureTemplate>,
+        designated_successor: &'graph NestedModel<procedure_templates::table>,
+        viable_successors: Vec<&'graph NestedModel<procedure_templates::table>>,
     },
     #[error("Multiple viable successors were found: [{}]. Please specify a designated successor.", .viable_successors.iter().map(|pt| pt.name().as_str()).collect::<Vec<_>>().join(", "))]
     /// When no designated successor was provided but multiple viable successors
     /// were found.
-    UnclearSuccessor { viable_successors: Vec<&'graph ProcedureTemplate> },
-    #[error("A builder not yet processed for the procedure template \"{}\" from table \"{}\". You most likely need to add another `.and_then(|builder, conn| {{...}})` to your guided procedure.", .0.name(), .0.procedure_template_table_id())]
+    UnclearSuccessor { viable_successors: Vec<&'graph NestedModel<procedure_templates::table>> },
+    #[error("A builder not yet processed for the procedure template \"{}\" from table \"{}\". You most likely need to add another `.and_then(|builder, conn| {{...}})` to your guided procedure.", .0.name(), .0.table_name_id())]
     /// A builder was not yet processed.
-    UnprocessedBuilder(&'graph ProcedureTemplate),
+    UnprocessedBuilder(&'graph NestedModel<procedure_templates::table>),
     #[error("A database error occurred: {0}")]
     /// An error occurred while interacting with the database.
     Diesel(diesel::result::Error),
@@ -33,15 +35,19 @@ pub enum GuidedProcedureError {
     #[error("No more builders are available.")]
     /// No more builders are available.
     NoMoreBuilders,
-    #[error("There are unprocessed builders for the procedure template \"{}\" from table \"{}\". You most likely need to add another `.and_then(|builder, conn| {{...}})` to your guided procedure.", .0.name(), .0.procedure_template_table_id())]
+    #[error("There are unprocessed builders for the procedure template \"{}\" from table \"{}\". You most likely need to add another `.and_then(|builder, conn| {{...}})` to your guided procedure.", .0.name(), .0.table_name_id())]
     /// Incomplete processing of builders.
-    UnprocessedBuilder(Box<ProcedureTemplate>),
+    UnprocessedBuilder(Box<NestedModel<procedure_templates::table>>),
     #[error("A database error occurred: {0}")]
     /// An error occurred while interacting with the database.
     Diesel(diesel::result::Error),
-    #[error("Expected builder of type `{expected}`, but a builder of type `{found}` is required to build the procedure template \"{}\" from table \"{}\".", .template.name(), .template.procedure_template_table_id())]
+    #[error("Expected builder of type `{expected}`, but a builder of type `{found}` is required to build the procedure template \"{}\" from table \"{}\".", .template.name(), .template.table_name_id())]
     /// Unexpected builder type encountered.
-    UnexpectedBuilder { expected: &'static str, found: String, template: Box<ProcedureTemplate> },
+    UnexpectedBuilder {
+        expected: &'static str,
+        found: String,
+        template: Box<NestedModel<procedure_templates::table>>,
+    },
 }
 
 impl<'graph> From<InternalGuidedProcedureError<'graph>> for GuidedProcedureError {

@@ -1,12 +1,14 @@
 //! Submodule implementing the iterator for the `GuidedProcedureBuilder`.
 
+use aps_entities::GetEntityTableNameId;
+use aps_ownables::*;
 use aps_procedure_asset_models::procedure_asset_models;
 use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::*;
 use aps_procedures::*;
 use aps_users::*;
 use diesel_builders::{
-    BuildableTable, BuilderError, DescendantOf, DescendantWithSelf, DynColumn, IterDynForeignKeys,
+    BuildableTable, BuilderError, DescendantOf, DynColumn, GetNestedModel, IterDynForeignKeys,
     NestedColumns, NestedTables, TableBuilder, TypedNestedTuple, ancestors::DescendantOfAll,
     builder_error::DynamicColumnError, prelude::*,
 };
@@ -20,7 +22,10 @@ use crate::{
 
 impl<'graph, C> Iterator for GuidedProcedure<'graph, C> {
     type Item = Result<
-        (Vec<&'graph ProcedureTemplate>, &'graph ProcedureTemplate),
+        (
+            Vec<&'graph NestedModel<procedure_templates::table>>,
+            &'graph NestedModel<procedure_templates::table>,
+        ),
         InternalGuidedProcedureError<'graph>,
     >;
 
@@ -71,12 +76,12 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
             + From<<TableBuilder<T> as ValidateColumn<procedures::predecessor_procedure_id>>::Error>
             + From<<TableBuilder<T> as ValidateColumn<procedures::parent_procedure_template_id>>::Error>
             + From<<TableBuilder<T> as ValidateColumn<procedures::predecessor_procedure_template_id>>::Error>,
-        TableBuilder<T>: ProcedureTableBuilder
+        TableBuilder<T>: ProcedureTableBuilder + OwnableTableBuilder
             + TrySetDynamicColumn
             + Insert<C, Table=T>,
-        <T::NestedAncestorsWithSelf as NestedTables>::NestedModels:
-            IterDynForeignKeys<(DynColumn<Uuid>, (DynColumn<Uuid>,))>,
-        <<<T as ProcedureTableLike>::ProcedureTemplateTable as DescendantWithSelf>::NestedAncestorsWithSelf as NestedTables>::NestedModels:
+        NestedModel<T>:
+            IterDynForeignKeys<(DynColumn<Uuid>, (DynColumn<Uuid>,))> + GetNestedModel<procedures::table>,
+        NestedModel<<T as ProcedureTableLike>::ProcedureTemplateTable>:
             IterDynForeignKeys<(DynColumn<Uuid>, (DynColumn<Uuid>,))> + TryGetDynamicColumn,
         (<<T as ProcedureTableLike>::ProcedureTemplateTable as Table>::PrimaryKey,):
             TypedNestedTuple<NestedTupleValueType = (rosetta_uuid::Uuid,)> +
@@ -88,16 +93,16 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
         else {
             return Err(GuidedProcedureError::NoMoreBuilders.into());
         };
-        if template.procedure_template_table_id() != T::TABLE_NAME {
+        if template.table_name_id() != T::TABLE_NAME {
             return Err(GuidedProcedureError::UnexpectedBuilder {
                 expected: T::TABLE_NAME,
-                found: template.procedure_template_table_id().to_owned(),
+                found: template.table_name_id().to_owned(),
                 template: Box::new(template.clone()),
             }
             .into());
         }
 
-        type Template<T> = <<<T as ProcedureTableLike>::ProcedureTemplateTable as DescendantWithSelf>::NestedAncestorsWithSelf as NestedTables>::NestedModels;
+        type Template<T> = NestedModel<<T as ProcedureTableLike>::ProcedureTemplateTable>;
 
         // First, we load the nested procedure template associated with the
         // current procedure. This will be then used to pre-fill the builder
@@ -276,9 +281,10 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
         let completed_builder =
             complete_builder(procedure_builder, self.visitor.listener_mut().connection())?;
 
-        let nested_procedure: <T::NestedAncestorsWithSelf as NestedTables>::NestedModels =
+        let nested_procedure: NestedModel<T> =
             completed_builder.insert_nested(self.visitor.listener_mut().connection())?;
-        let procedure: Procedure = nested_procedure.get_model::<procedures::table>();
+        let procedure: NestedModel<procedures::table> =
+            GetNestedModel::get_nested_model(&nested_procedure);
         self.visitor.listener_mut().push_parent(procedure);
 
         // We register in the graph the mapping from PTAM ID to PAM ID for

@@ -3,15 +3,16 @@
 
 use aps_procedure_template_asset_models::*;
 use aps_procedure_templates::*;
+use diesel_builders::NestedModel;
 
 /// Visitor pattern trait for traversing a `ProcedureTemplateGraph`.
 pub trait PTGListener<'graph> {
     /// Error enumeration which may occur during the visit.
     type Error: core::error::Error;
     /// The type returned when choosing a successor in a task.
-    type FilteredSuccessors<I>: IntoIterator<Item = &'graph ProcedureTemplate>
+    type FilteredSuccessors<I>: IntoIterator<Item = &'graph NestedModel<procedure_templates::table>>
     where
-        I: Iterator<Item = &'graph ProcedureTemplate>;
+        I: Iterator<Item = &'graph NestedModel<procedure_templates::table>>;
     /// The object being produced by the visits.
     type Output;
 
@@ -28,7 +29,7 @@ pub trait PTGListener<'graph> {
     ///   procedure template.
     fn enter_foreign_procedure_template(
         &mut self,
-        foreign_procedure_template: &'graph ProcedureTemplate,
+        foreign_procedure_template: &'graph NestedModel<procedure_templates::table>,
     ) -> Result<Self::Output, Self::Error>;
 
     /// Visit a procedure template.
@@ -44,8 +45,8 @@ pub trait PTGListener<'graph> {
     ///   template.
     fn enter_procedure_template(
         &mut self,
-        parents: &[&'graph ProcedureTemplate],
-        child: &'graph ProcedureTemplate,
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        child: &'graph NestedModel<procedure_templates::table>,
     ) -> Result<Self::Output, Self::Error>;
 
     /// Complete the visit of a procedure template.
@@ -61,8 +62,8 @@ pub trait PTGListener<'graph> {
     ///   template.
     fn leave_procedure_template(
         &mut self,
-        parents: &[&'graph ProcedureTemplate],
-        child: &'graph ProcedureTemplate,
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        child: &'graph NestedModel<procedure_templates::table>,
     ) -> Result<Self::Output, Self::Error>;
 
     /// Visit a task step, characterized by having a parent
@@ -79,9 +80,9 @@ pub trait PTGListener<'graph> {
     /// * Returns a `Self::Error` if there is an issue processing the task step.
     fn continue_task(
         &mut self,
-        parents: &[&'graph ProcedureTemplate],
-        predecessors: &[&'graph ProcedureTemplate],
-        child: &'graph ProcedureTemplate,
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        predecessors: &[&'graph NestedModel<procedure_templates::table>],
+        child: &'graph NestedModel<procedure_templates::table>,
     ) -> Result<(), Self::Error>;
 
     /// Visit the procedure template asset model owned by the current
@@ -100,8 +101,8 @@ pub trait PTGListener<'graph> {
     ///   template asset model.
     fn enter_leaf_ptam(
         &mut self,
-        parents: &[&'graph ProcedureTemplate],
-        leaf: &'graph ProcedureTemplate,
+        parents: &[&'graph NestedModel<procedure_templates::table>],
+        leaf: &'graph NestedModel<procedure_templates::table>,
         procedure_template_asset_model: &ProcedureTemplateAssetModel,
     ) -> Result<Self::Output, Self::Error>;
 
@@ -124,5 +125,5 @@ pub trait PTGListener<'graph> {
         successors: I,
     ) -> Result<Self::FilteredSuccessors<I>, Self::Error>
     where
-        I: Iterator<Item = &'graph ProcedureTemplate>;
+        I: Iterator<Item = &'graph NestedModel<procedure_templates::table>>;
 }

@@ -17,9 +17,9 @@
 )]
 /// synchronization in distributed systems.
 # [table_model (error = :: validation_errors :: ValidationError)]
-# [diesel (belongs_to (aps_table_names :: TableName , foreign_key = table_name))]
-#[diesel(primary_key(id, table_name))]
-# [table_model (foreign_key ((table_name ,) , (:: aps_table_names :: table_names :: id)))]
+# [diesel (belongs_to (aps_table_names :: TableName , foreign_key = table_name_id))]
+#[diesel(primary_key(id, table_name_id))]
+# [table_model (foreign_key ((table_name_id ,) , (:: aps_table_names :: table_names :: id)))]
 # [diesel (table_name = tombstones)]
 pub struct Tombstone {
     /// A deleted entity's ID, which cannot be a foreign key due to deletion.
@@ -27,31 +27,46 @@ pub struct Tombstone {
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The name of the table from which the entity was deleted.
-    table_name: String,
+    table_name_id: String,
     /// The timestamp when the entity was deleted.
     # [table_model (default = :: rosetta_timestamp :: TimestampUTC :: default ())]
-    #[infallible]
     # [diesel (sql_type = :: rosetta_timestamp :: diesel_impls :: TimestampUTC)]
     deleted_at: ::rosetta_timestamp::TimestampUTC,
 }
-impl ::diesel_builders::ValidateColumn<tombstones::table_name>
+impl ::diesel_builders::ValidateColumn<tombstones::table_name_id>
     for <tombstones::table as ::diesel_builders::TableExt>::NewValues
 {
     type Error = ::validation_errors::ValidationError;
     #[inline]
-    fn validate_column(table_name: &String) -> Result<(), Self::Error> {
+    fn validate_column(table_name_id: &String) -> Result<(), Self::Error> {
         use diesel::Column;
-        if table_name.is_empty() {
+        if table_name_id.is_empty() {
             return Err(::validation_errors::ValidationError::empty(
                 <crate::tombstones::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::tombstones::table_name::NAME,
+                crate::tombstones::table_name_id::NAME,
             ));
         }
-        if table_name.len() < 255usize {
+        if table_name_id.len() > 255usize {
             return Err(::validation_errors::ValidationError::exceeds_max_length(
                 <crate::tombstones::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::tombstones::table_name::NAME,
+                crate::tombstones::table_name_id::NAME,
                 255usize,
+            ));
+        }
+        Ok(())
+    }
+}
+impl ::diesel_builders::ValidateColumn<tombstones::deleted_at>
+    for <tombstones::table as ::diesel_builders::TableExt>::NewValues
+{
+    type Error = ::validation_errors::ValidationError;
+    #[inline]
+    fn validate_column(deleted_at: &::rosetta_timestamp::TimestampUTC) -> Result<(), Self::Error> {
+        use diesel::Column;
+        if deleted_at >= ::chrono::Utc::now() {
+            return Err(::validation_errors::ValidationError::in_the_future(
+                <crate::tombstones::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::tombstones::deleted_at::NAME,
             ));
         }
         Ok(())

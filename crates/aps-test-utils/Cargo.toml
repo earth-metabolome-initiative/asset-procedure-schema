@@ -10,6 +10,7 @@ diesel-builders.workspace = true
 aps-asset_models.workspace = true
 aps-container_models.workspace = true
 aps-physical_asset_models.workspace = true
+aps-ownables.workspace = true
 procedure-traits.workspace = true
 asset-traits.workspace = true
 aps-procedure_templates.workspace = true

@@ -97,7 +97,6 @@ dependencies = [
  "aps-harvesting_procedures",
  "aps-namespaces",
  "aps-next_procedure_templates",
- "aps-ownable_tables",
  "aps-ownables",
  "aps-owner_grants",
  "aps-owners",
@@ -186,11 +185,11 @@ name = "aps-asset_compatibility_rules"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
- "aps-users",
+ "aps-entities",
+ "aps-ownables",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
  "validation-errors",
 ]
@@ -328,11 +327,11 @@ dependencies = [
 name = "aps-brands"
 version = "0.1.0"
 dependencies = [
- "aps-users",
+ "aps-entities",
+ "aps-ownables",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
  "validation-errors",
 ]
@@ -681,12 +680,12 @@ name = "aps-container_compatibility_rules"
 version = "0.1.0"
 dependencies = [
  "aps-container_models",
+ "aps-entities",
+ "aps-ownables",
  "aps-physical_asset_models",
- "aps-users",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
  "validation-errors",
 ]
@@ -1267,23 +1266,13 @@ dependencies = [
 name = "aps-next_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
+ "aps-ownables",
  "aps-parent_procedure_templates",
  "aps-procedure_templates",
- "aps-users",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
- "rosetta_timestamp",
- "serde",
- "validation-errors",
-]
-
-[[package]]
-name = "aps-ownable_tables"
-version = "0.1.0"
-dependencies = [
- "diesel",
- "diesel-builders",
  "serde",
  "validation-errors",
 ]
@@ -1293,15 +1282,12 @@ name = "aps-ownables"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
- "aps-ownable_tables",
  "aps-owners",
  "aps-users",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
- "validation-errors",
 ]
 
 [[package]]
@@ -1322,13 +1308,10 @@ name = "aps-owners"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
- "aps-table_names",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
- "validation-errors",
 ]
 
 [[package]]
@@ -1389,12 +1372,12 @@ dependencies = [
 name = "aps-parent_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-entities",
+ "aps-ownables",
  "aps-procedure_templates",
- "aps-users",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
- "rosetta_timestamp",
  "serde",
  "validation-errors",
 ]
@@ -1799,6 +1782,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-container_models",
+ "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_templates",
  "aps-users",
@@ -2411,7 +2395,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#25167168b271fe46e434f1effc748610d12983b5"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#cedc6f96a0477df6d164a6bc2cc2cc3f107e6257"
 dependencies = [
  "diesel",
  "diesel-builders-derive",
@@ -2424,7 +2408,7 @@ dependencies = [
 [[package]]
 name = "diesel-builders-derive"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#25167168b271fe46e434f1effc748610d12983b5"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#cedc6f96a0477df6d164a6bc2cc2cc3f107e6257"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3557,11 +3541,11 @@ dependencies = [
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#96e19b1a70f935358d819d0d4a2364c733e709d4"
+source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#38da01e2250e961d3c4894f42a395993269c5843"
 dependencies = [
  "git2",
  "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits)",
- "sqlparser 0.60.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sqlparser 0.60.0 (git+https://github.com/LucaCappelletti94/sqlparser-rs?branch=externalize-statements)",
  "tempfile",
  "thiserror",
 ]
@@ -3710,7 +3694,9 @@ name = "procedure-template-visitor"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-entities",
  "aps-next_procedure_templates",
+ "aps-ownables",
  "aps-parent_procedure_templates",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
@@ -3740,7 +3726,9 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_compatibility_rules",
  "aps-asset_models",
+ "aps-entities",
  "aps-next_procedure_templates",
+ "aps-ownables",
  "aps-parent_procedure_templates",
  "aps-procedure_asset_models",
  "aps-procedure_template_asset_models",
@@ -4377,7 +4365,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#827efde35fd1e0d765a1963d713bc995a37c93ad"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main#ef94083f8e4abcb6092273aa85cd25689a526629"
 dependencies = [
  "geometric-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/geometric-traits?branch=main)",
  "git2",
@@ -4390,7 +4378,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-traits#827efde35fd1e0d765a1963d713bc995a37c93ad"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits#ef94083f8e4abcb6092273aa85cd25689a526629"
 dependencies = [
  "geometric-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/geometric-traits?branch=main)",
  "git2",
@@ -4403,7 +4391,7 @@ dependencies = [
 [[package]]
 name = "sql_docs"
 version = "1.0.11"
-source = "git+https://github.com/LucaCappelletti94/sql-docs?branch=main#db34474b99836bb9291a4bebc5d0633cb1af64c7"
+source = "git+https://github.com/LucaCappelletti94/sql-docs?branch=main#a2cbc3229cbe9df69f1de2b3eb19c68e02186cc8"
 dependencies = [
  "sqlparser 0.60.0 (git+https://github.com/apache/datafusion-sqlparser-rs?branch=main)",
 ]
@@ -4411,7 +4399,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#27916de5a80ee55e18bd660695eee1a28f772a29"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#5d5ae34f2e08e2a6506fcd655a55c5bf7b4729c3"
 dependencies = [
  "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?branch=main)",
 ]
@@ -4426,16 +4414,6 @@ dependencies = [
  "js-sys",
  "rsqlite-vfs",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "sqlparser"
-version = "0.60.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "505aa16b045c4c1375bf5f125cce3813d0176325bfe9ffc4a903f423de7774ff"
-dependencies = [
- "log",
- "recursive",
 ]
 
 [[package]]
@@ -4557,7 +4535,7 @@ checksum = "0bf256ce5efdfa370213c1dabab5935a12e49f2c58d15e9eac2870d3b4f27263"
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#27916de5a80ee55e18bd660695eee1a28f772a29"
+source = "git+https://github.com/earth-metabolome-initiative/synql?branch=main#5d5ae34f2e08e2a6506fcd655a55c5bf7b4729c3"
 dependencies = [
  "chrono",
  "enumflags2",
@@ -5282,7 +5260,7 @@ dependencies = [
 [[package]]
 name = "validation-errors"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#25167168b271fe46e434f1effc748610d12983b5"
+source = "git+https://github.com/LucaCappelletti94/diesel-builders?branch=main#cedc6f96a0477df6d164a6bc2cc2cc3f107e6257"
 dependencies = [
  "diesel",
  "diesel-builders",

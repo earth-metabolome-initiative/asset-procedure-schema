@@ -5,8 +5,7 @@ use std::rc::Rc;
 
 use aps_parent_procedure_templates::*;
 use aps_procedure_templates::*;
-use diesel::Identifiable;
-use diesel_builders::LoadMany;
+use diesel_builders::{GetColumnExt, LoadMany, NestedModel, TableModel, prelude::LoadNestedFirst};
 
 #[allow(clippy::type_complexity)]
 /// Recursively loads all sub-procedure templates of the given procedure
@@ -20,23 +19,33 @@ use diesel_builders::LoadMany;
 /// * `conn` - The database connection to use for loading the sub-procedure
 ///   templates.
 pub(super) fn load_subprocedure_templates<C>(
-    procedure_template: &Rc<ProcedureTemplate>,
+    procedure_template: &Rc<NestedModel<procedure_templates::table>>,
     conn: &mut C,
 ) -> Result<
-    (Vec<Rc<ProcedureTemplate>>, Vec<(Rc<ProcedureTemplate>, Rc<ProcedureTemplate>)>),
+    (
+        Vec<Rc<NestedModel<procedure_templates::table>>>,
+        Vec<(
+            Rc<NestedModel<procedure_templates::table>>,
+            Rc<NestedModel<procedure_templates::table>>,
+        )>,
+    ),
     diesel::result::Error,
 >
 where
+    (procedure_templates::id,): LoadNestedFirst<procedure_templates::table, C>,
     (parent_procedure_templates::parent_id,): LoadMany<C>,
     ParentProcedureTemplate: FKParentProcedureTemplatesChildId<C>,
 {
     let mut subprocedure_templates = Vec::new();
     let mut edges = Vec::new();
-    let parent_child_relations =
-        <(parent_procedure_templates::parent_id,)>::load_many((*procedure_template.id(),), conn)?;
+    let parent_child_relations = <(parent_procedure_templates::parent_id,)>::load_many(
+        (*procedure_template.get_column::<procedure_templates::id>(),),
+        conn,
+    )?;
 
     for parent_child_relation in parent_child_relations {
-        let child_procedure = Rc::from(parent_child_relation.child(conn)?);
+        let child_procedure: Rc<NestedModel<procedure_templates::table>> =
+            Rc::from(parent_child_relation.child(conn)?.nested(conn)?);
         let (child_subprocedure_templates, child_edges) =
             load_subprocedure_templates(&child_procedure, conn)?;
         subprocedure_templates.extend(child_subprocedure_templates);
