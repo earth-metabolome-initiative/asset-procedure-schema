@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Codecov](https://codecov.io/gh/earth-metabolome-initiative/asset-procedure-schema/branch/main/graph/badge.svg)](https://codecov.io/gh/earth-metabolome-initiative/asset-procedure-schema)
 
-The Asset-Procedure Schema (APS) defines a comprehensive data model for tracking assets and procedures throughout their lifecycle. It serves as the single source of truth for the database schema and automatically generates type-safe Rust interfaces.
+The Asset-Procedure Schema (APS) defines a comprehensive data model for tracking assets and procedures throughout their lifecycle. It serves as the single source of truth for the database schema and automatically generates type-safe Rust [diesel](https://github.com/diesel-rs/diesel) & [diesel-builders](https://github.com/LucaCappelletti94/diesel-builders)-based interfaces.
 
 ## Project Structure
 
