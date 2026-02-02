@@ -317,9 +317,9 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     ///
     /// ```rust
     /// use aps_parent_procedure_templates::*;
+    /// use aps_procedure_templates::*;
     /// use diesel::associations::Identifiable;
     /// use diesel_builders::prelude::*;
-    /// use aps_procedure_templates::*;
     /// use procedure_traits::ProcedureTemplateNode;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
