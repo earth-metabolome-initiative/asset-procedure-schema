@@ -11,7 +11,7 @@ The Asset-Procedure Schema (APS) defines a comprehensive data model for tracking
 
 The repository is organized into four primary sections:
 
-- **[`sql/`](./sql)**: The core definitions of the database schema. This directory contains the SQL migration files that define the entities, procedures, and their relationships. It is the source of truth for the project.
+- **[`sql/`](./sql)**: The core definitions of the database schema. This directory contains the SQL migration files that define the entities, procedures, and their relationships. It is the source of truth for the project. The SQL must follow the PostgreSQL dialect, and is later converted to SQLite-compatible syntax for broader compatibility, to be used primarely in WASM/edge settings, or unit tests for which a lightweight database is preferred.
 
 - **[`builder/`](./builder)**: A Rust application responsible for ensuring schema integrity and generating code. It performs three key tasks:
   1. **Introspection**: Connects to and parses the SQL schema.
@@ -30,9 +30,11 @@ The repository is organized into four primary sections:
 
 This project relies heavily on a set of core libraries for SQL parsing, traits, and rule enforcement:
 
-- **[synql](https://github.com/earth-metabolome-initiative/synql)**: SQL parser and analyzer.
+- **[sqlparser-rs](https://github.com/apache/datafusion-sqlparser-rs)**: A robust SQL parsing library used to interpret the schema definitions.
 - **[sql-traits](https://github.com/earth-metabolome-initiative/sql-traits)**: Shared traits defining the behavior of SQL entities.
 - **[sql-rules](https://github.com/earth-metabolome-initiative/sql-rules)**: Framework for defining and enforcing validation rules on the schema.
+- **[synql](https://github.com/earth-metabolome-initiative/synql)**: SQL to Rust code generation library.
+- **[pg2sqlite](https://github.com/LucaCappelletti94/pg2sqlite)**: Tool for converting PostgreSQL schema definitions to SQLite-compatible formats.
 
 ## Versioning
 
