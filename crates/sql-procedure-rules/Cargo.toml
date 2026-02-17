@@ -7,7 +7,7 @@ edition.workspace = true
 sql-traits = { git = "https://github.com/earth-metabolome-initiative/sql-traits", branch = "main" }
 sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", branch = "main" }
 sql_relations = { git = "https://github.com/earth-metabolome-initiative/synql", branch = "main" }
-sqlparser = { version = "0.60", git = "https://github.com/LucaCappelletti94/sqlparser-rs", branch = "externalize-statements" }
+sqlparser = { git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
 
 [lints]
 workspace = true

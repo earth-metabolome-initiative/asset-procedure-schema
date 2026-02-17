@@ -5,7 +5,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use sql_rules::prelude::*;
 use sql_traits::{prelude::ParserDB, traits::DatabaseLike};
-use sqlparser::ast::CreateTable;
+use sqlparser::{ast::CreateTable, dialect::PostgreSqlDialect};
 use synql::prelude::*;
 use time_requirements::{prelude::TimeTracker, task::Task};
 mod visualize_dags;
@@ -88,7 +88,8 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut tracker = TimeTracker::new("APS Generation");
 
     let task = Task::new("Database Introspection");
-    let db = ParserDB::try_from(Path::new("../")).expect("Failed to parse database schema");
+    let db = ParserDB::from_path::<PostgreSqlDialect>(Path::new("../"))
+        .expect("Failed to parse database schema");
     assert!(db.has_tables(), "Database should have tables");
     tracker.add_completed_task(task);
 

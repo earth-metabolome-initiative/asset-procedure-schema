@@ -7,12 +7,14 @@ mod tests {
     use sql_procedure_rules::register_procedure_constraints;
     use sql_rules::prelude::*;
     use sql_traits::prelude::ParserDB;
+    use sqlparser::dialect::PostgreSqlDialect;
 
     #[test]
     fn validate_schema() {
         // Parse the database schema from the root of the repository
         let root_path = Path::new("../../");
-        let db = ParserDB::try_from(root_path).expect("Failed to parse database schema");
+        let db = ParserDB::from_path::<PostgreSqlDialect>(root_path)
+            .expect("Failed to parse database schema");
         assert!(db.has_tables(), "Database should have tables");
 
         // Validate the database schema with all available constraints
