@@ -26,7 +26,7 @@ pub const REUSED_PROCEDURE_TEMPLATE_ASSET_MODELS_TABLE_NAME: &str =
 ///     ReusedProcedureTemplateAssetModelsForeignKey::default().into();
 ///
 /// // Invalid: has procedure_template_container_model but no FK to reused_procedure_template_asset_models
-/// let invalid_schema = ParserDB::try_from(
+/// let invalid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_template_asset_models (id INT PRIMARY KEY);
@@ -45,7 +45,7 @@ pub const REUSED_PROCEDURE_TEMPLATE_ASSET_MODELS_TABLE_NAME: &str =
 /// assert!(constrainer.validate_schema(&invalid_schema).is_err());
 ///
 /// // Valid: has FK to reused_procedure_template_asset_models
-/// let valid_schema = ParserDB::try_from(
+/// let valid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_template_asset_models (id INT PRIMARY KEY);
@@ -66,7 +66,7 @@ pub const REUSED_PROCEDURE_TEMPLATE_ASSET_MODELS_TABLE_NAME: &str =
 /// assert!(constrainer.validate_schema(&valid_schema).is_ok());
 ///
 /// // Invalid: has FK to reused_procedure_template_asset_models but no FK to procedure_template_asset_models
-/// let invalid_schema_reverse = ParserDB::try_from(
+/// let invalid_schema_reverse = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_template_asset_models (id INT PRIMARY KEY);

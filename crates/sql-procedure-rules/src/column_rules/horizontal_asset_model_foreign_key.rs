@@ -30,7 +30,7 @@ use crate::{
 ///     HorizontalAssetModelForeignKey::default().into();
 ///
 /// // Invalid: has procedure_template_container_model and container_model but no horizontal FK
-/// let invalid_schema = ParserDB::try_from(
+/// let invalid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE asset_models (id INT PRIMARY KEY);
@@ -50,7 +50,7 @@ use crate::{
 /// assert!(constrainer.validate_schema(&invalid_schema).is_err());
 ///
 /// // Valid: has horizontal FK from (procedure_template_container_model, container_model)
-/// let valid_schema = ParserDB::try_from(
+/// let valid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE asset_models (id INT PRIMARY KEY);

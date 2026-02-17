@@ -26,7 +26,7 @@ pub const ASSETS_TABLE_NAME: &str = "assets";
 /// let constrainer: GenericConstrainer<ParserDB> = AssetColumnNaming::default().into();
 ///
 /// // Invalid: column references assets but ends with "_model_id" (likely a typo)
-/// let invalid_schema = ParserDB::try_from(
+/// let invalid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedures (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
@@ -41,7 +41,7 @@ pub const ASSETS_TABLE_NAME: &str = "assets";
 /// assert!(constrainer.validate_schema(&invalid_schema).is_err());
 ///
 /// // Valid: column references assets and does not end with "_model_id"
-/// let valid_schema = ParserDB::try_from(
+/// let valid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedures (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);

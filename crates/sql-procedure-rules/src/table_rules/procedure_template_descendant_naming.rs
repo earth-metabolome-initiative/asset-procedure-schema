@@ -24,7 +24,7 @@ pub const PROCEDURE_TEMPLATES_TABLE_NAME: &str = "procedure_templates";
 ///     ProcedureTemplateDescendantNaming::default().into();
 ///
 /// // Invalid: table extends procedure_templates but doesn't end with "procedure_templates"
-/// let invalid_schema = ParserDB::try_from(
+/// let invalid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE freezing (id INT PRIMARY KEY REFERENCES procedure_templates(id));
@@ -34,7 +34,7 @@ pub const PROCEDURE_TEMPLATES_TABLE_NAME: &str = "procedure_templates";
 /// assert!(constrainer.validate_schema(&invalid_schema).is_err());
 ///
 /// // Valid: table extends procedure_templates and ends with "procedure_templates"
-/// let valid_schema = ParserDB::try_from(
+/// let valid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE freezing_procedure_templates (id INT PRIMARY KEY REFERENCES procedure_templates(id));

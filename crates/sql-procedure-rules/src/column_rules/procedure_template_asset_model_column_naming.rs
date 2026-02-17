@@ -25,7 +25,7 @@ pub const PROCEDURE_TEMPLATE_ASSET_MODELS_TABLE_NAME: &str = "procedure_template
 ///
 /// // Invalid: column references procedure_template_asset_models but doesn't start with
 /// // "procedure_template_"
-/// let invalid_schema = ParserDB::try_from(
+/// let invalid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_template_asset_models (id INT PRIMARY KEY);
@@ -40,7 +40,7 @@ pub const PROCEDURE_TEMPLATE_ASSET_MODELS_TABLE_NAME: &str = "procedure_template
 ///
 /// // Valid: column references procedure_template_asset_models and starts with
 /// // "procedure_template_"
-/// let valid_schema = ParserDB::try_from(
+/// let valid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_template_asset_models (id INT PRIMARY KEY);

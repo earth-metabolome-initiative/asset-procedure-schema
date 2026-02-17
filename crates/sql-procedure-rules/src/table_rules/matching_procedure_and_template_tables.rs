@@ -25,7 +25,7 @@ use super::{
 ///     MatchingProcedureAndTemplateTables::default().into();
 ///
 /// // Invalid: freezing_procedures exists but freezing_procedure_templates doesn't
-/// let invalid_schema = ParserDB::try_from(
+/// let invalid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedures (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
@@ -36,7 +36,7 @@ use super::{
 /// assert!(constrainer.validate_schema(&invalid_schema).is_err());
 ///
 /// // Valid: both freezing_procedures and freezing_procedure_templates exist
-/// let valid_schema = ParserDB::try_from(
+/// let valid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedures (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);
@@ -48,7 +48,7 @@ use super::{
 /// assert!(constrainer.validate_schema(&valid_schema).is_ok());
 ///
 /// // Valid: the base procedures and procedure_templates tables don't need matches
-/// let valid_base_schema = ParserDB::try_from(
+/// let valid_base_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedures (id INT PRIMARY KEY);
 /// CREATE TABLE procedure_templates (id INT PRIMARY KEY);

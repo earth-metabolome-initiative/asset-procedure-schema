@@ -34,7 +34,7 @@ RETURN max_role;
 END;
 $$;
 -- Enable RLS on Ownables
-ALTER TABLE ownables ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE ownables ENABLE ROW LEVEL SECURITY;
 -- -----------------------------------------------------------------------------
 -- Policies (Permissions based on Role)
 -- -----------------------------------------------------------------------------

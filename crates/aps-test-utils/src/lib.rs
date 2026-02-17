@@ -52,6 +52,16 @@ pub fn aps_conn() -> SqliteConnection {
                 .with_uuid_function_name("uuidv7".to_string()),
         )
         .expect("Failed to translate the PostgreSQL schema");
+
+   let sql = translated
+    .iter()
+    .map(ToString::to_string)
+    .collect::<Vec<_>>()
+    .join(";\n");
+
+    println!("{sql}"); 
+
+
     let mut connection = SqliteConnection::establish(":memory:")
         .expect("Failed to create in-memory SQLite database");
 

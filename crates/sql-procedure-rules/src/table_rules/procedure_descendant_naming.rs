@@ -22,7 +22,7 @@ pub const PROCEDURES_TABLE_NAME: &str = "procedures";
 /// let constrainer: GenericConstrainer<ParserDB> = ProcedureDescendantNaming::default().into();
 ///
 /// // Invalid: table extends procedures but doesn't end with "procedures"
-/// let invalid_schema = ParserDB::try_from(
+/// let invalid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedures (id INT PRIMARY KEY);
 /// CREATE TABLE freezing (id INT PRIMARY KEY REFERENCES procedures(id));
@@ -32,7 +32,7 @@ pub const PROCEDURES_TABLE_NAME: &str = "procedures";
 /// assert!(constrainer.validate_schema(&invalid_schema).is_err());
 ///
 /// // Valid: table extends procedures and ends with "procedures"
-/// let valid_schema = ParserDB::try_from(
+/// let valid_schema = ParserDB::parse::<sqlparser::dialect::GenericDialect>(
 ///     r#"
 /// CREATE TABLE procedures (id INT PRIMARY KEY);
 /// CREATE TABLE freezing_procedures (id INT PRIMARY KEY REFERENCES procedures(id));
