@@ -41,21 +41,21 @@ ALTER TABLE ownables ENABLE ROW LEVEL SECURITY;
 -- SELECT: Requires Viewer (2) or higher
 -- CREATE POLICY ownables_select_policy ON ownables FOR
 -- SELECT TO PUBLIC USING (
---         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 2
+--         get_owner_role(current_app_user(), owner_id) >= 2
 --     );
 -- -- INSERT: Requires Editor (3) or higher on the target owner
 -- CREATE POLICY ownables_insert_policy ON ownables FOR
 -- INSERT TO PUBLIC WITH CHECK (
---         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 3
+--         get_owner_role(current_app_user(), owner_id) >= 3
 --     );
 -- -- UPDATE: Requires Editor (3) or higher
 -- CREATE POLICY ownables_update_policy ON ownables FOR
 -- UPDATE TO PUBLIC USING (
---         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 3
+--         get_owner_role(current_app_user(), owner_id) >= 3
 --     ) WITH CHECK (
---         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 3
+--         get_owner_role(current_app_user(), owner_id) >= 3
 --     );
 -- -- DELETE: Requires Admin (4) (or Owner/Team Member)
 -- CREATE POLICY ownables_delete_policy ON ownables FOR DELETE TO PUBLIC USING (
---     get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 4
+--     get_owner_role(current_app_user(), owner_id) >= 4
 -- );
