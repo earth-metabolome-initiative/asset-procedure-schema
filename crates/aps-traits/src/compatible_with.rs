@@ -30,7 +30,7 @@ pub trait CompatibleWith: GetColumn<asset_models::id> {
     /// ```rust
     /// use aps_asset_compatibility_rules::*;
     /// use aps_asset_models::asset_models;
-    /// use asset_traits::CompatibleWith;
+    /// use aps_traits::CompatibleWith;
     /// use diesel::associations::Identifiable;
     /// use diesel_builders::prelude::*;
     /// let mut conn = aps_test_utils::aps_conn();
@@ -94,7 +94,7 @@ pub trait CanContain: GetColumn<container_models::id> {
     /// use aps_container_compatibility_rules::*;
     /// use aps_container_models::container_models;
     /// use aps_physical_asset_models::physical_asset_models;
-    /// use asset_traits::CanContain;
+    /// use aps_traits::CanContain;
     /// use diesel::associations::Identifiable;
     /// use diesel_builders::prelude::*;
     /// let mut conn = aps_test_utils::aps_conn();

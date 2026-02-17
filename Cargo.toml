@@ -2,9 +2,8 @@
 resolver = "2"
 members = [
   "builder",
-  "crates/procedure-traits",
   "crates/sql-procedure-rules",
-  "crates/asset-traits",
+  "crates/aps-traits",
   "crates/aps-test-utils",
   "crates/procedure-template-visitor",
   "crates/procedure-template-visualization",
@@ -124,9 +123,8 @@ edition = "2024"
 
 [workspace.dependencies]
 builder = { path = "builder" }
-procedure-traits = { path = "crates/procedure-traits" }
 sql-procedure-rules = { path = "crates/sql-procedure-rules" }
-asset-traits = { path = "crates/asset-traits" }
+aps-traits = { path = "crates/aps-traits" }
 aps-test-utils = { path = "crates/aps-test-utils" }
 procedure-template-visitor = { path = "crates/procedure-template-visitor" }
 procedure-template-visualization = { path = "crates/procedure-template-visualization" }

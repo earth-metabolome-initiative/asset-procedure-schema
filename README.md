@@ -20,7 +20,7 @@ The repository is organized into four primary sections:
 
 - **[`crates/`](./crates)**: Supporting libraries used by the builder and the generated code.
   - **`sql-procedure-rules`**: Defines the custom validation logic and constraints ensuring the logical consistency of the procedure schema.
-  - **`procedure-traits`**: Common traits and interfaces used to standardize behavior across different procedure types.
+  - **`aps-traits`**: Common traits and interfaces used to standardize behavior across asset and procedure types.
 
 - **[`aps/`](./aps)**: The output directory containing the auto-generated Rust crates. These provide type-safe access to the database tables defined in `sql/` and are meant to be reused across applications.
 

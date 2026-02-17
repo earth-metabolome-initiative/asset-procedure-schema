@@ -1906,12 +1906,11 @@ dependencies = [
  "aps-ownables",
  "aps-physical_asset_models",
  "aps-procedure_templates",
+ "aps-traits",
  "aps-users",
- "asset-traits",
  "diesel",
  "diesel-builders",
  "pg2sqlite",
- "procedure-traits",
  "rosetta-uuid",
 ]
 
@@ -1925,6 +1924,30 @@ dependencies = [
  "rosetta-utc",
  "rosetta-uuid",
  "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-traits"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_compatibility_rules",
+ "aps-asset_models",
+ "aps-container_compatibility_rules",
+ "aps-container_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-next_procedure_templates",
+ "aps-ownables",
+ "aps-parent_procedure_templates",
+ "aps-physical_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-reused_procedure_template_asset_models",
+ "aps-test-utils",
+ "aps-users",
+ "diesel",
+ "diesel-builders",
  "validation-errors",
 ]
 
@@ -2105,23 +2128,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7eb93bbb63b9c227414f6eb3a0adfddca591a8ce1e9b60661bb08969b87e340b"
 dependencies = [
  "object",
-]
-
-[[package]]
-name = "asset-traits"
-version = "0.1.0"
-dependencies = [
- "aps-asset_compatibility_rules",
- "aps-asset_models",
- "aps-container_compatibility_rules",
- "aps-container_models",
- "aps-ownables",
- "aps-physical_asset_models",
- "aps-test-utils",
- "aps-users",
- "diesel",
- "diesel-builders",
- "validation-errors",
 ]
 
 [[package]]
@@ -3921,25 +3927,6 @@ dependencies = [
  "procedure-template-visitor",
  "regex",
  "thiserror",
-]
-
-[[package]]
-name = "procedure-traits"
-version = "0.1.0"
-dependencies = [
- "aps-asset_models",
- "aps-entities",
- "aps-namespaced_ownables",
- "aps-next_procedure_templates",
- "aps-ownables",
- "aps-parent_procedure_templates",
- "aps-procedure_template_asset_models",
- "aps-procedure_templates",
- "aps-reused_procedure_template_asset_models",
- "aps-test-utils",
- "aps-users",
- "diesel",
- "diesel-builders",
 ]
 
 [[package]]

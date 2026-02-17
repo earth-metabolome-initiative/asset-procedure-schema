@@ -425,7 +425,7 @@ pub fn pizza_procedure_template(
     user: &aps_users::User,
     conn: &mut SqliteConnection,
 ) -> NestedModel<procedure_templates::table> {
-    use procedure_traits::ProcedureTemplateNode;
+    use aps_traits::ProcedureTemplateNode;
 
     // First, we create the parent procedure template for making a pizza.
     let make_pizza: NestedModel<procedure_templates::table> =
@@ -459,7 +459,7 @@ pub fn pizza_procedure_template(
     bake_pizza.reuses([pizza_model_ptam], conn).unwrap();
 
     // Next, we create the individual steps, and we use the traits defined in
-    // the `procedure-traits` crate to set up the relationships between them.
+    // the `aps-traits` crate to set up the relationships between them.
     make_pizza
         .extend([prepare_dough, add_toppings, bake_pizza], user, conn)
         .expect("Failed to extend 'Make a Pizza' procedure template");
@@ -497,7 +497,7 @@ pub fn pizza_four_season_procedure_template(
     user: &aps_users::User,
     conn: &mut SqliteConnection,
 ) -> NestedModel<procedure_templates::table> {
-    use procedure_traits::ProcedureTemplateNode;
+    use aps_traits::ProcedureTemplateNode;
 
     // First, we create the parent procedure template for making a pizza.
     let make_pizza = procedure_template("Make a Four Seasons Pizza", user, conn);
@@ -598,7 +598,7 @@ pub fn pizza_four_season_procedure_template(
     bake_omni_pizza.reuses([&oven_model_ptam, &omni_pizza_model_ptam], conn).unwrap();
 
     // Next, we create the individual steps, and we use the traits defined in
-    // the `procedure-traits` crate to set up the relationships between them.
+    // the `aps-traits` crate to set up the relationships between them.
     // First, we define the sequence for the vegetarian path.
     make_pizza
         .extend([&heat_oven, &prepare_dough, &add_vegetarian_toppings, &bake_veg_pizza], user, conn)

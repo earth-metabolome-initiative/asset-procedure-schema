@@ -114,9 +114,8 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
             .toml_callback(generate_toml_procedure_like)
             .members([
                 TomlDependency::new("builder").path("builder")?,
-                TomlDependency::new("procedure-traits").path("crates/procedure-traits")?,
                 TomlDependency::new("sql-procedure-rules").path("crates/sql-procedure-rules")?,
-                TomlDependency::new("asset-traits").path("crates/asset-traits")?,
+                TomlDependency::new("aps-traits").path("crates/aps-traits")?,
                 TomlDependency::new("aps-test-utils").path("crates/aps-test-utils")?,
                 TomlDependency::new("procedure-template-visitor")
                     .path("crates/procedure-template-visitor")?,
