@@ -10,6 +10,6 @@ sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", 
 time_requirements = "0.1.0"
 sql-procedure-rules = { path = "../crates/sql-procedure-rules" }
 mermaid-builder = "0.1.1"
-sqlparser = { git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
+sqlparser = { version = "0.61", git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
 quote = "1.0"
 proc-macro2 = "1.0"

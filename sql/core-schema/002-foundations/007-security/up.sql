@@ -1,5 +1,5 @@
 -- Function to get the user's maximum role on a specific owner
--- Returns: 0=None, 1=Anonymous (unused), 2=Viewer, 3=Editor, 4=Admin
+-- Returns: 1=Anonymous, 2=Viewer, 3=Editor, 4=Admin
 CREATE OR REPLACE FUNCTION get_owner_role(user_uuid UUID, target_owner_id UUID) RETURNS SMALLINT LANGUAGE plpgsql SECURITY DEFINER STABLE AS $$
 DECLARE max_role SMALLINT := 0;
 BEGIN -- 1. Direct Identity (Am I the owner?)
@@ -39,23 +39,23 @@ ALTER TABLE ownables ENABLE ROW LEVEL SECURITY;
 -- Policies (Permissions based on Role)
 -- -----------------------------------------------------------------------------
 -- SELECT: Requires Viewer (2) or higher
-CREATE POLICY ownables_select_policy ON ownables FOR
-SELECT TO PUBLIC USING (
-        get_owner_role(auth_current_user_id(), owner_id) >= 2
-    );
--- INSERT: Requires Editor (3) or higher on the target owner
-CREATE POLICY ownables_insert_policy ON ownables FOR
-INSERT TO PUBLIC WITH CHECK (
-        get_owner_role(auth_current_user_id(), owner_id) >= 3
-    );
--- UPDATE: Requires Editor (3) or higher
-CREATE POLICY ownables_update_policy ON ownables FOR
-UPDATE TO PUBLIC USING (
-        get_owner_role(auth_current_user_id(), owner_id) >= 3
-    ) WITH CHECK (
-        get_owner_role(auth_current_user_id(), owner_id) >= 3
-    );
--- DELETE: Requires Admin (4) (or Owner/Team Member)
-CREATE POLICY ownables_delete_policy ON ownables FOR DELETE TO PUBLIC USING (
-    get_owner_role(auth_current_user_id(), owner_id) >= 4
-);
+-- CREATE POLICY ownables_select_policy ON ownables FOR
+-- SELECT TO PUBLIC USING (
+--         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 2
+--     );
+-- -- INSERT: Requires Editor (3) or higher on the target owner
+-- CREATE POLICY ownables_insert_policy ON ownables FOR
+-- INSERT TO PUBLIC WITH CHECK (
+--         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 3
+--     );
+-- -- UPDATE: Requires Editor (3) or higher
+-- CREATE POLICY ownables_update_policy ON ownables FOR
+-- UPDATE TO PUBLIC USING (
+--         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 3
+--     ) WITH CHECK (
+--         get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 3
+--     );
+-- -- DELETE: Requires Admin (4) (or Owner/Team Member)
+-- CREATE POLICY ownables_delete_policy ON ownables FOR DELETE TO PUBLIC USING (
+--     get_owner_role(current_setting('app.user_id')::uuid, owner_id) >= 4
+-- );

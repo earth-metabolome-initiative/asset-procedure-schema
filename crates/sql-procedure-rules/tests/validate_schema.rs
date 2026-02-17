@@ -2,8 +2,6 @@
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
-
     use sql_procedure_rules::register_procedure_constraints;
     use sql_rules::prelude::*;
     use sql_traits::prelude::ParserDB;
@@ -12,8 +10,7 @@ mod tests {
     #[test]
     fn validate_schema() {
         // Parse the database schema from the root of the repository
-        let root_path = Path::new("../../");
-        let db = ParserDB::from_path::<PostgreSqlDialect>(root_path)
+        let db = ParserDB::parse::<PostgreSqlDialect>("../../")
             .expect("Failed to parse database schema");
         assert!(db.has_tables(), "Database should have tables");
 
