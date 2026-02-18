@@ -84,6 +84,10 @@ impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for CommercialProd
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_products,
+    ::aps_marker_models::marker_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_products,
     ::aps_mass_spectrometer_models::mass_spectrometer_models
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
@@ -93,6 +97,10 @@ impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for CommercialProd
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_products,
     ::aps_physical_asset_models::physical_asset_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_products,
+    ::aps_pipette_tip_models::pipette_tip_models
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_products,

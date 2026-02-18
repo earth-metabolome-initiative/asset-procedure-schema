@@ -1,12 +1,12 @@
-# Consumables Migration Naming
+# Supplies Migration Naming
 
 This document defines naming conventions for migrations under
-`sql/shared-schema/003-shared-assets/005-consumables`.
+`sql/shared-schema/003-shared-assets/005-supplies`.
 
 ## Goals
 
 - Keep migration folder names predictable.
-- Keep table names aligned with a single canonical stem per consumable family.
+- Keep table names aligned with a single canonical stem per supply family.
 - Ensure every `CREATE TABLE` has a matching registration in `table_names`.
 
 ## Conventions
@@ -20,13 +20,13 @@ This document defines naming conventions for migrations under
 2. Canonical stem
 - Stems are derived from migration folder names by singularizing the final
   plural token.
-- Keep one consumable family per migration folder.
+- Keep one supply family per migration folder.
 
 3. Allowed table families per stem
 - `<stem>_models`
 - `commercial_<stem>_models` (if commercialized)
 - `commercial_<stem>_lots` (if lot-tracked)
-- `<stem>s` (for physical consumable assets)
+- `<stem>s` (for physical supply assets)
 
 4. Foreign key column naming
 - `<stem>_model_id`
@@ -34,7 +34,7 @@ This document defines naming conventions for migrations under
 - `commercial_<stem>_lot_id`
 
 5. `table_names` registration
-- Every table created under consumables should have an in-place registration in
+- Every table created under supplies should have an in-place registration in
   the same migration file:
   `INSERT INTO table_names (id) VALUES ('<table_name>') ON CONFLICT DO NOTHING;`
 
@@ -43,3 +43,4 @@ This document defines naming conventions for migrations under
 - `001-personal-protective-equipments`
 - `002-packaging-models`
 - `003-beads`
+- `004-pipette-tips`

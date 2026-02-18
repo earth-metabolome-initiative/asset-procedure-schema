@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration: Shared Assets / Packaging Models
+-- Migration: Shared Assets / Supplies / Packaging Models
 -- Purpose:
 --   Adds a packaging model specialization for physical asset models used as
 --   packaging in storage, transport, and procedure logistics.

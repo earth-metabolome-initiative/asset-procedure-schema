@@ -66,12 +66,16 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_marker_lots",
+ "aps-commercial_marker_models",
  "aps-commercial_mass_spectrometer_lots",
  "aps-commercial_mass_spectrometer_models",
  "aps-commercial_personal_protective_equipment_lots",
  "aps-commercial_personal_protective_equipment_models",
  "aps-commercial_phone_device_lots",
  "aps-commercial_phone_device_models",
+ "aps-commercial_pipette_tip_lots",
+ "aps-commercial_pipette_tip_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-commercial_volume_measuring_device_lots",
@@ -105,6 +109,8 @@ dependencies = [
  "aps-geopositioning_procedures",
  "aps-harvesting_procedure_templates",
  "aps-harvesting_procedures",
+ "aps-marker_models",
+ "aps-markers",
  "aps-mass_spectrometer_models",
  "aps-mass_spectrometers",
  "aps-namespaced_ownables",
@@ -116,6 +122,8 @@ dependencies = [
  "aps-packaging_models",
  "aps-packaging_procedure_templates",
  "aps-packaging_procedures",
+ "aps-panel_models",
+ "aps-panels",
  "aps-parent_procedure_templates",
  "aps-personal_protective_equipment_models",
  "aps-personal_protective_equipments",
@@ -124,8 +132,12 @@ dependencies = [
  "aps-photograph_procedure_templates",
  "aps-photograph_procedures",
  "aps-photographs",
+ "aps-physical_asset_model_lifecycle_classes",
+ "aps-physical_asset_model_lifecycle_profiles",
  "aps-physical_asset_models",
  "aps-physical_assets",
+ "aps-pipette_tip_models",
+ "aps-pipette_tips",
  "aps-pouring_procedure_templates",
  "aps-pouring_procedures",
  "aps-privacy_dependencies",
@@ -708,6 +720,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-commercial_marker_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_marker_models",
+ "aps-commercial_product_lots",
+ "aps-entities",
+ "aps-marker_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_marker_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-entities",
+ "aps-marker_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-commercial_mass_spectrometer_lots"
 version = "0.1.0"
 dependencies = [
@@ -824,6 +873,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-commercial_pipette_tip_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_pipette_tip_models",
+ "aps-commercial_product_lots",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "aps-pipette_tip_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_pipette_tip_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "aps-pipette_tip_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-commercial_product_lots"
 version = "0.1.0"
 dependencies = [
@@ -833,11 +919,13 @@ dependencies = [
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
+ "aps-marker_models",
  "aps-mass_spectrometer_models",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-personal_protective_equipment_models",
  "aps-physical_asset_models",
+ "aps-pipette_tip_models",
  "aps-volume_measuring_device_models",
  "aps-weighing_device_models",
  "diesel",
@@ -857,11 +945,13 @@ dependencies = [
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
+ "aps-marker_models",
  "aps-mass_spectrometer_models",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-personal_protective_equipment_models",
  "aps-physical_asset_models",
+ "aps-pipette_tip_models",
  "aps-volume_measuring_device_models",
  "aps-weighing_device_models",
  "diesel",
@@ -1086,12 +1176,16 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_marker_lots",
+ "aps-commercial_marker_models",
  "aps-commercial_mass_spectrometer_lots",
  "aps-commercial_mass_spectrometer_models",
  "aps-commercial_personal_protective_equipment_lots",
  "aps-commercial_personal_protective_equipment_models",
  "aps-commercial_phone_device_lots",
  "aps-commercial_phone_device_models",
+ "aps-commercial_pipette_tip_lots",
+ "aps-commercial_pipette_tip_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-commercial_volume_measuring_device_lots",
@@ -1125,6 +1219,8 @@ dependencies = [
  "aps-geopositioning_procedures",
  "aps-harvesting_procedure_templates",
  "aps-harvesting_procedures",
+ "aps-marker_models",
+ "aps-markers",
  "aps-mass_spectrometer_models",
  "aps-mass_spectrometers",
  "aps-namespaced_ownables",
@@ -1136,6 +1232,8 @@ dependencies = [
  "aps-packaging_models",
  "aps-packaging_procedure_templates",
  "aps-packaging_procedures",
+ "aps-panel_models",
+ "aps-panels",
  "aps-parent_procedure_templates",
  "aps-personal_protective_equipment_models",
  "aps-personal_protective_equipments",
@@ -1144,8 +1242,11 @@ dependencies = [
  "aps-photograph_procedure_templates",
  "aps-photograph_procedures",
  "aps-photographs",
+ "aps-physical_asset_model_lifecycle_profiles",
  "aps-physical_asset_models",
  "aps-physical_assets",
+ "aps-pipette_tip_models",
+ "aps-pipette_tips",
  "aps-pouring_procedure_templates",
  "aps-pouring_procedures",
  "aps-privacy_dependencies",
@@ -1575,6 +1676,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-marker_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-markers"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-entities",
+ "aps-marker_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-mass_spectrometer_models"
 version = "0.1.0"
 dependencies = [
@@ -1748,6 +1882,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-panel_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-panels"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-panel_models",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-parent_procedure_templates"
 version = "0.1.0"
 dependencies = [
@@ -1892,6 +2059,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-physical_asset_model_lifecycle_classes"
+version = "0.1.0"
+dependencies = [
+ "diesel",
+ "diesel-builders",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-physical_asset_model_lifecycle_profiles"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_model_lifecycle_classes",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-physical_asset_models"
 version = "0.1.0"
 dependencies = [
@@ -1915,6 +2109,39 @@ dependencies = [
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-pipette_tip_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-pipette_tips"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_assets",
+ "aps-pipette_tip_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",

@@ -40,12 +40,16 @@ members = [
   "aps/aps-commercial_freezer_models",
   "aps/aps-commercial_geopositioning_device_lots",
   "aps/aps-commercial_geopositioning_device_models",
+  "aps/aps-commercial_marker_lots",
+  "aps/aps-commercial_marker_models",
   "aps/aps-commercial_mass_spectrometer_lots",
   "aps/aps-commercial_mass_spectrometer_models",
   "aps/aps-commercial_personal_protective_equipment_lots",
   "aps/aps-commercial_personal_protective_equipment_models",
   "aps/aps-commercial_phone_device_lots",
   "aps/aps-commercial_phone_device_models",
+  "aps/aps-commercial_pipette_tip_lots",
+  "aps/aps-commercial_pipette_tip_models",
   "aps/aps-commercial_product_lots",
   "aps/aps-commercial_products",
   "aps/aps-commercial_volume_measuring_device_lots",
@@ -79,6 +83,8 @@ members = [
   "aps/aps-geopositioning_procedures",
   "aps/aps-harvesting_procedure_templates",
   "aps/aps-harvesting_procedures",
+  "aps/aps-marker_models",
+  "aps/aps-markers",
   "aps/aps-mass_spectrometer_models",
   "aps/aps-mass_spectrometers",
   "aps/aps-namespaced_ownables",
@@ -90,6 +96,8 @@ members = [
   "aps/aps-packaging_models",
   "aps/aps-packaging_procedure_templates",
   "aps/aps-packaging_procedures",
+  "aps/aps-panel_models",
+  "aps/aps-panels",
   "aps/aps-parent_procedure_templates",
   "aps/aps-personal_protective_equipment_models",
   "aps/aps-personal_protective_equipments",
@@ -98,8 +106,12 @@ members = [
   "aps/aps-photograph_procedure_templates",
   "aps/aps-photograph_procedures",
   "aps/aps-photographs",
+  "aps/aps-physical_asset_model_lifecycle_classes",
+  "aps/aps-physical_asset_model_lifecycle_profiles",
   "aps/aps-physical_asset_models",
   "aps/aps-physical_assets",
+  "aps/aps-pipette_tip_models",
+  "aps/aps-pipette_tips",
   "aps/aps-pouring_procedure_templates",
   "aps/aps-pouring_procedures",
   "aps/aps-privacy_dependencies",
@@ -178,12 +190,16 @@ aps-commercial_freezer_lots = { path = "aps/aps-commercial_freezer_lots" }
 aps-commercial_freezer_models = { path = "aps/aps-commercial_freezer_models" }
 aps-commercial_geopositioning_device_lots = { path = "aps/aps-commercial_geopositioning_device_lots" }
 aps-commercial_geopositioning_device_models = { path = "aps/aps-commercial_geopositioning_device_models" }
+aps-commercial_marker_lots = { path = "aps/aps-commercial_marker_lots" }
+aps-commercial_marker_models = { path = "aps/aps-commercial_marker_models" }
 aps-commercial_mass_spectrometer_lots = { path = "aps/aps-commercial_mass_spectrometer_lots" }
 aps-commercial_mass_spectrometer_models = { path = "aps/aps-commercial_mass_spectrometer_models" }
 aps-commercial_personal_protective_equipment_lots = { path = "aps/aps-commercial_personal_protective_equipment_lots" }
 aps-commercial_personal_protective_equipment_models = { path = "aps/aps-commercial_personal_protective_equipment_models" }
 aps-commercial_phone_device_lots = { path = "aps/aps-commercial_phone_device_lots" }
 aps-commercial_phone_device_models = { path = "aps/aps-commercial_phone_device_models" }
+aps-commercial_pipette_tip_lots = { path = "aps/aps-commercial_pipette_tip_lots" }
+aps-commercial_pipette_tip_models = { path = "aps/aps-commercial_pipette_tip_models" }
 aps-commercial_product_lots = { path = "aps/aps-commercial_product_lots" }
 aps-commercial_products = { path = "aps/aps-commercial_products" }
 aps-commercial_volume_measuring_device_lots = { path = "aps/aps-commercial_volume_measuring_device_lots" }
@@ -217,6 +233,8 @@ aps-geopositioning_procedure_templates = { path = "aps/aps-geopositioning_proced
 aps-geopositioning_procedures = { path = "aps/aps-geopositioning_procedures" }
 aps-harvesting_procedure_templates = { path = "aps/aps-harvesting_procedure_templates" }
 aps-harvesting_procedures = { path = "aps/aps-harvesting_procedures" }
+aps-marker_models = { path = "aps/aps-marker_models" }
+aps-markers = { path = "aps/aps-markers" }
 aps-mass_spectrometer_models = { path = "aps/aps-mass_spectrometer_models" }
 aps-mass_spectrometers = { path = "aps/aps-mass_spectrometers" }
 aps-namespaced_ownables = { path = "aps/aps-namespaced_ownables" }
@@ -228,6 +246,8 @@ aps-owners = { path = "aps/aps-owners" }
 aps-packaging_models = { path = "aps/aps-packaging_models" }
 aps-packaging_procedure_templates = { path = "aps/aps-packaging_procedure_templates" }
 aps-packaging_procedures = { path = "aps/aps-packaging_procedures" }
+aps-panel_models = { path = "aps/aps-panel_models" }
+aps-panels = { path = "aps/aps-panels" }
 aps-parent_procedure_templates = { path = "aps/aps-parent_procedure_templates" }
 aps-personal_protective_equipment_models = { path = "aps/aps-personal_protective_equipment_models" }
 aps-personal_protective_equipments = { path = "aps/aps-personal_protective_equipments" }
@@ -236,8 +256,12 @@ aps-phone_devices = { path = "aps/aps-phone_devices" }
 aps-photograph_procedure_templates = { path = "aps/aps-photograph_procedure_templates" }
 aps-photograph_procedures = { path = "aps/aps-photograph_procedures" }
 aps-photographs = { path = "aps/aps-photographs" }
+aps-physical_asset_model_lifecycle_classes = { path = "aps/aps-physical_asset_model_lifecycle_classes" }
+aps-physical_asset_model_lifecycle_profiles = { path = "aps/aps-physical_asset_model_lifecycle_profiles" }
 aps-physical_asset_models = { path = "aps/aps-physical_asset_models" }
 aps-physical_assets = { path = "aps/aps-physical_assets" }
+aps-pipette_tip_models = { path = "aps/aps-pipette_tip_models" }
+aps-pipette_tips = { path = "aps/aps-pipette_tips" }
 aps-pouring_procedure_templates = { path = "aps/aps-pouring_procedure_templates" }
 aps-pouring_procedures = { path = "aps/aps-pouring_procedures" }
 aps-privacy_dependencies = { path = "aps/aps-privacy_dependencies" }

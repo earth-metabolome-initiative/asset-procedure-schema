@@ -124,11 +124,19 @@ impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_mode
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_product_lots,
+    ::aps_marker_models::marker_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_product_lots,
     ::aps_mass_spectrometer_models::mass_spectrometer_models
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_product_lots,
     ::aps_personal_protective_equipment_models::personal_protective_equipment_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_product_lots,
+    ::aps_pipette_tip_models::pipette_tip_models
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_product_lots,

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration: Shared Assets / Beads
+-- Migration: Shared Assets / Supplies / Beads
 -- Purpose:
 --   Adds bead model specialization with physical diameter metadata used by
 --   procedures that depend on bead size.

@@ -52,6 +52,8 @@ pub use aps_commercial_geopositioning_device_lots::{
 pub use aps_commercial_geopositioning_device_models::{
     self, CommercialGeopositioningDeviceModel, commercial_geopositioning_device_models,
 };
+pub use aps_commercial_marker_lots::{self, CommercialMarkerLot, commercial_marker_lots};
+pub use aps_commercial_marker_models::{self, CommercialMarkerModel, commercial_marker_models};
 pub use aps_commercial_mass_spectrometer_lots::{
     self, CommercialMassSpectrometerLot, commercial_mass_spectrometer_lots,
 };
@@ -70,6 +72,12 @@ pub use aps_commercial_phone_device_lots::{
 };
 pub use aps_commercial_phone_device_models::{
     self, CommercialPhoneDeviceModel, commercial_phone_device_models,
+};
+pub use aps_commercial_pipette_tip_lots::{
+    self, CommercialPipetteTipLot, commercial_pipette_tip_lots,
+};
+pub use aps_commercial_pipette_tip_models::{
+    self, CommercialPipetteTipModel, commercial_pipette_tip_models,
 };
 pub use aps_commercial_product_lots::{self, CommercialProductLot, commercial_product_lots};
 pub use aps_commercial_products::{self, CommercialProduct, commercial_products};
@@ -132,6 +140,8 @@ pub use aps_harvesting_procedure_templates::{
     self, HarvestingProcedureTemplate, harvesting_procedure_templates,
 };
 pub use aps_harvesting_procedures::{self, HarvestingProcedure, harvesting_procedures};
+pub use aps_marker_models::{self, MarkerModel, marker_models};
+pub use aps_markers::{self, Marker, markers};
 pub use aps_mass_spectrometer_models::{self, MassSpectrometerModel, mass_spectrometer_models};
 pub use aps_mass_spectrometers::{self, MassSpectrometer, mass_spectrometers};
 pub use aps_namespaced_ownables::{self, NamespacedOwnable, namespaced_ownables};
@@ -145,6 +155,8 @@ pub use aps_packaging_procedure_templates::{
     self, PackagingProcedureTemplate, packaging_procedure_templates,
 };
 pub use aps_packaging_procedures::{self, PackagingProcedure, packaging_procedures};
+pub use aps_panel_models::{self, PanelModel, panel_models};
+pub use aps_panels::{self, Panel, panels};
 pub use aps_parent_procedure_templates::{
     self, ParentProcedureTemplate, parent_procedure_templates,
 };
@@ -161,8 +173,13 @@ pub use aps_photograph_procedure_templates::{
 };
 pub use aps_photograph_procedures::{self, PhotographProcedure, photograph_procedures};
 pub use aps_photographs::{self, Photograph, photographs};
+pub use aps_physical_asset_model_lifecycle_profiles::{
+    self, PhysicalAssetModelLifecycleProfile, physical_asset_model_lifecycle_profiles,
+};
 pub use aps_physical_asset_models::{self, PhysicalAssetModel, physical_asset_models};
 pub use aps_physical_assets::{self, PhysicalAsset, physical_assets};
+pub use aps_pipette_tip_models::{self, PipetteTipModel, pipette_tip_models};
+pub use aps_pipette_tips::{self, PipetteTip, pipette_tips};
 pub use aps_pouring_procedure_templates::{
     self, PouringProcedureTemplate, pouring_procedure_templates,
 };

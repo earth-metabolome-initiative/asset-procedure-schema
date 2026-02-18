@@ -1,0 +1,21 @@
+[package]
+name = "aps-panels"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+validation-errors.workspace = true
+rosetta-uuid.workspace = true
+aps-assets.workspace = true
+aps-entities.workspace = true
+aps-namespaced_ownables.workspace = true
+aps-ownables.workspace = true
+aps-panel_models.workspace = true
+aps-physical_assets.workspace = true
+
+[lints]
+workspace = true
