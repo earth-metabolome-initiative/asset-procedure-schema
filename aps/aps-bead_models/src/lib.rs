@@ -13,7 +13,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `bead_models` table.
+/// Catalog of bead models with diameter metadata.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -27,11 +27,11 @@
 #[table_model(default(aps_entities::entities::table_name_id, "bead_models"))]
 # [diesel (table_name = bead_models)]
 pub struct BeadModel {
-    /// Field representing the `id` column in table `bead_models`.
+    /// Stable model identifier inherited from `physical_asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Diameter in millimeters
+    /// Bead diameter in millimeters.
     diameter: f32,
 }
 impl ::diesel_builders::ValidateColumn<bead_models::diameter>

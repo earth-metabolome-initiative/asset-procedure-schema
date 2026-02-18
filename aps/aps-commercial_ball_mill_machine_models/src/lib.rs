@@ -16,8 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `commercial_ball_mill_machine_models`
-/// table.
+/// Catalog of commercial ball mill machine models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -38,14 +37,12 @@
 ))]
 # [diesel (table_name = commercial_ball_mill_machine_models)]
 pub struct CommercialBallMillMachineModel {
-    /// Field representing the `id` column in table
-    /// `commercial_ball_mill_machine_models`.
+    /// Stable commercial model identifier shared with parent model tables.
     #[same_as(aps_asset_models::asset_models::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `ball_mill_machine_model_id` column in table
-    /// `commercial_ball_mill_machine_models`.
+    /// Base ball-mill model represented by this commercial model.
     #[same_as(aps_asset_models::asset_models::parent_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

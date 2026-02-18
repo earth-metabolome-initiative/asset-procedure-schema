@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `photographs` table.
+/// Physical record of a digital asset that is specifically a photograph.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -30,7 +30,7 @@
 #[table_model(default(aps_entities::entities::table_name_id, "photographs"))]
 # [diesel (table_name = photographs)]
 pub struct Photograph {
-    /// Field representing the `id` column in table `photographs`.
+    /// Stable asset identifier inherited from `digital_assets`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,

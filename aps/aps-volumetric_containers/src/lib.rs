@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `volumetric_containers` table.
+/// Physical containers whose model explicitly carries volumetric metadata.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -33,14 +33,13 @@
 #[table_model(default(aps_entities::entities::table_name_id, "volumetric_containers"))]
 # [diesel (table_name = volumetric_containers)]
 pub struct VolumetricContainer {
-    /// Field representing the `id` column in table `volumetric_containers`.
+    /// Stable asset identifier inherited from `containers`.
     #[same_as(aps_physical_assets::physical_assets::id)]
     #[same_as(aps_containers::containers::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `volumetric_container_model_id` column in table
-    /// `volumetric_containers`.
+    /// Volumetric model instantiated by this container.
     #[same_as(aps_containers::containers::container_model_id)]
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
     #[infallible]

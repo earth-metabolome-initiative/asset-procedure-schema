@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// A commercial product is an asset model produced by some brand.
+/// Catalog of branded product models that extend APS asset models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -31,11 +31,11 @@
 #[table_model(default(aps_entities::entities::table_name_id, "commercial_products"))]
 # [diesel (table_name = commercial_products)]
 pub struct CommercialProduct {
-    /// Identifier of the commercial product
+    /// Stable model identifier inherited from `asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// The brand producing this commercial product
+    /// Brand responsible for manufacturing or distributing this product model.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     brand_id: ::rosetta_uuid::Uuid,
@@ -81,6 +81,10 @@ impl ::diesel_builders::GetColumn<aps_ownables::ownables::id> for CommercialProd
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_products,
     ::aps_geopositioning_device_models::geopositioning_device_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_products,
+    ::aps_mass_spectrometer_models::mass_spectrometer_models
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
     commercial_products,

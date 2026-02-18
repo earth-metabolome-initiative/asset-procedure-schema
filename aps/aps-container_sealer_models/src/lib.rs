@@ -16,8 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Any physical asset whose primary function is to seal, cover, or close a
-/// container opening.
+/// Catalog of models whose primary role is sealing container openings.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -31,7 +30,7 @@
 #[table_model(default(aps_entities::entities::table_name_id, "container_sealer_models"))]
 # [diesel (table_name = container_sealer_models)]
 pub struct ContainerSealerModel {
-    /// Field representing the `id` column in table `container_sealer_models`.
+    /// Stable model identifier inherited from `physical_asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,

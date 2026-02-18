@@ -17,8 +17,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `commercial_volume_measuring_device_models`
-/// table.
+/// Catalog of commercial volume-measuring device models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -39,14 +38,12 @@
 ))]
 # [diesel (table_name = commercial_volume_measuring_device_models)]
 pub struct CommercialVolumeMeasuringDeviceModel {
-    /// Field representing the `id` column in table
-    /// `commercial_volume_measuring_device_models`.
+    /// Stable commercial model identifier shared with parent model tables.
     #[same_as(aps_asset_models::asset_models::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `volume_measuring_device_model_id` column in
-    /// table `commercial_volume_measuring_device_models`.
+    /// Base volume-measuring model represented by this commercial model.
     #[same_as(aps_asset_models::asset_models::parent_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

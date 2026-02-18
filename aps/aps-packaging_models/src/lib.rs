@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `packaging_models` table.
+/// Catalog of physical asset models used as packaging.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -30,7 +30,7 @@
 #[table_model(default(aps_entities::entities::table_name_id, "packaging_models"))]
 # [diesel (table_name = packaging_models)]
 pub struct PackagingModel {
-    /// Field representing the `id` column in table `packaging_models`.
+    /// Stable model identifier inherited from `physical_asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,

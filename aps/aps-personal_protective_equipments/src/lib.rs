@@ -16,8 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Physical PPE items tracked as individual assets in inventory and procedure
-/// execution.
+/// Physical personal protective equipment assets tracked in APS inventory.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -33,12 +32,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "personal_protective_equipments"))]
 # [diesel (table_name = personal_protective_equipments)]
 pub struct PersonalProtectiveEquipment {
-    /// Stable identifier inherited from `physical_assets`.
+    /// Stable asset identifier inherited from physical_assets.
     #[same_as(aps_physical_assets::physical_assets::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Declares which PPE model this physical item instantiates.
+    /// PPE model instantiated by this physical asset.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `freeze_dryers` table.
+/// Physical freeze dryers tracked in APS inventory.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -32,13 +32,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "freeze_dryers"))]
 # [diesel (table_name = freeze_dryers)]
 pub struct FreezeDryer {
-    /// Field representing the `id` column in table `freeze_dryers`.
+    /// Stable asset identifier inherited from physical_assets.
     #[same_as(aps_physical_assets::physical_assets::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `commercial_freeze_dryer_lot_id` column in table
-    /// `freeze_dryers`.
+    /// Commercial lot model instantiated by this physical asset.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

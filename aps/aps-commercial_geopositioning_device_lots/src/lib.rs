@@ -16,8 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `commercial_geopositioning_device_lots`
-/// table.
+/// Catalog of lot-specific commercial geopositioning device models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -40,14 +39,12 @@
 ))]
 # [diesel (table_name = commercial_geopositioning_device_lots)]
 pub struct CommercialGeopositioningDeviceLot {
-    /// Field representing the `id` column in table
-    /// `commercial_geopositioning_device_lots`.
+    /// Stable lot-model identifier shared with parent lot/model tables.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `commercial_geopositioning_device_model_id`
-    /// column in table `commercial_geopositioning_device_lots`.
+    /// Commercial geopositioning device model from which this lot derives.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

@@ -3,7 +3,6 @@ resolver = "2"
 members = [
   "builder",
   "crates/sql-procedure-rules",
-  "crates/sql-migration-lint",
   "crates/aps-traits",
   "crates/aps-test-utils",
   "crates/procedure-template-visitor",
@@ -40,6 +39,8 @@ members = [
   "aps/aps-commercial_freezer_models",
   "aps/aps-commercial_geopositioning_device_lots",
   "aps/aps-commercial_geopositioning_device_models",
+  "aps/aps-commercial_mass_spectrometer_lots",
+  "aps/aps-commercial_mass_spectrometer_models",
   "aps/aps-commercial_personal_protective_equipment_lots",
   "aps/aps-commercial_personal_protective_equipment_models",
   "aps/aps-commercial_phone_device_lots",
@@ -77,6 +78,8 @@ members = [
   "aps/aps-geopositioning_procedures",
   "aps/aps-harvesting_procedure_templates",
   "aps/aps-harvesting_procedures",
+  "aps/aps-mass_spectrometer_models",
+  "aps/aps-mass_spectrometers",
   "aps/aps-namespaced_ownables",
   "aps/aps-namespaces",
   "aps/aps-next_procedure_templates",
@@ -173,6 +176,8 @@ aps-commercial_freezer_lots = { path = "aps/aps-commercial_freezer_lots" }
 aps-commercial_freezer_models = { path = "aps/aps-commercial_freezer_models" }
 aps-commercial_geopositioning_device_lots = { path = "aps/aps-commercial_geopositioning_device_lots" }
 aps-commercial_geopositioning_device_models = { path = "aps/aps-commercial_geopositioning_device_models" }
+aps-commercial_mass_spectrometer_lots = { path = "aps/aps-commercial_mass_spectrometer_lots" }
+aps-commercial_mass_spectrometer_models = { path = "aps/aps-commercial_mass_spectrometer_models" }
 aps-commercial_personal_protective_equipment_lots = { path = "aps/aps-commercial_personal_protective_equipment_lots" }
 aps-commercial_personal_protective_equipment_models = { path = "aps/aps-commercial_personal_protective_equipment_models" }
 aps-commercial_phone_device_lots = { path = "aps/aps-commercial_phone_device_lots" }
@@ -210,6 +215,8 @@ aps-geopositioning_procedure_templates = { path = "aps/aps-geopositioning_proced
 aps-geopositioning_procedures = { path = "aps/aps-geopositioning_procedures" }
 aps-harvesting_procedure_templates = { path = "aps/aps-harvesting_procedure_templates" }
 aps-harvesting_procedures = { path = "aps/aps-harvesting_procedures" }
+aps-mass_spectrometer_models = { path = "aps/aps-mass_spectrometer_models" }
+aps-mass_spectrometers = { path = "aps/aps-mass_spectrometers" }
 aps-namespaced_ownables = { path = "aps/aps-namespaced_ownables" }
 aps-namespaces = { path = "aps/aps-namespaces" }
 aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }

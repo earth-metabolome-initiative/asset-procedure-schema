@@ -51,6 +51,12 @@ pub use aps_commercial_geopositioning_device_lots::{
 pub use aps_commercial_geopositioning_device_models::{
     self, CommercialGeopositioningDeviceModel, commercial_geopositioning_device_models,
 };
+pub use aps_commercial_mass_spectrometer_lots::{
+    self, CommercialMassSpectrometerLot, commercial_mass_spectrometer_lots,
+};
+pub use aps_commercial_mass_spectrometer_models::{
+    self, CommercialMassSpectrometerModel, commercial_mass_spectrometer_models,
+};
 pub use aps_commercial_personal_protective_equipment_lots::{
     self, CommercialPersonalProtectiveEquipmentLot, commercial_personal_protective_equipment_lots,
 };
@@ -125,6 +131,8 @@ pub use aps_harvesting_procedure_templates::{
     self, HarvestingProcedureTemplate, harvesting_procedure_templates,
 };
 pub use aps_harvesting_procedures::{self, HarvestingProcedure, harvesting_procedures};
+pub use aps_mass_spectrometer_models::{self, MassSpectrometerModel, mass_spectrometer_models};
+pub use aps_mass_spectrometers::{self, MassSpectrometer, mass_spectrometers};
 pub use aps_namespaced_ownables::{self, NamespacedOwnable, namespaced_ownables};
 pub use aps_namespaces::{self, Namespace, namespaces};
 pub use aps_next_procedure_templates::{self, NextProcedureTemplate, next_procedure_templates};

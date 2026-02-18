@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `container_compatibility_rules` table.
+/// specific container model and in what quantity.
 #[table_model(ancestors(aps_entities::entities, aps_ownables::ownables))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_ownables :: Ownable , foreign_key = id))]
@@ -28,21 +28,17 @@
 #[table_model(default(aps_entities::entities::table_name_id, "container_compatibility_rules"))]
 # [diesel (table_name = container_compatibility_rules)]
 pub struct ContainerCompatibilityRule {
-    /// Field representing the `id` column in table
-    /// `container_compatibility_rules`.
+    /// Stable rule identifier inherited from `ownables`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `container_model_id` column in table
-    /// `container_compatibility_rules`.
+    /// Container model that receives contained assets.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     container_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `contained_asset_model_id` column in table
-    /// `container_compatibility_rules`.
+    /// Physical asset model allowed inside the container model.
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     contained_asset_model_id: ::rosetta_uuid::Uuid,
-    /// The maximal quantity of the right trackable that can be associated with
-    /// the left trackable.
+    /// Maximum allowed count of `contained_asset_model_id` in the container.
     #[table_model(default = 1i16)]
     quantity: i16,
 }
@@ -63,9 +59,10 @@ impl ::diesel_builders::ValidateColumn<container_compatibility_rules::container_
         if let Some(contained_asset_model_id) = <Self as diesel_builders::MayGetColumn<
             container_compatibility_rules::contained_asset_model_id,
         >>::may_get_column_ref(self)
-            && container_model_id == contained_asset_model_id
         {
-            return Err (:: validation_errors :: ValidationError :: equal (< crate :: container_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: container_compatibility_rules :: container_model_id :: NAME , crate :: container_compatibility_rules :: contained_asset_model_id :: NAME)) ;
+            if container_model_id == contained_asset_model_id {
+                return Err (:: validation_errors :: ValidationError :: equal (< crate :: container_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: container_compatibility_rules :: container_model_id :: NAME , crate :: container_compatibility_rules :: contained_asset_model_id :: NAME)) ;
+            }
         }
         Ok(())
     }
@@ -83,9 +80,10 @@ impl ::diesel_builders::ValidateColumn<container_compatibility_rules::contained_
         if let Some(container_model_id) = <Self as diesel_builders::MayGetColumn<
             container_compatibility_rules::container_model_id,
         >>::may_get_column_ref(self)
-            && container_model_id == contained_asset_model_id
         {
-            return Err (:: validation_errors :: ValidationError :: equal (< crate :: container_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: container_compatibility_rules :: container_model_id :: NAME , crate :: container_compatibility_rules :: contained_asset_model_id :: NAME)) ;
+            if container_model_id == contained_asset_model_id {
+                return Err (:: validation_errors :: ValidationError :: equal (< crate :: container_compatibility_rules :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: container_compatibility_rules :: container_model_id :: NAME , crate :: container_compatibility_rules :: contained_asset_model_id :: NAME)) ;
+            }
         }
         Ok(())
     }

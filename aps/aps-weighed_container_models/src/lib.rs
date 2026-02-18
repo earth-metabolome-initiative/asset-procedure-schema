@@ -13,7 +13,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Container models which have a known empty weight.
+/// Specialization of container models with known empty mass.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -28,11 +28,11 @@
 #[table_model(default(aps_entities::entities::table_name_id, "weighed_container_models"))]
 # [diesel (table_name = weighed_container_models)]
 pub struct WeighedContainerModel {
-    /// Field representing the `id` column in table `weighed_container_models`.
+    /// Stable model identifier inherited from `container_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Mass in kilograms. The empty weight of the container.
+    /// Empty container mass in kilograms.
     mass: f32,
 }
 impl ::diesel_builders::ValidateColumn<weighed_container_models::mass>

@@ -16,6 +16,7 @@ aps-entities.workspace = true
 aps-freeze_dryer_models.workspace = true
 aps-freezer_models.workspace = true
 aps-geopositioning_device_models.workspace = true
+aps-mass_spectrometer_models.workspace = true
 aps-namespaced_ownables.workspace = true
 aps-ownables.workspace = true
 aps-personal_protective_equipment_models.workspace = true

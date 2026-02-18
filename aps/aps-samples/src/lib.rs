@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `samples` table.
+/// mandatory source-model compatibility.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -36,22 +36,22 @@
 #[table_model(default(aps_entities::entities::table_name_id, "samples"))]
 # [diesel (table_name = samples)]
 pub struct Sample {
-    /// Field representing the `id` column in table `samples`.
+    /// Stable asset identifier inherited from `physical_assets`.
     #[same_as(aps_physical_assets::physical_assets::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `sample_model_id` column in table `samples`.
+    /// Sample model instantiated by this physical sample.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_model_id: ::rosetta_uuid::Uuid,
-    /// Field representing the `sample_source_id` column in table `samples`.
+    /// Optional concrete source asset the sample was taken from.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_id: Option<::rosetta_uuid::Uuid>,
-    /// Field representing the `sample_source_model_id` column in table
-    /// `samples`.
+    /// Required source-model family associated with the sample and source
+    /// relation.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     sample_source_model_id: ::rosetta_uuid::Uuid,

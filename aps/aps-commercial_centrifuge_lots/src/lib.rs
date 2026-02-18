@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `commercial_centrifuge_lots` table.
+/// Catalog of lot-specific commercial centrifuge models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -36,14 +36,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "commercial_centrifuge_lots"))]
 # [diesel (table_name = commercial_centrifuge_lots)]
 pub struct CommercialCentrifugeLot {
-    /// Field representing the `id` column in table
-    /// `commercial_centrifuge_lots`.
+    /// Stable lot-model identifier shared with parent lot/model tables.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `commercial_centrifuge_model_id` column in table
-    /// `commercial_centrifuge_lots`.
+    /// Commercial centrifuge model from which this lot derives.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

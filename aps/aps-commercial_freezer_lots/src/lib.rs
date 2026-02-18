@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `commercial_freezer_lots` table.
+/// Catalog of lot-specific commercial freezer models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -36,13 +36,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "commercial_freezer_lots"))]
 # [diesel (table_name = commercial_freezer_lots)]
 pub struct CommercialFreezerLot {
-    /// Field representing the `id` column in table `commercial_freezer_lots`.
+    /// Stable lot-model identifier shared with parent lot/model tables.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `commercial_freezer_model_id` column in table
-    /// `commercial_freezer_lots`.
+    /// Commercial freezer model from which this lot derives.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

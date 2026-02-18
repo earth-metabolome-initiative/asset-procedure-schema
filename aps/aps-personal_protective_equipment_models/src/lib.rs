@@ -16,8 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Catalog of PPE model definitions that can be referenced by physical PPE
-/// assets.
+/// Catalog of personal protective equipment model definitions.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -34,7 +33,7 @@
 ))]
 # [diesel (table_name = personal_protective_equipment_models)]
 pub struct PersonalProtectiveEquipmentModel {
-    /// Stable identifier inherited from `physical_asset_models`.
+    /// Stable model identifier inherited from physical_asset_models.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,

@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `commercial_camera_models` table.
+/// Catalog of commercial camera models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -34,13 +34,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "commercial_camera_models"))]
 # [diesel (table_name = commercial_camera_models)]
 pub struct CommercialCameraModel {
-    /// Field representing the `id` column in table `commercial_camera_models`.
+    /// Stable commercial model identifier shared with parent model tables.
     #[same_as(aps_asset_models::asset_models::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `camera_model_id` column in table
-    /// `commercial_camera_models`.
+    /// Base camera model represented by this commercial model.
     #[same_as(aps_asset_models::asset_models::parent_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

@@ -63,28 +63,32 @@ impl ::diesel_builders::ValidateColumn<procedures::id>
         if let Some(parent_procedure_id) = <Self as diesel_builders::MayGetColumn<
             procedures::parent_procedure_id,
         >>::may_get_column_ref(self)
-            && parent_procedure_id
+        {
+            if parent_procedure_id
                 .as_ref()
                 .is_some_and(|parent_procedure_id| id == parent_procedure_id)
-        {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::id::NAME,
-                crate::procedures::parent_procedure_id::NAME,
-            ));
+            {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::id::NAME,
+                    crate::procedures::parent_procedure_id::NAME,
+                ));
+            }
         }
         if let Some(predecessor_procedure_id) = <Self as diesel_builders::MayGetColumn<
             procedures::predecessor_procedure_id,
         >>::may_get_column_ref(self)
-            && predecessor_procedure_id
+        {
+            if predecessor_procedure_id
                 .as_ref()
                 .is_some_and(|predecessor_procedure_id| id == predecessor_procedure_id)
-        {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::id::NAME,
-                crate::procedures::predecessor_procedure_id::NAME,
-            ));
+            {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::id::NAME,
+                    crate::procedures::predecessor_procedure_id::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -102,30 +106,32 @@ impl ::diesel_builders::ValidateColumn<procedures::procedure_template_id>
         if let Some(parent_procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::parent_procedure_template_id,
         >>::may_get_column_ref(self)
-            && parent_procedure_template_id.as_ref().is_some_and(|parent_procedure_template_id| {
-                procedure_template_id == parent_procedure_template_id
-            })
         {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::procedure_template_id::NAME,
-                crate::procedures::parent_procedure_template_id::NAME,
-            ));
+            if parent_procedure_template_id.as_ref().is_some_and(|parent_procedure_template_id| {
+                procedure_template_id == parent_procedure_template_id
+            }) {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::procedure_template_id::NAME,
+                    crate::procedures::parent_procedure_template_id::NAME,
+                ));
+            }
         }
         if let Some(predecessor_procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::predecessor_procedure_template_id,
         >>::may_get_column_ref(self)
-            && predecessor_procedure_template_id.as_ref().is_some_and(
+        {
+            if predecessor_procedure_template_id.as_ref().is_some_and(
                 |predecessor_procedure_template_id| {
                     procedure_template_id == predecessor_procedure_template_id
                 },
-            )
-        {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::procedure_template_id::NAME,
-                crate::procedures::predecessor_procedure_template_id::NAME,
-            ));
+            ) {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::procedure_template_id::NAME,
+                    crate::procedures::predecessor_procedure_template_id::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -142,13 +148,14 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_id>
         use diesel::Column;
         if let Some(id) =
             <Self as diesel_builders::MayGetColumn<procedures::id>>::may_get_column_ref(self)
-            && id == parent_procedure_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::id::NAME,
-                crate::procedures::parent_procedure_id::NAME,
-            ));
+            if id == parent_procedure_id {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::id::NAME,
+                    crate::procedures::parent_procedure_id::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -166,13 +173,14 @@ impl ::diesel_builders::ValidateColumn<procedures::parent_procedure_template_id>
         if let Some(procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::procedure_template_id,
         >>::may_get_column_ref(self)
-            && procedure_template_id == parent_procedure_template_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::procedure_template_id::NAME,
-                crate::procedures::parent_procedure_template_id::NAME,
-            ));
+            if procedure_template_id == parent_procedure_template_id {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::procedure_template_id::NAME,
+                    crate::procedures::parent_procedure_template_id::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -189,13 +197,14 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_id>
         use diesel::Column;
         if let Some(id) =
             <Self as diesel_builders::MayGetColumn<procedures::id>>::may_get_column_ref(self)
-            && id == predecessor_procedure_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::id::NAME,
-                crate::procedures::predecessor_procedure_id::NAME,
-            ));
+            if id == predecessor_procedure_id {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::id::NAME,
+                    crate::procedures::predecessor_procedure_id::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -213,13 +222,14 @@ impl ::diesel_builders::ValidateColumn<procedures::predecessor_procedure_templat
         if let Some(procedure_template_id) = <Self as diesel_builders::MayGetColumn<
             procedures::procedure_template_id,
         >>::may_get_column_ref(self)
-            && procedure_template_id == predecessor_procedure_template_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::procedures::procedure_template_id::NAME,
-                crate::procedures::predecessor_procedure_template_id::NAME,
-            ));
+            if procedure_template_id == predecessor_procedure_template_id {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::procedures::procedure_template_id::NAME,
+                    crate::procedures::predecessor_procedure_template_id::NAME,
+                ));
+            }
         }
         Ok(())
     }

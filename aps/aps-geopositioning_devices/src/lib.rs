@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `geopositioning_devices` table.
+/// Physical geopositioning devices tracked in APS inventory.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -32,13 +32,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "geopositioning_devices"))]
 # [diesel (table_name = geopositioning_devices)]
 pub struct GeopositioningDevice {
-    /// Field representing the `id` column in table `geopositioning_devices`.
+    /// Stable asset identifier inherited from physical_assets.
     #[same_as(aps_physical_assets::physical_assets::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `commercial_geopositioning_device_lot_id` column
-    /// in table `geopositioning_devices`.
+    /// Commercial lot model instantiated by this physical asset.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

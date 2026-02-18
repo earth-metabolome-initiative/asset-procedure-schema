@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `sample_sources` table.
+/// Physical assets that can act as concrete sample sources.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -32,13 +32,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "sample_sources"))]
 # [diesel (table_name = sample_sources)]
 pub struct SampleSource {
-    /// Field representing the `id` column in table `sample_sources`.
+    /// Stable asset identifier inherited from `physical_assets`.
     #[same_as(aps_physical_assets::physical_assets::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `sample_source_model_id` column in table
-    /// `sample_sources`.
+    /// Source model instantiated by this physical source asset.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

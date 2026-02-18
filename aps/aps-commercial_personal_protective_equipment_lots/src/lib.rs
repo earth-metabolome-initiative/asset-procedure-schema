@@ -17,7 +17,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Commercial PPE lot catalog.
+/// Catalog of lot-specific commercial personal protective equipment models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -40,15 +40,12 @@
 ))]
 # [diesel (table_name = commercial_personal_protective_equipment_lots)]
 pub struct CommercialPersonalProtectiveEquipmentLot {
-    /// Field representing the `id` column in table
-    /// `commercial_personal_protective_equipment_lots`.
+    /// Stable lot-model identifier shared with parent lot/model tables.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the
-    /// `commercial_personal_protective_equipment_model_id` column in table
-    /// `commercial_personal_protective_equipment_lots`.
+    /// Commercial PPE model from which this lot derives.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

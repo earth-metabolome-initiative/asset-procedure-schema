@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `weighing_device_models` table.
+/// Catalog of weighing-device model definitions.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -30,7 +30,7 @@
 #[table_model(default(aps_entities::entities::table_name_id, "weighing_device_models"))]
 # [diesel (table_name = weighing_device_models)]
 pub struct WeighingDeviceModel {
-    /// Field representing the `id` column in table `weighing_device_models`.
+    /// Stable model identifier inherited from `physical_asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,

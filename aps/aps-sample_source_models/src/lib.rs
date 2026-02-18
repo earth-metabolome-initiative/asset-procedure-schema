@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `sample_source_models` table.
+/// Catalog of model definitions for assets that can be sampled from.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -30,7 +30,7 @@
 #[table_model(default(aps_entities::entities::table_name_id, "sample_source_models"))]
 # [diesel (table_name = sample_source_models)]
 pub struct SampleSourceModel {
-    /// Field representing the `id` column in table `sample_source_models`.
+    /// Stable model identifier inherited from `physical_asset_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,

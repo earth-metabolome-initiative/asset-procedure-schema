@@ -50,13 +50,14 @@ impl ::diesel_builders::ValidateColumn<owner_grants::grantee_owner_id>
         if let Some(granted_owner_id) = <Self as diesel_builders::MayGetColumn<
             owner_grants::granted_owner_id,
         >>::may_get_column_ref(self)
-            && grantee_owner_id == granted_owner_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::owner_grants::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::owner_grants::grantee_owner_id::NAME,
-                crate::owner_grants::granted_owner_id::NAME,
-            ));
+            if grantee_owner_id == granted_owner_id {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::owner_grants::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::owner_grants::grantee_owner_id::NAME,
+                    crate::owner_grants::granted_owner_id::NAME,
+                ));
+            }
         }
         Ok(())
     }
@@ -74,13 +75,14 @@ impl ::diesel_builders::ValidateColumn<owner_grants::granted_owner_id>
         if let Some(grantee_owner_id) = <Self as diesel_builders::MayGetColumn<
             owner_grants::grantee_owner_id,
         >>::may_get_column_ref(self)
-            && grantee_owner_id == granted_owner_id
         {
-            return Err(::validation_errors::ValidationError::equal(
-                <crate::owner_grants::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                crate::owner_grants::grantee_owner_id::NAME,
-                crate::owner_grants::granted_owner_id::NAME,
-            ));
+            if grantee_owner_id == granted_owner_id {
+                return Err(::validation_errors::ValidationError::equal(
+                    <crate::owner_grants::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::owner_grants::grantee_owner_id::NAME,
+                    crate::owner_grants::granted_owner_id::NAME,
+                ));
+            }
         }
         Ok(())
     }

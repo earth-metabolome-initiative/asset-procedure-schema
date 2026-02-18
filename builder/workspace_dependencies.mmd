@@ -8,27 +8,27 @@ title: Workspace Dependencies
 erDiagram
   direction TB
   v3["asset model ancestors"]
-  v50["entities DAG"]
-  v71["owner grants"]
-  v88["privacy dependencies"]
-  v89["procedure asset models"]
-  v90["procedure template asset models"]
-  v93["reused procedure template asset models"]
-  v94["roles"]
-  v103["table names"]
-  v104["team members"]
-  v106["tombstones"]
-  v50 ||--|| v90 : "depends on"
-  v50 ||--|| v93 : "depends on"
-  v50 ||--|| v89 : "depends on"
-  v3 ||--|| v50 : "depends on"
-  v50 ||--|| v94 : "depends on"
-  v50 ||--|| v103 : "depends on"
-  v71 ||--|| v50 : "depends on"
-  v71 ||--|| v94 : "depends on"
-  v88 ||--|| v50 : "depends on"
-  v89 ||--|| v3 : "depends on"
-  v89 ||--|| v90 : "depends on"
-  v93 ||--|| v90 : "depends on"
-  v104 ||--|| v50 : "depends on"
-  v106 ||--|| v103 : "depends on"
+  v52["entities DAG"]
+  v75["owner grants"]
+  v92["privacy dependencies"]
+  v93["procedure asset models"]
+  v94["procedure template asset models"]
+  v97["reused procedure template asset models"]
+  v98["roles"]
+  v107["table names"]
+  v108["team members"]
+  v110["tombstones"]
+  v52 ||--|| v94 : "depends on"
+  v52 ||--|| v97 : "depends on"
+  v52 ||--|| v93 : "depends on"
+  v3 ||--|| v52 : "depends on"
+  v52 ||--|| v98 : "depends on"
+  v52 ||--|| v107 : "depends on"
+  v75 ||--|| v52 : "depends on"
+  v75 ||--|| v98 : "depends on"
+  v92 ||--|| v52 : "depends on"
+  v93 ||--|| v3 : "depends on"
+  v93 ||--|| v94 : "depends on"
+  v97 ||--|| v94 : "depends on"
+  v108 ||--|| v52 : "depends on"
+  v110 ||--|| v107 : "depends on"

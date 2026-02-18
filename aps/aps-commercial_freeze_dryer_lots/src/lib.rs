@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `commercial_freeze_dryer_lots` table.
+/// Catalog of lot-specific commercial freeze dryer models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -36,14 +36,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "commercial_freeze_dryer_lots"))]
 # [diesel (table_name = commercial_freeze_dryer_lots)]
 pub struct CommercialFreezeDryerLot {
-    /// Field representing the `id` column in table
-    /// `commercial_freeze_dryer_lots`.
+    /// Stable lot-model identifier shared with parent lot/model tables.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `commercial_freeze_dryer_model_id` column in
-    /// table `commercial_freeze_dryer_lots`.
+    /// Commercial freeze dryer model from which this lot derives.
     #[same_as(aps_commercial_product_lots::commercial_product_lots::product_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

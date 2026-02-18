@@ -13,7 +13,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `volumetric_container_models` table.
+/// Specialization of container models with known maximum volume.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -28,12 +28,11 @@
 #[table_model(default(aps_entities::entities::table_name_id, "volumetric_container_models"))]
 # [diesel (table_name = volumetric_container_models)]
 pub struct VolumetricContainerModel {
-    /// Field representing the `id` column in table
-    /// `volumetric_container_models`.
+    /// Stable model identifier inherited from `container_models`.
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Volume in liters. The maximum volume of the container.
+    /// Maximum internal volume in liters.
     volume: f32,
 }
 impl ::diesel_builders::ValidateColumn<volumetric_container_models::volume>

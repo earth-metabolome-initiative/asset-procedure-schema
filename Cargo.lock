@@ -66,6 +66,8 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_mass_spectrometer_lots",
+ "aps-commercial_mass_spectrometer_models",
  "aps-commercial_personal_protective_equipment_lots",
  "aps-commercial_personal_protective_equipment_models",
  "aps-commercial_phone_device_lots",
@@ -103,6 +105,8 @@ dependencies = [
  "aps-geopositioning_procedures",
  "aps-harvesting_procedure_templates",
  "aps-harvesting_procedures",
+ "aps-mass_spectrometer_models",
+ "aps-mass_spectrometers",
  "aps-namespaced_ownables",
  "aps-namespaces",
  "aps-next_procedure_templates",
@@ -704,6 +708,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-commercial_mass_spectrometer_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_mass_spectrometer_models",
+ "aps-commercial_product_lots",
+ "aps-entities",
+ "aps-mass_spectrometer_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_mass_spectrometer_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-entities",
+ "aps-mass_spectrometer_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-commercial_personal_protective_equipment_lots"
 version = "0.1.0"
 dependencies = [
@@ -792,6 +833,7 @@ dependencies = [
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
+ "aps-mass_spectrometer_models",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-personal_protective_equipment_models",
@@ -815,6 +857,7 @@ dependencies = [
  "aps-freeze_dryer_models",
  "aps-freezer_models",
  "aps-geopositioning_device_models",
+ "aps-mass_spectrometer_models",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-personal_protective_equipment_models",
@@ -1043,6 +1086,8 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_mass_spectrometer_lots",
+ "aps-commercial_mass_spectrometer_models",
  "aps-commercial_personal_protective_equipment_lots",
  "aps-commercial_personal_protective_equipment_models",
  "aps-commercial_phone_device_lots",
@@ -1080,6 +1125,8 @@ dependencies = [
  "aps-geopositioning_procedures",
  "aps-harvesting_procedure_templates",
  "aps-harvesting_procedures",
+ "aps-mass_spectrometer_models",
+ "aps-mass_spectrometers",
  "aps-namespaced_ownables",
  "aps-namespaces",
  "aps-next_procedure_templates",
@@ -1522,6 +1569,39 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "procedure-like",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-mass_spectrometer_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-mass_spectrometers"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-commercial_mass_spectrometer_lots",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
  "rosetta-uuid",
  "serde",
  "validation-errors",
@@ -4792,10 +4872,6 @@ dependencies = [
  "libc",
  "windows-sys 0.60.2",
 ]
-
-[[package]]
-name = "sql-migration-lint"
-version = "0.1.0"
 
 [[package]]
 name = "sql-procedure-rules"

@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Struct representing a row in the `containers` table.
+/// Physical containers tracked in inventory and execution contexts.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -32,13 +32,12 @@
 #[table_model(default(aps_entities::entities::table_name_id, "containers"))]
 # [diesel (table_name = containers)]
 pub struct Container {
-    /// Field representing the `id` column in table `containers`.
+    /// Stable asset identifier inherited from `physical_assets`.
     #[same_as(aps_physical_assets::physical_assets::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `container_model_id` column in table
-    /// `containers`.
+    /// Container model instantiated by this physical container.
     #[same_as(aps_physical_assets::physical_assets::physical_asset_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]

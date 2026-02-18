@@ -17,7 +17,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// Commercial PPE model catalog.
+/// Catalog of commercial personal protective equipment models.
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
@@ -38,14 +38,12 @@
 ))]
 # [diesel (table_name = commercial_personal_protective_equipment_models)]
 pub struct CommercialPersonalProtectiveEquipmentModel {
-    /// Field representing the `id` column in table
-    /// `commercial_personal_protective_equipment_models`.
+    /// Stable commercial model identifier shared with parent model tables.
     #[same_as(aps_asset_models::asset_models::id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
-    /// Field representing the `personal_protective_equipment_model_id` column
-    /// in table `commercial_personal_protective_equipment_models`.
+    /// Base PPE model represented by this commercial model.
     #[same_as(aps_asset_models::asset_models::parent_model_id)]
     #[infallible]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
