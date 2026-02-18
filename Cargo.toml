@@ -39,10 +39,16 @@ members = [
   "aps/aps-commercial_freezer_models",
   "aps/aps-commercial_geopositioning_device_lots",
   "aps/aps-commercial_geopositioning_device_models",
+  "aps/aps-commercial_personal_protective_equipment_lots",
+  "aps/aps-commercial_personal_protective_equipment_models",
   "aps/aps-commercial_phone_device_lots",
   "aps/aps-commercial_phone_device_models",
   "aps/aps-commercial_product_lots",
   "aps/aps-commercial_products",
+  "aps/aps-commercial_volume_measuring_device_lots",
+  "aps/aps-commercial_volume_measuring_device_models",
+  "aps/aps-commercial_weighing_device_lots",
+  "aps/aps-commercial_weighing_device_models",
   "aps/aps-container_compatibility_rules",
   "aps/aps-container_models",
   "aps/aps-container_sealer_models",
@@ -166,10 +172,16 @@ aps-commercial_freezer_lots = { path = "aps/aps-commercial_freezer_lots" }
 aps-commercial_freezer_models = { path = "aps/aps-commercial_freezer_models" }
 aps-commercial_geopositioning_device_lots = { path = "aps/aps-commercial_geopositioning_device_lots" }
 aps-commercial_geopositioning_device_models = { path = "aps/aps-commercial_geopositioning_device_models" }
+aps-commercial_personal_protective_equipment_lots = { path = "aps/aps-commercial_personal_protective_equipment_lots" }
+aps-commercial_personal_protective_equipment_models = { path = "aps/aps-commercial_personal_protective_equipment_models" }
 aps-commercial_phone_device_lots = { path = "aps/aps-commercial_phone_device_lots" }
 aps-commercial_phone_device_models = { path = "aps/aps-commercial_phone_device_models" }
 aps-commercial_product_lots = { path = "aps/aps-commercial_product_lots" }
 aps-commercial_products = { path = "aps/aps-commercial_products" }
+aps-commercial_volume_measuring_device_lots = { path = "aps/aps-commercial_volume_measuring_device_lots" }
+aps-commercial_volume_measuring_device_models = { path = "aps/aps-commercial_volume_measuring_device_models" }
+aps-commercial_weighing_device_lots = { path = "aps/aps-commercial_weighing_device_lots" }
+aps-commercial_weighing_device_models = { path = "aps/aps-commercial_weighing_device_models" }
 aps-container_compatibility_rules = { path = "aps/aps-container_compatibility_rules" }
 aps-container_models = { path = "aps/aps-container_models" }
 aps-container_sealer_models = { path = "aps/aps-container_sealer_models" }

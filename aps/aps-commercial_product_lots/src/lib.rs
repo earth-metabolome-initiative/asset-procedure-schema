@@ -123,3 +123,15 @@ impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_mode
     commercial_product_lots,
     ::aps_geopositioning_device_models::geopositioning_device_models
 );
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_product_lots,
+    ::aps_personal_protective_equipment_models::personal_protective_equipment_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_product_lots,
+    ::aps_volume_measuring_device_models::volume_measuring_device_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_product_lots,
+    ::aps_weighing_device_models::weighing_device_models
+);

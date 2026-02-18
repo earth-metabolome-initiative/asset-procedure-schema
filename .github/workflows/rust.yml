@@ -24,6 +24,16 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
 
+  sql_lint:
+    name: SQL Migration Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Run devices migration lint
+        run: cargo run -p sql-migration-lint -- devices
+
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest

@@ -9,6 +9,7 @@ CREATE TABLE commercial_geopositioning_device_models (
 	FOREIGN KEY (id) REFERENCES commercial_products(id) ON DELETE CASCADE,
 	FOREIGN KEY (id, geopositioning_device_model_id) REFERENCES asset_models(id, parent_model_id)
 );
+INSERT INTO table_names (id) VALUES ('commercial_geopositioning_device_models') ON CONFLICT DO NOTHING;
 CREATE TABLE commercial_geopositioning_device_lots (
 	id UUID PRIMARY KEY,
 	FOREIGN KEY (id) REFERENCES commercial_product_lots(id) ON DELETE CASCADE,
@@ -16,8 +17,10 @@ CREATE TABLE commercial_geopositioning_device_lots (
 	commercial_geopositioning_device_model_id UUID NOT NULL REFERENCES commercial_geopositioning_device_models(id),
 	FOREIGN KEY (id, commercial_geopositioning_device_model_id) REFERENCES asset_models(id, parent_model_id)
 );
+INSERT INTO table_names (id) VALUES ('commercial_geopositioning_device_lots') ON CONFLICT DO NOTHING;
 CREATE TABLE geopositioning_devices (
 	id UUID PRIMARY KEY REFERENCES physical_assets (id) ON DELETE CASCADE,
 	commercial_geopositioning_device_lot_id UUID NOT NULL REFERENCES commercial_geopositioning_device_lots (id),
 	FOREIGN KEY (id, commercial_geopositioning_device_lot_id) REFERENCES assets (id, model_id)
 );
+INSERT INTO table_names (id) VALUES ('geopositioning_devices') ON CONFLICT DO NOTHING;

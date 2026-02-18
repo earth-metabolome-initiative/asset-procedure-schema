@@ -21,7 +21,7 @@
 --     -> assets (id, model_id)
 --
 -- Metadata registration:
---   Both PPE tables are inserted into `table_names` so APS entities can store
+--   All PPE tables are inserted into `table_names` so APS entities can store
 --   and resolve their concrete table type.
 --
 -- Security context (local, inherited through ancestor PK extension):
@@ -71,6 +71,28 @@ CREATE TABLE personal_protective_equipment_models (
 );
 -- Registers this APS table identifier so entities can declare their concrete table type.
 INSERT INTO table_names (id) VALUES ('personal_protective_equipment_models') ON CONFLICT DO NOTHING;
+
+-- Commercial PPE model catalog.
+CREATE TABLE commercial_personal_protective_equipment_models (
+	id UUID PRIMARY KEY,
+	personal_protective_equipment_model_id UUID NOT NULL REFERENCES personal_protective_equipment_models(id) ON DELETE CASCADE,
+	FOREIGN KEY (id) REFERENCES personal_protective_equipment_models(id) ON DELETE CASCADE,
+	FOREIGN KEY (id) REFERENCES commercial_products(id) ON DELETE CASCADE,
+	FOREIGN KEY (id, personal_protective_equipment_model_id) REFERENCES asset_models(id, parent_model_id)
+);
+-- Registers this APS table identifier so entities can declare their concrete table type.
+INSERT INTO table_names (id) VALUES ('commercial_personal_protective_equipment_models') ON CONFLICT DO NOTHING;
+
+-- Commercial PPE lot catalog.
+CREATE TABLE commercial_personal_protective_equipment_lots (
+	id UUID PRIMARY KEY,
+	FOREIGN KEY (id) REFERENCES commercial_product_lots(id) ON DELETE CASCADE,
+	FOREIGN KEY (id) REFERENCES personal_protective_equipment_models(id) ON DELETE CASCADE,
+	commercial_personal_protective_equipment_model_id UUID NOT NULL REFERENCES commercial_personal_protective_equipment_models(id),
+	FOREIGN KEY (id, commercial_personal_protective_equipment_model_id) REFERENCES asset_models(id, parent_model_id)
+);
+-- Registers this APS table identifier so entities can declare their concrete table type.
+INSERT INTO table_names (id) VALUES ('commercial_personal_protective_equipment_lots') ON CONFLICT DO NOTHING;
 
 -- Physical PPE items tracked as individual assets in inventory and procedure execution.
 CREATE TABLE personal_protective_equipments (

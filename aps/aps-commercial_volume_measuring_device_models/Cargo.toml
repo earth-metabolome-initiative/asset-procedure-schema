@@ -1,5 +1,5 @@
 [package]
-name = "aps-commercial_product_lots"
+name = "aps-commercial_volume_measuring_device_models"
 version = "0.1.0"
 edition.workspace = true
 
@@ -13,15 +13,10 @@ rosetta-uuid.workspace = true
 aps-asset_models.workspace = true
 aps-commercial_products.workspace = true
 aps-entities.workspace = true
-aps-freeze_dryer_models.workspace = true
-aps-freezer_models.workspace = true
-aps-geopositioning_device_models.workspace = true
 aps-namespaced_ownables.workspace = true
 aps-ownables.workspace = true
-aps-personal_protective_equipment_models.workspace = true
 aps-physical_asset_models.workspace = true
 aps-volume_measuring_device_models.workspace = true
-aps-weighing_device_models.workspace = true
 
 [lints]
 workspace = true

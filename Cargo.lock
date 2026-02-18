@@ -66,10 +66,16 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_personal_protective_equipment_lots",
+ "aps-commercial_personal_protective_equipment_models",
  "aps-commercial_phone_device_lots",
  "aps-commercial_phone_device_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-commercial_volume_measuring_device_lots",
+ "aps-commercial_volume_measuring_device_models",
+ "aps-commercial_weighing_device_lots",
+ "aps-commercial_weighing_device_models",
  "aps-container_compatibility_rules",
  "aps-container_models",
  "aps-container_sealer_models",
@@ -698,6 +704,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-commercial_personal_protective_equipment_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_personal_protective_equipment_models",
+ "aps-commercial_product_lots",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-personal_protective_equipment_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_personal_protective_equipment_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-personal_protective_equipment_models",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-commercial_phone_device_lots"
 version = "0.1.0"
 dependencies = [
@@ -751,7 +794,10 @@ dependencies = [
  "aps-geopositioning_device_models",
  "aps-namespaced_ownables",
  "aps-ownables",
+ "aps-personal_protective_equipment_models",
  "aps-physical_asset_models",
+ "aps-volume_measuring_device_models",
+ "aps-weighing_device_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
@@ -771,7 +817,84 @@ dependencies = [
  "aps-geopositioning_device_models",
  "aps-namespaced_ownables",
  "aps-ownables",
+ "aps-personal_protective_equipment_models",
  "aps-physical_asset_models",
+ "aps-volume_measuring_device_models",
+ "aps-weighing_device_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_volume_measuring_device_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_product_lots",
+ "aps-commercial_volume_measuring_device_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "aps-volume_measuring_device_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_volume_measuring_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "aps-volume_measuring_device_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_weighing_device_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_product_lots",
+ "aps-commercial_weighing_device_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "aps-weighing_device_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_weighing_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-commercial_products",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "aps-weighing_device_models",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
@@ -920,10 +1043,16 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_personal_protective_equipment_lots",
+ "aps-commercial_personal_protective_equipment_models",
  "aps-commercial_phone_device_lots",
  "aps-commercial_phone_device_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
+ "aps-commercial_volume_measuring_device_lots",
+ "aps-commercial_volume_measuring_device_models",
+ "aps-commercial_weighing_device_lots",
+ "aps-commercial_weighing_device_models",
  "aps-container_compatibility_rules",
  "aps-container_models",
  "aps-container_sealer_models",
