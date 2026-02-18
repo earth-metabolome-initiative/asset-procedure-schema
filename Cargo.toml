@@ -78,6 +78,8 @@ members = [
   "aps/aps-packaging_procedure_templates",
   "aps/aps-packaging_procedures",
   "aps/aps-parent_procedure_templates",
+  "aps/aps-personal_protective_equipment_models",
+  "aps/aps-personal_protective_equipments",
   "aps/aps-photograph_procedure_templates",
   "aps/aps-photograph_procedures",
   "aps/aps-photographs",
@@ -199,6 +201,8 @@ aps-packaging_models = { path = "aps/aps-packaging_models" }
 aps-packaging_procedure_templates = { path = "aps/aps-packaging_procedure_templates" }
 aps-packaging_procedures = { path = "aps/aps-packaging_procedures" }
 aps-parent_procedure_templates = { path = "aps/aps-parent_procedure_templates" }
+aps-personal_protective_equipment_models = { path = "aps/aps-personal_protective_equipment_models" }
+aps-personal_protective_equipments = { path = "aps/aps-personal_protective_equipments" }
 aps-photograph_procedure_templates = { path = "aps/aps-photograph_procedure_templates" }
 aps-photograph_procedures = { path = "aps/aps-photograph_procedures" }
 aps-photographs = { path = "aps/aps-photographs" }

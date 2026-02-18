@@ -13,6 +13,7 @@ rosetta-uuid.workspace = true
 aps-assets.workspace = true
 aps-digital_assets.workspace = true
 aps-entities.workspace = true
+aps-namespaced_ownables.workspace = true
 aps-ownables.workspace = true
 
 [lints]

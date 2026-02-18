@@ -17,7 +17,12 @@
     :: diesel_builders :: prelude :: TableModel,
 )]
 /// Struct representing a row in the `physical_assets` table.
-#[table_model(ancestors(aps_entities::entities, aps_ownables::ownables, aps_assets::assets))]
+#[table_model(ancestors(
+    aps_entities::entities,
+    aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
+    aps_assets::assets
+))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_physical_asset_models :: PhysicalAssetModel , foreign_key = physical_asset_model_id))]
 # [table_model (foreign_key ((id ,) , (:: aps_assets :: assets :: id)))]
@@ -45,6 +50,15 @@ impl ::diesel_builders::GetColumn<aps_assets::assets::id> for PhysicalAsset {
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for PhysicalAsset {
+    fn get_column_ref(
+        &self,
+    ) -> &<physical_assets::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for PhysicalAsset
+{
     fn get_column_ref(
         &self,
     ) -> &<physical_assets::id as ::diesel_builders::ColumnTyped>::ColumnType {

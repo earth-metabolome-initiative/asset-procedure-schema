@@ -1,5 +1,5 @@
 [package]
-name = "aps-centrifuges"
+name = "aps-personal_protective_equipment_models"
 version = "0.1.0"
 edition.workspace = true
 
@@ -10,12 +10,11 @@ diesel-builders.workspace = true
 diesel.workspace = true
 validation-errors.workspace = true
 rosetta-uuid.workspace = true
-aps-assets.workspace = true
-aps-commercial_centrifuge_lots.workspace = true
+aps-asset_models.workspace = true
 aps-entities.workspace = true
 aps-namespaced_ownables.workspace = true
 aps-ownables.workspace = true
-aps-physical_assets.workspace = true
+aps-physical_asset_models.workspace = true
 
 [lints]
 workspace = true

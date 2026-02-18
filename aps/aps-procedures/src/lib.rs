@@ -34,7 +34,6 @@
 # [diesel (table_name = procedures)]
 pub struct Procedure {
     /// The ID of this procedure.
-    # [table_model (default = :: rosetta_uuid :: Uuid :: utc_v7 ())]
     # [diesel (sql_type = :: rosetta_uuid :: diesel_impls :: Uuid)]
     id: ::rosetta_uuid::Uuid,
     /// The procedure_id template of this procedure.

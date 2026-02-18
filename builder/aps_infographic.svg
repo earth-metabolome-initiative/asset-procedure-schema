@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1800" height="2600" viewBox="0 0 1800 2600" role="img" aria-labelledby="title desc">
+  <title id="title">APS Architecture Infographic</title>
+  <desc id="desc">Professional infographic describing how the Asset-Procedure Schema works: SQL foundations, builder validation pipeline, generated crates, and governance model.</desc>
+
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F9F4EF"/>
+      <stop offset="50%" stop-color="#EFF4F8"/>
+      <stop offset="100%" stop-color="#F3F8F3"/>
+    </linearGradient>
+
+    <linearGradient id="headerGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#F7CAC9"/>
+      <stop offset="100%" stop-color="#C9D8E8"/>
+    </linearGradient>
+
+    <linearGradient id="cardGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FAFCFF"/>
+    </linearGradient>
+
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#88A0B6" flood-opacity="0.18"/>
+    </filter>
+
+    <marker id="arrowHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6D8297"/>
+    </marker>
+
+    <style>
+      :root {
+        --ink: #243746;
+        --muted: #5E7488;
+        --rose: #F7CAC9;      /* Pantone 13-1520 inspired */
+        --sky: #C9D8E8;       /* Pantone 13-4308 inspired */
+        --mint: #CFE8D6;      /* Pantone 559 inspired */
+        --butter: #F5E6A6;    /* Pantone 7401 inspired */
+        --lavender: #DCCFE7;  /* pastel accent */
+      }
+
+      .heading {
+        font-family: "Poppins", "Avenir Next", "Segoe UI", sans-serif;
+        fill: var(--ink);
+        letter-spacing: 0.2px;
+      }
+
+      .body {
+        font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+        fill: var(--muted);
+      }
+
+      .kpi-value {
+        font-family: "Poppins", "Avenir Next", "Segoe UI", sans-serif;
+        font-weight: 700;
+        fill: var(--ink);
+      }
+
+      .icon {
+        fill: currentColor;
+      }
+
+      .smallcaps {
+        font-family: "Poppins", "Avenir Next", "Segoe UI", sans-serif;
+        letter-spacing: 1.2px;
+        font-size: 13px;
+        fill: #6A7F91;
+      }
+    </style>
+
+    <!-- Font Awesome glyph paths extracted from /usr/share/fonts-font-awesome/fonts/fontawesome-webfont.svg -->
+    <symbol id="fa-file-alt" viewBox="0 0 1536 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M1468 1156q28 -28 48 -76t20 -88v-1152q0 -40 -28 -68t-68 -28h-1344q-40 0 -68 28t-28 68v1600q0 40 28 68t68 28h896q40 0 88 -20t76 -48zM1024 1400v-376h376q-10 29 -22 41l-313 313q-12 12 -41 22zM1408 -128v1024h-416q-40 0 -68 28t-28 68v416h-768v-1536h1280z"/>
+      </g>
+    </symbol>
+
+    <symbol id="fa-cogs" viewBox="0 0 1920 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M896 640q0 106 -75 181t-181 75t-181 -75t-75 -181t75 -181t181 -75t181 75t75 181zM1664 128q0 52 -38 90t-90 38t-90 -38t-38 -90q0 -53 37.5 -90.5t90.5 -37.5t90.5 37.5t37.5 90.5zM1664 1152q0 52 -38 90t-90 38t-90 -38t-38 -90q0 -53 37.5 -90.5t90.5 -37.5 t90.5 37.5t37.5 90.5zM1280 731v-185q0 -10 -7 -19.5t-16 -10.5l-155 -24q-11 -35 -32 -76q34 -48 90 -115q7 -11 7 -20q0 -12 -7 -19q-23 -30 -82.5 -89.5t-78.5 -59.5q-11 0 -21 7l-115 90q-37 -19 -77 -31q-11 -108 -23 -155q-7 -24 -30 -24h-186q-11 0 -20 7.5t-10 17.5 l-23 153q-34 10 -75 31l-118 -89q-7 -7 -20 -7q-11 0 -21 8q-144 133 -144 160q0 9 7 19q10 14 41 53t47 61q-23 44 -35 82l-152 24q-10 1 -17 9.5t-7 19.5v185q0 10 7 19.5t16 10.5l155 24q11 35 32 76q-34 48 -90 115q-7 11 -7 20q0 12 7 20q22 30 82 89t79 59q11 0 21 -7 l115 -90q34 18 77 32q11 108 23 154q7 24 30 24h186q11 0 20 -7.5t10 -17.5l23 -153q34 -10 75 -31l118 89q8 7 20 7q11 0 21 -8q144 -133 144 -160q0 -8 -7 -19q-12 -16 -42 -54t-45 -60q23 -48 34 -82l152 -23q10 -2 17 -10.5t7 -19.5zM1920 198v-140q0 -16 -149 -31 q-12 -27 -30 -52q51 -113 51 -138q0 -4 -4 -7q-122 -71 -124 -71q-8 0 -46 47t-52 68q-20 -2 -30 -2t-30 2q-14 -21 -52 -68t-46 -47q-2 0 -124 71q-4 3 -4 7q0 25 51 138q-18 25 -30 52q-149 15 -149 31v140q0 16 149 31q13 29 30 52q-51 113 -51 138q0 4 4 7q4 2 35 20 t59 34t30 16q8 0 46 -46.5t52 -67.5q20 2 30 2t30 -2q51 71 92 112l6 2q4 0 124 -70q4 -3 4 -7q0 -25 -51 -138q17 -23 30 -52q149 -15 149 -31zM1920 1222v-140q0 -16 -149 -31q-12 -27 -30 -52q51 -113 51 -138q0 -4 -4 -7q-122 -71 -124 -71q-8 0 -46 47t-52 68 q-20 -2 -30 -2t-30 2q-14 -21 -52 -68t-46 -47q-2 0 -124 71q-4 3 -4 7q0 25 51 138q-18 25 -30 52q-149 15 -149 31v140q0 16 149 31q13 29 30 52q-51 113 -51 138q0 4 4 7q4 2 35 20t59 34t30 16q8 0 46 -46.5t52 -67.5q20 2 30 2t30 -2q51 71 92 112l6 2q4 0 124 -70 q4 -3 4 -7q0 -25 -51 -138q17 -23 30 -52q149 -15 149 -31z"/>
+      </g>
+    </symbol>
+
+    <symbol id="fa-sitemap" viewBox="0 0 1792 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M1792 288v-320q0 -40 -28 -68t-68 -28h-320q-40 0 -68 28t-28 68v320q0 40 28 68t68 28h96v192h-512v-192h96q40 0 68 -28t28 -68v-320q0 -40 -28 -68t-68 -28h-320q-40 0 -68 28t-28 68v320q0 40 28 68t68 28h96v192h-512v-192h96q40 0 68 -28t28 -68v-320 q0 -40 -28 -68t-68 -28h-320q-40 0 -68 28t-28 68v320q0 40 28 68t68 28h96v192q0 52 38 90t90 38h512v192h-96q-40 0 -68 28t-28 68v320q0 40 28 68t68 28h320q40 0 68 -28t28 -68v-320q0 -40 -28 -68t-68 -28h-96v-192h512q52 0 90 -38t38 -90v-192h96q40 0 68 -28t28 -68 z"/>
+      </g>
+    </symbol>
+
+    <symbol id="fa-shield" viewBox="0 0 1280 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M1088 576v640h-448v-1137q119 63 213 137q235 184 235 360zM1280 1344v-768q0 -86 -33.5 -170.5t-83 -150t-118 -127.5t-126.5 -103t-121 -77.5t-89.5 -49.5t-42.5 -20q-12 -6 -26 -6t-26 6q-16 7 -42.5 20t-89.5 49.5t-121 77.5t-126.5 103t-118 127.5t-83 150 t-33.5 170.5v768q0 26 19 45t45 19h1152q26 0 45 -19t19 -45z"/>
+      </g>
+    </symbol>
+
+    <symbol id="fa-code-fork" viewBox="0 0 1024 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M288 64q0 40 -28 68t-68 28t-68 -28t-28 -68t28 -68t68 -28t68 28t28 68zM288 1216q0 40 -28 68t-68 28t-68 -28t-28 -68t28 -68t68 -28t68 28t28 68zM928 1088q0 40 -28 68t-68 28t-68 -28t-28 -68t28 -68t68 -28t68 28t28 68zM1024 1088q0 -52 -26 -96.5t-70 -69.5 q-2 -287 -226 -414q-67 -38 -203 -81q-128 -40 -169.5 -71t-41.5 -100v-26q44 -25 70 -69.5t26 -96.5q0 -80 -56 -136t-136 -56t-136 56t-56 136q0 52 26 96.5t70 69.5v820q-44 25 -70 69.5t-26 96.5q0 80 56 136t136 56t136 -56t56 -136q0 -52 -26 -96.5t-70 -69.5v-497 q54 26 154 57q55 17 87.5 29.5t70.5 31t59 39.5t40.5 51t28 69.5t8.5 91.5q-44 25 -70 69.5t-26 96.5q0 80 56 136t136 56t136 -56t56 -136z"/>
+      </g>
+    </symbol>
+
+    <symbol id="fa-bar-chart" viewBox="0 0 2048 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M640 640v-512h-256v512h256zM1024 1152v-1024h-256v1024h256zM2048 0v-128h-2048v1536h128v-1408h1920zM1408 896v-768h-256v768h256zM1792 1280v-1152h-256v1152h256z"/>
+      </g>
+    </symbol>
+
+    <symbol id="fa-beaker" viewBox="0 0 1664 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M1527 88q56 -89 21.5 -152.5t-140.5 -63.5h-1152q-106 0 -140.5 63.5t21.5 152.5l503 793v399h-64q-26 0 -45 19t-19 45t19 45t45 19h512q26 0 45 -19t19 -45t-19 -45t-45 -19h-64v-399zM748 813l-272 -429h712l-272 429l-20 31v37v399h-128v-399v-37z"/>
+      </g>
+    </symbol>
+
+    <symbol id="fa-tasks" viewBox="0 0 1792 1792">
+      <g transform="translate(0 1536) scale(1 -1)">
+        <path class="icon" d="M1024 128h640v128h-640v-128zM640 640h1024v128h-1024v-128zM1280 1152h384v128h-384v-128zM1792 320v-256q0 -26 -19 -45t-45 -19h-1664q-26 0 -45 19t-19 45v256q0 26 19 45t45 19h1664q26 0 45 -19t19 -45zM1792 832v-256q0 -26 -19 -45t-45 -19h-1664q-26 0 -45 19 t-19 45v256q0 26 19 45t45 19h1664q26 0 45 -19t19 -45zM1792 1344v-256q0 -26 -19 -45t-45 -19h-1664q-26 0 -45 19t-19 45v256q0 26 19 45t45 19h1664q26 0 45 -19t19 -45z"/>
+      </g>
+    </symbol>
+  </defs>
+
+  <rect x="0" y="0" width="1800" height="2600" fill="url(#bgGradient)"/>
+  <circle cx="150" cy="2350" r="260" fill="#F7E6EA" opacity="0.45"/>
+  <circle cx="1660" cy="260" r="200" fill="#DCEAF6" opacity="0.5"/>
+  <circle cx="1620" cy="2120" r="280" fill="#DDF1E3" opacity="0.45"/>
+
+  <!-- Header and abstract -->
+  <g filter="url(#softShadow)">
+    <rect x="80" y="60" rx="30" ry="30" width="1640" height="255" fill="url(#headerGradient)"/>
+  </g>
+
+  <text class="smallcaps" x="120" y="110">ASSET-PROCEDURE SCHEMA • PROFESSIONAL OVERVIEW</text>
+  <text class="heading" x="120" y="165" font-size="54" font-weight="700">How APS Works End-to-End</text>
+  <text class="heading" x="120" y="205" font-size="24" font-weight="500">From PostgreSQL Schema Rules to Type-Safe Rust Crates and Procedure DAG Operations</text>
+
+  <foreignObject x="118" y="220" width="1560" height="90">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Source Sans 3','Helvetica Neue',Arial,sans-serif;color:#2F4A5F;font-size:17px;line-height:1.35;text-align:justify;">
+      <p><strong>Abstract.</strong> APS defines the database as the source of truth, validates structural and naming constraints (including procedure DAG consistency), then generates reusable Rust crates for safe data access. This infographic summarizes the current workspace shape, processing pipeline, foundational schema modules, and operational quality model.</p>
+    </div>
+  </foreignObject>
+
+  <!-- KPI and donut row -->
+  <g filter="url(#softShadow)">
+    <rect x="80" y="350" width="1040" height="250" rx="24" fill="url(#cardGradient)"/>
+    <rect x="1160" y="350" width="560" height="250" rx="24" fill="url(#cardGradient)"/>
+  </g>
+
+  <text class="heading" x="120" y="390" font-size="28" font-weight="700">Current Workspace Snapshot</text>
+  <text class="body" x="120" y="420" font-size="16">Measured from <tspan font-family="monospace">Cargo.toml</tspan> and <tspan font-family="monospace">sql/core-schema</tspan> in this repository.</text>
+
+  <g transform="translate(120 445)">
+    <rect x="0" y="0" width="310" height="130" rx="16" fill="#FCEDEE"/>
+    <use xlink:href="#fa-file-alt" x="20" y="20" width="38" height="38" style="color:#B26E78"/>
+    <text class="body" x="72" y="40" font-size="16">Core migration files</text>
+    <text class="kpi-value" x="72" y="88" font-size="44">20</text>
+  </g>
+
+  <g transform="translate(455 445)">
+    <rect x="0" y="0" width="310" height="130" rx="16" fill="#EAF3FB"/>
+    <use xlink:href="#fa-cogs" x="20" y="20" width="38" height="38" style="color:#5B80A8"/>
+    <text class="body" x="72" y="40" font-size="16">Workspace members</text>
+    <text class="kpi-value" x="72" y="88" font-size="44">115</text>
+  </g>
+
+  <g transform="translate(790 445)">
+    <rect x="0" y="0" width="310" height="130" rx="16" fill="#E8F4EC"/>
+    <use xlink:href="#fa-code-fork" x="20" y="20" width="38" height="38" style="color:#4E8A6B"/>
+    <text class="body" x="72" y="40" font-size="16">APS members in workspace</text>
+    <text class="kpi-value" x="72" y="88" font-size="44">107</text>
+  </g>
+
+  <text class="heading" x="1190" y="392" font-size="24" font-weight="700">Workspace Composition</text>
+  <g transform="translate(1260 470)">
+    <circle cx="120" cy="0" r="92" fill="none" stroke="#E4ECF2" stroke-width="28"/>
+    <g transform="rotate(-90 120 0)">
+      <circle cx="120" cy="0" r="92" fill="none" stroke="#87A9C8" stroke-width="28" stroke-linecap="round" stroke-dasharray="555 42"/>
+      <circle cx="120" cy="0" r="92" fill="none" stroke="#F1B6B5" stroke-width="28" stroke-linecap="round" stroke-dasharray="36 561" stroke-dashoffset="-555"/>
+      <circle cx="120" cy="0" r="92" fill="none" stroke="#B5D8C1" stroke-width="28" stroke-linecap="round" stroke-dasharray="5 592" stroke-dashoffset="-591"/>
+    </g>
+    <text class="kpi-value" x="120" y="8" text-anchor="middle" font-size="30">115</text>
+    <text class="body" x="120" y="30" text-anchor="middle" font-size="14">members</text>
+  </g>
+
+  <text class="body" x="1495" y="510" font-size="14">APS crates: 107 (93.0%)</text>
+  <rect x="1468" y="498" width="16" height="16" fill="#87A9C8" rx="3"/>
+  <text class="body" x="1495" y="535" font-size="14">Support crates: 7 (6.1%)</text>
+  <rect x="1468" y="523" width="16" height="16" fill="#F1B6B5" rx="3"/>
+  <text class="body" x="1495" y="560" font-size="14">Builder: 1 (0.9%)</text>
+  <rect x="1468" y="548" width="16" height="16" fill="#B5D8C1" rx="3"/>
+
+  <!-- Lifecycle flow -->
+  <text class="heading" x="80" y="670" font-size="32" font-weight="700">APS Functional Pipeline</text>
+  <text class="body" x="80" y="700" font-size="17">Logical flow from SQL definition to executable, testable, type-safe interfaces.</text>
+
+  <g filter="url(#softShadow)">
+    <rect x="80" y="730" width="300" height="350" rx="22" fill="#FFF6F7"/>
+    <rect x="420" y="730" width="300" height="350" rx="22" fill="#F2F8FD"/>
+    <rect x="760" y="730" width="300" height="350" rx="22" fill="#F4FBF6"/>
+    <rect x="1100" y="730" width="300" height="350" rx="22" fill="#F8F5FC"/>
+    <rect x="1440" y="730" width="280" height="350" rx="22" fill="#FFFBEF"/>
+  </g>
+
+  <path d="M385 905 L415 905" stroke="#6D8297" stroke-width="4" marker-end="url(#arrowHead)"/>
+  <path d="M725 905 L755 905" stroke="#6D8297" stroke-width="4" marker-end="url(#arrowHead)"/>
+  <path d="M1065 905 L1095 905" stroke="#6D8297" stroke-width="4" marker-end="url(#arrowHead)"/>
+  <path d="M1405 905 L1435 905" stroke="#6D8297" stroke-width="4" marker-end="url(#arrowHead)"/>
+
+  <g transform="translate(80 730)">
+    <text class="smallcaps" x="24" y="34">STEP 1</text>
+    <use xlink:href="#fa-file-alt" x="24" y="54" width="62" height="62" style="color:#B26E78"/>
+    <text class="heading" x="24" y="145" font-size="24" font-weight="700">SQL Source</text>
+    <text class="body" x="24" y="178" font-size="16">`sql/` is canonical.</text>
+    <text class="body" x="24" y="206" font-size="16">PostgreSQL dialect first,</text>
+    <text class="body" x="24" y="234" font-size="16">then translated for SQLite</text>
+    <text class="body" x="24" y="262" font-size="16">in tests/edge contexts.</text>
+  </g>
+
+  <g transform="translate(420 730)">
+    <text class="smallcaps" x="24" y="34">STEP 2</text>
+    <use xlink:href="#fa-cogs" x="24" y="54" width="62" height="62" style="color:#5B80A8"/>
+    <text class="heading" x="24" y="145" font-size="24" font-weight="700">Builder Parse</text>
+    <text class="body" x="24" y="178" font-size="16">`builder` introspects schema</text>
+    <text class="body" x="24" y="206" font-size="16">with sqlparser/sql-traits,</text>
+    <text class="body" x="24" y="234" font-size="16">constructing table graph and</text>
+    <text class="body" x="24" y="262" font-size="16">dependency model.</text>
+  </g>
+
+  <g transform="translate(760 730)">
+    <text class="smallcaps" x="24" y="34">STEP 3</text>
+    <use xlink:href="#fa-sitemap" x="24" y="54" width="62" height="62" style="color:#4E8A6B"/>
+    <use xlink:href="#fa-tasks" x="95" y="58" width="58" height="58" style="color:#6A9B83"/>
+    <text class="heading" x="24" y="145" font-size="24" font-weight="700">Rules + DAG Checks</text>
+    <text class="body" x="24" y="178" font-size="16">`sql-procedure-rules` enforces</text>
+    <text class="body" x="24" y="206" font-size="16">naming, matching templates,</text>
+    <text class="body" x="24" y="234" font-size="16">and DAG constraints before</text>
+    <text class="body" x="24" y="262" font-size="16">code generation proceeds.</text>
+  </g>
+
+  <g transform="translate(1100 730)">
+    <text class="smallcaps" x="24" y="34">STEP 4</text>
+    <use xlink:href="#fa-code-fork" x="24" y="54" width="62" height="62" style="color:#8E6DAA"/>
+    <text class="heading" x="24" y="145" font-size="24" font-weight="700">Rust Generation</text>
+    <text class="body" x="24" y="178" font-size="16">SynQL emits type-safe crates</text>
+    <text class="body" x="24" y="206" font-size="16">for APS tables + relationships,</text>
+    <text class="body" x="24" y="234" font-size="16">plus trait glue (e.g.</text>
+    <text class="body" x="24" y="262" font-size="16">`ProcedureTemplateNode`).</text>
+  </g>
+
+  <g transform="translate(1440 730)">
+    <text class="smallcaps" x="24" y="34">STEP 5</text>
+    <use xlink:href="#fa-beaker" x="24" y="54" width="58" height="58" style="color:#B39853"/>
+    <use xlink:href="#fa-bar-chart" x="90" y="54" width="68" height="58" style="color:#8B7740"/>
+    <text class="heading" x="24" y="145" font-size="24" font-weight="700">Use + Verify</text>
+    <text class="body" x="24" y="178" font-size="16">Consumers reuse generated</text>
+    <text class="body" x="24" y="206" font-size="16">crates; `aps-test-utils` spins</text>
+    <text class="body" x="24" y="234" font-size="16">in-memory SQLite translated</text>
+    <text class="body" x="24" y="262" font-size="16">from PostgreSQL migrations.</text>
+  </g>
+
+  <!-- Foundations section -->
+  <g filter="url(#softShadow)">
+    <rect x="80" y="1130" width="1640" height="510" rx="26" fill="url(#cardGradient)"/>
+  </g>
+  <text class="heading" x="120" y="1180" font-size="30" font-weight="700">Foundational Schema Ladder (`sql/core-schema/002-foundations`)</text>
+  <text class="body" x="120" y="1210" font-size="17">Seven sequential modules establish identity, ownership, ownables, teams, and security policy primitives.</text>
+
+  <line x1="150" y1="1270" x2="1660" y2="1270" stroke="#A8BACC" stroke-width="4"/>
+
+  <g>
+    <circle cx="150" cy="1270" r="16" fill="#F7CAC9"/>
+    <circle cx="402" cy="1270" r="16" fill="#C9D8E8"/>
+    <circle cx="654" cy="1270" r="16" fill="#CFE8D6"/>
+    <circle cx="906" cy="1270" r="16" fill="#F5E6A6"/>
+    <circle cx="1158" cy="1270" r="16" fill="#DCCFE7"/>
+    <circle cx="1410" cy="1270" r="16" fill="#BFDDE5"/>
+    <circle cx="1660" cy="1270" r="16" fill="#F2D7B6"/>
+  </g>
+
+  <g class="body" font-size="15">
+    <text x="100" y="1315" font-weight="700">001 Entities</text>
+    <text x="72" y="1338">table_names + universal</text>
+    <text x="82" y="1360">entity identity/audit.</text>
+
+    <text x="356" y="1315" font-weight="700">002 Sync</text>
+    <text x="324" y="1338">tombstones for offline</text>
+    <text x="346" y="1360">reconciliation.</text>
+
+    <text x="600" y="1315" font-weight="700">003 Owners</text>
+    <text x="570" y="1338">owner base + grants +</text>
+    <text x="592" y="1360">roles capability layer.</text>
+
+    <text x="854" y="1315" font-weight="700">004 Users</text>
+    <text x="828" y="1338">human identities + auth</text>
+    <text x="854" y="1360">helper functions.</text>
+
+    <text x="1098" y="1315" font-weight="700">005 Ownables</text>
+    <text x="1074" y="1338">base resource table with</text>
+    <text x="1068" y="1360">owner/creator/editor refs.</text>
+
+    <text x="1360" y="1315" font-weight="700">006 Teams</text>
+    <text x="1328" y="1338">diamond model: owner +</text>
+    <text x="1346" y="1360">ownable in one entity.</text>
+
+    <text x="1604" y="1315" font-weight="700">007 Security</text>
+    <text x="1576" y="1338">RLS + recursive access</text>
+    <text x="1584" y="1360">resolution functions.</text>
+  </g>
+
+  <foreignObject x="120" y="1405" width="1560" height="210">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Source Sans 3','Helvetica Neue',Arial,sans-serif;color:#445D71;font-size:17px;line-height:1.36;text-align:justify;">
+      <p><strong>Interpretation.</strong> APS starts with universal IDs and audit history, then layers ownership and role-based authority before introducing ownable resources and team-level composition. Security is not an afterthought: it is encoded into the schema itself through row-level policies and recursive access functions, making authorization behavior reproducible and reviewable.</p>
+    </div>
+  </foreignObject>
+
+  <!-- Bottom analytics and takeaways -->
+  <g filter="url(#softShadow)">
+    <rect x="80" y="1680" width="1060" height="830" rx="26" fill="url(#cardGradient)"/>
+    <rect x="1180" y="1680" width="540" height="830" rx="26" fill="url(#cardGradient)"/>
+  </g>
+
+  <text class="heading" x="120" y="1730" font-size="30" font-weight="700">APS Crate Taxonomy (Workspace Members)</text>
+  <text class="body" x="120" y="1760" font-size="16">Breakdown across procedure templates, procedures, assets, asset models, and remaining domain crates.</text>
+
+  <!-- Chart frame -->
+  <line x1="190" y1="2380" x2="1050" y2="2380" stroke="#9AB0C2" stroke-width="3"/>
+  <line x1="190" y1="1840" x2="190" y2="2380" stroke="#9AB0C2" stroke-width="3"/>
+
+  <!-- y-axis ticks -->
+  <g class="body" font-size="13">
+    <line x1="186" y1="2380" x2="1050" y2="2380" stroke="#E3EAF0"/>
+    <line x1="186" y1="2290" x2="1050" y2="2290" stroke="#E3EAF0"/>
+    <line x1="186" y1="2200" x2="1050" y2="2200" stroke="#E3EAF0"/>
+    <line x1="186" y1="2110" x2="1050" y2="2110" stroke="#E3EAF0"/>
+    <line x1="186" y1="2020" x2="1050" y2="2020" stroke="#E3EAF0"/>
+    <line x1="186" y1="1930" x2="1050" y2="1930" stroke="#E3EAF0"/>
+    <line x1="186" y1="1840" x2="1050" y2="1840" stroke="#E3EAF0"/>
+
+    <text x="160" y="2385" text-anchor="end">0</text>
+    <text x="160" y="2295" text-anchor="end">10</text>
+    <text x="160" y="2205" text-anchor="end">20</text>
+    <text x="160" y="2115" text-anchor="end">30</text>
+    <text x="160" y="2025" text-anchor="end">40</text>
+    <text x="160" y="1935" text-anchor="end">50</text>
+    <text x="160" y="1845" text-anchor="end">60</text>
+  </g>
+
+  <!-- Bars: max=62, scale=8.709 px per unit -->
+  <g>
+    <rect x="250" y="1840" width="130" height="540" fill="#93B2CF" rx="10"/>
+    <rect x="420" y="2215" width="130" height="165" fill="#E5B4B9" rx="10"/>
+    <rect x="590" y="2232" width="130" height="148" fill="#B9DBC7" rx="10"/>
+    <rect x="760" y="2328" width="130" height="52" fill="#D9C6E8" rx="10"/>
+    <rect x="930" y="2354" width="130" height="26" fill="#F0DE9E" rx="10"/>
+
+    <text class="kpi-value" x="315" y="1830" text-anchor="middle" font-size="24">62</text>
+    <text class="kpi-value" x="485" y="2206" text-anchor="middle" font-size="20">19</text>
+    <text class="kpi-value" x="655" y="2223" text-anchor="middle" font-size="20">17</text>
+    <text class="kpi-value" x="825" y="2319" text-anchor="middle" font-size="20">6</text>
+    <text class="kpi-value" x="995" y="2345" text-anchor="middle" font-size="20">3</text>
+  </g>
+
+  <g class="body" font-size="14" font-weight="600">
+    <text x="315" y="2405" text-anchor="middle">Other APS</text>
+    <text x="485" y="2405" text-anchor="middle">Template</text>
+    <text x="655" y="2405" text-anchor="middle">Procedure</text>
+    <text x="825" y="2405" text-anchor="middle">Asset Model</text>
+    <text x="995" y="2405" text-anchor="middle">Asset</text>
+  </g>
+
+  <!-- Right panel content -->
+  <text class="heading" x="1220" y="1730" font-size="30" font-weight="700">Operational Summary</text>
+  <use xlink:href="#fa-shield" x="1220" y="1760" width="42" height="42" style="color:#6D8DAE"/>
+  <text class="heading" x="1272" y="1789" font-size="20" font-weight="600">What APS guarantees</text>
+
+  <g class="body" font-size="17">
+    <text x="1220" y="1840">1. Schema-first governance and auditable evolution.</text>
+    <text x="1220" y="1880">2. Enforced procedure/template DAG consistency.</text>
+    <text x="1220" y="1920">3. Strongly-typed Rust access to generated tables.</text>
+    <text x="1220" y="1960">4. Reproducible tests via translated in-memory DB.</text>
+  </g>
+
+  <line x1="1220" y1="1990" x2="1680" y2="1990" stroke="#D1DCE6"/>
+
+  <text class="heading" x="1220" y="2040" font-size="22" font-weight="700">Procedure-centric data flow</text>
+  <g transform="translate(1220 2070)">
+    <rect x="0" y="0" width="145" height="70" rx="12" fill="#EAF3FB"/>
+    <text class="body" x="72" y="42" text-anchor="middle" font-size="15">Template</text>
+
+    <rect x="175" y="0" width="145" height="70" rx="12" fill="#E8F4EC"/>
+    <text class="body" x="247" y="42" text-anchor="middle" font-size="15">PTAM</text>
+
+    <rect x="350" y="0" width="145" height="70" rx="12" fill="#FFF1F1"/>
+    <text class="body" x="422" y="42" text-anchor="middle" font-size="15">Procedure</text>
+
+    <path d="M145 35 L170 35" stroke="#6D8297" stroke-width="3" marker-end="url(#arrowHead)"/>
+    <path d="M320 35 L345 35" stroke="#6D8297" stroke-width="3" marker-end="url(#arrowHead)"/>
+  </g>
+
+  <foreignObject x="1220" y="2170" width="460" height="280">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Source Sans 3','Helvetica Neue',Arial,sans-serif;color:#445D71;font-size:17px;line-height:1.4;text-align:justify;">
+      <p><strong>Closing note.</strong> APS is designed for professional reliability: conventions are codified as executable rules, generated code mirrors schema intent, and the same model is exercised in tests through translation tooling. This reduces drift between design, data, and implementation while keeping procedure-oriented workflows explicit.</p>
+      <p><em>Prepared as a presentation/report-ready visual brief.</em></p>
+    </div>
+  </foreignObject>
+
+  <text class="body" x="80" y="2565" font-size="13">Data sources in this graphic: `Cargo.toml`, `sql/core-schema/**/up.sql`, `builder/src/main.rs`, `crates/aps-traits`, `crates/aps-test-utils`.</text>
+</svg>

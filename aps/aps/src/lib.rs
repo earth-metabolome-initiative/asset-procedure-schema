@@ -114,6 +114,12 @@ pub use aps_packaging_procedures::{self, PackagingProcedure, packaging_procedure
 pub use aps_parent_procedure_templates::{
     self, ParentProcedureTemplate, parent_procedure_templates,
 };
+pub use aps_personal_protective_equipment_models::{
+    self, PersonalProtectiveEquipmentModel, personal_protective_equipment_models,
+};
+pub use aps_personal_protective_equipments::{
+    self, PersonalProtectiveEquipment, personal_protective_equipments,
+};
 pub use aps_photograph_procedure_templates::{
     self, PhotographProcedureTemplate, photograph_procedure_templates,
 };

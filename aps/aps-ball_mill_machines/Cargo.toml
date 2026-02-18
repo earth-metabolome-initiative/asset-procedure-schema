@@ -13,6 +13,7 @@ rosetta-uuid.workspace = true
 aps-assets.workspace = true
 aps-commercial_ball_mill_machine_lots.workspace = true
 aps-entities.workspace = true
+aps-namespaced_ownables.workspace = true
 aps-ownables.workspace = true
 aps-physical_assets.workspace = true
 

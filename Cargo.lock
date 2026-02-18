@@ -105,6 +105,8 @@ dependencies = [
  "aps-packaging_procedure_templates",
  "aps-packaging_procedures",
  "aps-parent_procedure_templates",
+ "aps-personal_protective_equipment_models",
+ "aps-personal_protective_equipments",
  "aps-photograph_procedure_templates",
  "aps-photograph_procedures",
  "aps-photographs",
@@ -228,6 +230,7 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -261,6 +264,7 @@ dependencies = [
  "aps-assets",
  "aps-commercial_ball_mill_machine_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -370,6 +374,7 @@ dependencies = [
  "aps-assets",
  "aps-commercial_camera_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -448,6 +453,7 @@ dependencies = [
  "aps-assets",
  "aps-commercial_centrifuge_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -816,6 +822,7 @@ dependencies = [
  "aps-assets",
  "aps-container_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -898,6 +905,8 @@ dependencies = [
  "aps-packaging_procedure_templates",
  "aps-packaging_procedures",
  "aps-parent_procedure_templates",
+ "aps-personal_protective_equipment_models",
+ "aps-personal_protective_equipments",
  "aps-photograph_procedure_templates",
  "aps-photograph_procedures",
  "aps-photographs",
@@ -955,6 +964,7 @@ dependencies = [
  "aps-assets",
  "aps-digital_asset_models",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -1081,6 +1091,7 @@ dependencies = [
  "aps-assets",
  "aps-commercial_freeze_dryer_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -1157,6 +1168,7 @@ dependencies = [
  "aps-assets",
  "aps-commercial_freezer_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -1233,6 +1245,7 @@ dependencies = [
  "aps-assets",
  "aps-commercial_geopositioning_device_lots",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "diesel",
@@ -1482,6 +1495,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-personal_protective_equipment_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-personal_protective_equipments"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-entities",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-personal_protective_equipment_models",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-photograph_procedure_templates"
 version = "0.1.0"
 dependencies = [
@@ -1533,6 +1579,7 @@ dependencies = [
  "aps-assets",
  "aps-digital_assets",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "diesel",
  "diesel-builders",
@@ -1562,6 +1609,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
  "diesel",
@@ -1745,6 +1793,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "aps-sample_source_models",
@@ -1761,6 +1810,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "aps-sample_models",
@@ -1986,6 +2036,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "aps-volume_measuring_device_models",
@@ -2020,6 +2071,7 @@ dependencies = [
  "aps-assets",
  "aps-containers",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "aps-volumetric_container_models",
@@ -2069,6 +2121,7 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-entities",
+ "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
  "aps-weighing_device_models",
@@ -3722,7 +3775,7 @@ dependencies = [
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#bf1e5d5794404e6dc421b996942ce862d1126f5c"
+source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#7524647c83800a8bac8b67c86ee31c1d232dda15"
 dependencies = [
  "git2",
  "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits)",
@@ -4530,7 +4583,7 @@ dependencies = [
 [[package]]
 name = "sql-rules"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-rules?branch=main#9db808c88ff5daeaf01ed036541cf741d61b704d"
+source = "git+https://github.com/earth-metabolome-initiative/sql-rules?branch=main#1c8aeb03cd47c188ed4f31431881d86902b00258"
 dependencies = [
  "heck",
  "inflection-rs",
@@ -4596,7 +4649,7 @@ dependencies = [
 [[package]]
 name = "sqlparser"
 version = "0.61.0"
-source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#2ea773a1ad0f18d2577846bb8201c0769734c098"
+source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#40350e321f918005e07f818fa31d816f4f8b4c8c"
 dependencies = [
  "log",
  "recursive",

@@ -20,6 +20,7 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_assets::assets,
     aps_physical_assets::physical_assets,
     aps_containers::containers
@@ -61,6 +62,15 @@ impl ::diesel_builders::GetColumn<aps_containers::containers::id> for Volumetric
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for VolumetricContainer {
+    fn get_column_ref(
+        &self,
+    ) -> &<volumetric_containers::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id>
+    for VolumetricContainer
+{
     fn get_column_ref(
         &self,
     ) -> &<volumetric_containers::id as ::diesel_builders::ColumnTyped>::ColumnType {

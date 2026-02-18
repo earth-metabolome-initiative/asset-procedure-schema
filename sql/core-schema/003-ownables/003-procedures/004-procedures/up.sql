@@ -1,6 +1,6 @@
 CREATE TABLE procedures (
 	-- The ID of this procedure.
-	id UUID PRIMARY KEY DEFAULT uuidv7() REFERENCES ownables(id) ON DELETE CASCADE,
+	id UUID PRIMARY KEY REFERENCES ownables(id) ON DELETE CASCADE,
 	-- The procedure_id template of this procedure.
 	procedure_template_id UUID NOT NULL REFERENCES procedure_templates(id),
 	-- The parent_id procedure_id (if any) of this procedure.

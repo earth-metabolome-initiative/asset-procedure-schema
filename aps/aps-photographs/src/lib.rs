@@ -20,6 +20,7 @@
 #[table_model(ancestors(
     aps_entities::entities,
     aps_ownables::ownables,
+    aps_namespaced_ownables::namespaced_ownables,
     aps_assets::assets,
     aps_digital_assets::digital_assets
 ))]
@@ -45,6 +46,11 @@ impl ::diesel_builders::GetColumn<aps_digital_assets::digital_assets::id> for Ph
     }
 }
 impl ::diesel_builders::GetColumn<aps_entities::entities::id> for Photograph {
+    fn get_column_ref(&self) -> &<photographs::id as ::diesel_builders::ColumnTyped>::ColumnType {
+        &self.id
+    }
+}
+impl ::diesel_builders::GetColumn<aps_namespaced_ownables::namespaced_ownables::id> for Photograph {
     fn get_column_ref(&self) -> &<photographs::id as ::diesel_builders::ColumnTyped>::ColumnType {
         &self.id
     }
