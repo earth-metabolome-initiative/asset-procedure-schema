@@ -52,8 +52,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// use aps_procedure_template_asset_models::*;
     /// use aps_procedure_templates::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel_builders::prelude::*;
     /// use aps_traits::ProcedureTemplateNode;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
     /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
@@ -121,8 +121,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// use aps_procedure_template_asset_models::*;
     /// use aps_procedure_templates::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel_builders::prelude::*;
     /// use aps_traits::ProcedureTemplateNode;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
     /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
@@ -189,8 +189,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// use aps_procedure_templates::*;
     /// use aps_reused_procedure_template_asset_models::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel_builders::prelude::*;
     /// use aps_traits::ProcedureTemplateNode;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
     /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
@@ -256,8 +256,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// use aps_procedure_templates::*;
     /// use aps_reused_procedure_template_asset_models::*;
     /// use aps_test_utils::{aps_conn, asset_model, procedure_template, user};
-    /// use diesel_builders::prelude::*;
     /// use aps_traits::ProcedureTemplateNode;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_conn();
     /// let test_user = user(&mut conn);
     /// let test_procedure_template = procedure_template("Test Procedure", &test_user, &mut conn);
@@ -318,9 +318,9 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_parent_procedure_templates::*;
     /// use aps_procedure_templates::*;
+    /// use aps_traits::ProcedureTemplateNode;
     /// use diesel::associations::Identifiable;
     /// use diesel_builders::prelude::*;
-    /// use aps_traits::ProcedureTemplateNode;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
     /// let parent_template = aps_test_utils::procedure_template("Parent Procedure", &user, &mut conn);
@@ -373,8 +373,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_next_procedure_templates::*;
     /// use aps_procedure_templates::*;
-    /// use diesel_builders::prelude::*;
     /// use aps_traits::ProcedureTemplateNode;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
     /// let parent_template = aps_test_utils::procedure_template("Parent Procedure", &user, &mut conn);
@@ -445,8 +445,8 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
     /// ```rust
     /// use aps_next_procedure_templates::*;
     /// use aps_procedure_templates::*;
-    /// use diesel_builders::prelude::*;
     /// use aps_traits::ProcedureTemplateNode;
+    /// use diesel_builders::prelude::*;
     /// let mut conn = aps_test_utils::aps_conn();
     /// let user = aps_test_utils::user(&mut conn);
     /// let parent_template = aps_test_utils::procedure_template("Parent Procedure", &user, &mut conn);
