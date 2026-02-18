@@ -51,6 +51,12 @@ pub use aps_commercial_geopositioning_device_lots::{
 pub use aps_commercial_geopositioning_device_models::{
     self, CommercialGeopositioningDeviceModel, commercial_geopositioning_device_models,
 };
+pub use aps_commercial_phone_device_lots::{
+    self, CommercialPhoneDeviceLot, commercial_phone_device_lots,
+};
+pub use aps_commercial_phone_device_models::{
+    self, CommercialPhoneDeviceModel, commercial_phone_device_models,
+};
 pub use aps_commercial_product_lots::{self, CommercialProductLot, commercial_product_lots};
 pub use aps_commercial_products::{self, CommercialProduct, commercial_products};
 pub use aps_container_compatibility_rules::{
@@ -120,6 +126,8 @@ pub use aps_personal_protective_equipment_models::{
 pub use aps_personal_protective_equipments::{
     self, PersonalProtectiveEquipment, personal_protective_equipments,
 };
+pub use aps_phone_device_models::{self, PhoneDeviceModel, phone_device_models};
+pub use aps_phone_devices::{self, PhoneDevice, phone_devices};
 pub use aps_photograph_procedure_templates::{
     self, PhotographProcedureTemplate, photograph_procedure_templates,
 };

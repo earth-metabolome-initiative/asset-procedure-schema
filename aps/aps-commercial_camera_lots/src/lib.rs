@@ -103,3 +103,11 @@ impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_mode
         &self.id
     }
 }
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_camera_lots,
+    ::aps_commercial_geopositioning_device_lots::commercial_geopositioning_device_lots
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    commercial_camera_lots,
+    ::aps_geopositioning_device_models::geopositioning_device_models
+);

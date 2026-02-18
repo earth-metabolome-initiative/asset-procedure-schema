@@ -69,3 +69,7 @@ impl ::diesel_builders::GetColumn<aps_physical_assets::physical_assets::id> for 
         &self.id
     }
 }
+::diesel::allow_tables_to_appear_in_same_query!(
+    cameras,
+    ::aps_geopositioning_devices::geopositioning_devices
+);

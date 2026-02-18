@@ -39,6 +39,8 @@ members = [
   "aps/aps-commercial_freezer_models",
   "aps/aps-commercial_geopositioning_device_lots",
   "aps/aps-commercial_geopositioning_device_models",
+  "aps/aps-commercial_phone_device_lots",
+  "aps/aps-commercial_phone_device_models",
   "aps/aps-commercial_product_lots",
   "aps/aps-commercial_products",
   "aps/aps-container_compatibility_rules",
@@ -80,6 +82,8 @@ members = [
   "aps/aps-parent_procedure_templates",
   "aps/aps-personal_protective_equipment_models",
   "aps/aps-personal_protective_equipments",
+  "aps/aps-phone_device_models",
+  "aps/aps-phone_devices",
   "aps/aps-photograph_procedure_templates",
   "aps/aps-photograph_procedures",
   "aps/aps-photographs",
@@ -162,6 +166,8 @@ aps-commercial_freezer_lots = { path = "aps/aps-commercial_freezer_lots" }
 aps-commercial_freezer_models = { path = "aps/aps-commercial_freezer_models" }
 aps-commercial_geopositioning_device_lots = { path = "aps/aps-commercial_geopositioning_device_lots" }
 aps-commercial_geopositioning_device_models = { path = "aps/aps-commercial_geopositioning_device_models" }
+aps-commercial_phone_device_lots = { path = "aps/aps-commercial_phone_device_lots" }
+aps-commercial_phone_device_models = { path = "aps/aps-commercial_phone_device_models" }
 aps-commercial_product_lots = { path = "aps/aps-commercial_product_lots" }
 aps-commercial_products = { path = "aps/aps-commercial_products" }
 aps-container_compatibility_rules = { path = "aps/aps-container_compatibility_rules" }
@@ -203,6 +209,8 @@ aps-packaging_procedures = { path = "aps/aps-packaging_procedures" }
 aps-parent_procedure_templates = { path = "aps/aps-parent_procedure_templates" }
 aps-personal_protective_equipment_models = { path = "aps/aps-personal_protective_equipment_models" }
 aps-personal_protective_equipments = { path = "aps/aps-personal_protective_equipments" }
+aps-phone_device_models = { path = "aps/aps-phone_device_models" }
+aps-phone_devices = { path = "aps/aps-phone_devices" }
 aps-photograph_procedure_templates = { path = "aps/aps-photograph_procedure_templates" }
 aps-photograph_procedures = { path = "aps/aps-photograph_procedures" }
 aps-photographs = { path = "aps/aps-photographs" }

@@ -66,6 +66,8 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_phone_device_lots",
+ "aps-commercial_phone_device_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-container_compatibility_rules",
@@ -107,6 +109,8 @@ dependencies = [
  "aps-parent_procedure_templates",
  "aps-personal_protective_equipment_models",
  "aps-personal_protective_equipments",
+ "aps-phone_device_models",
+ "aps-phone_devices",
  "aps-photograph_procedure_templates",
  "aps-photograph_procedures",
  "aps-photographs",
@@ -354,9 +358,12 @@ name = "aps-camera_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-commercial_geopositioning_device_lots",
+ "aps-commercial_geopositioning_device_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-entities",
+ "aps-geopositioning_device_models",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -374,6 +381,7 @@ dependencies = [
  "aps-assets",
  "aps-commercial_camera_lots",
  "aps-entities",
+ "aps-geopositioning_devices",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
@@ -507,8 +515,10 @@ dependencies = [
  "aps-asset_models",
  "aps-camera_models",
  "aps-commercial_camera_models",
+ "aps-commercial_geopositioning_device_lots",
  "aps-commercial_product_lots",
  "aps-entities",
+ "aps-geopositioning_device_models",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -525,8 +535,10 @@ version = "0.1.0"
 dependencies = [
  "aps-asset_models",
  "aps-camera_models",
+ "aps-commercial_geopositioning_device_models",
  "aps-commercial_products",
  "aps-entities",
+ "aps-geopositioning_device_models",
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_asset_models",
@@ -672,6 +684,48 @@ name = "aps-commercial_geopositioning_device_models"
 version = "0.1.0"
 dependencies = [
  "aps-asset_models",
+ "aps-commercial_products",
+ "aps-entities",
+ "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_phone_device_lots"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-camera_models",
+ "aps-commercial_camera_lots",
+ "aps-commercial_geopositioning_device_lots",
+ "aps-commercial_product_lots",
+ "aps-entities",
+ "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-commercial_phone_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-camera_models",
+ "aps-commercial_camera_models",
+ "aps-commercial_geopositioning_device_models",
  "aps-commercial_products",
  "aps-entities",
  "aps-geopositioning_device_models",
@@ -866,6 +920,8 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_geopositioning_device_lots",
  "aps-commercial_geopositioning_device_models",
+ "aps-commercial_phone_device_lots",
+ "aps-commercial_phone_device_models",
  "aps-commercial_product_lots",
  "aps-commercial_products",
  "aps-container_compatibility_rules",
@@ -907,6 +963,8 @@ dependencies = [
  "aps-parent_procedure_templates",
  "aps-personal_protective_equipment_models",
  "aps-personal_protective_equipments",
+ "aps-phone_device_models",
+ "aps-phone_devices",
  "aps-photograph_procedure_templates",
  "aps-photograph_procedures",
  "aps-photographs",
@@ -1519,6 +1577,42 @@ dependencies = [
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-personal_protective_equipment_models",
+ "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-phone_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-asset_models",
+ "aps-camera_models",
+ "aps-entities",
+ "aps-geopositioning_device_models",
+ "aps-namespaced_ownables",
+ "aps-ownables",
+ "aps-physical_asset_models",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-phone_devices"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-cameras",
+ "aps-entities",
+ "aps-geopositioning_devices",
+ "aps-namespaced_ownables",
+ "aps-ownables",
  "aps-physical_assets",
  "diesel",
  "diesel-builders",

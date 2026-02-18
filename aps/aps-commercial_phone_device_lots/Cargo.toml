@@ -1,5 +1,5 @@
 [package]
-name = "aps-camera_models"
+name = "aps-commercial_phone_device_lots"
 version = "0.1.0"
 edition.workspace = true
 
@@ -11,10 +11,10 @@ diesel.workspace = true
 validation-errors.workspace = true
 rosetta-uuid.workspace = true
 aps-asset_models.workspace = true
+aps-camera_models.workspace = true
+aps-commercial_camera_lots.workspace = true
 aps-commercial_geopositioning_device_lots.workspace = true
-aps-commercial_geopositioning_device_models.workspace = true
 aps-commercial_product_lots.workspace = true
-aps-commercial_products.workspace = true
 aps-entities.workspace = true
 aps-geopositioning_device_models.workspace = true
 aps-namespaced_ownables.workspace = true

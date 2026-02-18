@@ -66,9 +66,21 @@ impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_mode
 }
 ::diesel::allow_tables_to_appear_in_same_query!(
     camera_models,
+    ::aps_commercial_geopositioning_device_lots::commercial_geopositioning_device_lots
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    camera_models,
+    ::aps_commercial_geopositioning_device_models::commercial_geopositioning_device_models
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    camera_models,
     ::aps_commercial_product_lots::commercial_product_lots
 );
 ::diesel::allow_tables_to_appear_in_same_query!(
     camera_models,
     ::aps_commercial_products::commercial_products
+);
+::diesel::allow_tables_to_appear_in_same_query!(
+    camera_models,
+    ::aps_geopositioning_device_models::geopositioning_device_models
 );
