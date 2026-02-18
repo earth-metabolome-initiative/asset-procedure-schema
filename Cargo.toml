@@ -107,7 +107,6 @@ members = [
   "aps/aps-photograph_procedures",
   "aps/aps-photographs",
   "aps/aps-physical_asset_model_lifecycle_classes",
-  "aps/aps-physical_asset_model_lifecycle_profiles",
   "aps/aps-physical_asset_models",
   "aps/aps-physical_assets",
   "aps/aps-pipette_tip_models",
@@ -257,7 +256,6 @@ aps-photograph_procedure_templates = { path = "aps/aps-photograph_procedure_temp
 aps-photograph_procedures = { path = "aps/aps-photograph_procedures" }
 aps-photographs = { path = "aps/aps-photographs" }
 aps-physical_asset_model_lifecycle_classes = { path = "aps/aps-physical_asset_model_lifecycle_classes" }
-aps-physical_asset_model_lifecycle_profiles = { path = "aps/aps-physical_asset_model_lifecycle_profiles" }
 aps-physical_asset_models = { path = "aps/aps-physical_asset_models" }
 aps-physical_assets = { path = "aps/aps-physical_assets" }
 aps-pipette_tip_models = { path = "aps/aps-pipette_tip_models" }

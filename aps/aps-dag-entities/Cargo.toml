@@ -101,7 +101,6 @@ aps-phone_devices.workspace = true
 aps-photograph_procedure_templates.workspace = true
 aps-photograph_procedures.workspace = true
 aps-photographs.workspace = true
-aps-physical_asset_model_lifecycle_profiles.workspace = true
 aps-physical_asset_models.workspace = true
 aps-physical_assets.workspace = true
 aps-pipette_tip_models.workspace = true

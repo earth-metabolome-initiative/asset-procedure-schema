@@ -175,9 +175,6 @@ pub use aps_photographs::{self, Photograph, photographs};
 pub use aps_physical_asset_model_lifecycle_classes::{
     self, PhysicalAssetModelLifecycleClass, physical_asset_model_lifecycle_classes,
 };
-pub use aps_physical_asset_model_lifecycle_profiles::{
-    self, PhysicalAssetModelLifecycleProfile, physical_asset_model_lifecycle_profiles,
-};
 pub use aps_physical_asset_models::{self, PhysicalAssetModel, physical_asset_models};
 pub use aps_physical_assets::{self, PhysicalAsset, physical_assets};
 pub use aps_pipette_tip_models::{self, PipetteTipModel, pipette_tip_models};

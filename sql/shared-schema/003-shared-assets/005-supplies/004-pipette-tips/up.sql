@@ -33,8 +33,8 @@
 --
 -- Lifecycle/reusability note:
 --   Pipette tips are expected to be `single_use`, but lifecycle remains
---   authoritative in `physical_asset_model_lifecycle_profiles`.
---   This migration is schema-only and does not mutate lifecycle profile rows.
+--   authoritative on `physical_asset_models` lifecycle columns.
+--   This migration is schema-only and does not override model lifecycle data.
 --
 -- Security context (local, inherited through ancestor PK extension):
 --   No table-local RLS is defined in this migration. Access is inherited from

@@ -24,6 +24,8 @@ diesel.workspace = true
 
 [dev-dependencies]
 aps-test-utils = { path = "../aps-test-utils" }
+aps-namespaces.workspace = true
+aps-pipette_tip_models.workspace = true
 
 [lints]
 workspace = true

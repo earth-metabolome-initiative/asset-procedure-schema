@@ -34,9 +34,9 @@ photographs, etc.) that are meant to be reused across projects. Here,
   `digital_asset_models` / `digital_assets`.
 - `marking-assets`: physical assets used to identify, label, or signal
   entities and locations (for example panels, markers).
-- Lifecycle class (`unknown`, `single_use`, `reusable`) is modeled separately
-  in `physical_asset_model_lifecycle_profiles`; directories do not encode
-  lifecycle behavior.
+- Lifecycle class (`unknown`, `single_use`, `reusable`) is modeled on
+  `physical_asset_models` (`lifecycle_class_id`, `recommended_max_use`);
+  directories do not encode lifecycle behavior.
 
 ## Commercial Tables And Lifecycle Precision
 
@@ -52,8 +52,8 @@ photographs, etc.) that are meant to be reused across projects. Here,
 - Lifecycle/reusability is orthogonal to folder taxonomy:
   - `devices`, `supplies`, `marking-assets`, etc. do not imply `single_use`
     or `reusable`;
-  - lifecycle metadata belongs in `physical_asset_model_lifecycle_profiles`
-    and should be called out explicitly when relevant.
+  - lifecycle metadata belongs on `physical_asset_models` and should be called
+    out explicitly when relevant.
 
 ## Required Migration Documentation
 
@@ -199,7 +199,7 @@ Commercial tables decision:
 Lifecycle/reusability expectation:
 - <unknown | single_use | reusable>
 - Note whether lifecycle data changes are in-scope here or handled separately
-  in physical_asset_model_lifecycle_profiles.
+  via physical_asset_models lifecycle columns.
 
 Requirements:
 - Add full migration documentation header with:
