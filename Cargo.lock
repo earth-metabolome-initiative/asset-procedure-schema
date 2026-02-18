@@ -4794,6 +4794,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sql-migration-lint"
+version = "0.1.0"
+
+[[package]]
 name = "sql-procedure-rules"
 version = "0.1.0"
 dependencies = [

@@ -9,9 +9,13 @@ use std::{
 
 /// Relative path to the device migrations root.
 const DEVICES_RELATIVE_PATH: &str = "sql/shared-schema/003-shared-assets/004-devices";
+/// Relative path to the shared-assets migration root.
+const SHARED_ASSETS_RELATIVE_PATH: &str = "sql/shared-schema/003-shared-assets";
 
 /// Supported command for device migration linting.
 const DEVICES_COMMAND: &str = "devices";
+/// Supported command for shared-assets migration documentation linting.
+const SHARED_ASSETS_DOCS_COMMAND: &str = "shared-assets-docs";
 /// Optional flag to require complete device table families for each stem.
 const REQUIRE_FULL_DEVICE_CHAIN_FLAG: &str = "--require-full-device-chain";
 
@@ -83,6 +87,7 @@ fn run() -> Result<(), String> {
 
     match command.as_str() {
         DEVICES_COMMAND => lint_devices(&root, options),
+        SHARED_ASSETS_DOCS_COMMAND => lint_shared_assets_docs(&root),
         _ => Err(format!("Unknown command '{command}'\n\n{}", usage())),
     }
 }
@@ -90,7 +95,7 @@ fn run() -> Result<(), String> {
 /// Returns command-line usage instructions.
 fn usage() -> String {
     format!(
-        "Usage:\n  cargo run -p sql-migration-lint -- {DEVICES_COMMAND} [--root <path>] [{REQUIRE_FULL_DEVICE_CHAIN_FLAG}]\n"
+        "Usage:\n  cargo run -p sql-migration-lint -- {DEVICES_COMMAND} [--root <path>] [{REQUIRE_FULL_DEVICE_CHAIN_FLAG}]\n  cargo run -p sql-migration-lint -- {SHARED_ASSETS_DOCS_COMMAND} [--root <path>]\n"
     )
 }
 
@@ -136,6 +141,43 @@ fn lint_devices(root: &Path, options: DeviceLintOptions) -> Result<(), String> {
     Err(message)
 }
 
+/// Lints shared-assets migrations for required documentation sections and
+/// in-file statement/column comments.
+fn lint_shared_assets_docs(root: &Path) -> Result<(), String> {
+    let shared_assets_dir = root.join(SHARED_ASSETS_RELATIVE_PATH);
+    let migrations = load_up_sql_files_recursive(&shared_assets_dir)?;
+
+    if migrations.is_empty() {
+        return Err(format!(
+            "No shared-assets migrations with up.sql found under {}",
+            shared_assets_dir.display()
+        ));
+    }
+
+    let mut errors = Vec::new();
+
+    for migration_path in &migrations {
+        let sql = fs::read_to_string(migration_path)
+            .map_err(|error| format!("Failed to read {}: {error}", migration_path.display()))?;
+        let migration_label =
+            migration_path.strip_prefix(root).unwrap_or(migration_path).display().to_string();
+        validate_shared_assets_documentation(&migration_label, &sql, &mut errors);
+    }
+
+    if errors.is_empty() {
+        println!("Shared-assets migration documentation lint passed.");
+        return Ok(());
+    }
+
+    let mut message = String::from("Shared-assets migration documentation lint failed:\n");
+    for error in errors {
+        message.push_str("  - ");
+        message.push_str(&error);
+        message.push('\n');
+    }
+    Err(message)
+}
+
 /// Loads migration directories that contain an `up.sql` file.
 fn load_migrations(devices_dir: &Path) -> Result<Vec<Migration>, String> {
     let entries = fs::read_dir(devices_dir)
@@ -171,6 +213,41 @@ fn load_migrations(devices_dir: &Path) -> Result<Vec<Migration>, String> {
 
     migrations.sort_by(|left, right| left.dir_name.cmp(&right.dir_name));
     Ok(migrations)
+}
+
+/// Recursively collects all `up.sql` files under `root`.
+fn load_up_sql_files_recursive(root: &Path) -> Result<Vec<PathBuf>, String> {
+    let mut files = Vec::new();
+    collect_up_sql_files_recursive(root, &mut files)?;
+    files.sort();
+    Ok(files)
+}
+
+/// Recursively traverses directories and collects `up.sql` files.
+fn collect_up_sql_files_recursive(dir: &Path, files: &mut Vec<PathBuf>) -> Result<(), String> {
+    let entries =
+        fs::read_dir(dir).map_err(|error| format!("Failed to read {}: {error}", dir.display()))?;
+
+    for entry_result in entries {
+        let entry = entry_result
+            .map_err(|error| format!("Failed to iterate entries in {}: {error}", dir.display()))?;
+        let path = entry.path();
+        let file_type = entry.file_type().map_err(|error| {
+            format!("Failed to inspect entry '{}' in {}: {error}", path.display(), dir.display())
+        })?;
+
+        if file_type.is_dir() {
+            collect_up_sql_files_recursive(&path, files)?;
+            continue;
+        }
+
+        if file_type.is_file() && path.file_name().and_then(|name| name.to_str()) == Some("up.sql")
+        {
+            files.push(path);
+        }
+    }
+
+    Ok(())
 }
 
 /// Validates that migration prefixes are contiguous (`001..N`) without gaps.
@@ -407,6 +484,227 @@ fn extract_registered_tables(sql: &str) -> BTreeSet<String> {
     tables
 }
 
+/// Validates documentation completeness for one shared-assets migration file.
+fn validate_shared_assets_documentation(
+    migration_label: &str,
+    sql: &str,
+    errors: &mut Vec<String>,
+) {
+    validate_required_doc_sections(migration_label, sql, errors);
+    validate_statement_comments(migration_label, sql, errors);
+    validate_column_comments(migration_label, sql, errors);
+}
+
+/// Validates required top-level documentation sections and ASCII placement art.
+fn validate_required_doc_sections(migration_label: &str, sql: &str, errors: &mut Vec<String>) {
+    let required_markers = [
+        "Migration:",
+        "Purpose:",
+        "APS placement",
+        "Security context",
+        "SQL/RLS semantics",
+        "Zanzibar semantics",
+    ];
+
+    for marker in required_markers {
+        if !sql.contains(marker) {
+            errors.push(format!(
+                "[{}] missing documentation section marker '{}'",
+                migration_label, marker
+            ));
+        }
+    }
+
+    if !sql.lines().any(|line| line.contains("+--")) {
+        errors.push(format!(
+            "[{}] missing APS ASCII placement diagram (expected at least one '+--' line)",
+            migration_label
+        ));
+    }
+}
+
+/// Validates that each top-level SQL statement has a preceding comment.
+fn validate_statement_comments(migration_label: &str, sql: &str, errors: &mut Vec<String>) {
+    let lines = sql.lines().collect::<Vec<_>>();
+
+    for (index, line) in lines.iter().enumerate() {
+        let trimmed = line.trim_start();
+        if !is_supported_statement_start(trimmed) {
+            continue;
+        }
+
+        if !has_preceding_comment(&lines, index) {
+            errors.push(format!(
+                "[{}] SQL statement '{}' is missing a preceding '--' comment",
+                migration_label, trimmed
+            ));
+        }
+    }
+}
+
+/// Validates that each table column line has a preceding comment.
+fn validate_column_comments(migration_label: &str, sql: &str, errors: &mut Vec<String>) {
+    let lines = sql.lines().collect::<Vec<_>>();
+    let mut current_table_name = String::new();
+    let mut in_create_table = false;
+
+    for (index, line) in lines.iter().enumerate() {
+        let trimmed = line.trim_start();
+
+        if let Some(table_name) = parse_create_table_name(trimmed) {
+            in_create_table = true;
+            current_table_name = table_name;
+            continue;
+        }
+
+        if !in_create_table {
+            continue;
+        }
+
+        if is_create_table_terminator(trimmed) {
+            in_create_table = false;
+            current_table_name.clear();
+            continue;
+        }
+
+        if trimmed.is_empty() || trimmed.starts_with("--") {
+            continue;
+        }
+
+        if is_column_definition(trimmed) && !has_preceding_comment(&lines, index) {
+            errors.push(format!(
+                "[{}] table '{}' column line '{}' is missing a preceding '--' comment",
+                migration_label, current_table_name, trimmed
+            ));
+        }
+    }
+}
+
+/// Returns true when the line starts one of the supported statement forms.
+fn is_supported_statement_start(trimmed_line: &str) -> bool {
+    [
+        "CREATE TABLE ",
+        "INSERT INTO ",
+        "ALTER TABLE ",
+        "CREATE UNIQUE INDEX ",
+        "CREATE INDEX ",
+        "CREATE POLICY ",
+        "CREATE OR REPLACE ",
+        "DROP TABLE ",
+        "UPDATE ",
+        "DELETE FROM ",
+    ]
+    .iter()
+    .any(|prefix| trimmed_line.starts_with(prefix))
+}
+
+/// Returns true when a table definition line terminates `CREATE TABLE (...)`.
+fn is_create_table_terminator(trimmed_line: &str) -> bool {
+    let trimmed_end = trimmed_line.trim_end();
+    trimmed_end == ");" || trimmed_end == ")"
+}
+
+/// Parses table name from a `CREATE TABLE ...` line.
+fn parse_create_table_name(trimmed_line: &str) -> Option<String> {
+    let rest = trimmed_line.strip_prefix("CREATE TABLE ")?;
+    let first_token = rest.split_whitespace().next()?;
+    let table_name =
+        first_token.trim_matches('"').trim_end_matches('(').trim_end_matches(';').to_string();
+    (!table_name.is_empty()).then_some(table_name)
+}
+
+/// Returns true if a line appears to define a table column.
+fn is_column_definition(trimmed_line: &str) -> bool {
+    if trimmed_line.is_empty() || trimmed_line.starts_with("--") {
+        return false;
+    }
+
+    let uppercase = trimmed_line.to_ascii_uppercase();
+    for keyword in [
+        "CONSTRAINT ",
+        "PRIMARY KEY",
+        "FOREIGN KEY",
+        "UNIQUE ",
+        "CHECK ",
+        "REFERENCES ",
+        "ON DELETE",
+        "ON UPDATE",
+    ] {
+        if uppercase.starts_with(keyword) {
+            return false;
+        }
+    }
+
+    if is_create_table_terminator(trimmed_line) {
+        return false;
+    }
+
+    let mut tokens = trimmed_line.split_whitespace();
+    let Some(first_token) = tokens.next() else {
+        return false;
+    };
+    let Some(second_token) = tokens.next() else {
+        return false;
+    };
+
+    let cleaned = first_token.trim_matches('"').trim_end_matches(',');
+    if cleaned.is_empty() {
+        return false;
+    }
+
+    let Some(first_character) = cleaned.chars().next() else {
+        return false;
+    };
+    if !(first_character.is_ascii_lowercase() || first_character == '_') {
+        return false;
+    }
+
+    let normalized_type = second_token.trim_matches(',').trim_matches('"').to_ascii_uppercase();
+    let looks_like_data_type = matches!(
+        normalized_type.as_str(),
+        "UUID"
+            | "TEXT"
+            | "SMALLINT"
+            | "INTEGER"
+            | "BIGINT"
+            | "REAL"
+            | "DOUBLE"
+            | "NUMERIC"
+            | "BOOLEAN"
+            | "DATE"
+            | "TIMESTAMP"
+            | "TIMESTAMPTZ"
+            | "JSONB"
+            | "BYTEA"
+            | "SERIAL"
+            | "BIGSERIAL"
+    ) || normalized_type.starts_with("VARCHAR(")
+        || normalized_type.starts_with("CHAR(")
+        || normalized_type.starts_with("NUMERIC(");
+
+    if !looks_like_data_type {
+        return false;
+    }
+
+    cleaned.chars().all(|character| {
+        character.is_ascii_lowercase() || character.is_ascii_digit() || character == '_'
+    })
+}
+
+/// Returns true when the nearest previous non-empty line is a SQL comment.
+fn has_preceding_comment(lines: &[&str], index: usize) -> bool {
+    for previous in lines[..index].iter().rev() {
+        let trimmed = previous.trim_start();
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        return trimmed.starts_with("--");
+    }
+
+    false
+}
+
 /// Derives allowed stems from migration directory name.
 ///
 /// Expected format: `NNN-<stem-slug>[+<stem-slug>...]`, where each stem slug is
@@ -629,5 +927,64 @@ INSERT INTO table_names (id) VALUES ('camera_models') ON CONFLICT DO NOTHING;
         assert_eq!(errors.len(), 1);
         assert!(errors[0].contains("commercial_weighing_device_models"));
         assert!(errors[0].contains("commercial_weighing_device_lots"));
+    }
+
+    #[test]
+    fn shared_assets_docs_checker_accepts_fully_documented_migration() {
+        let sql = r#"
+-- Migration: Shared Assets / Example
+-- Purpose:
+--   Example purpose.
+-- APS placement:
+--   entities
+--     +-- ownables
+-- Security context:
+-- SQL/RLS semantics:
+-- Zanzibar semantics:
+-- Creates example table.
+CREATE TABLE examples (
+    -- Stable identifier.
+    id UUID PRIMARY KEY,
+    -- User-facing name.
+    name TEXT NOT NULL
+);
+-- Registers table name.
+INSERT INTO table_names (id) VALUES ('examples') ON CONFLICT DO NOTHING;
+"#;
+
+        let mut errors = Vec::new();
+        validate_shared_assets_documentation("example/up.sql", sql, &mut errors);
+        assert!(errors.is_empty(), "{errors:?}");
+    }
+
+    #[test]
+    fn shared_assets_docs_checker_reports_missing_markers_and_comments() {
+        let sql = r#"
+-- Migration: Shared Assets / Example
+-- Purpose:
+--   Example purpose.
+-- APS placement:
+CREATE TABLE examples (
+    id UUID PRIMARY KEY
+);
+INSERT INTO table_names (id) VALUES ('examples') ON CONFLICT DO NOTHING;
+"#;
+
+        let mut errors = Vec::new();
+        validate_shared_assets_documentation("example/up.sql", sql, &mut errors);
+
+        assert!(!errors.is_empty());
+        assert!(errors.iter().any(|error| error.contains("Security context")));
+        assert!(errors.iter().any(|error| error.contains("ASCII placement diagram")));
+        assert!(
+            errors.iter().any(|error| error.contains("SQL statement 'INSERT INTO table_names"))
+        );
+        assert!(errors.iter().any(|error| error.contains("column line 'id UUID PRIMARY KEY'")));
+    }
+
+    #[test]
+    fn column_definition_detection_ignores_check_expression_lines() {
+        assert!(is_column_definition("id UUID PRIMARY KEY"));
+        assert!(!is_column_definition("container_model_id <> contained_asset_model_id"));
     }
 }

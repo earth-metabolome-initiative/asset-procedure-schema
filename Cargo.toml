@@ -3,6 +3,7 @@ resolver = "2"
 members = [
   "builder",
   "crates/sql-procedure-rules",
+  "crates/sql-migration-lint",
   "crates/aps-traits",
   "crates/aps-test-utils",
   "crates/procedure-template-visitor",
