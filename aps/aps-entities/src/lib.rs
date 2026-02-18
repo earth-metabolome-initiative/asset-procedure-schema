@@ -92,14 +92,13 @@ impl ::diesel_builders::ValidateColumn<entities::created_at>
         )?;
         if let Some(edited_at) =
             <Self as diesel_builders::MayGetColumn<entities::edited_at>>::may_get_column_ref(self)
+            && created_at > edited_at
         {
-            if created_at > edited_at {
-                return Err(::validation_errors::ValidationError::smaller_than(
-                    <crate::entities::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::entities::created_at::NAME,
-                    crate::entities::edited_at::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::smaller_than(
+                <crate::entities::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::entities::created_at::NAME,
+                crate::entities::edited_at::NAME,
+            ));
         }
         Ok(())
     }
@@ -130,14 +129,13 @@ impl ::diesel_builders::ValidateColumn<entities::edited_at>
         )?;
         if let Some(created_at) =
             <Self as diesel_builders::MayGetColumn<entities::created_at>>::may_get_column_ref(self)
+            && created_at > edited_at
         {
-            if created_at > edited_at {
-                return Err(::validation_errors::ValidationError::smaller_than(
-                    <crate::entities::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::entities::created_at::NAME,
-                    crate::entities::edited_at::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::smaller_than(
+                <crate::entities::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::entities::created_at::NAME,
+                crate::entities::edited_at::NAME,
+            ));
         }
         Ok(())
     }

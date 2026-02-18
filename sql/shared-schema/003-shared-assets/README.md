@@ -2,8 +2,8 @@
 
 This directory contains SQL migrations that define APS shared asset entities.
 It is the canonical place for reusable asset model/asset tables (containers,
-commercial products, devices, samples, photographs, etc.) that are meant to be
-used across projects.
+commercial products, devices, consumables, samples, photographs, etc.) that are
+meant to be used across projects.
 
 ## Directory Intent
 
@@ -19,9 +19,17 @@ used across projects.
 - `002-commercial-products`
 - `003-samples`
 - `004-devices/*` (device family migrations)
-- `005-packaging-models`
-- `006-beads`
-- `013-photographs`
+- `005-consumables/*` (consumable family migrations)
+- `006-digital-assets/*` (digital asset family migrations)
+
+## Classification Rubric
+
+- `devices`: durable instruments primarily used to measure, process, sense, or
+  acquire data from assets and procedures.
+- `consumables`: physical non-device items that are depleted, discarded, or
+  treated as operational supplies (for example PPE, beads, packaging).
+- `digital-assets`: non-physical assets that descend from
+  `digital_asset_models` / `digital_assets`.
 
 ## Required Migration Documentation
 
@@ -52,13 +60,39 @@ Every new `up.sql` migration in this directory must include:
 1. Pick the target location and naming:
 - For device entities, use `sql/shared-schema/003-shared-assets/004-devices/NNN-<entity-plural-kebab>/up.sql`.
 - Device numbering must stay contiguous (`001`, `002`, ... without gaps).
+- For consumable entities, use `sql/shared-schema/003-shared-assets/005-consumables/NNN-<entity-plural-kebab>/up.sql`.
+- Consumable numbering must stay contiguous (`001`, `002`, ... without gaps).
+- For digital-asset entities, use `sql/shared-schema/003-shared-assets/006-digital-assets/NNN-<entity-plural-kebab>/up.sql`.
+- Digital-asset numbering must stay contiguous (`001`, `002`, ... without gaps).
 
-2. Create the migration folder and file (example for a new device migration):
+2. Create the migration folder and file.
+
+Example for a new device migration:
 
 ```bash
 NEXT=011
 ENTITY_PLURAL=spectrometers
 BASE="sql/shared-schema/003-shared-assets/004-devices/${NEXT}-${ENTITY_PLURAL}"
+mkdir -p "$BASE"
+touch "$BASE/up.sql"
+```
+
+Example for a new consumable migration:
+
+```bash
+NEXT=004
+ENTITY_PLURAL=swabs
+BASE="sql/shared-schema/003-shared-assets/005-consumables/${NEXT}-${ENTITY_PLURAL}"
+mkdir -p "$BASE"
+touch "$BASE/up.sql"
+```
+
+Example for a new digital-asset migration:
+
+```bash
+NEXT=002
+ENTITY_PLURAL=documents
+BASE="sql/shared-schema/003-shared-assets/006-digital-assets/${NEXT}-${ENTITY_PLURAL}"
 mkdir -p "$BASE"
 touch "$BASE/up.sql"
 ```
@@ -151,3 +185,5 @@ Report:
 - Prefer one entity family per migration folder.
 - Do not modify old migration semantics unless explicitly required.
 - Keep names aligned with `004-devices/NAMING.md` when working on devices.
+- Keep names aligned with `005-consumables/NAMING.md` when working on consumables.
+- Keep names aligned with `006-digital-assets/NAMING.md` when working on digital assets.

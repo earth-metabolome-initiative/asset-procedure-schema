@@ -141,6 +141,7 @@ edition = "2024"
 [workspace.dependencies]
 builder = { path = "builder" }
 sql-procedure-rules = { path = "crates/sql-procedure-rules" }
+sql-migration-lint = { path = "crates/sql-migration-lint" }
 aps-traits = { path = "crates/aps-traits" }
 aps-test-utils = { path = "crates/aps-test-utils" }
 procedure-template-visitor = { path = "crates/procedure-template-visitor" }
@@ -313,6 +314,3 @@ missing_crate_level_docs = "forbid"
 unescaped_backticks = "forbid"
 redundant_explicit_links = "forbid"
 invalid_rust_codeblocks = "forbid"
-
-[workspace.lints.clippy]
-collapsible_if = "allow"

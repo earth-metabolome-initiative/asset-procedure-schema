@@ -75,14 +75,13 @@ impl ::diesel_builders::ValidateColumn<namespaced_ownables::name>
         if let Some(description) = <Self as diesel_builders::MayGetColumn<
             namespaced_ownables::description,
         >>::may_get_column_ref(self)
+            && name == description
         {
-            if name == description {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::namespaced_ownables::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::namespaced_ownables::name::NAME,
-                    crate::namespaced_ownables::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::namespaced_ownables::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::namespaced_ownables::name::NAME,
+                crate::namespaced_ownables::description::NAME,
+            ));
         }
         Ok(())
     }
@@ -117,14 +116,13 @@ impl ::diesel_builders::ValidateColumn<namespaced_ownables::description>
             <Self as diesel_builders::MayGetColumn<namespaced_ownables::name>>::may_get_column_ref(
                 self,
             )
+            && name == description
         {
-            if name == description {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::namespaced_ownables::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::namespaced_ownables::name::NAME,
-                    crate::namespaced_ownables::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::namespaced_ownables::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::namespaced_ownables::name::NAME,
+                crate::namespaced_ownables::description::NAME,
+            ));
         }
         Ok(())
     }

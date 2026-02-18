@@ -67,14 +67,13 @@ impl ::diesel_builders::ValidateColumn<teams::name>
         <Self as ::diesel_builders::ValidateColumn<teams::name>>::validate_column(name)?;
         if let Some(description) =
             <Self as diesel_builders::MayGetColumn<teams::description>>::may_get_column_ref(self)
+            && name == description
         {
-            if name == description {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::teams::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::teams::name::NAME,
-                    crate::teams::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::teams::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::teams::name::NAME,
+                crate::teams::description::NAME,
+            ));
         }
         Ok(())
     }
@@ -109,14 +108,13 @@ impl ::diesel_builders::ValidateColumn<teams::description>
         )?;
         if let Some(name) =
             <Self as diesel_builders::MayGetColumn<teams::name>>::may_get_column_ref(self)
+            && name == description
         {
-            if name == description {
-                return Err(::validation_errors::ValidationError::equal(
-                    <crate::teams::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::teams::name::NAME,
-                    crate::teams::description::NAME,
-                ));
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::teams::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::teams::name::NAME,
+                crate::teams::description::NAME,
+            ));
         }
         Ok(())
     }

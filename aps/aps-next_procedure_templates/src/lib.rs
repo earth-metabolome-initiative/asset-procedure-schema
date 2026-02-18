@@ -61,18 +61,24 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::parent_id>
         if let Some(predecessor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::predecessor_id,
         >>::may_get_column_ref(self)
+            && parent_id == predecessor_id
         {
-            if parent_id == predecessor_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: next_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: next_procedure_templates :: parent_id :: NAME , crate :: next_procedure_templates :: predecessor_id :: NAME)) ;
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::next_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::predecessor_id::NAME,
+            ));
         }
         if let Some(successor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::successor_id,
         >>::may_get_column_ref(self)
+            && parent_id == successor_id
         {
-            if parent_id == successor_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: next_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: next_procedure_templates :: parent_id :: NAME , crate :: next_procedure_templates :: successor_id :: NAME)) ;
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::next_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
         }
         Ok(())
     }
@@ -90,18 +96,24 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::predecessor_id>
         if let Some(parent_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::parent_id,
         >>::may_get_column_ref(self)
+            && parent_id == predecessor_id
         {
-            if parent_id == predecessor_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: next_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: next_procedure_templates :: parent_id :: NAME , crate :: next_procedure_templates :: predecessor_id :: NAME)) ;
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::next_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::predecessor_id::NAME,
+            ));
         }
         if let Some(successor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::successor_id,
         >>::may_get_column_ref(self)
+            && predecessor_id == successor_id
         {
-            if predecessor_id == successor_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: next_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: next_procedure_templates :: predecessor_id :: NAME , crate :: next_procedure_templates :: successor_id :: NAME)) ;
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::next_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::next_procedure_templates::predecessor_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
         }
         Ok(())
     }
@@ -119,18 +131,24 @@ impl ::diesel_builders::ValidateColumn<next_procedure_templates::successor_id>
         if let Some(parent_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::parent_id,
         >>::may_get_column_ref(self)
+            && parent_id == successor_id
         {
-            if parent_id == successor_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: next_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: next_procedure_templates :: parent_id :: NAME , crate :: next_procedure_templates :: successor_id :: NAME)) ;
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::next_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::next_procedure_templates::parent_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
         }
         if let Some(predecessor_id) = <Self as diesel_builders::MayGetColumn<
             next_procedure_templates::predecessor_id,
         >>::may_get_column_ref(self)
+            && predecessor_id == successor_id
         {
-            if predecessor_id == successor_id {
-                return Err (:: validation_errors :: ValidationError :: equal (< crate :: next_procedure_templates :: table as :: diesel_builders :: TableExt > :: TABLE_NAME , crate :: next_procedure_templates :: predecessor_id :: NAME , crate :: next_procedure_templates :: successor_id :: NAME)) ;
-            }
+            return Err(::validation_errors::ValidationError::equal(
+                <crate::next_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                crate::next_procedure_templates::predecessor_id::NAME,
+                crate::next_procedure_templates::successor_id::NAME,
+            ));
         }
         Ok(())
     }

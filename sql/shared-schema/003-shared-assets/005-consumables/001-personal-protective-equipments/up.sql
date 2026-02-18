@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration: Shared Assets / Devices / Personal Protective Equipment
+-- Migration: Shared Assets / Consumables / Personal Protective Equipment
 -- Purpose:
 --   Adds model, commercial model, commercial lot, and physical asset tables for
 --   personal protective equipment used to protect operators during procedures.

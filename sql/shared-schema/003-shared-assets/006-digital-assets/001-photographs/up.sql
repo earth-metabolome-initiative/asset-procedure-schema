@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration: Shared Assets / Photographs
+-- Migration: Shared Assets / Digital Assets / Photographs
 -- Purpose:
 --   Adds photograph assets as a specialization of digital assets for procedure
 --   evidence, inspection records, and contextual documentation.

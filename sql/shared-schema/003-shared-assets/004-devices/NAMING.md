@@ -15,7 +15,7 @@ This document defines naming conventions for migrations under
 - Format: `NNN-<plural-stem-slug>`
 - Numeric prefixes are incremental without gaps, starting at `001`.
 - `<plural-stem-slug>` is a plural entity stem in kebab-case.
-- Example: `phone_device` -> `010-phone-devices`.
+- Example: `phone_device` -> `009-phone-devices`.
 
 2. Canonical stem
 - Stems are derived automatically from migration folder names by singularizing
@@ -49,8 +49,8 @@ This document defines naming conventions for migrations under
 - `006-freezers`
 - `007-geopositioning-devices`
 - `008-cameras`
-- `009-personal-protective-equipments`
-- `010-phone-devices`
+- `009-phone-devices`
+- `010-mass-spectrometers`
 
 ## Enforcement
 
