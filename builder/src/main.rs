@@ -115,6 +115,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
             .members([
                 TomlDependency::new("builder").path("builder")?,
                 TomlDependency::new("sql-procedure-rules").path("crates/sql-procedure-rules")?,
+                TomlDependency::new("sql-migration-lint").path("crates/sql-migration-lint")?,
                 TomlDependency::new("aps-traits").path("crates/aps-traits")?,
                 TomlDependency::new("aps-test-utils").path("crates/aps-test-utils")?,
                 TomlDependency::new("procedure-template-visitor")
