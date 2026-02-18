@@ -31,20 +31,8 @@ extern "SQL" {
 /// * If cloning the repository fails.
 /// * If translating the schema fails.
 /// * If applying the translated migrations fails.
-///
-/// # Example
-///
-/// ```rust
-/// use aps_test_utils::aps_conn;
-/// let _conn = aps_conn();
-/// ```
-pub fn aps_conn() -> SqliteConnection {
-    let root = std::path::PathBuf::from(
-        std::env::var("CARGO_MANIFEST_DIR").expect("Failed to get CARGO_MANIFEST_DIR"),
-    )
-    .join("../../");
-    let translated = Pg2Sqlite::ups(root)
-        .expect("Failed to get PostgreSQL migrations")
+fn aps_conn_from_statements(translator: Pg2Sqlite) -> SqliteConnection {
+    let translated = translator
         .translate(
             &Pg2SqliteOptions::default()
                 .remove_unsupported_check_constraints()
@@ -88,6 +76,57 @@ pub fn aps_conn() -> SqliteConnection {
     }
 
     connection
+}
+
+/// Creates an in-memory SQLite connection by translating the PostgreSQL
+/// schema from the asset-procedure-schema repository.
+///
+/// # Panics
+///
+/// * If cloning the repository fails.
+/// * If translating the schema fails.
+/// * If applying the translated migrations fails.
+///
+/// # Example
+///
+/// ```rust
+/// use aps_test_utils::aps_conn;
+/// let _conn = aps_conn();
+/// ```
+pub fn aps_conn() -> SqliteConnection {
+    let root = std::path::PathBuf::from(
+        std::env::var("CARGO_MANIFEST_DIR").expect("Failed to get CARGO_MANIFEST_DIR"),
+    )
+    .join("../../");
+    aps_conn_from_statements(
+        Pg2Sqlite::ups(root)
+            .expect("Failed to get local PostgreSQL migrations, are you in the APS repository?"),
+    )
+}
+
+/// Creates an in-memory SQLite connection by translating the PostgreSQL
+/// schema from the asset-procedure-schema repository, loading the migrations
+/// directly from the GitHub repository.
+///
+/// # Panics
+///
+/// * If cloning the repository fails.
+/// * If translating the schema fails.
+/// * If applying the translated migrations fails.
+///
+/// # Example
+///
+/// ```rust
+/// use aps_test_utils::aps_git_conn;
+/// let _conn = aps_git_conn();
+/// ```
+pub fn aps_git_conn() -> SqliteConnection {
+    aps_conn_from_statements(
+        Pg2Sqlite::from_git(
+            "https://github.com/earth-metabolome-initiative/asset-procedure-schema",
+        )
+        .expect("Failed to get PostgreSQL migrations from Git repository"),
+    )
 }
 
 /// Creates and returns a standard user in the provided connection for testing
