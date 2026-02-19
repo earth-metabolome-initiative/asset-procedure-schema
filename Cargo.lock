@@ -54,6 +54,7 @@ dependencies = [
  "aps-centrifuge_procedure_templates",
  "aps-centrifuge_procedures",
  "aps-centrifuges",
+ "aps-chemical_entities",
  "aps-commercial_ball_mill_machine_lots",
  "aps-commercial_ball_mill_machine_models",
  "aps-commercial_camera_lots",
@@ -484,6 +485,18 @@ dependencies = [
  "aps-namespaced_ownables",
  "aps-ownables",
  "aps-physical_assets",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-chemical_entities"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
@@ -1162,6 +1175,7 @@ dependencies = [
  "aps-centrifuge_procedure_templates",
  "aps-centrifuge_procedures",
  "aps-centrifuges",
+ "aps-chemical_entities",
  "aps-commercial_ball_mill_machine_lots",
  "aps-commercial_ball_mill_machine_models",
  "aps-commercial_camera_lots",

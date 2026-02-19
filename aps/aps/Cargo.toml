@@ -23,6 +23,7 @@ aps-centrifuge_models.workspace = true
 aps-centrifuge_procedure_templates.workspace = true
 aps-centrifuge_procedures.workspace = true
 aps-centrifuges.workspace = true
+aps-chemical_entities.workspace = true
 aps-commercial_ball_mill_machine_lots.workspace = true
 aps-commercial_ball_mill_machine_models.workspace = true
 aps-commercial_camera_lots.workspace = true

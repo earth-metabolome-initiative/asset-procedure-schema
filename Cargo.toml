@@ -28,6 +28,7 @@ members = [
   "aps/aps-centrifuge_procedure_templates",
   "aps/aps-centrifuge_procedures",
   "aps/aps-centrifuges",
+  "aps/aps-chemical_entities",
   "aps/aps-commercial_ball_mill_machine_lots",
   "aps/aps-commercial_ball_mill_machine_models",
   "aps/aps-commercial_camera_lots",
@@ -176,6 +177,7 @@ aps-centrifuge_models = { path = "aps/aps-centrifuge_models" }
 aps-centrifuge_procedure_templates = { path = "aps/aps-centrifuge_procedure_templates" }
 aps-centrifuge_procedures = { path = "aps/aps-centrifuge_procedures" }
 aps-centrifuges = { path = "aps/aps-centrifuges" }
+aps-chemical_entities = { path = "aps/aps-chemical_entities" }
 aps-commercial_ball_mill_machine_lots = { path = "aps/aps-commercial_ball_mill_machine_lots" }
 aps-commercial_ball_mill_machine_models = { path = "aps/aps-commercial_ball_mill_machine_models" }
 aps-commercial_camera_lots = { path = "aps/aps-commercial_camera_lots" }

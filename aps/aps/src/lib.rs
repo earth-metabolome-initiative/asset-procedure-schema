@@ -23,6 +23,7 @@ pub use aps_centrifuge_procedure_templates::{
 };
 pub use aps_centrifuge_procedures::{self, CentrifugeProcedure, centrifuge_procedures};
 pub use aps_centrifuges::{self, Centrifuge, centrifuges};
+pub use aps_chemical_entities::{self, ChemicalEntity, chemical_entities};
 pub use aps_commercial_ball_mill_machine_lots::{
     self, CommercialBallMillMachineLot, commercial_ball_mill_machine_lots,
 };
