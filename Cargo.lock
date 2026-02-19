@@ -132,7 +132,6 @@ dependencies = [
  "aps-photograph_procedure_templates",
  "aps-photograph_procedures",
  "aps-photographs",
- "aps-physical_asset_model_lifecycle_classes",
  "aps-physical_asset_models",
  "aps-physical_assets",
  "aps-pipette_tip_models",
@@ -2057,16 +2056,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-physical_asset_model_lifecycle_classes"
-version = "0.1.0"
-dependencies = [
- "diesel",
- "diesel-builders",
- "serde",
- "validation-errors",
-]
-
-[[package]]
 name = "aps-physical_asset_models"
 version = "0.1.0"
 dependencies = [
@@ -2498,12 +2487,10 @@ dependencies = [
  "aps-container_models",
  "aps-entities",
  "aps-namespaced_ownables",
- "aps-namespaces",
  "aps-next_procedure_templates",
  "aps-ownables",
  "aps-parent_procedure_templates",
  "aps-physical_asset_models",
- "aps-pipette_tip_models",
  "aps-procedure_template_asset_models",
  "aps-procedure_templates",
  "aps-reused_procedure_template_asset_models",

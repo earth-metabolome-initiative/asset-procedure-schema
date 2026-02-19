@@ -3,8 +3,7 @@
 This directory contains SQL migrations that define APS shared asset entities.
 It is the canonical place for shared asset model/asset tables (containers,
 commercial products, devices, supplies, marking assets, samples,
-photographs, etc.) that are meant to be reused across projects. Here,
-"reused" refers to schema reuse across domains, not physical lifecycle class.
+photographs, etc.) that are meant to be reused across projects.
 
 ## Directory Intent
 
@@ -34,11 +33,8 @@ photographs, etc.) that are meant to be reused across projects. Here,
   `digital_asset_models` / `digital_assets`.
 - `marking-assets`: physical assets used to identify, label, or signal
   entities and locations (for example panels, markers).
-- Lifecycle class (`unknown`, `single_use`, `reusable`) is modeled on
-  `physical_asset_models` (`lifecycle_class_id`, `recommended_max_use`);
-  directories do not encode lifecycle behavior.
 
-## Commercial Tables And Lifecycle Precision
+## Commercial Tables Precision
 
 - Decide explicitly whether the migration includes commercial table families:
   `commercial_<stem>_models` and (if lot tracking is needed)
@@ -49,11 +45,6 @@ photographs, etc.) that are meant to be reused across projects. Here,
   - `commercial_<stem>_lots` only when lot/batch traceability matters.
 - Document that decision in the migration header (`Purpose` and
   `APS placement`).
-- Lifecycle/reusability is orthogonal to folder taxonomy:
-  - `devices`, `supplies`, `marking-assets`, etc. do not imply `single_use`
-    or `reusable`;
-  - lifecycle metadata belongs on `physical_asset_models` and should be called
-    out explicitly when relevant.
 
 ## Required Migration Documentation
 
@@ -65,7 +56,6 @@ Every new `up.sql` migration in this directory must include:
 - `APS placement` (with ASCII tree using `+--`)
 - `Metadata registration`
 - `Commercial tables decision` (included vs omitted, with rationale)
-- `Lifecycle/reusability note` (expected class and where it is modeled)
 - `Security context`
 - `SQL/RLS semantics`
 - `Zanzibar semantics`
@@ -196,22 +186,16 @@ Commercial tables decision:
 - <none | commercial_<stem>_models | commercial_<stem>_models + commercial_<stem>_lots>
 - Reason: <why included/omitted>
 
-Lifecycle/reusability expectation:
-- <unknown | single_use | reusable>
-- Note whether lifecycle data changes are in-scope here or handled separately
-  via physical_asset_models lifecycle columns.
-
 Requirements:
 - Add full migration documentation header with:
   Migration, Purpose, APS placement ASCII art, Metadata registration,
-  Commercial tables decision, Lifecycle/reusability note,
+  Commercial tables decision,
   Security context, SQL/RLS semantics, Zanzibar semantics.
 - Add statement-level comments for every top-level SQL statement.
 - Add column-level comments for every column definition.
 - Register every created table in table_names with ON CONFLICT DO NOTHING.
 - Preserve APS PK-extension and FK consistency patterns.
 - Explicitly justify whether `commercial_*` tables are added or omitted.
-- Keep lifecycle/reusability guidance precise; do not infer it from folder type.
 - Do not make tautological comments; comments must explain semantic intent.
 - Keep SQL style aligned with existing shared-assets migrations.
 
