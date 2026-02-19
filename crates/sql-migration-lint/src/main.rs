@@ -18,6 +18,8 @@ const DEVICES_COMMAND: &str = "devices";
 const SHARED_ASSETS_DOCS_COMMAND: &str = "shared-assets-docs";
 /// Optional flag to require complete device table families for each stem.
 const REQUIRE_FULL_DEVICE_CHAIN_FLAG: &str = "--require-full-device-chain";
+/// Optional path override for command target.
+const PATH_FLAG: &str = "--path";
 
 /// Represents one migration folder with its `up.sql` file.
 #[derive(Debug, Clone)]
@@ -62,6 +64,7 @@ fn run() -> Result<(), String> {
 
     let mut root =
         env::current_dir().map_err(|error| format!("Failed to read current directory: {error}"))?;
+    let mut target_path: Option<PathBuf> = None;
 
     let remaining_args = args.collect::<Vec<_>>();
     let mut options = DeviceLintOptions::default();
@@ -76,6 +79,14 @@ fn run() -> Result<(), String> {
             index += 2;
             continue;
         }
+        if argument == PATH_FLAG {
+            let Some(value) = remaining_args.get(index + 1) else {
+                return Err(format!("Missing value for {PATH_FLAG}"));
+            };
+            target_path = Some(PathBuf::from(value));
+            index += 2;
+            continue;
+        }
         if argument == REQUIRE_FULL_DEVICE_CHAIN_FLAG {
             options.require_full_device_chain = true;
             index += 1;
@@ -86,8 +97,8 @@ fn run() -> Result<(), String> {
     }
 
     match command.as_str() {
-        DEVICES_COMMAND => lint_devices(&root, options),
-        SHARED_ASSETS_DOCS_COMMAND => lint_shared_assets_docs(&root),
+        DEVICES_COMMAND => lint_devices(&root, target_path.as_deref(), options),
+        SHARED_ASSETS_DOCS_COMMAND => lint_shared_assets_docs(&root, target_path.as_deref()),
         _ => Err(format!("Unknown command '{command}'\n\n{}", usage())),
     }
 }
@@ -95,14 +106,19 @@ fn run() -> Result<(), String> {
 /// Returns command-line usage instructions.
 fn usage() -> String {
     format!(
-        "Usage:\n  cargo run -p sql-migration-lint -- {DEVICES_COMMAND} [--root <path>] [{REQUIRE_FULL_DEVICE_CHAIN_FLAG}]\n  cargo run -p sql-migration-lint -- {SHARED_ASSETS_DOCS_COMMAND} [--root <path>]\n"
+        "Usage:\n  cargo run -p sql-migration-lint -- {DEVICES_COMMAND} [--root <path>] [{PATH_FLAG} <path>] [{REQUIRE_FULL_DEVICE_CHAIN_FLAG}]\n  cargo run -p sql-migration-lint -- {SHARED_ASSETS_DOCS_COMMAND} [--root <path>] [{PATH_FLAG} <path>]\n"
     )
 }
 
 /// Lints the device migration folder naming and table registration conventions.
-fn lint_devices(root: &Path, options: DeviceLintOptions) -> Result<(), String> {
-    let devices_dir = root.join(DEVICES_RELATIVE_PATH);
-    let migrations = load_migrations(&devices_dir)?;
+fn lint_devices(
+    root: &Path,
+    target_path: Option<&Path>,
+    options: DeviceLintOptions,
+) -> Result<(), String> {
+    let devices_dir = resolve_command_target(root, target_path, DEVICES_RELATIVE_PATH);
+    let migrations = load_device_migrations_recursive(&devices_dir)?;
+    let check_incremental_prefixes = target_path.is_none();
 
     if migrations.is_empty() {
         return Err(format!(
@@ -114,7 +130,9 @@ fn lint_devices(root: &Path, options: DeviceLintOptions) -> Result<(), String> {
     let mut errors = Vec::new();
     let mut warnings = Vec::new();
 
-    validate_incremental_prefixes(&migrations, &mut errors);
+    if check_incremental_prefixes {
+        validate_incremental_prefixes(&migrations, &mut errors);
+    }
 
     for migration in &migrations {
         validate_migration(migration, &mut errors, &mut warnings, options)?;
@@ -143,9 +161,9 @@ fn lint_devices(root: &Path, options: DeviceLintOptions) -> Result<(), String> {
 
 /// Lints shared-assets migrations for required documentation sections and
 /// in-file statement/column comments.
-fn lint_shared_assets_docs(root: &Path) -> Result<(), String> {
-    let shared_assets_dir = root.join(SHARED_ASSETS_RELATIVE_PATH);
-    let migrations = load_up_sql_files_recursive(&shared_assets_dir)?;
+fn lint_shared_assets_docs(root: &Path, target_path: Option<&Path>) -> Result<(), String> {
+    let shared_assets_dir = resolve_command_target(root, target_path, SHARED_ASSETS_RELATIVE_PATH);
+    let migrations = load_up_sql_files_from_target(&shared_assets_dir)?;
 
     if migrations.is_empty() {
         return Err(format!(
@@ -178,41 +196,63 @@ fn lint_shared_assets_docs(root: &Path) -> Result<(), String> {
     Err(message)
 }
 
-/// Loads migration directories that contain an `up.sql` file.
-fn load_migrations(devices_dir: &Path) -> Result<Vec<Migration>, String> {
-    let entries = fs::read_dir(devices_dir)
-        .map_err(|error| format!("Failed to read {}: {error}", devices_dir.display()))?;
+/// Resolves the target path for a command from default + optional override.
+fn resolve_command_target(
+    root: &Path,
+    target_path: Option<&Path>,
+    default_relative: &str,
+) -> PathBuf {
+    match target_path {
+        Some(path) if path.is_absolute() => path.to_path_buf(),
+        Some(path) => root.join(path),
+        None => root.join(default_relative),
+    }
+}
 
-    let mut migrations = Vec::new();
-
-    for entry_result in entries {
-        let entry = entry_result.map_err(|error| {
-            format!("Failed to iterate entries in {}: {error}", devices_dir.display())
-        })?;
-
-        let file_type = entry.file_type().map_err(|error| {
-            format!(
-                "Failed to inspect entry '{}' in {}: {error}",
-                entry.path().display(),
-                devices_dir.display()
-            )
-        })?;
-
-        if !file_type.is_dir() {
-            continue;
+/// Loads devices migrations recursively from a directory tree, or one `up.sql`.
+fn load_device_migrations_recursive(target: &Path) -> Result<Vec<Migration>, String> {
+    if target.is_file() {
+        if target.file_name().and_then(|name| name.to_str()) != Some("up.sql") {
+            return Err(format!(
+                "Expected an up.sql file for devices lint target, got {}",
+                target.display()
+            ));
         }
-
-        let up_sql_path = entry.path().join("up.sql");
-        if !up_sql_path.is_file() {
-            continue;
-        }
-
-        let dir_name = entry.file_name().to_string_lossy().to_string();
-        migrations.push(Migration { dir_name, up_sql_path });
+        let Some(parent) = target.parent() else {
+            return Err(format!("Failed to locate parent directory for {}", target.display()));
+        };
+        let migration = migration_from_up_sql(parent, target)?;
+        return Ok(vec![migration]);
     }
 
-    migrations.sort_by(|left, right| left.dir_name.cmp(&right.dir_name));
+    if !target.is_dir() {
+        return Err(format!(
+            "Devices lint target does not exist or is not accessible: {}",
+            target.display()
+        ));
+    }
+
+    let up_sql_files = load_up_sql_files_recursive(target)?;
+    let mut migrations = Vec::new();
+
+    for up_sql_path in up_sql_files {
+        let Some(parent) = up_sql_path.parent() else {
+            return Err(format!("Failed to locate parent directory for {}", up_sql_path.display()));
+        };
+        migrations.push(migration_from_up_sql(parent, &up_sql_path)?);
+    }
+
+    migrations.sort_by(|left, right| left.up_sql_path.cmp(&right.up_sql_path));
     Ok(migrations)
+}
+
+/// Creates one migration model from directory + up.sql path.
+fn migration_from_up_sql(dir: &Path, up_sql_path: &Path) -> Result<Migration, String> {
+    let Some(dir_name) = dir.file_name().and_then(|name| name.to_str()) else {
+        return Err(format!("Failed to derive migration folder name from {}", dir.display()));
+    };
+
+    Ok(Migration { dir_name: dir_name.to_string(), up_sql_path: up_sql_path.to_path_buf() })
 }
 
 /// Recursively collects all `up.sql` files under `root`.
@@ -221,6 +261,25 @@ fn load_up_sql_files_recursive(root: &Path) -> Result<Vec<PathBuf>, String> {
     collect_up_sql_files_recursive(root, &mut files)?;
     files.sort();
     Ok(files)
+}
+
+/// Loads one or many `up.sql` files from a target directory or file.
+fn load_up_sql_files_from_target(target: &Path) -> Result<Vec<PathBuf>, String> {
+    if target.is_file() {
+        if target.file_name().and_then(|name| name.to_str()) != Some("up.sql") {
+            return Err(format!(
+                "Expected an up.sql file for docs lint target, got {}",
+                target.display()
+            ));
+        }
+        return Ok(vec![target.to_path_buf()]);
+    }
+
+    if target.is_dir() {
+        return load_up_sql_files_recursive(target);
+    }
+
+    Err(format!("Docs lint target does not exist or is not accessible: {}", target.display()))
 }
 
 /// Recursively traverses directories and collects `up.sql` files.
@@ -852,6 +911,8 @@ fn pluralize_word(word: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use std::time::{SystemTime, UNIX_EPOCH};
+
     use super::*;
 
     #[test]
@@ -986,5 +1047,70 @@ INSERT INTO table_names (id) VALUES ('examples') ON CONFLICT DO NOTHING;
     fn column_definition_detection_ignores_check_expression_lines() {
         assert!(is_column_definition("id UUID PRIMARY KEY"));
         assert!(!is_column_definition("container_model_id <> contained_asset_model_id"));
+    }
+
+    #[test]
+    fn docs_target_loader_accepts_single_up_sql_file() {
+        let temp_dir = new_temp_test_dir();
+        let up_sql = temp_dir.join("up.sql");
+        fs::write(&up_sql, "-- test").expect("write up.sql");
+
+        let files = load_up_sql_files_from_target(&up_sql).expect("load target");
+        assert_eq!(files, vec![up_sql]);
+    }
+
+    #[test]
+    fn devices_loader_accepts_single_migration_folder() {
+        let temp_dir = new_temp_test_dir();
+        let migration_dir = temp_dir.join("001-example-devices");
+        fs::create_dir_all(&migration_dir).expect("create migration dir");
+        let up_sql = migration_dir.join("up.sql");
+        fs::write(&up_sql, "-- test").expect("write up.sql");
+
+        let migrations =
+            load_device_migrations_recursive(&migration_dir).expect("load devices target");
+        assert_eq!(migrations.len(), 1);
+        assert_eq!(migrations[0].dir_name, "001-example-devices");
+        assert_eq!(migrations[0].up_sql_path, up_sql);
+    }
+
+    #[test]
+    fn devices_loader_accepts_up_sql_file_target() {
+        let temp_dir = new_temp_test_dir();
+        let migration_dir = temp_dir.join("001-example-devices");
+        fs::create_dir_all(&migration_dir).expect("create migration dir");
+        let up_sql = migration_dir.join("up.sql");
+        fs::write(&up_sql, "-- test").expect("write up.sql");
+
+        let migrations = load_device_migrations_recursive(&up_sql).expect("load devices target");
+        assert_eq!(migrations.len(), 1);
+        assert_eq!(migrations[0].dir_name, "001-example-devices");
+        assert_eq!(migrations[0].up_sql_path, up_sql);
+    }
+
+    #[test]
+    fn devices_loader_recurses_under_target_directory() {
+        let temp_dir = new_temp_test_dir();
+        let top = temp_dir.join("001-top-devices");
+        fs::create_dir_all(&top).expect("create top migration dir");
+        fs::write(top.join("up.sql"), "-- top").expect("write top up.sql");
+
+        let nested_root = temp_dir.join("nested");
+        let nested = nested_root.join("002-nested-devices");
+        fs::create_dir_all(&nested).expect("create nested migration dir");
+        fs::write(nested.join("up.sql"), "-- nested").expect("write nested up.sql");
+
+        let migrations =
+            load_device_migrations_recursive(&temp_dir).expect("load devices target recursively");
+        assert_eq!(migrations.len(), 2);
+        assert!(migrations.iter().any(|migration| migration.dir_name == "001-top-devices"));
+        assert!(migrations.iter().any(|migration| migration.dir_name == "002-nested-devices"));
+    }
+
+    fn new_temp_test_dir() -> PathBuf {
+        let unique = SystemTime::now().duration_since(UNIX_EPOCH).expect("time works").as_nanos();
+        let path = env::temp_dir().join(format!("sql_migration_lint_test_{unique}"));
+        fs::create_dir_all(&path).expect("create temp dir");
+        path
     }
 }

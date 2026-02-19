@@ -24,6 +24,7 @@ pub use aps_centrifuge_procedure_templates::{
 pub use aps_centrifuge_procedures::{self, CentrifugeProcedure, centrifuge_procedures};
 pub use aps_centrifuges::{self, Centrifuge, centrifuges};
 pub use aps_chemical_entities::{self, ChemicalEntity, chemical_entities};
+pub use aps_col_taxa::{self, ColTaxon, col_taxa};
 pub use aps_commercial_ball_mill_machine_lots::{
     self, CommercialBallMillMachineLot, commercial_ball_mill_machine_lots,
 };
@@ -144,9 +145,13 @@ pub use aps_marker_models::{self, MarkerModel, marker_models};
 pub use aps_markers::{self, Marker, markers};
 pub use aps_mass_spectrometer_models::{self, MassSpectrometerModel, mass_spectrometer_models};
 pub use aps_mass_spectrometers::{self, MassSpectrometer, mass_spectrometers};
+pub use aps_name_classes::{self, NameClass, name_classes};
 pub use aps_namespaced_ownables::{self, NamespacedOwnable, namespaced_ownables};
 pub use aps_namespaces::{self, Namespace, namespaces};
+pub use aps_ncbi_taxa::{self, NcbiTaxon, ncbi_taxa};
 pub use aps_next_procedure_templates::{self, NextProcedureTemplate, next_procedure_templates};
+pub use aps_organism_taxa::{self, OrganismTaxon, organism_taxa};
+pub use aps_organism_taxonomies::{self, OrganismTaxonomy, organism_taxonomies};
 pub use aps_ownables::{self, Ownable, ownables};
 pub use aps_owner_grants::{self, OwnerGrant, owner_grants};
 pub use aps_owners::{self, Owner, owners};
@@ -205,6 +210,8 @@ pub use aps_supernatant_procedure_templates::{
 };
 pub use aps_supernatant_procedures::{self, SupernatantProcedure, supernatant_procedures};
 pub use aps_table_names::{self, TableName, table_names};
+pub use aps_taxon_names::{self, TaxonName, taxon_names};
+pub use aps_taxon_ranks::{self, TaxonRank, taxon_ranks};
 pub use aps_team_members::{self, TeamMember, team_members};
 pub use aps_teams::{self, Team, teams};
 pub use aps_tombstones::{self, Tombstone, tombstones};

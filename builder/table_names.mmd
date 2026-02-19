@@ -1,0 +1,14 @@
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: table_names
+---
+flowchart TB
+  v0@{shape: rounded, label: "organism_taxonomies"}
+  style v0 rx: 3px, ry: 3px 
+  v1@{shape: rounded, label: "table_names"}
+  style v1 rx: 3px, ry: 3px 
+  v0 ---> v1

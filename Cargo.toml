@@ -29,6 +29,7 @@ members = [
   "aps/aps-centrifuge_procedures",
   "aps/aps-centrifuges",
   "aps/aps-chemical_entities",
+  "aps/aps-col_taxa",
   "aps/aps-commercial_ball_mill_machine_lots",
   "aps/aps-commercial_ball_mill_machine_models",
   "aps/aps-commercial_camera_lots",
@@ -88,9 +89,13 @@ members = [
   "aps/aps-markers",
   "aps/aps-mass_spectrometer_models",
   "aps/aps-mass_spectrometers",
+  "aps/aps-name_classes",
   "aps/aps-namespaced_ownables",
   "aps/aps-namespaces",
+  "aps/aps-ncbi_taxa",
   "aps/aps-next_procedure_templates",
+  "aps/aps-organism_taxa",
+  "aps/aps-organism_taxonomies",
   "aps/aps-ownables",
   "aps/aps-owner_grants",
   "aps/aps-owners",
@@ -129,6 +134,8 @@ members = [
   "aps/aps-supernatant_procedure_templates",
   "aps/aps-supernatant_procedures",
   "aps/aps-table_names",
+  "aps/aps-taxon_names",
+  "aps/aps-taxon_ranks",
   "aps/aps-team_members",
   "aps/aps-teams",
   "aps/aps-tombstones",
@@ -144,6 +151,7 @@ members = [
   "aps/aps-weighing_procedures",
   "aps/aps",
   "aps/aps-dag-entities",
+  "aps/aps-dag-table_names",
 ]
 
 [workspace.package]
@@ -178,6 +186,7 @@ aps-centrifuge_procedure_templates = { path = "aps/aps-centrifuge_procedure_temp
 aps-centrifuge_procedures = { path = "aps/aps-centrifuge_procedures" }
 aps-centrifuges = { path = "aps/aps-centrifuges" }
 aps-chemical_entities = { path = "aps/aps-chemical_entities" }
+aps-col_taxa = { path = "aps/aps-col_taxa" }
 aps-commercial_ball_mill_machine_lots = { path = "aps/aps-commercial_ball_mill_machine_lots" }
 aps-commercial_ball_mill_machine_models = { path = "aps/aps-commercial_ball_mill_machine_models" }
 aps-commercial_camera_lots = { path = "aps/aps-commercial_camera_lots" }
@@ -237,9 +246,13 @@ aps-marker_models = { path = "aps/aps-marker_models" }
 aps-markers = { path = "aps/aps-markers" }
 aps-mass_spectrometer_models = { path = "aps/aps-mass_spectrometer_models" }
 aps-mass_spectrometers = { path = "aps/aps-mass_spectrometers" }
+aps-name_classes = { path = "aps/aps-name_classes" }
 aps-namespaced_ownables = { path = "aps/aps-namespaced_ownables" }
 aps-namespaces = { path = "aps/aps-namespaces" }
+aps-ncbi_taxa = { path = "aps/aps-ncbi_taxa" }
 aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
+aps-organism_taxa = { path = "aps/aps-organism_taxa" }
+aps-organism_taxonomies = { path = "aps/aps-organism_taxonomies" }
 aps-ownables = { path = "aps/aps-ownables" }
 aps-owner_grants = { path = "aps/aps-owner_grants" }
 aps-owners = { path = "aps/aps-owners" }
@@ -278,6 +291,8 @@ aps-storage_procedures = { path = "aps/aps-storage_procedures" }
 aps-supernatant_procedure_templates = { path = "aps/aps-supernatant_procedure_templates" }
 aps-supernatant_procedures = { path = "aps/aps-supernatant_procedures" }
 aps-table_names = { path = "aps/aps-table_names" }
+aps-taxon_names = { path = "aps/aps-taxon_names" }
+aps-taxon_ranks = { path = "aps/aps-taxon_ranks" }
 aps-team_members = { path = "aps/aps-team_members" }
 aps-teams = { path = "aps/aps-teams" }
 aps-tombstones = { path = "aps/aps-tombstones" }

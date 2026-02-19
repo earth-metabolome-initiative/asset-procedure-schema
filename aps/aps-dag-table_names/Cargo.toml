@@ -1,5 +1,5 @@
 [package]
-name = "aps"
+name = "aps-dag-table_names"
 version = "0.1.0"
 edition.workspace = true
 
@@ -119,7 +119,6 @@ aps-procedure_template_asset_models.workspace = true
 aps-procedure_templates.workspace = true
 aps-procedures.workspace = true
 aps-reused_procedure_template_asset_models.workspace = true
-aps-roles.workspace = true
 aps-sample_models.workspace = true
 aps-sample_source_models.workspace = true
 aps-sample_sources.workspace = true

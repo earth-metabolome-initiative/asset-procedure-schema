@@ -55,6 +55,7 @@ dependencies = [
  "aps-centrifuge_procedures",
  "aps-centrifuges",
  "aps-chemical_entities",
+ "aps-col_taxa",
  "aps-commercial_ball_mill_machine_lots",
  "aps-commercial_ball_mill_machine_models",
  "aps-commercial_camera_lots",
@@ -114,9 +115,13 @@ dependencies = [
  "aps-markers",
  "aps-mass_spectrometer_models",
  "aps-mass_spectrometers",
+ "aps-name_classes",
  "aps-namespaced_ownables",
  "aps-namespaces",
+ "aps-ncbi_taxa",
  "aps-next_procedure_templates",
+ "aps-organism_taxa",
+ "aps-organism_taxonomies",
  "aps-ownables",
  "aps-owner_grants",
  "aps-owners",
@@ -155,6 +160,8 @@ dependencies = [
  "aps-supernatant_procedure_templates",
  "aps-supernatant_procedures",
  "aps-table_names",
+ "aps-taxon_names",
+ "aps-taxon_ranks",
  "aps-team_members",
  "aps-teams",
  "aps-tombstones",
@@ -497,6 +504,19 @@ name = "aps-chemical_entities"
 version = "0.1.0"
 dependencies = [
  "aps-entities",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-col_taxa"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
+ "aps-organism_taxa",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
@@ -1176,6 +1196,7 @@ dependencies = [
  "aps-centrifuge_procedures",
  "aps-centrifuges",
  "aps-chemical_entities",
+ "aps-col_taxa",
  "aps-commercial_ball_mill_machine_lots",
  "aps-commercial_ball_mill_machine_models",
  "aps-commercial_camera_lots",
@@ -1235,9 +1256,12 @@ dependencies = [
  "aps-markers",
  "aps-mass_spectrometer_models",
  "aps-mass_spectrometers",
+ "aps-name_classes",
  "aps-namespaced_ownables",
  "aps-namespaces",
+ "aps-ncbi_taxa",
  "aps-next_procedure_templates",
+ "aps-organism_taxa",
  "aps-ownables",
  "aps-owner_grants",
  "aps-owners",
@@ -1274,8 +1298,154 @@ dependencies = [
  "aps-storage_procedures",
  "aps-supernatant_procedure_templates",
  "aps-supernatant_procedures",
+ "aps-taxon_names",
+ "aps-taxon_ranks",
  "aps-team_members",
  "aps-teams",
+ "aps-users",
+ "aps-volume_measuring_device_models",
+ "aps-volume_measuring_devices",
+ "aps-volumetric_container_models",
+ "aps-volumetric_containers",
+ "aps-weighed_container_models",
+ "aps-weighing_device_models",
+ "aps-weighing_devices",
+ "aps-weighing_procedure_templates",
+ "aps-weighing_procedures",
+]
+
+[[package]]
+name = "aps-dag-table_names"
+version = "0.1.0"
+dependencies = [
+ "aps-aliquoting_procedure_templates",
+ "aps-aliquoting_procedures",
+ "aps-asset_compatibility_rules",
+ "aps-asset_model_ancestors",
+ "aps-asset_models",
+ "aps-assets",
+ "aps-ball_mill_machine_models",
+ "aps-ball_mill_machines",
+ "aps-ball_mill_procedure_templates",
+ "aps-ball_mill_procedures",
+ "aps-bead_models",
+ "aps-brands",
+ "aps-camera_models",
+ "aps-cameras",
+ "aps-centrifuge_models",
+ "aps-centrifuge_procedure_templates",
+ "aps-centrifuge_procedures",
+ "aps-centrifuges",
+ "aps-chemical_entities",
+ "aps-col_taxa",
+ "aps-commercial_ball_mill_machine_lots",
+ "aps-commercial_ball_mill_machine_models",
+ "aps-commercial_camera_lots",
+ "aps-commercial_camera_models",
+ "aps-commercial_centrifuge_lots",
+ "aps-commercial_centrifuge_models",
+ "aps-commercial_freeze_dryer_lots",
+ "aps-commercial_freeze_dryer_models",
+ "aps-commercial_freezer_lots",
+ "aps-commercial_freezer_models",
+ "aps-commercial_geopositioning_device_lots",
+ "aps-commercial_geopositioning_device_models",
+ "aps-commercial_marker_lots",
+ "aps-commercial_marker_models",
+ "aps-commercial_mass_spectrometer_lots",
+ "aps-commercial_mass_spectrometer_models",
+ "aps-commercial_personal_protective_equipment_lots",
+ "aps-commercial_personal_protective_equipment_models",
+ "aps-commercial_phone_device_lots",
+ "aps-commercial_phone_device_models",
+ "aps-commercial_pipette_tip_lots",
+ "aps-commercial_pipette_tip_models",
+ "aps-commercial_product_lots",
+ "aps-commercial_products",
+ "aps-commercial_volume_measuring_device_lots",
+ "aps-commercial_volume_measuring_device_models",
+ "aps-commercial_weighing_device_lots",
+ "aps-commercial_weighing_device_models",
+ "aps-container_compatibility_rules",
+ "aps-container_models",
+ "aps-container_sealer_models",
+ "aps-container_sealing_procedure_templates",
+ "aps-container_sealing_procedures",
+ "aps-containers",
+ "aps-digital_asset_models",
+ "aps-digital_assets",
+ "aps-disposal_procedure_templates",
+ "aps-disposal_procedures",
+ "aps-entities",
+ "aps-fractioning_procedure_templates",
+ "aps-fractioning_procedures",
+ "aps-freeze_dryer_models",
+ "aps-freeze_dryers",
+ "aps-freeze_drying_procedure_templates",
+ "aps-freeze_drying_procedures",
+ "aps-freezer_models",
+ "aps-freezers",
+ "aps-freezing_procedure_templates",
+ "aps-freezing_procedures",
+ "aps-geopositioning_device_models",
+ "aps-geopositioning_devices",
+ "aps-geopositioning_procedure_templates",
+ "aps-geopositioning_procedures",
+ "aps-harvesting_procedure_templates",
+ "aps-harvesting_procedures",
+ "aps-marker_models",
+ "aps-markers",
+ "aps-mass_spectrometer_models",
+ "aps-mass_spectrometers",
+ "aps-name_classes",
+ "aps-namespaced_ownables",
+ "aps-namespaces",
+ "aps-ncbi_taxa",
+ "aps-next_procedure_templates",
+ "aps-organism_taxa",
+ "aps-organism_taxonomies",
+ "aps-ownables",
+ "aps-owner_grants",
+ "aps-owners",
+ "aps-packaging_models",
+ "aps-packaging_procedure_templates",
+ "aps-packaging_procedures",
+ "aps-panel_models",
+ "aps-panels",
+ "aps-parent_procedure_templates",
+ "aps-personal_protective_equipment_models",
+ "aps-personal_protective_equipments",
+ "aps-phone_device_models",
+ "aps-phone_devices",
+ "aps-photograph_procedure_templates",
+ "aps-photograph_procedures",
+ "aps-photographs",
+ "aps-physical_asset_models",
+ "aps-physical_assets",
+ "aps-pipette_tip_models",
+ "aps-pipette_tips",
+ "aps-pouring_procedure_templates",
+ "aps-pouring_procedures",
+ "aps-privacy_dependencies",
+ "aps-procedure_asset_models",
+ "aps-procedure_template_asset_models",
+ "aps-procedure_templates",
+ "aps-procedures",
+ "aps-reused_procedure_template_asset_models",
+ "aps-sample_models",
+ "aps-sample_source_models",
+ "aps-sample_sources",
+ "aps-samples",
+ "aps-storage_procedure_templates",
+ "aps-storage_procedures",
+ "aps-supernatant_procedure_templates",
+ "aps-supernatant_procedures",
+ "aps-table_names",
+ "aps-taxon_names",
+ "aps-taxon_ranks",
+ "aps-team_members",
+ "aps-teams",
+ "aps-tombstones",
  "aps-users",
  "aps-volume_measuring_device_models",
  "aps-volume_measuring_devices",
@@ -1753,6 +1923,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-name_classes"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
+ "aps-organism_taxonomies",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-namespaced_ownables"
 version = "0.1.0"
 dependencies = [
@@ -1780,6 +1963,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-ncbi_taxa"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
+ "aps-organism_taxa",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
 name = "aps-next_procedure_templates"
 version = "0.1.0"
 dependencies = [
@@ -1790,6 +1986,31 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-organism_taxa"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
+ "aps-organism_taxonomies",
+ "aps-taxon_ranks",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-organism_taxonomies"
+version = "0.1.0"
+dependencies = [
+ "aps-table_names",
+ "diesel",
+ "diesel-builders",
  "serde",
  "validation-errors",
 ]
@@ -2429,6 +2650,34 @@ version = "0.1.0"
 dependencies = [
  "diesel",
  "diesel-builders",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-taxon_names"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
+ "aps-name_classes",
+ "aps-organism_taxa",
+ "aps-organism_taxonomies",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
+ "serde",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-taxon_ranks"
+version = "0.1.0"
+dependencies = [
+ "aps-entities",
+ "aps-organism_taxonomies",
+ "diesel",
+ "diesel-builders",
+ "rosetta-uuid",
  "serde",
  "validation-errors",
 ]
