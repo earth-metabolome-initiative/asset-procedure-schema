@@ -2925,9 +2925,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.19.1"
+version = "3.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dd9dc738b7a8311c7ade152424974d8115f2cdad61e8dab8dac9f2362298510"
+checksum = "5c6f81257d10a0f602a294ae4182251151ff97dbb504ef9afcdda4a64b24d9b4"
 
 [[package]]
 name = "bytecount"
@@ -4288,10 +4288,10 @@ dependencies = [
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#7524647c83800a8bac8b67c86ee31c1d232dda15"
+source = "git+https://github.com/LucaCappelletti94/pg2sqlite?branch=main#a0fe5f7177a314b19f4c70263db3b57e2d3aab54"
 dependencies = [
  "git2",
- "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits)",
+ "sql-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/sql-traits?rev=1d5a6d7e31358daf68362a2078a3a17cfdfed549)",
  "sqlparser",
  "tempfile",
  "thiserror",
@@ -5124,7 +5124,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/earth-metabolome-initiative/sql-traits#1d5a6d7e31358daf68362a2078a3a17cfdfed549"
+source = "git+https://github.com/earth-metabolome-initiative/sql-traits?rev=1d5a6d7e31358daf68362a2078a3a17cfdfed549#1d5a6d7e31358daf68362a2078a3a17cfdfed549"
 dependencies = [
  "geometric-traits 0.1.0 (git+https://github.com/earth-metabolome-initiative/geometric-traits?branch=main)",
  "git2",

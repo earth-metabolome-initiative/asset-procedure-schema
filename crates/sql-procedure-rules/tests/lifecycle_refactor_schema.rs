@@ -35,7 +35,7 @@ mod tests {
     }
 
     #[test]
-    fn lifecycle_migration_contains_backfill_and_drop_steps() {
+    fn lifecycle_migration_contains_physical_asset_model_constraints_only() {
         let migration_path = Path::new(
             "../../sql/core-schema/003-ownables/002-assets/007-physical-asset-model-lifecycle-profiles/up.sql",
         );
@@ -47,20 +47,21 @@ mod tests {
             "Expected ALTER TABLE for physical_asset_models lifecycle columns",
         );
         assert!(
-            sql.contains("UPDATE physical_asset_models AS pam"),
-            "Expected lifecycle backfill update from legacy profile table",
-        );
-        assert!(
-            sql.contains("DROP TABLE physical_asset_model_lifecycle_profiles"),
-            "Expected legacy lifecycle profile table drop",
-        );
-        assert!(
             sql.contains("physical_asset_models_recommended_max_use_requires_reusable_check"),
             "Expected physical_asset_models lifecycle enforcement constraint",
         );
         assert!(
             sql.contains("CHECK (lifecycle_class_id = 'reusable' OR recommended_max_use IS NULL)"),
             "Expected non-reusable models to enforce NULL recommended_max_use",
+        );
+
+        assert!(
+            !sql.contains("UPDATE physical_asset_models AS pam"),
+            "Legacy lifecycle backfill update should not be present",
+        );
+        assert!(
+            !sql.contains("DROP TABLE physical_asset_model_lifecycle_profiles"),
+            "Legacy lifecycle profile drop step should not be present",
         );
     }
 }
