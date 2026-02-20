@@ -16,7 +16,7 @@
     :: diesel :: Associations,
     :: diesel_builders :: prelude :: TableModel,
 )]
-/// ============================================================================
+/// Struct representing a row in the `organism_taxonomies` table.
 #[table_model(ancestors(aps_table_names::table_names))]
 # [table_model (error = :: validation_errors :: ValidationError)]
 # [diesel (belongs_to (aps_table_names :: TableName , foreign_key = id))]
