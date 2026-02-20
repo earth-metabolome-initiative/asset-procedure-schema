@@ -1,0 +1,1 @@
+Add check for the present of ALL relvant INSERT

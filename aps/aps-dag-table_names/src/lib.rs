@@ -1,4 +1,4 @@
-//! Auto-generated sink crate `aps-dag-entities` which re-exports all table
+//! Auto-generated sink crate `aps-dag-table_names` which re-exports all table
 //! crates.
 pub use aps_aliquoting_procedure_templates::{
     self, AliquotingProcedureTemplate, aliquoting_procedure_templates,
@@ -152,6 +152,7 @@ pub use aps_namespaces::{self, Namespace, namespaces};
 pub use aps_ncbi_taxa::{self, NcbiTaxon, ncbi_taxa};
 pub use aps_next_procedure_templates::{self, NextProcedureTemplate, next_procedure_templates};
 pub use aps_organism_taxa::{self, OrganismTaxon, organism_taxa};
+pub use aps_organism_taxonomies::{self, OrganismTaxonomy, organism_taxonomies};
 pub use aps_ownables::{self, Ownable, ownables};
 pub use aps_owner_grants::{self, OwnerGrant, owner_grants};
 pub use aps_owners::{self, Owner, owners};
@@ -208,10 +209,12 @@ pub use aps_supernatant_procedure_templates::{
     self, SupernatantProcedureTemplate, supernatant_procedure_templates,
 };
 pub use aps_supernatant_procedures::{self, SupernatantProcedure, supernatant_procedures};
+pub use aps_table_names::{self, TableName, table_names};
 pub use aps_taxon_names::{self, TaxonName, taxon_names};
 pub use aps_taxon_ranks::{self, TaxonRank, taxon_ranks};
 pub use aps_team_members::{self, TeamMember, team_members};
 pub use aps_teams::{self, Team, teams};
+pub use aps_tombstones::{self, Tombstone, tombstones};
 pub use aps_users::{self, User, users};
 pub use aps_volume_measuring_device_models::{
     self, VolumeMeasuringDeviceModel, volume_measuring_device_models,
