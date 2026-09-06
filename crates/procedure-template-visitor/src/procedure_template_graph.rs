@@ -244,11 +244,12 @@ impl ProcedureTemplateGraph {
         ) =
             self.task_graph_of(current)
         {
-            // If this is a recursion step, we check if the current procedure is associated
-            // to a task graph. If it is, we search starting from the leaf task nodes
-            // whether they employ or contain subprocedures that employ the given
-            // procedure template asset model. If it is not, we continue the search
-            // recursively in the parents.
+            // If this is a recursion step, we check if the current procedure is
+            // associated to a task graph. If it is, we search
+            // starting from the leaf task nodes whether they employ
+            // or contain subprocedures that employ the given
+            // procedure template asset model. If it is not, we continue the
+            // search recursively in the parents.
 
             let mut parents: Vec<&'graph NestedModel<procedure_templates::table>> =
                 parents.to_vec();
@@ -283,8 +284,9 @@ impl ProcedureTemplateGraph {
                 }
             }
 
-            // We are in a leaf node, so we search through the predecessor of the current
-            // node within the task graph of the parent procedure template.
+            // We are in a leaf node, so we search through the predecessor of
+            // the current node within the task graph of the parent
+            // procedure template.
             let task_graph = self.task_graph_of(parent).expect(
                 "Parent procedure template must have a task graph if the current one does not.",
             );
@@ -303,8 +305,8 @@ impl ProcedureTemplateGraph {
                     })
                     .collect()
             } else {
-                // If the current node does not have predecessors, it means we need to move to
-                // the parent's predecessors.
+                // If the current node does not have predecessors, it means we
+                // need to move to the parent's predecessors.
                 let Some((grand_parent, parents)) = parents.split_last() else {
                     unreachable!(
                         "There must be a grand parent if the parent has no predecessors for `{}`.",
@@ -329,9 +331,10 @@ impl ProcedureTemplateGraph {
                     .collect()
             }
         };
-        // Then, we deduplicate the paths, as even if the search starts from distinct
-        // sink nodes it is possible that they converge to the same procedure template
-        // using the given procedure template asset model.
+        // Then, we deduplicate the paths, as even if the search starts from
+        // distinct sink nodes it is possible that they converge to the
+        // same procedure template using the given procedure template
+        // asset model.
 
         paths.sort_unstable();
         paths.dedup();

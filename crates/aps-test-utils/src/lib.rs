@@ -236,8 +236,9 @@ where
 {
     let test_namespace = namespace("aps-test-utils", user, conn);
 
-    // We try to load an existing asset model with the same name to avoid duplicates
-    // in tests that create multiple asset models with the same name.
+    // We try to load an existing asset model with the same name to avoid
+    // duplicates in tests that create multiple asset models with the same
+    // name.
     if let Ok(existing) =
         <(namespaced_ownables::namespace_id, (namespaced_ownables::name,))>::load_nested_first(
             (test_namespace.get_column::<namespaces::id>(), (name,)),

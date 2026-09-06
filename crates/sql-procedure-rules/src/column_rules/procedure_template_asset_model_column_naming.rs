@@ -87,7 +87,8 @@ impl<C: ColumnLike> ColumnRule for ProcedureTemplateAssetModelColumnNaming<C> {
             return Ok(());
         };
 
-        // Skip validation if the procedure_template_asset_models table doesn't exist
+        // Skip validation if the procedure_template_asset_models table doesn't
+        // exist
         let Some(procedure_template_asset_models_table) =
             database.table(None, PROCEDURE_TEMPLATE_ASSET_MODELS_TABLE_NAME)
         else {
@@ -106,11 +107,12 @@ impl<C: ColumnLike> ColumnRule for ProcedureTemplateAssetModelColumnNaming<C> {
         // Get the tables referenced by this column via foreign keys
         let referenced_tables = table.referenced_tables_via_column(database, column);
 
-        // Check if any of the referenced tables are procedure_template_asset_models
+        // Check if any of the referenced tables are
+        // procedure_template_asset_models
         for referenced_table in &referenced_tables {
             if *referenced_table == procedure_template_asset_models_table {
-                // Column references procedure_template_asset_models - must start with
-                // procedure_template_
+                // Column references procedure_template_asset_models - must
+                // start with procedure_template_
                 if !column.column_name().starts_with("procedure_template_") {
                     let table_name = table.table_name();
                     let column_name = column.column_name();

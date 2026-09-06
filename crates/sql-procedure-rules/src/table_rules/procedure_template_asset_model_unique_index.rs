@@ -121,8 +121,8 @@ impl<DB: DatabaseLike> TableRule for ProcedureTemplateAssetModelUniqueIndex<DB> 
             })
             .collect();
 
-        // For each such column, verify there's a UNIQUE (id, procedure_template_{am})
-        // index
+        // For each such column, verify there's a UNIQUE (id,
+        // procedure_template_{am}) index
         for column in procedure_template_asset_model_columns {
             let has_unique_index = table.unique_indices(database).any(|idx| {
                 let idx_columns: Vec<_> = idx.columns(database).collect();

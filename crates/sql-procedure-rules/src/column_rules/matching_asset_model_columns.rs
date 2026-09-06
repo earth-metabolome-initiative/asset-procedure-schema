@@ -108,8 +108,8 @@ impl<C: ColumnLike> ColumnRule for MatchingAssetModelColumns<C> {
             return Ok(());
         };
 
-        // If the column does not reference procedure_template_asset_models, skip
-        // validation.
+        // If the column does not reference procedure_template_asset_models,
+        // skip validation.
         if !column
             .references_table_pk_or_descendant(database, procedure_template_asset_models_table)
         {
@@ -117,8 +117,9 @@ impl<C: ColumnLike> ColumnRule for MatchingAssetModelColumns<C> {
         }
 
         // The fact that this column should start with "procedure_template_" is
-        // already enforced by ProcedureTemplateAssetModelColumnNaming, so we can
-        // skip the check if the prefix is not present and avoid redundant errors.
+        // already enforced by ProcedureTemplateAssetModelColumnNaming, so we
+        // can skip the check if the prefix is not present and avoid
+        // redundant errors.
         let Some(expected_column_name) = column.column_name().strip_prefix("procedure_template_")
         else {
             return Ok(());
@@ -159,7 +160,8 @@ impl<C: ColumnLike> ColumnRule for MatchingAssetModelColumns<C> {
             return Ok(());
         };
 
-        // If the retrieved column does not reference asset_models, return an error.
+        // If the retrieved column does not reference asset_models, return an
+        // error.
         if !expected_asset_model_column
             .references_table_pk_or_descendant(database, asset_models_table)
         {

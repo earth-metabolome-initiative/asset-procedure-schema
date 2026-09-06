@@ -289,8 +289,8 @@ pub trait OwnershipLike: AsRef<Ownership> {
         if procedure_template_asset_model.procedure_template_id()
             == parents[0].get_column_ref::<procedure_templates::id>()
         {
-            // If the PTAM is owned by the root procedure template, it is its own
-            // certain based on alias.
+            // If the PTAM is owned by the root procedure template, it is its
+            // own certain based on alias.
             return Some(procedure_template_asset_model);
         }
 

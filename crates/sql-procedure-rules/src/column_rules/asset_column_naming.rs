@@ -81,7 +81,8 @@ impl<C: ColumnLike> ColumnRule for AssetColumnNaming<C> {
     ) -> Result<(), Error<Self::Database>> {
         let table = column.table(database);
 
-        // Skip validation if the procedures or procedure_templates tables don't exist
+        // Skip validation if the procedures or procedure_templates tables don't
+        // exist
         let Some(procedures_table) = database.table(None, PROCEDURES_TABLE_NAME) else {
             return Err(Error::Unapplicable(format!(
                 "Table '{}' does not exist",
@@ -96,8 +97,9 @@ impl<C: ColumnLike> ColumnRule for AssetColumnNaming<C> {
             )));
         };
 
-        // Check if this table is a descendant of procedures or procedure_templates,
-        // otherwise this check constraint does not apply.
+        // Check if this table is a descendant of procedures or
+        // procedure_templates, otherwise this check constraint does not
+        // apply.
         if !(table.is_descendant_of(database, procedures_table)
             || table == procedures_table
             || table.is_descendant_of(database, procedure_templates_table)

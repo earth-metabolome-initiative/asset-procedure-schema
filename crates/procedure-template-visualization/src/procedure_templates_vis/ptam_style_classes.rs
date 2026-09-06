@@ -44,7 +44,7 @@ where
 
     let colors = Color::maximally_distinct(u16::try_from(ptam_builders.len()).unwrap(), 70, 80);
 
-    for ((node_builder, edge_builder), color) in ptam_builders.into_iter().zip(colors.into_iter()) {
+    for ((node_builder, edge_builder), color) in ptam_builders.into_iter().zip(colors) {
         builder.style_class(
             node_builder
                 .property(StyleProperty::Fill(color))

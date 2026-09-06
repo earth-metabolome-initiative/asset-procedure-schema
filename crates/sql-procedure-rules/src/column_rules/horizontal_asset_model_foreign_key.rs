@@ -139,7 +139,8 @@ impl<C: ColumnLike> ColumnRule for HorizontalAssetModelForeignKey<C> {
             return Ok(());
         }
 
-        // Column must start with "procedure_template_" (enforced by another constraint)
+        // Column must start with "procedure_template_" (enforced by another
+        // constraint)
         let Some(suffix) = column.column_name().strip_prefix("procedure_template_") else {
             return Ok(());
         };
@@ -154,8 +155,8 @@ impl<C: ColumnLike> ColumnRule for HorizontalAssetModelForeignKey<C> {
         };
 
         // Check if there exists a horizontal foreign key from
-        // (procedure_template_{am}, {am}) to procedure_template_asset_models(id,
-        // asset_model_id)
+        // (procedure_template_{am}, {am}) to
+        // procedure_template_asset_models(id, asset_model_id)
         let has_horizontal_fk = table.foreign_keys(database).any(|fk| {
             if !fk.is_horizontal_same_as(database) {
                 return false;
