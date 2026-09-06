@@ -82,7 +82,8 @@ impl<C: ColumnLike> ColumnRule for AssetModelColumnNaming<C> {
     ) -> Result<(), Error<Self::Database>> {
         let table = column.table(database);
 
-        // Skip validation if the procedures or procedure_templates tables don't exist
+        // Skip validation if the procedures or procedure_templates tables don't
+        // exist
         let Some(procedures_table) = database.table(None, PROCEDURES_TABLE_NAME) else {
             return Err(Error::Unapplicable(format!(
                 "Table '{}' does not exist",
@@ -105,7 +106,8 @@ impl<C: ColumnLike> ColumnRule for AssetModelColumnNaming<C> {
             )));
         };
 
-        // Check if this table is a descendant of procedures or procedure_templates
+        // Check if this table is a descendant of procedures or
+        // procedure_templates
         let is_procedure_descendant = table.is_descendant_of(database, procedures_table)
             || table == procedures_table
             || table.is_descendant_of(database, procedure_templates_table)
@@ -123,7 +125,8 @@ impl<C: ColumnLike> ColumnRule for AssetModelColumnNaming<C> {
             if *referenced_table == asset_models_table
                 || referenced_table.is_descendant_of(database, asset_models_table)
             {
-                // Column references asset_models or its descendant - must end with _model_id
+                // Column references asset_models or its descendant - must end
+                // with _model_id
                 if !column.column_name().ends_with("_model_id") {
                     let table_name = table.table_name();
                     let column_name = column.column_name();

@@ -230,7 +230,7 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
         TableBuilder<aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table>:
             Insert<C>,
         PTAMS: IntoIterator<Item: ProcedureTemplateAssetModelTableModel>,
-    {
+{
         let mut ptams = Vec::new();
         for asset_model in procedure_template_asset_models {
             ptams.push(aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table::builder()
@@ -296,7 +296,7 @@ pub trait ProcedureTemplateNode: ProcedureTemplateTableModel + NamespacedOwnable
         TableBuilder<aps_reused_procedure_template_asset_models::reused_procedure_template_asset_models::table>:
             Insert<C>,
         PTAM: ProcedureTemplateAssetModelTableModel,
-    {
+{
         let ptams = self.reuses(procedure_template_asset_models, conn)?;
         Ok(ptams.try_into().expect("Vector size should match array size N"))
     }

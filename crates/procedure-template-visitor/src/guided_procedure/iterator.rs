@@ -87,7 +87,7 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
             TypedNestedTuple<NestedTupleValueType = (rosetta_uuid::Uuid,)> +
             LoadNestedFirst<<T as ProcedureTableLike>::ProcedureTemplateTable, C>,
         <T as ProcedureTableLike>::ProcedureTemplateTable: DescendantOfAll<<(<<T as ProcedureTableLike>::ProcedureTemplateTable as diesel::Table>::PrimaryKey,) as NestedColumns>::NestedTables>
-    {
+{
         let Some((parents, template)) =
             self.next().transpose().map_err(GuidedProcedureError::from)?
         else {
@@ -106,8 +106,8 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
 
         // First, we load the nested procedure template associated with the
         // current procedure. This will be then used to pre-fill the builder
-        // of the procedure, setting the known values of asset model procedure template
-        // entries.
+        // of the procedure, setting the known values of asset model procedure
+        // template entries.
         let nested_template: Template<T> = <(
             <<T as ProcedureTableLike>::ProcedureTemplateTable as Table>::PrimaryKey,
         )>::load_nested_first(
@@ -136,10 +136,11 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
                 )?;
         }
 
-        // We get the set of foreign keys from the procedure table to the PAM table,
-        // and analogously the set of foreign keys from the procedure template table
-        // to the PTAM table. Specifically, the set of columns in the procedure table
-        // hierarchy that reference specifically
+        // We get the set of foreign keys from the procedure table to the PAM
+        // table, and analogously the set of foreign keys from the
+        // procedure template table to the PTAM table. Specifically, the
+        // set of columns in the procedure table hierarchy that
+        // reference specifically
         // `procedure_asset_models::procedure_template_asset_model_id`
         // and the set of columns in the procedure template table hierarchy that
         // reference `procedure_template_asset_models::id` should be in
@@ -150,9 +151,10 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
         // it should have been caught at the generation of the APS by the
         // `sql-procedure-rules`.
 
-        // Since in both the procedure and procedure template hierarchies not all tables
-        // in the hierarchy may have a foreign key to the PAM/PTAM table, we need to use
-        // the dynamic foreign key iterator, and not the compile-time one.
+        // Since in both the procedure and procedure template hierarchies not
+        // all tables in the hierarchy may have a foreign key to the
+        // PAM/PTAM table, we need to use the dynamic foreign key
+        // iterator, and not the compile-time one.
 
         let pam_ptam_index = (
             procedure_asset_models::id.into(),
@@ -168,10 +170,10 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
             )
         ).collect::<Vec<_>>();
 
-        // We check that the two sets of foreign keys have the same length. If this
-        // assert fails, it indicates a mismatch in the schema design that
-        // should have been caught at the generation of the APS by the
-        // `sql-procedure-rules`.
+        // We check that the two sets of foreign keys have the same length. If
+        // this assert fails, it indicates a mismatch in the schema
+        // design that should have been caught at the generation of the
+        // APS by the `sql-procedure-rules`.
         assert_eq!(
             procedure2pam_ptam_fks.len(),
             procedure2pam_am_fks.len(),
@@ -179,8 +181,9 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
             T::TABLE_NAME
         );
 
-        // First, we sort `procedure2pam_ptam_fks` and `procedure2pam_am_fks` by the
-        // name of the host column which points to `procedure_asset_models::id`:
+        // First, we sort `procedure2pam_ptam_fks` and `procedure2pam_am_fks` by
+        // the name of the host column which points to
+        // `procedure_asset_models::id`:
         procedure2pam_ptam_fks.sort_by_cached_key(|(pam_column, _)| pam_column.column_name());
         procedure2pam_am_fks.sort_by_cached_key(|(pam_column, _)| pam_column.column_name());
 
@@ -205,10 +208,10 @@ impl<'graph, C> GuidedProcedure<'graph, C> {
             ))
             .collect::<Vec<_>>();
 
-        // We assert that the two sets of foreign keys have the same length. If this
-        // assert fails, it indicates a mismatch in the schema design that
-        // should have been caught at the generation of the APS by the
-        // `sql-procedure-rules`.
+        // We assert that the two sets of foreign keys have the same length. If
+        // this assert fails, it indicates a mismatch in the schema
+        // design that should have been caught at the generation of the
+        // APS by the `sql-procedure-rules`.
         assert_eq!(
             procedure2pam_fks.len(),
             procedure_template2ptam_fks.len(),

@@ -172,14 +172,15 @@ mod tests {
             "There are seven procedure templates in the pizza tree hierarchy."
         );
 
-        // We check that the root procedure template is indeed the pizza procedure
-        // template.
+        // We check that the root procedure template is indeed the pizza
+        // procedure template.
         assert_eq!(hierarchy.root_procedure_template(), &procedure_template);
 
         // We check that the root procedure template is not a leaf.
         assert!(!hierarchy.is_leaf(&procedure_template));
 
-        // We check that the number of neighbours of the root procedure template is 3.
+        // We check that the number of neighbours of the root procedure template
+        // is 3.
         let root_node_id = hierarchy.procedure_node_id(&procedure_template);
         let successors: Vec<_> = hierarchy
             .hierarchy
@@ -215,14 +216,15 @@ mod tests {
             "There are seven procedure templates in the pizza tree hierarchy."
         );
 
-        // We check that the root procedure template is indeed the pizza tree procedure
-        // template.
+        // We check that the root procedure template is indeed the pizza tree
+        // procedure template.
         assert_eq!(hierarchy.root_procedure_template(), &procedure_template);
 
         // We check that the root procedure template is not a leaf.
         assert!(!hierarchy.is_leaf(&procedure_template));
 
-        // We check that the number of neighbours of the root procedure template is 6.
+        // We check that the number of neighbours of the root procedure template
+        // is 6.
         let root_node_id = hierarchy.procedure_node_id(&procedure_template);
         let successors: Vec<_> = hierarchy
             .hierarchy

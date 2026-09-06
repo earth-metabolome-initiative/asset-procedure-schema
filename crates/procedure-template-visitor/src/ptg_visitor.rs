@@ -122,8 +122,8 @@ where
 
                 // When we are starting to visit a node, we setup its recursion.
                 if let Some(task_graph) = self.graph.as_ref().task_graph_of(current_node) {
-                    // If the node is associated with a task, we need to explore and
-                    // visit its task graph.
+                    // If the node is associated with a task, we need to explore
+                    // and visit its task graph.
                     // We push the current node to the parents stack, set the
                     // current node to the root of the task graph, and push the
                     // task graph to the stack of nodes to visit.
@@ -132,20 +132,24 @@ where
                     self.current_node = Some(root_node);
                     // Since we are changing the current node, we would need
                     // to change its state to unvisited, but this is already
-                    // the value of `current_node_state`, so no action is needed.
+                    // the value of `current_node_state`, so no action is
+                    // needed.
 
-                    // We push the task graph to the stack of nodes to visit, with
-                    // the root node as the first node to visit, and an empty
-                    // predecessors list.
+                    // We push the task graph to the stack of nodes to visit,
+                    // with the root node as the first node
+                    // to visit, and an empty predecessors
+                    // list.
                     self.nodes_to_visit
                         .push((task_graph, VecDeque::from([(root_node, Vec::new())])));
                 } else {
-                    // Otherwise, we are at a leaf node, and we need to visit all
-                    // its owned procedure template asset models.
+                    // Otherwise, we are at a leaf node, and we need to visit
+                    // all its owned procedure template
+                    // asset models.
                     self.ptam_iter =
                         Some(self.graph.as_ref().employed_by(self.current_node?).collect());
-                    // We change the state of the current node to visiting, so that
-                    // we can start visiting its owned procedure template asset models.
+                    // We change the state of the current node to visiting, so
+                    // that we can start visiting its owned
+                    // procedure template asset models.
                     self.current_node_state = CurrentNodeVisitState::Visiting;
                 }
 
@@ -155,15 +159,18 @@ where
                 // When we are visiting a node, so we can either be visiting its
                 // owned procedure template asset models, or its task graph.
                 if let Some(ptam_iter) = &mut self.ptam_iter {
-                    // If there is a procedure template asset model iterator, then this indicates
-                    // that we are visiting a leaf node, and we need to visit all its owned
+                    // If there is a procedure template asset model iterator,
+                    // then this indicates that we are
+                    // visiting a leaf node, and we need to visit all its owned
                     // procedure template asset models.
                     if let Some(ptam) = ptam_iter.pop() {
-                        // If there are still owned procedure template asset models to visit,
-                        // we visit the next one.
+                        // If there are still owned procedure template asset
+                        // models to visit, we visit the
+                        // next one.
                         self.listener.enter_leaf_ptam(self.parents.as_slice(), current_node, ptam)
                     } else {
-                        // Otherwise, we have finished visiting all owned procedure template asset
+                        // Otherwise, we have finished visiting all owned
+                        // procedure template asset
                         // models. We change the state of the current node
                         // to visited, so that we can move on to
                         // the next node in the task graph, if any.
@@ -173,16 +180,18 @@ where
                             .leave_procedure_template(self.parents.as_slice(), current_node)
                     }
                 } else if let Some((task_graph, nodes)) = self.nodes_to_visit.last_mut() {
-                    // If there is a task graph to visit, then we are visiting a non-leaf node,
-                    // and the current node is expected to be a node within the task graph.
+                    // If there is a task graph to visit, then we are visiting a
+                    // non-leaf node, and the current node
+                    // is expected to be a node within the task graph.
                     assert_eq!(
                         *task_graph,
                         self.graph.as_ref().task_graph_of(current_node).unwrap(),
                         "The current node should be the one associated with the task graph we are visiting."
                     );
 
-                    // If there are still nodes to visit in the task graph, we expect that we
-                    // currently have finished visiting the current inner one,
+                    // If there are still nodes to visit in the task graph, we
+                    // expect that we currently have
+                    // finished visiting the current inner one,
                     // got sent back to the parent node, and now we need to
                     // continue exploring its task graph.
                     if let Some((node, _predecessors)) = nodes.front() {
@@ -191,9 +200,10 @@ where
                         self.parents.push(current_node);
                         self.next()?
                     } else {
-                        // Otherwise, we have finished visiting all nodes in the task graph.
-                        // We pop the task graph from the stack and change the state of the current
-                        // node to visited.
+                        // Otherwise, we have finished visiting all nodes in the
+                        // task graph. We pop the task
+                        // graph from the stack and change the state of the
+                        // current node to visited.
                         self.nodes_to_visit.pop();
                         self.current_node_state = CurrentNodeVisitState::Visited;
                         self.listener
@@ -206,12 +216,14 @@ where
                 }
             }
             CurrentNodeVisitState::Visited => {
-                // If we have finished visiting the node, we need to move to its parent.
-                // If there are no parents, then we have finished visiting the entire graph.
+                // If we have finished visiting the node, we need to move to its
+                // parent. If there are no parents, then we have
+                // finished visiting the entire graph.
                 if let Some((task_graph, nodes)) = self.nodes_to_visit.last_mut() {
-                    // And we ask the listener to filter the successors of the current node, so
-                    // to only explore the ones that are relevant to the
-                    // current context.
+                    // And we ask the listener to filter the successors of the
+                    // current node, so to only explore the
+                    // ones that are relevant to the current
+                    // context.
                     let successors = match self
                         .listener
                         .filter_successors(task_graph.successors(current_node))
@@ -236,8 +248,8 @@ where
 
                     predecessors.push(current_node);
 
-                    // We push the successors to the nodes to visit stack, so that we can
-                    // explore them later.
+                    // We push the successors to the nodes to visit stack, so
+                    // that we can explore them later.
                     for successor in successors {
                         nodes.push_back((successor, predecessors.clone()));
                     }
