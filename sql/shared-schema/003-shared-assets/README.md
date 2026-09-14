@@ -186,6 +186,12 @@ Commercial tables decision:
 - <none | commercial_<stem>_models | commercial_<stem>_models + commercial_<stem>_lots>
 - Reason: <why included/omitted>
 
+Specific columns to be added:
+
+- name:
+- description:
+- Wikidata QID:
+
 Requirements:
 - Add full migration documentation header with:
   Migration, Purpose, APS placement ASCII art, Metadata registration,
