@@ -86,6 +86,8 @@ impl<'graph> GuidedProcedurePseudocode<'graph> {
         let variable_name = format_ident!("{}", variable_name_str);
 
         let error_type_str = std::any::type_name::<E>();
+        let error_type_str =
+            if error_type_str == "!" { "core::convert::Infallible" } else { error_type_str };
         let error_type: syn::Type =
             syn::parse_str(error_type_str).expect("Failed to parse error type");
 
