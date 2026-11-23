@@ -1,65 +1,152 @@
-CREATE TABLE disposal_procedure_templates (
-	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	-- The disposed asset asset model being disposed of.
-	disposed_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	-- The associated procedure_id asset model for the disposed asset.
-	procedure_template_disposed_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The disposed asset model must match the procedure_id template of the procedure.
-	FOREIGN KEY (
-		procedure_template_disposed_asset_model_id,
-		disposed_asset_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_disposed_asset_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_disposed_asset_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_disposed_asset_model_id
-	)
-);
-CREATE OR REPLACE FUNCTION disposal_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_disposed_asset_model_id) ON CONFLICT DO NOTHING;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Migration: 004-disposal-procedures
+-- Purpose: Typed disposal slots and execution records.
+-- APS placement
+-- ownables
+-- +-- procedure_templates -- disposal_procedure_templates
+-- +-- procedures -- disposal_procedures
+-- Slot | Role | Meaning
+-- `disposed_asset` | `consumed` | Disposal removes the asset from inventory.
 
-CREATE TRIGGER disposal_procedure_templates_rptam_insert_trigger
-AFTER INSERT ON disposal_procedure_templates
-FOR EACH ROW EXECUTE FUNCTION disposal_procedure_templates_rptam_insert_fn();
-CREATE TABLE disposal_procedures (
-	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
-	-- The model of the procedure.
-	disposal_procedure_template_id UUID NOT NULL REFERENCES disposal_procedure_templates(id) ON DELETE CASCADE,
-	-- The disposed asset is the one that is being disposed_asset_id of.
-	disposed_asset_id UUID REFERENCES physical_assets(id),
-	-- The model of the disposed asset.
-	disposed_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	-- The procedure_id template asset model associated to the `disposed_asset`.
-	procedure_template_disposed_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `disposed_asset`.
-	procedure_disposed_asset_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- We ensure that the parent_id table's procedure_template_id is indeed a disposal_procedure_template.
-	FOREIGN KEY (id, disposal_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
-	-- The procedure_id template asset model describing the `disposed_asset` must be the same one
-	-- as the one in the procedure_id template.
-	FOREIGN KEY (
-		disposal_procedure_template_id,
-		procedure_template_disposed_asset_model_id
-	) REFERENCES disposal_procedure_templates(
-		id,
-		procedure_template_disposed_asset_model_id
-	),
-	-- We enforce that the `procedure_disposed_asset` is associated with the `procedure_template_disposed_asset_model`.
-	FOREIGN KEY (
-		procedure_disposed_asset_id,
-		procedure_template_disposed_asset_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We enforce that the `procedure_disposed_asset` is associated with the `disposed_asset_model`.
-	FOREIGN KEY (procedure_disposed_asset_id, disposed_asset_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	-- We enforce that the `procedure_disposed_asset` is associated with the `disposed_asset`.
-	FOREIGN KEY (disposed_asset_id, disposed_asset_model_id) REFERENCES assets(id, model_id)
+-- Typed slots and parameters for disposal.
+CREATE TABLE disposal_procedure_templates (
+    -- Identity shared with the parent template.
+    id UUID PRIMARY KEY REFERENCES procedure_templates (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Slot declaring the `disposed_asset` assets.
+    disposed_asset_slot_id UUID NOT NULL,
+    -- Admissible model for the `disposed_asset` slot.
+    disposed_asset_model_id UUID NOT NULL REFERENCES physical_asset_models (id),
+    -- Required role of the `disposed_asset` slot.
+    disposed_asset_slot_role_id TEXT GENERATED ALWAYS AS ('consumed') STORED NOT NULL,
+    FOREIGN KEY (disposed_asset_slot_id, id, disposed_asset_model_id, disposed_asset_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
+CREATE INDEX ON disposal_procedure_templates (disposed_asset_model_id);
+INSERT INTO table_names (id) VALUES ('disposal_procedure_templates');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'disposal_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
+    UNION SELECT 'disposal_procedure_templates', 'disposal_procedure_templates';
+CREATE TRIGGER disposal_procedure_templates_guard AFTER INSERT OR UPDATE ON disposal_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER disposal_procedure_templates_delete_guard BEFORE DELETE ON disposal_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+
+CREATE FUNCTION require_disposal_procedure_templates_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedure_templates root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'disposal_procedure_templates'
+    ) AND NOT EXISTS (SELECT 1 FROM public.disposal_procedure_templates row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'disposal_procedure_templates'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_disposal_procedure_templates_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_disposal_procedure_templates_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER disposal_procedure_templates_row AFTER INSERT ON procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'disposal_procedure_templates')
+    EXECUTE FUNCTION require_disposal_procedure_templates_row();
+CREATE CONSTRAINT TRIGGER disposal_procedure_templates_kept AFTER DELETE ON disposal_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_disposal_procedure_templates_row();
+
+GRANT SELECT, INSERT, DELETE ON disposal_procedure_templates TO app;
+ALTER TABLE disposal_procedure_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disposal_procedure_templates FORCE ROW LEVEL SECURITY;
+CREATE POLICY disposal_procedure_templates_select ON disposal_procedure_templates FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY disposal_procedure_templates_insert ON disposal_procedure_templates FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND disposed_asset_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY disposal_procedure_templates_delete ON disposal_procedure_templates FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY disposal_procedure_templates_archived_insert ON disposal_procedure_templates AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(disposed_asset_model_id));
+CREATE POLICY disposal_procedure_templates_archived_delete ON disposal_procedure_templates AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY disposal_procedure_templates_blocked ON disposal_procedure_templates AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Recorded execution of a disposal template.
+CREATE TABLE disposal_procedures (
+    -- Identity shared with the parent procedure.
+    id UUID PRIMARY KEY REFERENCES procedures (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Typed template executed by this procedure.
+    disposal_procedure_template_id UUID NOT NULL REFERENCES disposal_procedure_templates (id),
+    -- Execution status copied from the parent procedure.
+    status_id TEXT NOT NULL,
+    FOREIGN KEY (id, disposal_procedure_template_id, status_id, organization_id)
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+);
+CREATE INDEX ON disposal_procedures (disposal_procedure_template_id);
+INSERT INTO table_names (id) VALUES ('disposal_procedures');
+INSERT INTO table_name_instances (id, instance_table_name_id)
+    VALUES ('disposal_procedure_templates', 'disposal_procedures');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'disposal_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
+    UNION SELECT 'disposal_procedures', 'disposal_procedures';
+CREATE TRIGGER disposal_procedures_guard AFTER INSERT OR UPDATE ON disposal_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER disposal_procedures_delete_guard BEFORE DELETE ON disposal_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+CREATE FUNCTION require_disposal_procedures_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedures root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'disposal_procedures'
+    ) AND NOT EXISTS (SELECT 1 FROM public.disposal_procedures row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'disposal_procedures'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_disposal_procedures_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_disposal_procedures_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER disposal_procedures_row AFTER INSERT ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'disposal_procedures')
+    EXECUTE FUNCTION require_disposal_procedures_row();
+CREATE CONSTRAINT TRIGGER disposal_procedures_kept AFTER DELETE ON disposal_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_disposal_procedures_row();
+
+GRANT SELECT, INSERT, DELETE ON disposal_procedures TO app;
+ALTER TABLE disposal_procedures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disposal_procedures FORCE ROW LEVEL SECURITY;
+CREATE POLICY disposal_procedures_select ON disposal_procedures FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY disposal_procedures_insert ON disposal_procedures FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND disposal_procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY disposal_procedures_delete ON disposal_procedures FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY disposal_procedures_archived_insert ON disposal_procedures AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(disposal_procedure_template_id));
+CREATE POLICY disposal_procedures_archived_delete ON disposal_procedures AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY disposal_procedures_blocked ON disposal_procedures AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER disposal_procedure_templates_audit AFTER INSERT OR DELETE ON disposal_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER disposal_procedure_templates_update_audit AFTER UPDATE ON disposal_procedure_templates
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER disposal_procedures_audit AFTER INSERT OR DELETE ON disposal_procedures
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER disposal_procedures_update_audit AFTER UPDATE ON disposal_procedures
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();

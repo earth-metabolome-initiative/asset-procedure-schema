@@ -1,144 +1,172 @@
-CREATE TABLE photograph_procedure_templates (
-	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	-- The device used for photograph.
-	photographed_with_model_id UUID NOT NULL REFERENCES camera_models(id),
-	procedure_template_photographed_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	photographed_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	procedure_template_photographed_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	photograph_model_id UUID NOT NULL REFERENCES digital_asset_models(id),
-	procedure_template_photograph_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	-- We check that the `photographed_with_model` is indeed a trackable that is compatible with the procedure_id template.
-	FOREIGN KEY (
-		procedure_template_photographed_with_model_id,
-		photographed_with_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		procedure_template_photographed_asset_model_id,
-		photographed_asset_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		procedure_template_photograph_model_id,
-		photograph_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_photographed_with_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_photographed_asset_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_photograph_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_photographed_with_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_photographed_with_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_photographed_asset_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_photographed_asset_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_photograph_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_photograph_model_id
-	)
-);
-INSERT INTO table_names (id) VALUES ('photograph_procedure_templates') ON CONFLICT DO NOTHING;
-CREATE OR REPLACE FUNCTION photograph_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_photographed_with_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_photographed_asset_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_photograph_model_id) ON CONFLICT DO NOTHING;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Migration: 006-photograph-procedures
+-- Purpose: Typed photograph slots and execution records.
+-- APS placement
+-- ownables
+-- +-- procedure_templates -- photograph_procedure_templates
+-- +-- procedures -- photograph_procedures
+-- Slot | Role | Meaning
+-- `photographed_with` | `instrument` | The camera takes the photograph.
+-- `photographed_asset` | `input` | The subject survives photography.
+-- `photograph` | `produced` | The procedure creates the photograph.
 
-CREATE TRIGGER photograph_procedure_templates_rptam_insert_trigger
-AFTER INSERT ON photograph_procedure_templates
-FOR EACH ROW EXECUTE FUNCTION photograph_procedure_templates_rptam_insert_fn();
-CREATE TABLE photograph_procedures (
-	-- Identifier of the photograph_id id, which is also a foreign key to the general procedure.
-	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
-	-- The template of this procedure_id should be a photograph_id procedure_id template.
-	photograph_procedure_template_id UUID NOT NULL REFERENCES photograph_procedure_templates(id),
-	-- The asset being photographed, which must be a physical asset.
-	photographed_asset_id UUID REFERENCES physical_assets(id),
-	-- The model of the asset being photographed.
-	photographed_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	-- The procedure_id template asset model associated to the `photographed_asset`.
-	procedure_template_photographed_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `photographed_asset`.
-	procedure_photographed_asset_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The positioning device used for photograph. This field is optional, as the positioning device might not necessarily be tracked.
-	photographed_with_id UUID REFERENCES cameras(id),
-	-- The model of the positioning device used for photograph.
-	photographed_with_model_id UUID NOT NULL REFERENCES camera_models(id),
-	-- The procedure_id template asset model associated to the `photographed_with_model`.
-	procedure_template_photographed_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `photographed_with`.
-	procedure_photographed_with_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The resulting photograph.
-	photograph_id UUID NOT NULL REFERENCES photographs(id) ON DELETE CASCADE,
-	-- The model of the resulting photograph.
-	photograph_model_id UUID NOT NULL REFERENCES digital_asset_models(id),
-	-- The procedure_id template asset model associated to the `photograph_model`.
-	procedure_template_photograph_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `photograph`.
-	procedure_photograph_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- We enforce that the current `photograph` has indeed the same `photograph_template`.
-	FOREIGN KEY (id, photograph_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
-	-- The `procedure_template_photographed_with_model` must be the same as in the `photograph_procedure_templates`.
-	FOREIGN KEY (
-		photograph_procedure_template_id,
-		procedure_template_photographed_with_model_id
-	) REFERENCES photograph_procedure_templates(
-		id,
-		procedure_template_photographed_with_model_id
-	),
-	-- The `procedure_template_photographed_asset_model` must be the same as in the `photograph_procedure_templates`.
-	FOREIGN KEY (
-		photograph_procedure_template_id,
-		procedure_template_photographed_asset_model_id
-	) REFERENCES photograph_procedure_templates(
-		id,
-		procedure_template_photographed_asset_model_id
-	),
-	-- The `procedure_template_photograph_model` must be the same as in the `photograph_procedure_templates`.
-	FOREIGN KEY (
-		photograph_procedure_template_id,
-		procedure_template_photograph_model_id
-	) REFERENCES photograph_procedure_templates(
-		id,
-		procedure_template_photograph_model_id
-	),
-	-- We check that the `procedure_photographed_with` is associated to the same `procedure_template_photographed_with_model`.
-	FOREIGN KEY (
-		procedure_photographed_with_id,
-		procedure_template_photographed_with_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_photographed_asset` is associated to the same `procedure_template_photographed_asset_model`.
-	FOREIGN KEY (
-		procedure_photographed_asset_id,
-		procedure_template_photographed_asset_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_photograph` is associated to the same `procedure_template_photograph_model`.
-	FOREIGN KEY (
-		procedure_photograph_id,
-		procedure_template_photograph_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_photographed_asset` is associated to the `photographed_asset`.
-	FOREIGN KEY (photographed_asset_id, photographed_asset_model_id) REFERENCES assets(id, model_id),
-	-- We check that the `procedure_photographed_with` is associated to the `photographed_with`.
-	FOREIGN KEY (photographed_with_id, photographed_with_model_id) REFERENCES assets(id, model_id),
-	-- We check that the `procedure_photograph` is associated to the `photograph`.
-	FOREIGN KEY (photograph_id, photograph_model_id) REFERENCES assets(id, model_id)
+-- Typed slots and parameters for photograph.
+CREATE TABLE photograph_procedure_templates (
+    -- Identity shared with the parent template.
+    id UUID PRIMARY KEY REFERENCES procedure_templates (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Slot declaring the `photographed_with` assets.
+    photographed_with_slot_id UUID NOT NULL,
+    -- Admissible model for the `photographed_with` slot.
+    photographed_with_model_id UUID NOT NULL REFERENCES camera_models (id),
+    -- Required role of the `photographed_with` slot.
+    photographed_with_slot_role_id TEXT GENERATED ALWAYS AS ('instrument') STORED NOT NULL,
+    -- Slot declaring the `photographed_asset` assets.
+    photographed_asset_slot_id UUID NOT NULL,
+    -- Admissible model for the `photographed_asset` slot.
+    photographed_asset_model_id UUID NOT NULL REFERENCES physical_asset_models (id),
+    -- Required role of the `photographed_asset` slot.
+    photographed_asset_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    -- Slot declaring the `photograph` assets.
+    photograph_slot_id UUID NOT NULL,
+    -- Admissible model for the `photograph` slot.
+    photograph_model_id UUID NOT NULL REFERENCES photograph_models (id),
+    -- Required role of the `photograph` slot.
+    photograph_slot_role_id TEXT GENERATED ALWAYS AS ('produced') STORED NOT NULL,
+    FOREIGN KEY (photographed_with_slot_id, id, photographed_with_model_id, photographed_with_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (photographed_asset_slot_id, id, photographed_asset_model_id, photographed_asset_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (photograph_slot_id, id, photograph_model_id, photograph_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
-INSERT INTO table_names (id) VALUES ('photograph_procedures') ON CONFLICT DO NOTHING;
+CREATE INDEX ON photograph_procedure_templates (photograph_model_id);
+CREATE INDEX ON photograph_procedure_templates (photographed_asset_model_id);
+CREATE INDEX ON photograph_procedure_templates (photographed_with_model_id);
+INSERT INTO table_names (id) VALUES ('photograph_procedure_templates');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'photograph_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
+    UNION SELECT 'photograph_procedure_templates', 'photograph_procedure_templates';
+CREATE TRIGGER photograph_procedure_templates_guard AFTER INSERT OR UPDATE ON photograph_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER photograph_procedure_templates_delete_guard BEFORE DELETE ON photograph_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+
+CREATE FUNCTION require_photograph_procedure_templates_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedure_templates root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'photograph_procedure_templates'
+    ) AND NOT EXISTS (SELECT 1 FROM public.photograph_procedure_templates row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'photograph_procedure_templates'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_photograph_procedure_templates_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_photograph_procedure_templates_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER photograph_procedure_templates_row AFTER INSERT ON procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'photograph_procedure_templates')
+    EXECUTE FUNCTION require_photograph_procedure_templates_row();
+CREATE CONSTRAINT TRIGGER photograph_procedure_templates_kept AFTER DELETE ON photograph_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_photograph_procedure_templates_row();
+
+GRANT SELECT, INSERT, DELETE ON photograph_procedure_templates TO app;
+ALTER TABLE photograph_procedure_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE photograph_procedure_templates FORCE ROW LEVEL SECURITY;
+CREATE POLICY photograph_procedure_templates_select ON photograph_procedure_templates FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY photograph_procedure_templates_insert ON photograph_procedure_templates FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND photographed_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND photographed_asset_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND photograph_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY photograph_procedure_templates_delete ON photograph_procedure_templates FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY photograph_procedure_templates_archived_insert ON photograph_procedure_templates AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(photographed_with_model_id) AND NOT authz.is_archived(photographed_asset_model_id) AND NOT authz.is_archived(photograph_model_id));
+CREATE POLICY photograph_procedure_templates_archived_delete ON photograph_procedure_templates AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY photograph_procedure_templates_blocked ON photograph_procedure_templates AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Recorded execution of a photograph template.
+CREATE TABLE photograph_procedures (
+    -- Identity shared with the parent procedure.
+    id UUID PRIMARY KEY REFERENCES procedures (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Typed template executed by this procedure.
+    photograph_procedure_template_id UUID NOT NULL REFERENCES photograph_procedure_templates (id),
+    -- Execution status copied from the parent procedure.
+    status_id TEXT NOT NULL,
+    FOREIGN KEY (id, photograph_procedure_template_id, status_id, organization_id)
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+);
+CREATE INDEX ON photograph_procedures (photograph_procedure_template_id);
+INSERT INTO table_names (id) VALUES ('photograph_procedures');
+INSERT INTO table_name_instances (id, instance_table_name_id)
+    VALUES ('photograph_procedure_templates', 'photograph_procedures');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'photograph_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
+    UNION SELECT 'photograph_procedures', 'photograph_procedures';
+CREATE TRIGGER photograph_procedures_guard AFTER INSERT OR UPDATE ON photograph_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER photograph_procedures_delete_guard BEFORE DELETE ON photograph_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+CREATE FUNCTION require_photograph_procedures_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedures root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'photograph_procedures'
+    ) AND NOT EXISTS (SELECT 1 FROM public.photograph_procedures row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'photograph_procedures'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_photograph_procedures_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_photograph_procedures_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER photograph_procedures_row AFTER INSERT ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'photograph_procedures')
+    EXECUTE FUNCTION require_photograph_procedures_row();
+CREATE CONSTRAINT TRIGGER photograph_procedures_kept AFTER DELETE ON photograph_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_photograph_procedures_row();
+
+GRANT SELECT, INSERT, DELETE ON photograph_procedures TO app;
+ALTER TABLE photograph_procedures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE photograph_procedures FORCE ROW LEVEL SECURITY;
+CREATE POLICY photograph_procedures_select ON photograph_procedures FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY photograph_procedures_insert ON photograph_procedures FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND photograph_procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY photograph_procedures_delete ON photograph_procedures FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY photograph_procedures_archived_insert ON photograph_procedures AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(photograph_procedure_template_id));
+CREATE POLICY photograph_procedures_archived_delete ON photograph_procedures AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY photograph_procedures_blocked ON photograph_procedures AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER photograph_procedure_templates_audit AFTER INSERT OR DELETE ON photograph_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER photograph_procedure_templates_update_audit AFTER UPDATE ON photograph_procedure_templates
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER photograph_procedures_audit AFTER INSERT OR DELETE ON photograph_procedures
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER photograph_procedures_update_audit AFTER UPDATE ON photograph_procedures
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();

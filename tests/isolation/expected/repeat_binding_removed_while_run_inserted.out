@@ -1,0 +1,16 @@
+Parsed test spec with 3 sessions
+
+starting permutation: first_begin first_write second_begin second_write first_finish second_finish invariant
+step first_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step first_write: DELETE FROM procedure_assets WHERE id = 'e0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE;
+step second_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step second_write: INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, status_id, root_procedure_id, parent_procedure_id, parent_template_id, step_id, repeat_procedure_asset_id, started_at, performed_by_id) VALUES ('f0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'procedures', 'c0000000-0000-7000-8000-000000000002', 'in_progress', 'f0000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', '90000000-0000-7000-8000-000000000001', 'e0000000-0000-7000-8000-000000000001', '2026-01-01 10:00+00', '10000000-0000-7000-8000-000000000001'); SET CONSTRAINTS ALL IMMEDIATE; <waiting ...>
+step first_finish: COMMIT;
+step second_write: <... completed>
+ERROR:  procedure f0000000-0000-7000-8000-000000000002 must name a parent binding of its step's repeat slot, and only then
+step second_finish: COMMIT;
+step invariant: SELECT run.status_id, count(binding.id) AS repeat_bindings FROM procedures run LEFT JOIN procedure_assets binding ON binding.id = run.repeat_procedure_asset_id WHERE run.id = 'f0000000-0000-7000-8000-000000000002' GROUP BY run.status_id;
+status_id|repeat_bindings
+---------+---------------
+(0 rows)
+

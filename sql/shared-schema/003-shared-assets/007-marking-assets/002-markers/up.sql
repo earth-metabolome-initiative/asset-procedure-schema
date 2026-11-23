@@ -1,112 +1,281 @@
--- ============================================================================
 -- Migration: Shared Assets / Marking Assets / Markers
--- Purpose:
---   Adds marker model and asset specializations for disposable or reusable
---   identification artifacts used to mark assets, organisms, or locations.
---
--- APS placement (inheritance and specialization):
---
---   entities
---     +-- ownables
---         +-- namespaced_ownables
---             +-- asset_models
---             |   +-- physical_asset_models
---             |   |   +-- marker_models
---             |   +-- commercial_products
---             |   |   +-- commercial_marker_models
---             |   +-- commercial_product_lots
---             |       +-- commercial_marker_lots
---             +-- assets
---                 +-- physical_assets
---                     +-- markers
---
--- Integrity bridge to core APS tables:
---   markers (id, marker_model_id)
---   references assets (id, model_id) to enforce model/asset consistency.
---
--- Metadata registration:
---   Every created table is registered in table_names.
---
--- Security context (local, inherited through ancestor PK extension):
---   No table-local RLS is defined in this migration. Access is inherited from
---   ancestor ownables through PK/FK identity chains.
---
---   PK-extension chains used for inherited access checks:
---   - marker_models:
---       id -> physical_asset_models.id -> asset_models.id
---          -> namespaced_ownables.id -> ownables.id
---   - commercial_marker_models:
---       id -> commercial_products.id -> asset_models.id
---          -> namespaced_ownables.id -> ownables.id
---   - commercial_marker_lots:
---       id -> commercial_product_lots.id -> physical_asset_models.id
---          -> asset_models.id -> namespaced_ownables.id -> ownables.id
---   - markers:
---       id -> physical_assets.id -> assets.id
---          -> namespaced_ownables.id -> ownables.id
---
---   SQL/RLS semantics for these specific marker tables:
---   - SELECT: viewer-or-higher on ancestor owner (role >= 2).
---   - INSERT: editor-or-higher on ancestor owner (role >= 3).
---   - UPDATE: editor-or-higher on ancestor owner (role >= 3).
---   - DELETE: admin on ancestor owner (role >= 4).
---   - Roles are resolved with get_owner_role(...).
---
---   Zanzibar semantics for these specific marker tables:
---   - Equivalent checks can be modeled on ownable:{id} relations.
---   - Team membership and grants are graph traversal
---     (user -> team -> owner, plus explicit grants).
---   - Zanzibar syntax expresses relation intent; SQL/RLS enforces row access.
--- ============================================================================
+-- Purpose: Markers for project inventories.
+-- APS placement
+--   ownables
+--       +-- asset_models
+--           +-- physical_asset_models
+--               +-- marker_models
+--                   +-- commercial_marker_models
+--               +-- commercial_product_lots
+--                   +-- commercial_marker_lots
+--       +-- assets
+--           +-- physical_assets
+--               +-- markers
+-- Commercial tables decision: Vendor models and lots provide purchase traceability.
 
 -- Catalog of marker model definitions.
 CREATE TABLE marker_models (
-	-- Stable model identifier inherited from physical_asset_models.
-	id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE
+    -- Stable model identifier inherited from physical_asset_models.
+    id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
+    -- Organization containing this resource.
+    organization_id UUID NOT NULL,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
--- Registers the marker_models table name for APS lookup.
-INSERT INTO table_names (id) VALUES ('marker_models') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('marker_models');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'marker_models', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_asset_models')
+    UNION SELECT 'marker_models', 'marker_models';
+CREATE TRIGGER marker_models_path AFTER INSERT ON marker_models
+    FOR EACH ROW EXECUTE FUNCTION check_asset_model_subtype();
+
+CREATE FUNCTION require_marker_models_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.asset_models root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'marker_models'
+    ) AND NOT EXISTS (SELECT 1 FROM public.marker_models subtype WHERE subtype.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'marker_models'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_marker_models_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_marker_models_row() FROM PUBLIC;
+GRANT SELECT ON marker_models TO aps_writer;
+CREATE CONSTRAINT TRIGGER marker_models_row AFTER INSERT ON asset_models
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'marker_models')
+    EXECUTE FUNCTION require_marker_models_row();
+CREATE CONSTRAINT TRIGGER marker_models_kept AFTER DELETE ON marker_models
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_marker_models_row();
 
 -- Catalog of commercial marker models.
 CREATE TABLE commercial_marker_models (
-	-- Stable commercial model identifier shared with parent model tables.
-	id UUID PRIMARY KEY,
-	-- Base marker model represented by this commercial model.
-	marker_model_id UUID NOT NULL REFERENCES marker_models(id) ON DELETE CASCADE,
-	-- Enforces inheritance from marker_models.
-	FOREIGN KEY (id) REFERENCES marker_models(id) ON DELETE CASCADE,
-	-- Enforces inheritance from commercial_products.
-	FOREIGN KEY (id) REFERENCES commercial_products(id) ON DELETE CASCADE,
-	-- Ensures parent linkage in asset_models matches the base marker model.
-	FOREIGN KEY (id, marker_model_id) REFERENCES asset_models(id, parent_model_id)
+    -- Stable commercial model identifier shared with parent model tables.
+    id UUID PRIMARY KEY REFERENCES marker_models (id) ON DELETE CASCADE,
+    -- Organization containing this resource.
+    organization_id UUID NOT NULL,
+    -- Base marker model represented by this commercial model.
+    marker_model_id UUID NOT NULL REFERENCES marker_models (id) ON DELETE RESTRICT,
+    FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
+    FOREIGN KEY (id, marker_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
--- Registers the commercial_marker_models table name for APS lookup.
-INSERT INTO table_names (id) VALUES ('commercial_marker_models') ON CONFLICT DO NOTHING;
+CREATE INDEX ON commercial_marker_models (marker_model_id);
+INSERT INTO table_names (id) VALUES ('commercial_marker_models');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'commercial_marker_models', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('marker_models', 'commercial_products')
+    UNION SELECT 'commercial_marker_models', 'commercial_marker_models';
+CREATE TRIGGER commercial_marker_models_path AFTER INSERT ON commercial_marker_models
+    FOR EACH ROW EXECUTE FUNCTION check_asset_model_subtype();
+
+CREATE FUNCTION require_commercial_marker_models_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.asset_models root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'commercial_marker_models'
+    ) AND NOT EXISTS (SELECT 1 FROM public.commercial_marker_models subtype WHERE subtype.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'commercial_marker_models'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_commercial_marker_models_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_commercial_marker_models_row() FROM PUBLIC;
+GRANT SELECT ON commercial_marker_models TO aps_writer;
+CREATE CONSTRAINT TRIGGER commercial_marker_models_row AFTER INSERT ON asset_models
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_marker_models')
+    EXECUTE FUNCTION require_commercial_marker_models_row();
+CREATE CONSTRAINT TRIGGER commercial_marker_models_kept AFTER DELETE ON commercial_marker_models
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_commercial_marker_models_row();
 
 -- Catalog of lot-specific commercial marker models.
 CREATE TABLE commercial_marker_lots (
-	-- Stable lot-model identifier shared with parent lot/model tables.
-	id UUID PRIMARY KEY,
-	-- Enforces inheritance from commercial_product_lots.
-	FOREIGN KEY (id) REFERENCES commercial_product_lots(id) ON DELETE CASCADE,
-	-- Enforces inheritance from marker_models.
-	FOREIGN KEY (id) REFERENCES marker_models(id) ON DELETE CASCADE,
-	-- Commercial marker model from which this lot derives.
-	commercial_marker_model_id UUID NOT NULL REFERENCES commercial_marker_models(id),
-	-- Ensures parent linkage in asset_models matches the commercial model.
-	FOREIGN KEY (id, commercial_marker_model_id) REFERENCES asset_models(id, parent_model_id)
+    -- Stable lot-model identifier shared with parent lot/model tables.
+    id UUID PRIMARY KEY REFERENCES commercial_product_lots (id) ON DELETE CASCADE,
+    -- Organization containing this resource.
+    organization_id UUID NOT NULL,
+    FOREIGN KEY (id) REFERENCES marker_models (id) ON DELETE CASCADE,
+    -- Commercial marker model from which this lot derives.
+    commercial_marker_model_id UUID NOT NULL REFERENCES commercial_marker_models (id),
+    FOREIGN KEY (id, commercial_marker_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
--- Registers the commercial_marker_lots table name for APS lookup.
-INSERT INTO table_names (id) VALUES ('commercial_marker_lots') ON CONFLICT DO NOTHING;
+CREATE INDEX ON commercial_marker_lots (commercial_marker_model_id);
+INSERT INTO table_names (id) VALUES ('commercial_marker_lots');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'commercial_marker_lots', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('commercial_product_lots', 'marker_models')
+    UNION SELECT 'commercial_marker_lots', 'commercial_marker_lots';
+INSERT INTO table_name_admitted_parents (table_name_id, parent_table_name_id)
+    VALUES ('commercial_marker_lots', 'commercial_marker_models');
+CREATE TRIGGER commercial_marker_lots_path AFTER INSERT ON commercial_marker_lots
+    FOR EACH ROW EXECUTE FUNCTION check_asset_model_subtype();
+
+CREATE FUNCTION require_commercial_marker_lots_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.asset_models root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'commercial_marker_lots'
+    ) AND NOT EXISTS (SELECT 1 FROM public.commercial_marker_lots subtype WHERE subtype.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'commercial_marker_lots'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_commercial_marker_lots_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_commercial_marker_lots_row() FROM PUBLIC;
+GRANT SELECT ON commercial_marker_lots TO aps_writer;
+CREATE CONSTRAINT TRIGGER commercial_marker_lots_row AFTER INSERT ON asset_models
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_marker_lots')
+    EXECUTE FUNCTION require_commercial_marker_lots_row();
+CREATE CONSTRAINT TRIGGER commercial_marker_lots_kept AFTER DELETE ON commercial_marker_lots
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_commercial_marker_lots_row();
 
 -- Physical markers tracked in APS inventory.
 CREATE TABLE markers (
-	-- Stable asset identifier inherited from physical_assets.
-	id UUID PRIMARY KEY REFERENCES physical_assets (id) ON DELETE CASCADE,
-	-- Marker model instantiated by this physical asset.
-	marker_model_id UUID NOT NULL REFERENCES marker_models (id),
-	-- Ensures assets.model_id matches the declared marker model.
-	FOREIGN KEY (id, marker_model_id) REFERENCES assets (id, model_id)
+    -- Stable asset identifier inherited from physical_assets.
+    id UUID PRIMARY KEY REFERENCES physical_assets (id) ON DELETE CASCADE,
+    -- Organization containing this resource.
+    organization_id UUID NOT NULL,
+    -- Marker model instantiated by this physical asset.
+    marker_model_id UUID NOT NULL REFERENCES marker_models (id),
+    FOREIGN KEY (id, marker_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
--- Registers the markers table name for APS type lookup.
-INSERT INTO table_names (id) VALUES ('markers') ON CONFLICT DO NOTHING;
+CREATE INDEX ON markers (marker_model_id);
+INSERT INTO table_names (id) VALUES ('markers');
+INSERT INTO table_name_instances (id, instance_table_name_id)
+    VALUES ('marker_models', 'markers');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'markers', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
+    UNION SELECT 'markers', 'markers';
+CREATE TRIGGER markers_path AFTER INSERT ON markers
+    FOR EACH ROW EXECUTE FUNCTION check_asset_subtype();
+
+CREATE FUNCTION require_markers_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.assets root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'markers'
+    ) AND NOT EXISTS (SELECT 1 FROM public.markers subtype WHERE subtype.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'markers'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_markers_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_markers_row() FROM PUBLIC;
+GRANT SELECT ON markers TO aps_writer;
+CREATE CONSTRAINT TRIGGER markers_row AFTER INSERT ON assets
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'markers')
+    EXECUTE FUNCTION require_markers_row();
+CREATE CONSTRAINT TRIGGER markers_kept AFTER DELETE ON markers
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_markers_row();
+
+GRANT SELECT, INSERT, DELETE ON marker_models TO app;
+ALTER TABLE marker_models ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marker_models FORCE ROW LEVEL SECURITY;
+CREATE POLICY marker_models_select ON marker_models FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY marker_models_insert ON marker_models FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+CREATE POLICY marker_models_delete ON marker_models FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY marker_models_archived_insert ON marker_models AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id));
+CREATE POLICY marker_models_archived_delete ON marker_models AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY marker_models_blocked ON marker_models AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+GRANT SELECT, INSERT, DELETE ON commercial_marker_models TO app;
+ALTER TABLE commercial_marker_models ENABLE ROW LEVEL SECURITY;
+ALTER TABLE commercial_marker_models FORCE ROW LEVEL SECURITY;
+CREATE POLICY commercial_marker_models_select ON commercial_marker_models FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY commercial_marker_models_insert ON commercial_marker_models FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND marker_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY commercial_marker_models_delete ON commercial_marker_models FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY commercial_marker_models_archived_insert ON commercial_marker_models AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(marker_model_id));
+CREATE POLICY commercial_marker_models_archived_delete ON commercial_marker_models AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY commercial_marker_models_blocked ON commercial_marker_models AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+GRANT SELECT, INSERT, DELETE ON commercial_marker_lots TO app;
+ALTER TABLE commercial_marker_lots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE commercial_marker_lots FORCE ROW LEVEL SECURITY;
+CREATE POLICY commercial_marker_lots_select ON commercial_marker_lots FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY commercial_marker_lots_insert ON commercial_marker_lots FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND commercial_marker_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY commercial_marker_lots_delete ON commercial_marker_lots FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY commercial_marker_lots_archived_insert ON commercial_marker_lots AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_marker_model_id));
+CREATE POLICY commercial_marker_lots_archived_delete ON commercial_marker_lots AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY commercial_marker_lots_blocked ON commercial_marker_lots AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+GRANT SELECT, INSERT, DELETE ON markers TO app;
+ALTER TABLE markers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE markers FORCE ROW LEVEL SECURITY;
+CREATE POLICY markers_select ON markers FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY markers_insert ON markers FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND marker_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY markers_delete ON markers FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY markers_archived_insert ON markers AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(marker_model_id));
+CREATE POLICY markers_archived_delete ON markers AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY markers_blocked ON markers AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER marker_models_audit AFTER INSERT OR DELETE ON marker_models
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER marker_models_update_audit AFTER UPDATE ON marker_models
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER commercial_marker_models_audit AFTER INSERT OR DELETE ON commercial_marker_models
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER commercial_marker_models_update_audit AFTER UPDATE ON commercial_marker_models
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER commercial_marker_lots_audit AFTER INSERT OR DELETE ON commercial_marker_lots
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER commercial_marker_lots_update_audit AFTER UPDATE ON commercial_marker_lots
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER markers_audit AFTER INSERT OR DELETE ON markers
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER markers_update_audit AFTER UPDATE ON markers
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();

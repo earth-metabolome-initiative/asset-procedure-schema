@@ -4,10 +4,9 @@ version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
-sql-traits = { git = "https://github.com/earth-metabolome-initiative/sql-traits", branch = "main" }
-sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", branch = "main" }
-sql_relations = { git = "https://github.com/earth-metabolome-initiative/synql", branch = "main" }
-sqlparser = { version = "0.61", git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
+sql-traits = { git = "https://github.com/connetto-rs/sql-traits", branch = "main" }
+sqlippy = { git = "https://github.com/connetto-rs/SQLippy", branch = "main" }
+sqlparser = { version = "0.64", git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
 
 [lints]
 workspace = true

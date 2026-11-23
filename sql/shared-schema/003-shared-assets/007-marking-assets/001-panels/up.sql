@@ -1,70 +1,142 @@
--- ============================================================================
 -- Migration: Shared Assets / Marking Assets / Panels
--- Purpose:
---   Adds panel model and asset specializations for durable signage and
---   identification artifacts used to communicate or anchor contextual metadata.
---
--- APS placement (inheritance and specialization):
---
---   entities
---     +-- ownables
---         +-- namespaced_ownables
---             +-- asset_models
---             |   +-- physical_asset_models
---             |   |   +-- panel_models
---             +-- assets
---                 +-- physical_assets
---                     +-- panels
---
--- Integrity bridge to core APS tables:
---   panels (id, panel_model_id)
---   references assets (id, model_id) to enforce model/asset consistency.
---
--- Metadata registration:
---   Every created table is registered in table_names.
---
--- Security context (local, inherited through ancestor PK extension):
---   No table-local RLS is defined in this migration. Access is inherited from
---   ancestor ownables through PK/FK identity chains.
---
---   PK-extension chains used for inherited access checks:
---   - panel_models:
---       id -> physical_asset_models.id -> asset_models.id
---          -> namespaced_ownables.id -> ownables.id
---   - panels:
---       id -> physical_assets.id -> assets.id
---          -> namespaced_ownables.id -> ownables.id
---
---   SQL/RLS semantics for these specific panel tables:
---   - SELECT: viewer-or-higher on ancestor owner (role >= 2).
---   - INSERT: editor-or-higher on ancestor owner (role >= 3).
---   - UPDATE: editor-or-higher on ancestor owner (role >= 3).
---   - DELETE: admin on ancestor owner (role >= 4).
---   - Roles are resolved with get_owner_role(...).
---
---   Zanzibar semantics for these specific panel tables:
---   - Equivalent checks can be modeled on ownable:{id} relations.
---   - Team membership and grants are graph traversal
---     (user -> team -> owner, plus explicit grants).
---   - Zanzibar syntax expresses relation intent; SQL/RLS enforces row access.
--- ============================================================================
+-- Purpose: Panels for project inventories.
+-- APS placement
+--   ownables
+--       +-- asset_models
+--           +-- physical_asset_models
+--               +-- panel_models
+--       +-- assets
+--           +-- physical_assets
+--               +-- panels
+-- Commercial tables decision: No vendor model or lot specialization is required.
 
 -- Catalog of panel model definitions.
 CREATE TABLE panel_models (
-	-- Stable model identifier inherited from physical_asset_models.
-	id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE
+    -- Stable model identifier inherited from physical_asset_models.
+    id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
+    -- Organization containing this resource.
+    organization_id UUID NOT NULL,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
--- Registers the panel_models table name for APS lookup.
-INSERT INTO table_names (id) VALUES ('panel_models') ON CONFLICT DO NOTHING;
+INSERT INTO table_names (id) VALUES ('panel_models');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'panel_models', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_asset_models')
+    UNION SELECT 'panel_models', 'panel_models';
+CREATE TRIGGER panel_models_path AFTER INSERT ON panel_models
+    FOR EACH ROW EXECUTE FUNCTION check_asset_model_subtype();
+
+CREATE FUNCTION require_panel_models_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.asset_models root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'panel_models'
+    ) AND NOT EXISTS (SELECT 1 FROM public.panel_models subtype WHERE subtype.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'panel_models'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_panel_models_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_panel_models_row() FROM PUBLIC;
+GRANT SELECT ON panel_models TO aps_writer;
+CREATE CONSTRAINT TRIGGER panel_models_row AFTER INSERT ON asset_models
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'panel_models')
+    EXECUTE FUNCTION require_panel_models_row();
+CREATE CONSTRAINT TRIGGER panel_models_kept AFTER DELETE ON panel_models
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_panel_models_row();
 
 -- Physical panels tracked in APS inventory.
 CREATE TABLE panels (
-	-- Stable asset identifier inherited from physical_assets.
-	id UUID PRIMARY KEY REFERENCES physical_assets (id) ON DELETE CASCADE,
-	-- Panel model instantiated by this physical asset.
-	panel_model_id UUID NOT NULL REFERENCES panel_models (id),
-	-- Ensures assets.model_id matches the declared panel model.
-	FOREIGN KEY (id, panel_model_id) REFERENCES assets (id, model_id)
+    -- Stable asset identifier inherited from physical_assets.
+    id UUID PRIMARY KEY REFERENCES physical_assets (id) ON DELETE CASCADE,
+    -- Organization containing this resource.
+    organization_id UUID NOT NULL,
+    -- Panel model instantiated by this physical asset.
+    panel_model_id UUID NOT NULL REFERENCES panel_models (id),
+    FOREIGN KEY (id, panel_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
--- Registers the panels table name for APS type lookup.
-INSERT INTO table_names (id) VALUES ('panels') ON CONFLICT DO NOTHING;
+CREATE INDEX ON panels (panel_model_id);
+INSERT INTO table_names (id) VALUES ('panels');
+INSERT INTO table_name_instances (id, instance_table_name_id)
+    VALUES ('panel_models', 'panels');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'panels', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
+    UNION SELECT 'panels', 'panels';
+CREATE TRIGGER panels_path AFTER INSERT ON panels
+    FOR EACH ROW EXECUTE FUNCTION check_asset_subtype();
+
+CREATE FUNCTION require_panels_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.assets root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'panels'
+    ) AND NOT EXISTS (SELECT 1 FROM public.panels subtype WHERE subtype.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'panels'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_panels_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_panels_row() FROM PUBLIC;
+GRANT SELECT ON panels TO aps_writer;
+CREATE CONSTRAINT TRIGGER panels_row AFTER INSERT ON assets
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'panels')
+    EXECUTE FUNCTION require_panels_row();
+CREATE CONSTRAINT TRIGGER panels_kept AFTER DELETE ON panels
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_panels_row();
+
+GRANT SELECT, INSERT, DELETE ON panel_models TO app;
+ALTER TABLE panel_models ENABLE ROW LEVEL SECURITY;
+ALTER TABLE panel_models FORCE ROW LEVEL SECURITY;
+CREATE POLICY panel_models_select ON panel_models FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY panel_models_insert ON panel_models FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+CREATE POLICY panel_models_delete ON panel_models FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY panel_models_archived_insert ON panel_models AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id));
+CREATE POLICY panel_models_archived_delete ON panel_models AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY panel_models_blocked ON panel_models AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+GRANT SELECT, INSERT, DELETE ON panels TO app;
+ALTER TABLE panels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE panels FORCE ROW LEVEL SECURITY;
+CREATE POLICY panels_select ON panels FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY panels_insert ON panels FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND panel_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY panels_delete ON panels FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY panels_archived_insert ON panels AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(panel_model_id));
+CREATE POLICY panels_archived_delete ON panels AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY panels_blocked ON panels AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER panel_models_audit AFTER INSERT OR DELETE ON panel_models
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER panel_models_update_audit AFTER UPDATE ON panel_models
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER panels_audit AFTER INSERT OR DELETE ON panels
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER panels_update_audit AFTER UPDATE ON panels
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();

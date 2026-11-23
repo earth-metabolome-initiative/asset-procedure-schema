@@ -1,173 +1,157 @@
-//! Submodule defining the `GuidedProcedurePseudocodeBuilder` structure and its
-//! associated methods.
+//! The Rust code a caller writes to record a run of a procedure template
+//! through a [`GuidedProcedure`](crate::GuidedProcedure).
 
-mod error;
-mod iterator;
-mod listener;
-use aps_entities::GetEntityTableNameId;
-use aps_namespaced_ownables::*;
-use listener::GPPListener;
-use quote::{format_ident, quote};
+use core::fmt::Write;
 
-use crate::{
-    guided_procedure_pseudocode::error::GuidedProcedurePseudocodeError,
-    procedure_template_graph::ProcedureTemplateGraph, ptg_visitor::PTGVisitor,
+use aps_procedure_templates::{
+    ProcedureTemplateSlot, procedure_template_slots, procedure_template_steps, procedure_templates,
 };
-#[derive(Debug, Clone)]
-/// Struct providing functionalities to help the user concretely build a
-/// procedure.
+use diesel_builders::GetColumnExt;
+
+use crate::{ProcedureTemplateGraph, StepNode, TemplateNode, Visitor, walk_template};
+
+/// Writes the chain of [`GuidedProcedure`](crate::GuidedProcedure) calls
+/// recording a run of a template graph: one `and_then` per procedure in the
+/// order the walk asks for them, each saying which slots its closure binds.
+#[derive(Debug, Clone, Copy)]
 pub struct GuidedProcedurePseudocode<'graph> {
-    visitor: PTGVisitor<'graph, ProcedureTemplateGraph, GPPListener>,
+    /// The graph the run follows.
+    graph: &'graph ProcedureTemplateGraph,
 }
 
 impl<'graph> GuidedProcedurePseudocode<'graph> {
-    /// Creates a new `GuidedProcedurePseudocodeBuilder` instance.
-    ///
-    /// # Arguments
-    ///
-    /// * `graph` - A reference to the `ProcedureTemplateGraph` representing the
-    ///   procedure template structure.
-    /// * `skip_base_procedures` - A boolean indicating whether to skip base
-    ///   procedures that do not require user guidance.
-    ///
-    /// # Returns
-    ///
-    /// A new instance of `GuidedProcedurePseudocode`.
-    ///
-    /// # Errors
-    ///
-    /// * `GuidedProcedurePseudocodeError::NotASimplePath` - If the provided
-    ///   graph is not a simple path.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use aps_test_utils::{aps_conn, pizza_procedure_template, user};
-    /// use procedure_template_visitor::{GuidedProcedurePseudocode, ProcedureTemplateGraph};
-    /// let mut conn = aps_conn();
-    /// let author = user(&mut conn);
-    /// let procedure_template = pizza_procedure_template(&author, &mut conn);
-    /// let graph = ProcedureTemplateGraph::new(&procedure_template, &mut conn)
-    ///     .expect("Failed to create ProcedureTemplateGraph");
-    /// let guided_pseudocode = GuidedProcedurePseudocode::new(&graph, false)
-    ///     .expect("Failed to create GuidedProcedurePseudocode");
-    /// ```
-    pub fn new(
-        graph: &'graph ProcedureTemplateGraph,
-        skip_base_procedures: bool,
-    ) -> Result<Self, GuidedProcedurePseudocodeError> {
-        if !graph.is_simple_path() {
-            return Err(GuidedProcedurePseudocodeError::NotASimplePath);
-        }
-        Ok(Self { visitor: PTGVisitor::new(graph, GPPListener::new(skip_base_procedures)) })
+    /// The pseudocode of a run of `graph`.
+    #[must_use]
+    pub const fn new(graph: &'graph ProcedureTemplateGraph) -> Self {
+        Self { graph }
     }
 
-    /// Writes out the guided procedure pseudocode.
+    /// The calls recording a run, with `E` as the error type of each closure.
     ///
     /// # Example
     ///
     /// ```rust
-    /// use std::convert::Infallible;
+    /// use core::convert::Infallible;
     ///
-    /// use aps_test_utils::{aps_conn, pizza_procedure_template, user};
+    /// use aps_test_utils::{Replica, Tenant};
     /// use procedure_template_visitor::{GuidedProcedurePseudocode, ProcedureTemplateGraph};
-    /// let mut conn = aps_conn();
-    /// let author = user(&mut conn);
-    /// let procedure_template = pizza_procedure_template(&author, &mut conn);
-    /// let graph = ProcedureTemplateGraph::new(&procedure_template, &mut conn)
-    ///     .expect("Failed to create ProcedureTemplateGraph");
-    /// let guided_pseudocode = GuidedProcedurePseudocode::new(&graph, false)
-    ///     .expect("Failed to create GuidedProcedurePseudocode");
-    /// let _pseudocode = guided_pseudocode.pseudocode::<Infallible>().unwrap();
+    ///
+    /// let mut replica = Replica::new();
+    /// let tenant = replica.deliver(|conn| Ok(Tenant::insert(conn))).unwrap();
+    /// replica.act_as(Some(tenant.user()));
+    /// let graph = replica
+    ///     .write(|conn| {
+    ///         let pizza = tenant.pizza(&["Add toppings"], conn);
+    ///         ProcedureTemplateGraph::new(pizza.template(), conn)
+    ///     })
+    ///     .unwrap();
+    /// let pseudocode = GuidedProcedurePseudocode::new(&graph).pseudocode::<Infallible>();
+    /// assert!(pseudocode.starts_with("let make_a_pizza = GuidedProcedure::new("));
     /// ```
-    pub fn pseudocode<E>(mut self) -> Result<String, GuidedProcedurePseudocodeError> {
-        let root_procedure_template = self.visitor.graph().root_procedure_template();
-        let variable_name_str = root_procedure_template.name().to_lowercase().replace(' ', "_");
-        let variable_name = format_ident!("{}", variable_name_str);
-
-        let error_type_str = std::any::type_name::<E>();
-        let error_type_str =
-            if error_type_str == "!" { "core::convert::Infallible" } else { error_type_str };
-        let error_type: syn::Type =
-            syn::parse_str(error_type_str).expect("Failed to parse error type");
-
-        let mut chain_calls = Vec::new();
-
-        for procedure in &mut self {
-            let procedure_name = procedure.name();
-            let msg = format!("Implement the logic for \"{procedure_name}\"");
-
-            let procedure_id_str = procedure.table_name_id();
-            let procedure_type: syn::Type = syn::parse_str(procedure_id_str)
-                .unwrap_or_else(|_| panic!("Failed to parse procedure type: {}", procedure_id_str));
-
-            chain_calls.push(quote! {
-                .and_then::<#procedure_type, #error_type>(|mut builder, conn| {
-                    todo!(#msg);
-                    Ok(builder)
-                })?
-            });
-        }
-
-        if chain_calls.is_empty() {
-            return Err(GuidedProcedurePseudocodeError::NoUnskippedProcedures);
-        }
-
-        let code = quote! {
-            fn dummy() -> anyhow::Result<()> {
-                let #variable_name = GuidedProcedure::new()
-                    .author(author)
-                    .graph(&procedure_graph)
-                    .connection(portal_conn)
-                    .try_into()?;
-
-                #variable_name
-                    #(#chain_calls)*
-                    .finish()?;
-                Ok(())
-            }
-        };
-
-        let syntax_tree = syn::parse2(code).expect("Failed to parse generated code");
-        let formatted = prettyplease::unparse(&syntax_tree);
-
-        // Strip the wrapper function
-        let lines: Vec<&str> = formatted.lines().collect();
-
-        let content = lines[1..lines.len() - 2].join("\n");
-        // Dedent
-        Ok(content
-            .lines()
-            .map(|l| l.strip_prefix("    ").unwrap_or(l))
-            .collect::<Vec<_>>()
-            .join("\n"))
+    #[must_use]
+    pub fn pseudocode<E>(&self) -> String {
+        let error_type = core::any::type_name::<E>();
+        let error_type = if error_type == "!" { "core::convert::Infallible" } else { error_type };
+        let root = self
+            .graph
+            .root()
+            .template()
+            .get_column_ref::<procedure_templates::name>()
+            .to_lowercase()
+            .replace(' ', "_");
+        let mut writer = Writer { error_type, code: String::new() };
+        writer.line(format_args!(
+            "let {root} = GuidedProcedure::new(&graph, organization, project, author, conn)"
+        ));
+        let Ok(()) = self.graph.accept(&mut writer);
+        writer.line(format_args!("    .finish()?;"));
+        writer.code
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use aps_procedure_templates::procedure_templates;
-    use diesel_builders::NestedModel;
+/// The visitor writing one `and_then` per procedure of the run.
+struct Writer<'error> {
+    /// Name of the error type of each closure.
+    error_type: &'error str,
+    /// The code written so far.
+    code: String,
+}
 
-    #[test]
-    /// Tests that an error is returned when trying to create a
-    /// `GuidedProcedurePseudocode` from a non-simple path
-    /// `ProcedureTemplateGraph`.
-    fn test_error_case_on_tree_procedure_template_graph() {
-        use aps_test_utils::{aps_conn, pizza_four_season_procedure_template, user};
-
-        use crate::{GuidedProcedurePseudocode, ProcedureTemplateGraph};
-
-        let mut conn = aps_conn();
-        let author = user(&mut conn);
-        let procedure_template: NestedModel<procedure_templates::table> =
-            pizza_four_season_procedure_template(&author, &mut conn);
-        let graph = ProcedureTemplateGraph::new(&procedure_template, &mut conn)
-            .expect("Failed to create ProcedureTemplateGraph");
-        let guided_pseudocode_result = GuidedProcedurePseudocode::new(&graph, false);
-        assert!(matches!(
-            guided_pseudocode_result,
-            Err(crate::guided_procedure_pseudocode::error::GuidedProcedurePseudocodeError::NotASimplePath)
-        ));
+impl Writer<'_> {
+    /// Appends `text` and a line break.
+    fn line(&mut self, text: core::fmt::Arguments<'_>) {
+        self.code.write_fmt(text).expect("writing to a string cannot fail");
+        self.code.push('\n');
     }
+}
+
+impl<'graph> Visitor<'graph> for Writer<'_> {
+    type Error = core::convert::Infallible;
+
+    fn visit_template(
+        &mut self,
+        graph: &'graph ProcedureTemplateGraph,
+        path: &[&'graph StepNode],
+        template: &'graph TemplateNode,
+    ) -> Result<(), Self::Error> {
+        let name = template.template().get_column_ref::<procedure_templates::name>();
+        let procedure_table = procedure_table(
+            template.template().get_column_ref::<procedure_templates::table_name_id>(),
+        );
+        let own_slots: Vec<&ProcedureTemplateSlot> = template
+            .slots()
+            .iter()
+            .filter(|slot| graph.slot_owner(path, slot).depth() == path.len())
+            .collect();
+        match path.last() {
+            None => self.line(format_args!("    // {name}")),
+            Some(step) => {
+                let step_name = step.step().get_column_ref::<procedure_template_steps::name>();
+                self.line(format_args!("    // {name}, step \"{step_name}\""));
+                if step.step().get_column::<procedure_template_steps::optional>() {
+                    self.line(format_args!("    // optional, `.skip(ended_at, note)` passes it"));
+                }
+                if let Some(repeat_slot) =
+                    step.step().get_column::<procedure_template_steps::repeat_slot_id>()
+                {
+                    let repeat_slot = graph
+                        .parent_of(step)
+                        .slot(repeat_slot)
+                        .expect("a step repeats over a slot of its parent template");
+                    self.line(format_args!(
+                        "    // once per asset bound to `{}`, one call each",
+                        repeat_slot.get_column_ref::<procedure_template_slots::name>()
+                    ));
+                }
+            }
+        }
+        let error_type = self.error_type;
+        self.line(format_args!(
+            "    .and_then::<{procedure_table}, {error_type}>(|builder, slots, conn| {{"
+        ));
+        self.line(format_args!(
+            "        // Set the times, the performer and the measurements on `builder`."
+        ));
+        if !own_slots.is_empty() {
+            let names: Vec<String> = own_slots
+                .iter()
+                .map(|slot| {
+                    format!("`{}`", slot.get_column_ref::<procedure_template_slots::name>())
+                })
+                .collect();
+            self.line(format_args!("        // Bind {} through `slots`.", names.join(", ")));
+        }
+        self.line(format_args!("        Ok(builder)"));
+        self.line(format_args!("    }})?"));
+        walk_template(self, graph, path, template)
+    }
+}
+
+/// The procedure table running a template of `template_table`, which the
+/// schema names by replacing the template suffix.
+fn procedure_table(template_table: &str) -> String {
+    let stem = template_table
+        .strip_suffix("_templates")
+        .expect("a procedure template table name ends in `_templates`");
+    format!("{stem}s")
 }

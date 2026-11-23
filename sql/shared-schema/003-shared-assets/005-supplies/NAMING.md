@@ -1,46 +1,10 @@
-# Supplies Migration Naming
+# Supplies Naming
 
-This document defines naming conventions for migrations under
-`sql/shared-schema/003-shared-assets/005-supplies`.
+Use contiguous `NNN-<plural-stem-slug>` directories, starting at `001`, with one family per migration. Derive the canonical singular stem from the family name.
 
-## Goals
+- Model tables use `<stem>_models` and asset tables use `<stem>s`.
+- Vendor models use `commercial_<stem>_models` and lot models use `commercial_<stem>_lots` when required.
+- Model references use `<stem>_model_id`, with `commercial_` and `_lot_id` where applicable.
+- Register every table in the same migration with `INSERT INTO table_names (id) VALUES ('<table_name>');`.
 
-- Keep migration folder names predictable.
-- Keep table names aligned with a single canonical stem per supply family.
-- Ensure every `CREATE TABLE` has a matching registration in `table_names`.
-
-## Conventions
-
-1. Migration folders
-- Format: `NNN-<plural-stem-slug>`
-- Numeric prefixes are incremental without gaps, starting at `001`.
-- `<plural-stem-slug>` is a plural entity stem in kebab-case.
-- Example: `personal_protective_equipment` -> `001-personal-protective-equipments`.
-
-2. Canonical stem
-- Stems are derived from migration folder names by singularizing the final
-  plural token.
-- Keep one supply family per migration folder.
-
-3. Allowed table families per stem
-- `<stem>_models`
-- `commercial_<stem>_models` (if commercialized)
-- `commercial_<stem>_lots` (if lot-tracked)
-- `<stem>s` (for physical supply assets)
-
-4. Foreign key column naming
-- `<stem>_model_id`
-- `commercial_<stem>_model_id`
-- `commercial_<stem>_lot_id`
-
-5. `table_names` registration
-- Every table created under supplies should have an in-place registration in
-  the same migration file:
-  `INSERT INTO table_names (id) VALUES ('<table_name>') ON CONFLICT DO NOTHING;`
-
-## Current Migrations
-
-- `001-personal-protective-equipments`
-- `002-packaging-models`
-- `003-beads`
-- `004-pipette-tips`
+Follow the [shared asset conventions](../README.md) for primary-key extensions, organization foreign keys, authorization and headers.

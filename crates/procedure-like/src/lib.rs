@@ -1,5 +1,7 @@
-//! Crate defining the `ProcedureLike` trait, which is implemented by items that
-//! behave like procedures.
+//! Crate defining the `ProcedureTableLike` trait, which is implemented by
+//! tables that behave like procedures, and the shapes of the typed APS tables.
+
+pub mod shape;
 
 use diesel_builders::{
     DescendantWithSelf, NestedTables, TableExt, TryGetDynamicColumn, TypedColumn,

@@ -1,0 +1,17 @@
+Parsed test spec with 3 sessions
+
+starting permutation: second_begin second_write first_begin first_write second_finish first_finish invariant
+step second_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step second_write: UPDATE procedure_templates SET state_id = 'published' WHERE id = 'c0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE;
+step first_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step first_write: INSERT INTO procedure_template_slots (id, organization_id, procedure_template_id, name, asset_model_id, role_id, minimum_count, maximum_count) VALUES ('d0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 'intermediate sample', 'a0000000-0000-7000-8000-000000000001', 'intermediate', 1, 1); SET CONSTRAINTS ALL IMMEDIATE; <waiting ...>
+step second_finish: COMMIT;
+step first_write: <... completed>
+ERROR:  procedure template c0000000-0000-7000-8000-000000000001 is not a draft, so its definition cannot change
+step first_finish: COMMIT;
+step invariant: SELECT template.state_id, count(slot.id) AS slots FROM procedure_templates template JOIN procedure_template_slots slot ON slot.procedure_template_id = template.id WHERE template.id = 'c0000000-0000-7000-8000-000000000001' GROUP BY template.state_id;
+state_id |slots
+---------+-----
+published|    1
+(1 row)
+

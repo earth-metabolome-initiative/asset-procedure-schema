@@ -1,0 +1,157 @@
+\set ON_ERROR_STOP 1
+SET search_path = public, test_tools;
+BEGIN;
+\ir ../fixture.sql
+SELECT plan(54);
+SELECT pg_temp.create_ownable('70000000-0000-7000-8000-000000000001');
+INSERT INTO brands (id, organization_id, project_id, table_name_id, name) VALUES ('70000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'brands', 'Smoke brand');
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000002', 'Smoke balance', NULL, 'weighing_device_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001');
+INSERT INTO weighing_device_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001');
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000003', 'Smoke commercial balance', '70000000-0000-7000-8000-000000000002', 'commercial_weighing_device_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001');
+INSERT INTO weighing_device_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001');
+INSERT INTO commercial_products (id, organization_id, brand_id) VALUES ('70000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000001');
+INSERT INTO commercial_weighing_device_models (id, organization_id, weighing_device_model_id) VALUES ('70000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000002');
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000004', 'Smoke balance lot', '70000000-0000-7000-8000-000000000003', 'commercial_weighing_device_lots');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001');
+INSERT INTO weighing_device_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001');
+INSERT INTO commercial_product_lots (id, organization_id, lot, product_model_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001', 'lot-1', '70000000-0000-7000-8000-000000000003');
+INSERT INTO commercial_weighing_device_lots (id, organization_id, commercial_weighing_device_model_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000003');
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000005', 'Smoke tube', NULL, 'weighed_volumetric_container_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001');
+INSERT INTO container_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001');
+SELECT throws_ok($statement$SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000028', 'Invalid container lot', '70000000-0000-7000-8000-000000000005', 'commercial_weighing_device_lots')$statement$, '23514', NULL, 'lot model refuses an unrelated container parent');
+INSERT INTO volumetric_container_models (id, organization_id, volume_l) VALUES ('70000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001', 0.002);
+INSERT INTO weighed_container_models (id, organization_id, mass_kg) VALUES ('70000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001', 0.001);
+SELECT pg_temp.new_asset('70000000-0000-7000-8000-000000000006', 'Smoke tube asset', '70000000-0000-7000-8000-000000000005', 'volumetric_containers');
+INSERT INTO physical_assets (id, organization_id, physical_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000006', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000005');
+INSERT INTO containers (id, organization_id, container_model_id) VALUES ('70000000-0000-7000-8000-000000000006', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000005');
+INSERT INTO volumetric_containers (id, organization_id, volumetric_container_model_id) VALUES ('70000000-0000-7000-8000-000000000006', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000005');
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000007', 'Smoke source model', NULL, 'sample_source_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000007', '20000000-0000-7000-8000-000000000001');
+INSERT INTO sample_source_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000007', '20000000-0000-7000-8000-000000000001');
+SELECT pg_temp.new_asset('70000000-0000-7000-8000-000000000008', 'Smoke source', '70000000-0000-7000-8000-000000000007', 'sample_sources');
+INSERT INTO physical_assets (id, organization_id, physical_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000008', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000007');
+INSERT INTO sample_sources (id, organization_id, sample_source_model_id) VALUES ('70000000-0000-7000-8000-000000000008', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000007');
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000009', 'Smoke sample model', NULL, 'sample_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000009', '20000000-0000-7000-8000-000000000001');
+INSERT INTO sample_models (id, organization_id, sample_source_model_id) VALUES ('70000000-0000-7000-8000-000000000009', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000007');
+SELECT pg_temp.new_asset('70000000-0000-7000-8000-000000000010', 'Smoke sample', '70000000-0000-7000-8000-000000000009', 'samples');
+INSERT INTO physical_assets (id, organization_id, physical_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000010', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000009');
+INSERT INTO samples (id, organization_id, sample_model_id, sample_source_model_id) VALUES ('70000000-0000-7000-8000-000000000010', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000009', '70000000-0000-7000-8000-000000000007');
+SELECT pg_temp.create_ownable('70000000-0000-7000-8000-000000000011');
+INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id, quantity) VALUES ('70000000-0000-7000-8000-000000000011', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_compatibility_rules', '70000000-0000-7000-8000-000000000005', '70000000-0000-7000-8000-000000000009', 4);
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000012', 'Smoke bead', NULL, 'bead_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000012', '20000000-0000-7000-8000-000000000001');
+INSERT INTO bead_models (id, organization_id, diameter_m) VALUES ('70000000-0000-7000-8000-000000000012', '20000000-0000-7000-8000-000000000001', 0.001);
+SELECT lives_ok($statement$INSERT INTO weighed_volumetric_container_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001')$statement$, 'container model combines mass and volume');
+SELECT throws_ok($statement$INSERT INTO container_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001')$statement$, '23514', NULL, 'model refuses cross-family subtype');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT is((SELECT count(*) FROM brands WHERE id IN ('70000000-0000-7000-8000-000000000001')), 1::bigint, 'brands visible to creator');
+SELECT is((SELECT count(*) FROM physical_asset_models WHERE id IN ('70000000-0000-7000-8000-000000000002', '70000000-0000-7000-8000-000000000003', '70000000-0000-7000-8000-000000000004', '70000000-0000-7000-8000-000000000005', '70000000-0000-7000-8000-000000000007', '70000000-0000-7000-8000-000000000009', '70000000-0000-7000-8000-000000000012')), 7::bigint, 'physical_asset_models visible to creator');
+SELECT is((SELECT count(*) FROM weighing_device_models WHERE id IN ('70000000-0000-7000-8000-000000000002', '70000000-0000-7000-8000-000000000003', '70000000-0000-7000-8000-000000000004')), 3::bigint, 'weighing_device_models visible to creator');
+SELECT is((SELECT count(*) FROM commercial_products WHERE id IN ('70000000-0000-7000-8000-000000000003')), 1::bigint, 'commercial_products visible to creator');
+SELECT is((SELECT count(*) FROM commercial_weighing_device_models WHERE id IN ('70000000-0000-7000-8000-000000000003')), 1::bigint, 'commercial_weighing_device_models visible to creator');
+SELECT is((SELECT count(*) FROM commercial_product_lots WHERE id IN ('70000000-0000-7000-8000-000000000004')), 1::bigint, 'commercial_product_lots visible to creator');
+SELECT is((SELECT count(*) FROM commercial_weighing_device_lots WHERE id IN ('70000000-0000-7000-8000-000000000004')), 1::bigint, 'commercial_weighing_device_lots visible to creator');
+SELECT is((SELECT count(*) FROM container_models WHERE id IN ('70000000-0000-7000-8000-000000000005')), 1::bigint, 'container_models visible to creator');
+SELECT is((SELECT count(*) FROM volumetric_container_models WHERE id IN ('70000000-0000-7000-8000-000000000005')), 1::bigint, 'volumetric_container_models visible to creator');
+SELECT is((SELECT count(*) FROM weighed_container_models WHERE id IN ('70000000-0000-7000-8000-000000000005')), 1::bigint, 'weighed_container_models visible to creator');
+SELECT is((SELECT count(*) FROM physical_assets WHERE id IN ('70000000-0000-7000-8000-000000000006', '70000000-0000-7000-8000-000000000008', '70000000-0000-7000-8000-000000000010')), 3::bigint, 'physical_assets visible to creator');
+SELECT is((SELECT count(*) FROM containers WHERE id IN ('70000000-0000-7000-8000-000000000006')), 1::bigint, 'containers visible to creator');
+SELECT is((SELECT count(*) FROM volumetric_containers WHERE id IN ('70000000-0000-7000-8000-000000000006')), 1::bigint, 'volumetric_containers visible to creator');
+SELECT is((SELECT count(*) FROM sample_source_models WHERE id IN ('70000000-0000-7000-8000-000000000007')), 1::bigint, 'sample_source_models visible to creator');
+SELECT is((SELECT count(*) FROM sample_sources WHERE id IN ('70000000-0000-7000-8000-000000000008')), 1::bigint, 'sample_sources visible to creator');
+SELECT is((SELECT count(*) FROM sample_models WHERE id IN ('70000000-0000-7000-8000-000000000009')), 1::bigint, 'sample_models visible to creator');
+SELECT is((SELECT count(*) FROM samples WHERE id IN ('70000000-0000-7000-8000-000000000010')), 1::bigint, 'samples visible to creator');
+SELECT is((SELECT count(*) FROM container_compatibility_rules WHERE id IN ('70000000-0000-7000-8000-000000000011')), 1::bigint, 'container_compatibility_rules visible to creator');
+SELECT is((SELECT count(*) FROM bead_models WHERE id IN ('70000000-0000-7000-8000-000000000012')), 1::bigint, 'bead_models visible to creator');
+SET app.user_id = '10000000-0000-7000-8000-000000000002';
+SELECT is_empty($query$SELECT * FROM brands$query$, 'brands hidden without grant');
+SELECT is_empty($query$SELECT * FROM physical_asset_models$query$, 'physical_asset_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM weighing_device_models$query$, 'weighing_device_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM commercial_products$query$, 'commercial_products hidden without grant');
+SELECT is_empty($query$SELECT * FROM commercial_weighing_device_models$query$, 'commercial_weighing_device_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM commercial_product_lots$query$, 'commercial_product_lots hidden without grant');
+SELECT is_empty($query$SELECT * FROM commercial_weighing_device_lots$query$, 'commercial_weighing_device_lots hidden without grant');
+SELECT is_empty($query$SELECT * FROM container_models$query$, 'container_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM volumetric_container_models$query$, 'volumetric_container_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM weighed_container_models$query$, 'weighed_container_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM physical_assets$query$, 'physical_assets hidden without grant');
+SELECT is_empty($query$SELECT * FROM containers$query$, 'containers hidden without grant');
+SELECT is_empty($query$SELECT * FROM volumetric_containers$query$, 'volumetric_containers hidden without grant');
+SELECT is_empty($query$SELECT * FROM sample_source_models$query$, 'sample_source_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM sample_sources$query$, 'sample_sources hidden without grant');
+SELECT is_empty($query$SELECT * FROM sample_models$query$, 'sample_models hidden without grant');
+SELECT is_empty($query$SELECT * FROM samples$query$, 'samples hidden without grant');
+SELECT is_empty($query$SELECT * FROM container_compatibility_rules$query$, 'container_compatibility_rules hidden without grant');
+SELECT is_empty($query$SELECT * FROM bead_models$query$, 'bead_models hidden without grant');
+SET app.user_id = '10000000-0000-7000-8000-000000000001';
+
+
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000022', 'Image model', NULL, 'photograph_models');
+INSERT INTO digital_asset_models (id, organization_id, mime_type) VALUES ('70000000-0000-7000-8000-000000000022', '20000000-0000-7000-8000-000000000001', 'image/png');
+SELECT lives_ok($statement$INSERT INTO photograph_models (id, organization_id, mime_type) VALUES ('70000000-0000-7000-8000-000000000022', '20000000-0000-7000-8000-000000000001', 'image/png')$statement$, 'image model admits photographs');
+SELECT pg_temp.new_asset('70000000-0000-7000-8000-000000000023', 'Photograph', '70000000-0000-7000-8000-000000000022', 'photographs');
+INSERT INTO digital_assets (id, organization_id, digital_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000022');
+SELECT lives_ok($statement$INSERT INTO photographs (id, organization_id, photograph_model_id) VALUES ('70000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000022')$statement$, 'photograph instantiates its image model');
+SELECT throws_ok($statement$UPDATE digital_asset_models SET mime_type = 'application/pdf' WHERE id = '70000000-0000-7000-8000-000000000022'$statement$, '23514', NULL, 'photograph model cannot become a PDF');
+SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000024', 'PDF model', NULL, 'photograph_models');
+INSERT INTO digital_asset_models (id, organization_id, mime_type) VALUES ('70000000-0000-7000-8000-000000000024', '20000000-0000-7000-8000-000000000001', 'application/pdf');
+SELECT throws_ok($statement$INSERT INTO photograph_models (id, organization_id, mime_type) VALUES ('70000000-0000-7000-8000-000000000024', '20000000-0000-7000-8000-000000000001', 'application/pdf')$statement$, '23514', NULL, 'PDF model cannot be a photograph model');
+SELECT throws_ok($statement$INSERT INTO photograph_models (id, organization_id, mime_type) VALUES ('70000000-0000-7000-8000-000000000024', '20000000-0000-7000-8000-000000000001', 'image/png')$statement$, '23503', NULL, 'image MIME cannot disguise a PDF parent');
+UPDATE digital_asset_models SET mime_type = 'image/png' WHERE id = '70000000-0000-7000-8000-000000000024';
+INSERT INTO photograph_models (id, organization_id, mime_type) VALUES ('70000000-0000-7000-8000-000000000024', '20000000-0000-7000-8000-000000000001', 'image/png');
+SELECT isnt_empty($query$SELECT 1 FROM audit_events WHERE table_name = 'brands' AND operation = 'INSERT' AND new_row ->> 'id' = '70000000-0000-7000-8000-000000000001'$query$, 'brand insertion is audited');
+UPDATE weighed_container_models SET mass_kg = 0.003 WHERE id = '70000000-0000-7000-8000-000000000005';
+SELECT isnt_empty($query$SELECT 1 FROM audit_events WHERE table_name = 'weighed_container_models' AND operation = 'UPDATE' AND new_row ->> 'id' = '70000000-0000-7000-8000-000000000005'$query$, 'shared subtype update is audited');
+SELECT pg_temp.create_ownable('70000000-0000-7000-8000-000000000025');
+SELECT throws_ok($statement$UPDATE resources SET archived_at = now() WHERE id = '70000000-0000-7000-8000-000000000012'; INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000025', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_compatibility_rules', '70000000-0000-7000-8000-000000000005', '70000000-0000-7000-8000-000000000012')$statement$, '42501', NULL, 'compatibility rule refuses an archived model');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT lives_ok($statement$UPDATE digital_asset_models SET mime_type = 'image/jpeg' WHERE id = '70000000-0000-7000-8000-000000000022'$statement$, 'image MIME changes preserve photograph models');
+SELECT is((SELECT mime_type FROM photograph_models WHERE id = '70000000-0000-7000-8000-000000000022'), 'image/jpeg', 'photograph MIME follows its parent');
+UPDATE weighed_container_models SET mass_kg = mass_kg WHERE id = '70000000-0000-7000-8000-000000000005';
+SELECT is((SELECT count(*) FROM audit_events WHERE table_name = 'weighed_container_models' AND operation = 'UPDATE' AND new_row ->> 'id' = '70000000-0000-7000-8000-000000000005'), 1::bigint, 'unchanged subtype update emits no audit event');
+DELETE FROM photographs WHERE id = '70000000-0000-7000-8000-000000000023';
+SELECT isnt_empty($query$SELECT 1 FROM audit_events WHERE table_name = 'photographs' AND operation = 'DELETE' AND old_row ->> 'id' = '70000000-0000-7000-8000-000000000023'$query$, 'shared subtype deletion is audited');
+INSERT INTO photographs (id, organization_id, photograph_model_id) VALUES ('70000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000022');
+
+RESET ROLE;
+SELECT pg_temp.act('10000000-0000-7000-8000-000000000002');
+SET ROLE app;
+INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-000000000002', authz.caller_id());
+INSERT INTO resources (id, kind, organization_id)
+  VALUES ('20000000-0000-7000-8000-000000000002', 'organization', '20000000-0000-7000-8000-000000000002');
+INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000002', authz.caller_id(), 'active');
+INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
+  VALUES ('20000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000002', authz.caller_id(), 'user', 'admin');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+INSERT INTO resources (id, kind, organization_id)
+  VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002');
+INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+  VALUES ('20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'project',
+    '20000000-0000-7000-8000-000000000002', 'organization');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+INSERT INTO ownables (id, organization_id, project_id, created_by_id)
+VALUES ('70000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id());
+INSERT INTO resources (id, kind, organization_id) VALUES ('70000000-0000-7000-8000-000000000090', 'ownable', '20000000-0000-7000-8000-000000000002');
+INSERT INTO asset_models (id, organization_id, project_id, table_name_id, name)
+VALUES ('70000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'physical_asset_models', 'Foreign physical model');
+INSERT INTO asset_model_ancestors (descendant_model_id, ancestor_model_id, organization_id)
+VALUES ('70000000-0000-7000-8000-000000000090', '70000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+RESET ROLE;
+SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
+SET ROLE app;
+SELECT throws_ok($statement$INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000025', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_compatibility_rules', '70000000-0000-7000-8000-000000000005', '70000000-0000-7000-8000-000000000090')$statement$, '42501', NULL, 'compatibility rule refuses another organization model');
+
+RESET ROLE;
+SELECT * FROM finish();
+ROLLBACK;

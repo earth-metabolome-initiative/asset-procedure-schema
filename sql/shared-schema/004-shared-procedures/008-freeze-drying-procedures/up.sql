@@ -1,145 +1,190 @@
-CREATE TABLE freeze_drying_procedure_templates (
-	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	-- The storage temperature in Kelvin.
-	kelvin REAL NOT NULL DEFAULT 203.15 CHECK (kelvin > 0.0),
-	-- Tolerance percentage for the storage temperature.
-	kelvin_tolerance_percentage REAL NOT NULL DEFAULT 5.0 CHECK (
-		kelvin_tolerance_percentage > 0.0
-		AND kelvin_tolerance_percentage <= 100.0
-	),
-	-- We use a default of 4 Pa for the pressure in the freeze-drying chamber.
-	pascal REAL NOT NULL DEFAULT 4.0 CHECK (
-		pascal >= 0.0
-		AND pascal <= 500.0
-	),
-	-- Duration in seconds. We use a default of 3 days (259200 seconds) for the freeze-drying procedure.
-	duration REAL NOT NULL DEFAULT 259200.0 CHECK (
-		duration >= 7200.0
-		AND duration <= 604800.0
-	),
-	-- The device used for the freeze drying procedure.
-	freeze_dried_with_model_id UUID NOT NULL REFERENCES freeze_dryer_models(id),
-	procedure_template_freeze_dried_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	-- The container that is being freeze_dried.
-	freeze_dried_container_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	procedure_template_freeze_dried_container_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- We check that the `freeze_dried_with_model` is indeed a container that is compatible with the procedure_id template.
-	FOREIGN KEY (
-		procedure_template_freeze_dried_with_model_id,
-		freeze_dried_with_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	-- We check that the `freeze_dried_container_model` is indeed a container that is compatible with the procedure_id template.
-	FOREIGN KEY (
-		procedure_template_freeze_dried_container_model_id,
-		freeze_dried_container_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	-- We check that the `freeze_dried_container_model` is indeed a freeze drier that can hold the `freeze_dried_with_model`.
-	FOREIGN KEY (
-		freeze_dried_with_model_id,
-		freeze_dried_container_model_id
-	) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_freeze_dried_with_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_freeze_dried_container_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_freeze_dried_with_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_freeze_dried_with_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_freeze_dried_container_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_freeze_dried_container_model_id
-	)
-);
-CREATE OR REPLACE FUNCTION freeze_drying_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_freeze_dried_with_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_freeze_dried_container_model_id) ON CONFLICT DO NOTHING;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Migration: 008-freeze-drying-procedures
+-- Purpose: Typed freeze drying slots and execution records.
+-- APS placement
+-- ownables
+-- +-- procedure_templates -- freeze_drying_procedure_templates
+-- +-- procedures -- freeze_drying_procedures
+-- Slot | Role | Meaning
+-- `freeze_dried_with` | `instrument` | The dryer performs lyophilization.
+-- `freeze_dried_container` | `input` | The container remains after drying.
 
-CREATE TRIGGER freeze_drying_procedure_templates_rptam_insert_trigger
-AFTER INSERT ON freeze_drying_procedure_templates
-FOR EACH ROW EXECUTE FUNCTION freeze_drying_procedure_templates_rptam_insert_fn();
-INSERT INTO table_names (id) VALUES ('freeze_drying_procedure_templates') ON CONFLICT DO NOTHING;
-CREATE TABLE freeze_drying_procedures (
-	-- Identifier of the freeze drying id, which is also a foreign key to the general procedure.
-	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
-	-- The template of this procedure_id should be a freeze drying procedure_id template.
-	freeze_drying_procedure_template_id UUID NOT NULL REFERENCES freeze_drying_procedure_templates(id),
-	-- The container that is being freeze dried, which must be a volumetric container.
-	freeze_dried_container_id UUID NOT NULL REFERENCES volumetric_containers(id),
-	-- The container model that is being freeze dried, which must be a volumetric container model.
-	freeze_dried_container_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	-- The procedure_id template asset model associated to the `freeze_dried_container`.
-	procedure_template_freeze_dried_container_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `freeze_dried_container`.
-	procedure_freeze_dried_container_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The freeze drier used for the freeze drying procedure. This field is optional, as the freeze drier might not necessarily be tracked.
-	freeze_dried_with_id UUID REFERENCES freeze_dryers(id),
-	-- The model of the freeze drier used, which must be a freeze drier model.
-	freeze_dried_with_model_id UUID NOT NULL REFERENCES freeze_dryer_models(id),
-	-- The procedure_id template asset model associated to the `freeze_dried_with`.
-	procedure_template_freeze_dried_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `freeze_dried_with`.
-	procedure_freeze_dried_with_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- We enforce that the current `freeze_drying_procedures` has indeed the same `freeze_drying_procedures_template`.
-	FOREIGN KEY (id, freeze_drying_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
-	-- We enforce that the `freeze_dried_with` is indeed a weighing device of the correct model.
-	FOREIGN KEY (freeze_dried_with_id, freeze_dried_with_model_id) REFERENCES assets(id, model_id),
-	-- We enforce that the `procedure_template_freeze_dried_with_model` is the same as the one in the procedure_id template.
-	FOREIGN KEY (
-		freeze_drying_procedure_template_id,
-		procedure_template_freeze_dried_with_model_id
-	) REFERENCES freeze_drying_procedure_templates(
-		id,
-		procedure_template_freeze_dried_with_model_id
-	),
-	-- We enforce that the `procedure_template_freeze_dried_container_model` is the same as the one in the procedure_id template.
-	FOREIGN KEY (
-		freeze_drying_procedure_template_id,
-		procedure_template_freeze_dried_container_model_id
-	) REFERENCES freeze_drying_procedure_templates(
-		id,
-		procedure_template_freeze_dried_container_model_id
-	),
-	-- We enforce that the `procedure_freeze_dried_container` is associated with `procedure_template_freeze_dried_container_model`.
-	FOREIGN KEY (
-		procedure_freeze_dried_container_id,
-		procedure_template_freeze_dried_container_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We enforce that the `procedure_freeze_dried_with` is associated with `procedure_template_freeze_dried_with_model`.
-	FOREIGN KEY (
-		procedure_freeze_dried_with_id,
-		procedure_template_freeze_dried_with_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- The compatibility rules between the freeze drier and the container being freeze dried must be respected.
-	FOREIGN KEY (
-		freeze_dried_with_model_id,
-		freeze_dried_container_model_id
-	) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
-	-- We enforce that the `procedure_freeze_dried_container` is associated with the `freeze_dried_container_model`.
-	FOREIGN KEY (
-		procedure_freeze_dried_container_id,
-		freeze_dried_container_model_id
-	) REFERENCES procedure_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		freeze_dried_container_id,
-		freeze_dried_container_model_id
-	) REFERENCES assets(id, model_id),
-	-- We enforce that the `procedure_freeze_dried_with` is associated with the `freeze_dried_with_model`.
-	FOREIGN KEY (
-		procedure_freeze_dried_with_id,
-		freeze_dried_with_model_id
-	) REFERENCES procedure_asset_models(id, asset_model_id)
+-- Typed slots and parameters for freeze drying.
+CREATE TABLE freeze_drying_procedure_templates (
+    -- Identity shared with the parent template.
+    id UUID PRIMARY KEY REFERENCES procedure_templates (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Slot declaring the `freeze_dried_with` assets.
+    freeze_dried_with_slot_id UUID NOT NULL,
+    -- Admissible model for the `freeze_dried_with` slot.
+    freeze_dried_with_model_id UUID NOT NULL REFERENCES freeze_dryer_models (id),
+    -- Required role of the `freeze_dried_with` slot.
+    freeze_dried_with_slot_role_id TEXT GENERATED ALWAYS AS ('instrument') STORED NOT NULL,
+    -- Slot declaring the `freeze_dried_container` assets.
+    freeze_dried_container_slot_id UUID NOT NULL,
+    -- Admissible model for the `freeze_dried_container` slot.
+    freeze_dried_container_model_id UUID NOT NULL REFERENCES volumetric_container_models (id),
+    -- Required role of the `freeze_dried_container` slot.
+    freeze_dried_container_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    -- Target temperature in kelvin.
+    temperature_k DOUBLE PRECISION NOT NULL DEFAULT 203.15 CHECK (temperature_k > 0.0 AND temperature_k < 'Infinity'::double precision),
+    -- Allowed temperature deviation as a percentage of the target.
+    temperature_tolerance_percentage DOUBLE PRECISION NOT NULL DEFAULT 5.0 CHECK ( temperature_tolerance_percentage > 0.0 AND temperature_tolerance_percentage <= 100.0 ),
+    -- Target pressure in pascals.
+    pressure_pa DOUBLE PRECISION NOT NULL DEFAULT 4.0 CHECK ( pressure_pa >= 0.0 AND pressure_pa <= 500.0 ),
+    -- Allowed pressure deviation as a percentage of the target.
+    pressure_pa_tolerance_percentage DOUBLE PRECISION NOT NULL DEFAULT 5.0 CHECK (pressure_pa_tolerance_percentage > 0.0 AND pressure_pa_tolerance_percentage <= 100.0),
+    -- Treatment duration in seconds.
+    duration_s DOUBLE PRECISION NOT NULL DEFAULT 259200.0 CHECK ( duration_s >= 7200.0 AND duration_s <= 604800.0 ),
+    -- Allowed duration deviation as a percentage of the target.
+    duration_tolerance_percentage DOUBLE PRECISION NOT NULL DEFAULT 5.0 CHECK (duration_tolerance_percentage > 0.0 AND duration_tolerance_percentage <= 100.0),
+    FOREIGN KEY (freeze_dried_with_slot_id, id, freeze_dried_with_model_id, freeze_dried_with_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (freeze_dried_container_slot_id, id, freeze_dried_container_model_id, freeze_dried_container_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
-INSERT INTO table_names (id) VALUES ('freeze_drying_procedures') ON CONFLICT DO NOTHING;
+CREATE INDEX ON freeze_drying_procedure_templates (freeze_dried_container_model_id);
+CREATE INDEX ON freeze_drying_procedure_templates (freeze_dried_with_model_id);
+INSERT INTO table_names (id) VALUES ('freeze_drying_procedure_templates');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'freeze_drying_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
+    UNION SELECT 'freeze_drying_procedure_templates', 'freeze_drying_procedure_templates';
+CREATE TRIGGER freeze_drying_procedure_templates_guard AFTER INSERT OR UPDATE ON freeze_drying_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER freeze_drying_procedure_templates_delete_guard BEFORE DELETE ON freeze_drying_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+
+CREATE FUNCTION require_freeze_drying_procedure_templates_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedure_templates root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'freeze_drying_procedure_templates'
+    ) AND NOT EXISTS (SELECT 1 FROM public.freeze_drying_procedure_templates row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'freeze_drying_procedure_templates'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_freeze_drying_procedure_templates_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_freeze_drying_procedure_templates_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER freeze_drying_procedure_templates_row AFTER INSERT ON procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'freeze_drying_procedure_templates')
+    EXECUTE FUNCTION require_freeze_drying_procedure_templates_row();
+CREATE CONSTRAINT TRIGGER freeze_drying_procedure_templates_kept AFTER DELETE ON freeze_drying_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_freeze_drying_procedure_templates_row();
+
+GRANT SELECT, INSERT, UPDATE (temperature_k, temperature_tolerance_percentage, pressure_pa, pressure_pa_tolerance_percentage, duration_s, duration_tolerance_percentage), DELETE ON freeze_drying_procedure_templates TO app;
+ALTER TABLE freeze_drying_procedure_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE freeze_drying_procedure_templates FORCE ROW LEVEL SECURITY;
+CREATE POLICY freeze_drying_procedure_templates_select ON freeze_drying_procedure_templates FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY freeze_drying_procedure_templates_insert ON freeze_drying_procedure_templates FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND freeze_dried_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND freeze_dried_container_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY freeze_drying_procedure_templates_update ON freeze_drying_procedure_templates FOR UPDATE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+CREATE POLICY freeze_drying_procedure_templates_delete ON freeze_drying_procedure_templates FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY freeze_drying_procedure_templates_archived_insert ON freeze_drying_procedure_templates AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(freeze_dried_with_model_id) AND NOT authz.is_archived(freeze_dried_container_model_id));
+CREATE POLICY freeze_drying_procedure_templates_archived_update ON freeze_drying_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
+    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+CREATE POLICY freeze_drying_procedure_templates_archived_delete ON freeze_drying_procedure_templates AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY freeze_drying_procedure_templates_blocked ON freeze_drying_procedure_templates AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Recorded execution of a freeze drying template.
+CREATE TABLE freeze_drying_procedures (
+    -- Identity shared with the parent procedure.
+    id UUID PRIMARY KEY REFERENCES procedures (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Typed template executed by this procedure.
+    freeze_drying_procedure_template_id UUID NOT NULL REFERENCES freeze_drying_procedure_templates (id),
+    -- Execution status copied from the parent procedure.
+    status_id TEXT NOT NULL,
+    -- Measured temperature k.
+    temperature_k DOUBLE PRECISION CHECK (temperature_k > 0.0 AND temperature_k < 'Infinity'::double precision),
+    CHECK (status_id <> 'completed' OR temperature_k IS NOT NULL),
+    -- Measured pressure pa.
+    pressure_pa DOUBLE PRECISION CHECK (pressure_pa >= 0.0 AND pressure_pa < 'Infinity'::double precision),
+    CHECK (status_id <> 'completed' OR pressure_pa IS NOT NULL),
+    FOREIGN KEY (id, freeze_drying_procedure_template_id, status_id, organization_id)
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+);
+CREATE INDEX ON freeze_drying_procedures (freeze_drying_procedure_template_id);
+INSERT INTO table_names (id) VALUES ('freeze_drying_procedures');
+INSERT INTO table_name_instances (id, instance_table_name_id)
+    VALUES ('freeze_drying_procedure_templates', 'freeze_drying_procedures');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'freeze_drying_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
+    UNION SELECT 'freeze_drying_procedures', 'freeze_drying_procedures';
+CREATE TRIGGER freeze_drying_procedures_guard AFTER INSERT OR UPDATE ON freeze_drying_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER freeze_drying_procedures_delete_guard BEFORE DELETE ON freeze_drying_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+CREATE FUNCTION require_freeze_drying_procedures_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedures root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'freeze_drying_procedures'
+    ) AND NOT EXISTS (SELECT 1 FROM public.freeze_drying_procedures row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'freeze_drying_procedures'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_freeze_drying_procedures_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_freeze_drying_procedures_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER freeze_drying_procedures_row AFTER INSERT ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'freeze_drying_procedures')
+    EXECUTE FUNCTION require_freeze_drying_procedures_row();
+CREATE CONSTRAINT TRIGGER freeze_drying_procedures_kept AFTER DELETE ON freeze_drying_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_freeze_drying_procedures_row();
+
+GRANT SELECT, INSERT, UPDATE (temperature_k, pressure_pa), DELETE ON freeze_drying_procedures TO app;
+ALTER TABLE freeze_drying_procedures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE freeze_drying_procedures FORCE ROW LEVEL SECURITY;
+CREATE POLICY freeze_drying_procedures_select ON freeze_drying_procedures FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY freeze_drying_procedures_insert ON freeze_drying_procedures FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND freeze_drying_procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY freeze_drying_procedures_delete ON freeze_drying_procedures FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY freeze_drying_procedures_archived_insert ON freeze_drying_procedures AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(freeze_drying_procedure_template_id));
+CREATE POLICY freeze_drying_procedures_archived_delete ON freeze_drying_procedures AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY freeze_drying_procedures_blocked ON freeze_drying_procedures AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER freeze_drying_procedure_templates_audit AFTER INSERT OR DELETE ON freeze_drying_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER freeze_drying_procedure_templates_update_audit AFTER UPDATE ON freeze_drying_procedure_templates
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER freeze_drying_procedures_audit AFTER INSERT OR DELETE ON freeze_drying_procedures
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER freeze_drying_procedures_update_audit AFTER UPDATE ON freeze_drying_procedures
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE POLICY freeze_drying_procedures_update ON freeze_drying_procedures FOR UPDATE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+CREATE POLICY freeze_drying_procedures_archived_update ON freeze_drying_procedures AS RESTRICTIVE FOR UPDATE TO app
+    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));

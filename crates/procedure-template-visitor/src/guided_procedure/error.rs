@@ -1,69 +1,64 @@
-//! Submodule defining the errors which might occur when using the
-//! `GuidedProcedure`.
+//! The errors of a [`GuidedProcedure`](crate::GuidedProcedure).
 
-use aps_entities::GetEntityTableNameId;
-use aps_namespaced_ownables::*;
-use aps_procedure_templates::*;
-use diesel_builders::NestedModel;
+use diesel_builders::BuilderError;
+use validation_errors::ValidationError;
 
+/// Why a [`GuidedProcedure`](crate::GuidedProcedure) refused a call.
 #[derive(Debug, thiserror::Error)]
-/// Enum representing the possible errors which might occur when using the
-/// `GuidedProcedure`.
-pub enum InternalGuidedProcedureError<'graph> {
-    #[error("The designated successor '{}' was not found in the viable successors: [{}]", .designated_successor.name(), .viable_successors.iter().map(|pt| pt.name().as_str()).collect::<Vec<_>>().join(", "))]
-    /// When the provided designated successor was not found in the viable
-    /// successors.
-    DesignatedSuccessorNotFound {
-        designated_successor: &'graph NestedModel<procedure_templates::table>,
-        viable_successors: Vec<&'graph NestedModel<procedure_templates::table>>,
-    },
-    #[error("Multiple viable successors were found: [{}]. Please specify a designated successor.", .viable_successors.iter().map(|pt| pt.name().as_str()).collect::<Vec<_>>().join(", "))]
-    /// When no designated successor was provided but multiple viable successors
-    /// were found.
-    UnclearSuccessor { viable_successors: Vec<&'graph NestedModel<procedure_templates::table>> },
-    #[error("A builder not yet processed for the procedure template \"{}\" from table \"{}\". You most likely need to add another `.and_then(|builder, conn| {{...}})` to your guided procedure.", .0.name(), .0.table_name_id())]
-    /// A builder was not yet processed.
-    UnprocessedBuilder(&'graph NestedModel<procedure_templates::table>),
-    #[error("A database error occurred: {0}")]
-    /// An error occurred while interacting with the database.
-    Diesel(diesel::result::Error),
-}
-
-#[derive(Debug, thiserror::Error)]
-/// Enum representing the possible errors which might occur when using the
-/// `GuidedProcedure`.
 pub enum GuidedProcedureError {
-    #[error("No more builders are available.")]
-    /// No more builders are available.
-    NoMoreBuilders,
-    #[error("There are unprocessed builders for the procedure template \"{}\" from table \"{}\". You most likely need to add another `.and_then(|builder, conn| {{...}})` to your guided procedure.", .0.name(), .0.table_name_id())]
-    /// Incomplete processing of builders.
-    UnprocessedBuilder(Box<NestedModel<procedure_templates::table>>),
-    #[error("A database error occurred: {0}")]
-    /// An error occurred while interacting with the database.
-    Diesel(diesel::result::Error),
-    #[error("Expected builder of type `{expected}`, but a builder of type `{found}` is required to build the procedure template \"{}\" from table \"{}\".", .template.name(), .template.table_name_id())]
-    /// Unexpected builder type encountered.
-    UnexpectedBuilder {
-        expected: &'static str,
-        found: String,
-        template: Box<NestedModel<procedure_templates::table>>,
+    /// Every procedure of the run is already recorded.
+    #[error("every procedure of the run is already recorded")]
+    NoMoreProcedures,
+    /// The run ended with procedures still to record.
+    #[error("the procedure of template \"{template}\" is still to record")]
+    Unrecorded {
+        /// Name of the template of the next procedure.
+        template: String,
     },
-}
-
-impl<'graph> From<InternalGuidedProcedureError<'graph>> for GuidedProcedureError {
-    fn from(value: InternalGuidedProcedureError<'graph>) -> Self {
-        match value {
-            InternalGuidedProcedureError::DesignatedSuccessorNotFound { .. } => {
-                todo!("Define error handling for DesignatedSuccessorNotFound")
-            }
-            InternalGuidedProcedureError::UnclearSuccessor { viable_successors: _ } => {
-                todo!("Define error handling for UnclearSuccessor")
-            }
-            InternalGuidedProcedureError::UnprocessedBuilder(template) => {
-                GuidedProcedureError::UnprocessedBuilder(Box::new((*template).clone()))
-            }
-            InternalGuidedProcedureError::Diesel(e) => GuidedProcedureError::Diesel(e),
-        }
-    }
+    /// The call names a procedure table that does not run the next template.
+    #[error(
+        "template \"{template}\" of table `{found}` runs next, the call names a procedure of `{expected}`"
+    )]
+    UnexpectedTable {
+        /// Template table the procedure table of the call runs.
+        expected: &'static str,
+        /// Table of the template that runs next.
+        found: String,
+        /// Name of the template that runs next.
+        template: String,
+    },
+    /// The root of a run cannot be skipped, since only a step can.
+    #[error("the root \"{template}\" of the run cannot be skipped")]
+    RootSkipped {
+        /// Name of the root template.
+        template: String,
+    },
+    /// The closure left `ended_at` unset, which completing the procedure needs.
+    #[error("the procedure of template \"{template}\" has no `ended_at` to complete with")]
+    MissingEndedAt {
+        /// Name of the template.
+        template: String,
+    },
+    /// The closure bound a slot the template does not declare.
+    #[error("template \"{template}\" declares no slot \"{slot}\"")]
+    UnknownSlot {
+        /// Name of the template.
+        template: String,
+        /// Name the closure gave.
+        slot: String,
+    },
+    /// The closure bound a slot its step fills with the parent's assets.
+    #[error("slot \"{slot}\" of template \"{template}\" takes the assets its step binds to it")]
+    InheritedSlot {
+        /// Name of the template.
+        template: String,
+        /// Name of the slot.
+        slot: String,
+    },
+    /// A builder refused a row.
+    #[error(transparent)]
+    Builder(#[from] BuilderError<ValidationError>),
+    /// The connection refused a statement.
+    #[error(transparent)]
+    Diesel(#[from] diesel::result::Error),
 }

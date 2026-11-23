@@ -1,0 +1,17 @@
+Parsed test spec with 3 sessions
+
+starting permutation: first_begin first_write second_begin second_write first_finish second_finish invariant
+step first_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step first_write: DELETE FROM procedures WHERE id = 'f0000000-0000-7000-8000-000000000002'; SET CONSTRAINTS ALL IMMEDIATE;
+step second_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step second_write: UPDATE procedures SET status_id = 'completed', ended_at = '2026-01-01 11:00+00' WHERE id = 'f0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE; <waiting ...>
+step first_finish: COMMIT;
+step second_write: <... completed>
+ERROR:  procedure f0000000-0000-7000-8000-000000000001 completes with a required step neither completed nor skipped
+step second_finish: COMMIT;
+step invariant: SELECT parent.status_id, count(child.id) AS required_runs FROM procedures parent LEFT JOIN procedures child ON child.parent_procedure_id = parent.id WHERE parent.id = 'f0000000-0000-7000-8000-000000000001' GROUP BY parent.status_id;
+status_id  |required_runs
+-----------+-------------
+in_progress|            0
+(1 row)
+

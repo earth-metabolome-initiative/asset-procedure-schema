@@ -1,0 +1,16 @@
+Parsed test spec with 3 sessions
+
+starting permutation: first_begin first_write second_begin second_write first_finish second_finish invariant
+step first_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step first_write: UPDATE procedure_assets SET asset_id = 'b0000000-0000-7000-8000-000000000002' WHERE id = 'e0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE;
+step second_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step second_write: INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, status_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id, parent_procedure_asset_id, parent_procedure_id) VALUES ('e0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000002', 'c0000000-0000-7000-8000-000000000002', 'in_progress', 'd0000000-0000-7000-8000-000000000002', 'a0000000-0000-7000-8000-000000000001', 'input', 'a0000000-0000-7000-8000-000000000001', 'b0000000-0000-7000-8000-000000000001', 'e0000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000001'); SET CONSTRAINTS ALL IMMEDIATE; <waiting ...>
+step first_finish: COMMIT;
+step second_write: <... completed>
+ERROR:  procedure f0000000-0000-7000-8000-000000000002 must bind the asset its parent binds to slot d0000000-0000-7000-8000-000000000002
+step second_finish: COMMIT;
+step invariant: SELECT parent.asset_id AS parent_asset, child.asset_id AS child_asset, parent.asset_id = child.asset_id AS same_asset FROM procedure_assets parent JOIN procedure_assets child ON child.parent_procedure_asset_id = parent.id WHERE parent.id = 'e0000000-0000-7000-8000-000000000001';
+parent_asset|child_asset|same_asset
+------------+-----------+----------
+(0 rows)
+

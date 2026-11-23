@@ -1,111 +1,170 @@
-CREATE TABLE geopositioning_procedure_templates (
-	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	-- The device used for geopositioning.
-	geopositioned_with_model_id UUID NOT NULL REFERENCES geopositioning_device_models(id),
-	procedure_template_geopositioned_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	geopositioned_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	procedure_template_geopositioned_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- We check that the `geopositioned_with_model` is indeed an asset model that is compatible with the procedure_id template.
-	FOREIGN KEY (
-		procedure_template_geopositioned_with_model_id,
-		geopositioned_with_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	-- We check that the asset model is indeed a procedure_id asset model.
-	FOREIGN KEY (
-		procedure_template_geopositioned_asset_model_id,
-		geopositioned_asset_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_geopositioned_with_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_geopositioned_asset_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_geopositioned_with_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_geopositioned_with_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_geopositioned_asset_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_geopositioned_asset_model_id
-	)
-);
-INSERT INTO table_names (id) VALUES ('geopositioning_procedure_templates') ON CONFLICT DO NOTHING;
-CREATE OR REPLACE FUNCTION geopositioning_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_geopositioned_with_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_geopositioned_asset_model_id) ON CONFLICT DO NOTHING;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Migration: 007-geolocation-procedures
+-- Purpose: Typed geopositioning slots and execution records.
+-- APS placement
+-- ownables
+-- +-- procedure_templates -- geopositioning_procedure_templates
+-- +-- procedures -- geopositioning_procedures
+-- Slot | Role | Meaning
+-- `geopositioned_with` | `instrument` | The device measures position.
+-- `geopositioned_asset` | `input` | The positioned asset survives measurement.
 
-CREATE TRIGGER geopositioning_procedure_templates_rptam_insert_trigger
-AFTER INSERT ON geopositioning_procedure_templates
-FOR EACH ROW EXECUTE FUNCTION geopositioning_procedure_templates_rptam_insert_fn();
-CREATE TABLE geopositioning_procedures (
-	-- Identifier of the geopositioning id, which is also a foreign key to the general procedure.
-	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
-	-- The template of this procedure_id should be a geopositioning procedure_id template.
-	geopositioning_procedure_template_id UUID NOT NULL REFERENCES geopositioning_procedure_templates(id),
-	-- The asset being geopositioned, which must be a physical asset.
-	geopositioned_asset_id UUID NOT NULL REFERENCES physical_assets(id),
-	-- The model of the asset being geopositioned.
-	geopositioned_asset_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	-- The procedure_id template asset model associated to the `geopositioned_asset`.
-	procedure_template_geopositioned_asset_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `geopositioned_asset`.
-	procedure_geopositioned_asset_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The positioning device used for geopositioning. This field is optional, as the positioning device might not necessarily be tracked.
-	geopositioned_with_id UUID REFERENCES geopositioning_devices(id),
-	-- The model of the positioning device used for geopositioning.
-	geopositioned_with_model_id UUID NOT NULL REFERENCES geopositioning_device_models(id),
-	-- The procedure_id asset associated to the `geopositioned_with`.
-	procedure_geopositioned_with_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The procedure_id template asset model associated to the `geopositioned_with_model`.
-	procedure_template_geopositioned_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The latitude and longitude of the geopositioning.
-	location GEOGRAPHY(POINT, 4326) NOT NULL,
-	-- We enforce that the current `geopositioning` has indeed the same `geopositioning_template`.
-	FOREIGN KEY (id, geopositioning_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
-	-- The `procedure_template_geopositioned_with_model` must be the same as in the `geopositioning_procedure_templates`.
-	FOREIGN KEY (
-		geopositioning_procedure_template_id,
-		procedure_template_geopositioned_with_model_id
-	) REFERENCES geopositioning_procedure_templates(
-		id,
-		procedure_template_geopositioned_with_model_id
-	),
-	-- The `procedure_template_geopositioned_asset_model` must be the same as in the `geopositioning_procedure_templates`.
-	FOREIGN KEY (
-		geopositioning_procedure_template_id,
-		procedure_template_geopositioned_asset_model_id
-	) REFERENCES geopositioning_procedure_templates(
-		id,
-		procedure_template_geopositioned_asset_model_id
-	),
-	-- We check that the `procedure_geopositioned_asset` has the same `procedure_template_geopositioned_asset_model`.
-	FOREIGN KEY (
-		procedure_geopositioned_asset_id,
-		procedure_template_geopositioned_asset_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_geopositioned_with` has the same `procedure_template_geopositioned_with_model`.
-	FOREIGN KEY (
-		procedure_geopositioned_with_id,
-		procedure_template_geopositioned_with_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_geopositioned_asset` is associated to the `geopositioned_asset_model`.
-	FOREIGN KEY (procedure_geopositioned_asset_id, geopositioned_asset_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	-- We check that the `procedure_geopositioned_with` is associated to the `geopositioned_with_model`.
-	FOREIGN KEY (procedure_geopositioned_with_id, geopositioned_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	-- We check that the `procedure_geopositioned_asset` is associated to the `geopositioned_asset`.
-	FOREIGN KEY (geopositioned_asset_id, geopositioned_asset_model_id) REFERENCES assets(id, model_id),
-	-- We check that the `procedure_geopositioned_with` is associated to the `geopositioned_with`.
-	FOREIGN KEY (geopositioned_with_id, geopositioned_with_model_id) REFERENCES assets(id, model_id)
+-- Typed slots and parameters for geopositioning.
+CREATE TABLE geopositioning_procedure_templates (
+    -- Identity shared with the parent template.
+    id UUID PRIMARY KEY REFERENCES procedure_templates (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Slot declaring the `geopositioned_with` assets.
+    geopositioned_with_slot_id UUID NOT NULL,
+    -- Admissible model for the `geopositioned_with` slot.
+    geopositioned_with_model_id UUID NOT NULL REFERENCES geopositioning_device_models (id),
+    -- Required role of the `geopositioned_with` slot.
+    geopositioned_with_slot_role_id TEXT GENERATED ALWAYS AS ('instrument') STORED NOT NULL,
+    -- Slot declaring the `geopositioned_asset` assets.
+    geopositioned_asset_slot_id UUID NOT NULL,
+    -- Admissible model for the `geopositioned_asset` slot.
+    geopositioned_asset_model_id UUID NOT NULL REFERENCES physical_asset_models (id),
+    -- Required role of the `geopositioned_asset` slot.
+    geopositioned_asset_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    FOREIGN KEY (geopositioned_with_slot_id, id, geopositioned_with_model_id, geopositioned_with_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (geopositioned_asset_slot_id, id, geopositioned_asset_model_id, geopositioned_asset_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
-INSERT INTO table_names (id) VALUES ('geopositioning_procedures') ON CONFLICT DO NOTHING;
+CREATE INDEX ON geopositioning_procedure_templates (geopositioned_asset_model_id);
+CREATE INDEX ON geopositioning_procedure_templates (geopositioned_with_model_id);
+INSERT INTO table_names (id) VALUES ('geopositioning_procedure_templates');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'geopositioning_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
+    UNION SELECT 'geopositioning_procedure_templates', 'geopositioning_procedure_templates';
+CREATE TRIGGER geopositioning_procedure_templates_guard AFTER INSERT OR UPDATE ON geopositioning_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER geopositioning_procedure_templates_delete_guard BEFORE DELETE ON geopositioning_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+
+CREATE FUNCTION require_geopositioning_procedure_templates_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedure_templates root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'geopositioning_procedure_templates'
+    ) AND NOT EXISTS (SELECT 1 FROM public.geopositioning_procedure_templates row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'geopositioning_procedure_templates'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_geopositioning_procedure_templates_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_geopositioning_procedure_templates_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER geopositioning_procedure_templates_row AFTER INSERT ON procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'geopositioning_procedure_templates')
+    EXECUTE FUNCTION require_geopositioning_procedure_templates_row();
+CREATE CONSTRAINT TRIGGER geopositioning_procedure_templates_kept AFTER DELETE ON geopositioning_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_geopositioning_procedure_templates_row();
+
+GRANT SELECT, INSERT, DELETE ON geopositioning_procedure_templates TO app;
+ALTER TABLE geopositioning_procedure_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE geopositioning_procedure_templates FORCE ROW LEVEL SECURITY;
+CREATE POLICY geopositioning_procedure_templates_select ON geopositioning_procedure_templates FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY geopositioning_procedure_templates_insert ON geopositioning_procedure_templates FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND geopositioned_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND geopositioned_asset_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY geopositioning_procedure_templates_delete ON geopositioning_procedure_templates FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY geopositioning_procedure_templates_archived_insert ON geopositioning_procedure_templates AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(geopositioned_with_model_id) AND NOT authz.is_archived(geopositioned_asset_model_id));
+CREATE POLICY geopositioning_procedure_templates_archived_delete ON geopositioning_procedure_templates AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY geopositioning_procedure_templates_blocked ON geopositioning_procedure_templates AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Recorded execution of a geopositioning template.
+CREATE TABLE geopositioning_procedures (
+    -- Identity shared with the parent procedure.
+    id UUID PRIMARY KEY REFERENCES procedures (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Typed template executed by this procedure.
+    geopositioning_procedure_template_id UUID NOT NULL REFERENCES geopositioning_procedure_templates (id),
+    -- Execution status copied from the parent procedure.
+    status_id TEXT NOT NULL,
+    -- Measured geographic position in the WGS 84 reference system.
+    location GEOGRAPHY(POINT, 4326),
+    FOREIGN KEY (id, geopositioning_procedure_template_id, status_id, organization_id)
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CHECK (status_id <> 'completed' OR location IS NOT NULL),
+    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+);
+CREATE INDEX ON geopositioning_procedures (geopositioning_procedure_template_id);
+INSERT INTO table_names (id) VALUES ('geopositioning_procedures');
+INSERT INTO table_name_instances (id, instance_table_name_id)
+    VALUES ('geopositioning_procedure_templates', 'geopositioning_procedures');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'geopositioning_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
+    UNION SELECT 'geopositioning_procedures', 'geopositioning_procedures';
+CREATE TRIGGER geopositioning_procedures_guard AFTER INSERT OR UPDATE ON geopositioning_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER geopositioning_procedures_delete_guard BEFORE DELETE ON geopositioning_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+CREATE FUNCTION require_geopositioning_procedures_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedures root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'geopositioning_procedures'
+    ) AND NOT EXISTS (SELECT 1 FROM public.geopositioning_procedures row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'geopositioning_procedures'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_geopositioning_procedures_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_geopositioning_procedures_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER geopositioning_procedures_row AFTER INSERT ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'geopositioning_procedures')
+    EXECUTE FUNCTION require_geopositioning_procedures_row();
+CREATE CONSTRAINT TRIGGER geopositioning_procedures_kept AFTER DELETE ON geopositioning_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_geopositioning_procedures_row();
+
+GRANT SELECT, INSERT, UPDATE (location), DELETE ON geopositioning_procedures TO app;
+ALTER TABLE geopositioning_procedures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE geopositioning_procedures FORCE ROW LEVEL SECURITY;
+CREATE POLICY geopositioning_procedures_select ON geopositioning_procedures FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY geopositioning_procedures_insert ON geopositioning_procedures FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND geopositioning_procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY geopositioning_procedures_update ON geopositioning_procedures FOR UPDATE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+CREATE POLICY geopositioning_procedures_delete ON geopositioning_procedures FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY geopositioning_procedures_archived_insert ON geopositioning_procedures AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(geopositioning_procedure_template_id));
+CREATE POLICY geopositioning_procedures_archived_update ON geopositioning_procedures AS RESTRICTIVE FOR UPDATE TO app
+    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+CREATE POLICY geopositioning_procedures_archived_delete ON geopositioning_procedures AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT authz.is_archived(id));
+CREATE POLICY geopositioning_procedures_blocked ON geopositioning_procedures AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER geopositioning_procedure_templates_audit AFTER INSERT OR DELETE ON geopositioning_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER geopositioning_procedure_templates_update_audit AFTER UPDATE ON geopositioning_procedure_templates
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER geopositioning_procedures_audit AFTER INSERT OR DELETE ON geopositioning_procedures
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER geopositioning_procedures_update_audit AFTER UPDATE ON geopositioning_procedures
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
