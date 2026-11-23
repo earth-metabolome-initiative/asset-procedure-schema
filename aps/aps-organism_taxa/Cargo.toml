@@ -1,0 +1,18 @@
+[package]
+name = "aps-organism_taxa"
+version = "0.1.0"
+edition.workspace = true
+
+
+[dependencies]
+serde.workspace = true
+diesel-builders.workspace = true
+diesel.workspace = true
+validation-errors.workspace = true
+rosetta-uuid.workspace = true
+aps-entities.workspace = true
+aps-organism_taxonomies.workspace = true
+aps-taxon_ranks.workspace = true
+
+[lints]
+workspace = true
