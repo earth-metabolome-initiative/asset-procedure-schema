@@ -93,7 +93,7 @@ pub trait ProcedureTemplateNode:
     /// ```rust
     /// use aps_procedure_templates::*;
     /// use aps_test_utils::{Replica, Tenant};
-    /// use aps_traits::ProcedureTemplateNode;
+    /// use aps_traits::{ProcedureTemplateNode, SlotRole};
     ///
     /// let mut replica = Replica::new();
     /// let tenant = replica.deliver(|conn| Ok(Tenant::insert(conn))).unwrap();
@@ -102,6 +102,8 @@ pub trait ProcedureTemplateNode:
     ///     .write(|conn| {
     ///         let pizza = tenant.procedure_template("Make a pizza", conn);
     ///         let knead = tenant.procedure_template("Knead", conn);
+    ///         let dough = tenant.asset_model("Dough", None, conn);
+    ///         knead.slot("dough", &dough, SlotRole::Input, 1, Some(1), conn).unwrap();
     ///         knead.publish(conn)?;
     ///         Ok(pizza.step(&knead, "knead the dough", 0, conn).unwrap())
     ///     })

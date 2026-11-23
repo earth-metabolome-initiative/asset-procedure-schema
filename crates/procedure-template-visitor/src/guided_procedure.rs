@@ -4,7 +4,6 @@
 mod error;
 mod slots;
 
-use aps_authz_resource_kind::ResourceKind;
 use aps_procedure_templates::{
     ProcedureTemplateSlot, procedure_template_slots, procedure_template_steps, procedure_templates,
 };
@@ -49,8 +48,10 @@ pub type Skip = Update<
 /// A builder of a procedure table, which the walk fills with the columns
 /// placing the procedure in its run and then inserts.
 pub trait ProcedureBuilder<C>:
-    SetColumn<procedures::id>
+    SetColumn<resources::id>
+    + SetColumn<resources::organization_id>
     + SetColumn<procedures::organization_id>
+    + SetColumn<procedures::project_id>
     + SetColumn<ownables::organization_id>
     + SetColumn<ownables::project_id>
     + SetColumn<ownables::created_by_id>
@@ -72,8 +73,10 @@ pub trait ProcedureBuilder<C>:
 }
 
 impl<C, B> ProcedureBuilder<C> for B where
-    B: SetColumn<procedures::id>
+    B: SetColumn<resources::id>
+        + SetColumn<resources::organization_id>
         + SetColumn<procedures::organization_id>
+        + SetColumn<procedures::project_id>
         + SetColumn<ownables::organization_id>
         + SetColumn<ownables::project_id>
         + SetColumn<ownables::created_by_id>
@@ -355,8 +358,7 @@ where
         Ok((template, step, repeat))
     }
 
-    /// Inserts the `resources` row of a new procedure and returns its builder
-    /// with the columns placing it in the run.
+    /// The builder of a new procedure, with the columns placing it in the run.
     fn procedure_builder<T>(
         &mut self,
         template: &'graph TemplateNode,
@@ -369,18 +371,13 @@ where
         TableBuilder<T>: ProcedureBuilder<C>,
     {
         let id = Uuid::new_v4();
-        flatten(
-            resources::table::builder()
-                .set_column::<resources::id>(id)
-                .set_column::<resources::kind>(ResourceKind::Ownable)
-                .set_column::<resources::organization_id>(self.organization)
-                .insert(self.connection),
-        )?;
         let root = *self.root.get_or_insert(id);
         let parent = self.frames.last();
         let builder = validated(T::try_builder())?
-            .set_column::<procedures::id>(id)
+            .set_column::<resources::id>(id)
+            .set_column::<resources::organization_id>(self.organization)
             .set_column::<procedures::organization_id>(self.organization)
+            .set_column::<procedures::project_id>(self.project)
             .set_column::<ownables::organization_id>(self.organization)
             .set_column::<ownables::project_id>(self.project)
             .set_column::<ownables::created_by_id>(self.author)

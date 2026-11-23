@@ -23,7 +23,7 @@ fn pizza_flowchart(toppings: &[&str]) -> String {
 fn edges_in(mermaid: &str, class_prefix: &str) -> usize {
     mermaid
         .lines()
-        .filter_map(|line| line.trim().strip_prefix("class E"))
+        .filter_map(|line| line.trim().strip_prefix("class e"))
         .filter(|rest| {
             rest.split_once(' ').is_some_and(|(_, class)| class.starts_with(class_prefix))
         })
