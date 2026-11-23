@@ -1520,7 +1520,7 @@ checksum = "4ec91767ecc0a0bbe558ce8c9da33c068066c57ecc8bb8477ef8c1ad3ef77c27"
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?branch=main#140ac47fd8492e83254e384d5639a29d1426c79b"
+source = "git+https://github.com/connetto-rs/pg2sqlite?branch=main#cc7c408a51c1cbd92c5ad6d5963b31bae7be5d4f"
 dependencies = [
  "diesel",
  "libsqlite3-sys",
@@ -2086,7 +2086,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sql-traits?branch=main#eec5e6aac3eb9cba3b877d7d655ae67e88f1db74"
+source = "git+https://github.com/connetto-rs/sql-traits?branch=main#940e38519677f9113be056fa56cbab7b7c8b5923"
 dependencies = [
  "geometric-traits",
  "once_cell",
@@ -2098,6 +2098,7 @@ dependencies = [
  "sqlparser-expr-eval",
  "sqlparser-plpgsql",
  "sqlstate",
+ "stacker",
  "thiserror 2.0.21",
  "unicode-normalization",
  "yoke",
