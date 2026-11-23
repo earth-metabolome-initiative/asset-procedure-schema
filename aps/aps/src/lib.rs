@@ -1,12 +1,22 @@
+pub use aps_aliquoting_procedure_templates::{
+    self, AliquotingProcedure, AliquotingProcedureTemplate, aliquoting_procedure_templates,
+    aliquoting_procedures,
+};
+pub use aps_asset_model_ancestors::{
+    self, AssetModelAncestor, HarvestingProcedure, HarvestingProcedureTemplate, ProcedureAsset,
+    ProcedureTemplateSlotBinding, SlotRolePair, asset_model_ancestors,
+    harvesting_procedure_templates, harvesting_procedures, procedure_assets,
+    procedure_template_slot_bindings, slot_role_pairs,
+};
 pub use aps_assets::{
     self, Asset, Container, DigitalAsset, Marker, MarkerModel, Panel, PanelModel,
     PersonalProtectiveEquipment, PersonalProtectiveEquipmentModel, Photograph, PhysicalAsset,
-    PipetteTip, PipetteTipModel, SampleSource, SampleSourceModel, VolumeMeasuringDevice,
-    VolumetricContainer, WeighingDevice, assets, containers, digital_assets, marker_models,
-    markers, panel_models, panels, personal_protective_equipment_models,
+    PipetteTip, PipetteTipModel, Sample, SampleModel, SampleSource, SampleSourceModel,
+    VolumeMeasuringDevice, VolumetricContainer, WeighingDevice, assets, containers, digital_assets,
+    marker_models, markers, panel_models, panels, personal_protective_equipment_models,
     personal_protective_equipments, photographs, physical_assets, pipette_tip_models, pipette_tips,
-    sample_source_models, sample_sources, volume_measuring_devices, volumetric_containers,
-    weighing_devices,
+    sample_models, sample_source_models, sample_sources, samples, volume_measuring_devices,
+    volumetric_containers, weighing_devices,
 };
 pub use aps_audit_events::{self, AuditEvent, audit_events};
 pub use aps_ball_mill_machine_models::{
@@ -53,9 +63,17 @@ pub use aps_commercial_products::{
     geopositioning_procedures, mass_spectrometer_models, mass_spectrometers, phone_device_models,
     phone_devices,
 };
+pub use aps_fractioning_procedure_templates::{
+    self, FractioningProcedure, FractioningProcedureTemplate, fractioning_procedure_templates,
+    fractioning_procedures,
+};
 pub use aps_freeze_dryer_models::{
     self, FreezeDryerModel, FreezeDryingProcedure, FreezeDryingProcedureTemplate,
     freeze_dryer_models, freeze_drying_procedure_templates, freeze_drying_procedures,
+};
+pub use aps_freezer_models::{
+    self, FreezerModel, FreezingProcedure, FreezingProcedureTemplate, freezer_models,
+    freezing_procedure_templates, freezing_procedures,
 };
 pub use aps_grantees::{
     self, App, AppInstallation, Grantee, InstallationPermission, Invitation, Membership,
@@ -63,6 +81,10 @@ pub use aps_grantees::{
     User, app_installations, apps, grantees, installation_permissions, invitations, memberships,
     organization_blocks, organizations, platform_operators, share_links, team_members,
     team_parents, teams, users,
+};
+pub use aps_packaging_models::{
+    self, PackagingModel, PackagingProcedure, PackagingProcedureTemplate, packaging_models,
+    packaging_procedure_templates, packaging_procedures,
 };
 pub use aps_photograph_procedure_templates::{
     self, PhotographProcedure, PhotographProcedureTemplate, photograph_procedure_templates,
@@ -77,6 +99,10 @@ pub use aps_physical_asset_models::{
     volumetric_container_models, weighed_container_models, weighed_volumetric_container_models,
 };
 pub use aps_platform_audit_events::{self, PlatformAuditEvent, platform_audit_events};
+pub use aps_pouring_procedure_templates::{
+    self, PouringProcedure, PouringProcedureTemplate, pouring_procedure_templates,
+    pouring_procedures,
+};
 pub use aps_procedure_templates::{
     self, ProcedureTemplate, ProcedureTemplateSlot, ProcedureTemplateState, ProcedureTemplateStep,
     ProcedureTemplateStepEdge, SlotRole, procedure_template_slots, procedure_template_states,
@@ -84,16 +110,15 @@ pub use aps_procedure_templates::{
 };
 pub use aps_procedures::{
     self, ContainerSealerModel, ContainerSealingProcedure, ContainerSealingProcedureTemplate,
-    DisposalProcedure, DisposalProcedureTemplate, FreezerModel, FreezingProcedure,
-    FreezingProcedureTemplate, ParameterValueKind, Procedure, ProcedureParameterValue,
-    ProcedureStatus, ProcedureTemplateParameter, ProcedureTemplateStepParameter, QuantityKind,
-    RetrievalProcedure, StorageProcedure, container_sealer_models,
+    DisposalProcedure, DisposalProcedureTemplate, ParameterValueKind, Procedure,
+    ProcedureParameterValue, ProcedureStatus, ProcedureTemplateParameter,
+    ProcedureTemplateStepParameter, QuantityKind, RetrievalProcedure, StorageProcedure,
+    WeighingDeviceModel, WeighingProcedure, WeighingProcedureTemplate, container_sealer_models,
     container_sealing_procedure_templates, container_sealing_procedures,
-    disposal_procedure_templates, disposal_procedures, freezer_models,
-    freezing_procedure_templates, freezing_procedures, parameter_value_kinds,
+    disposal_procedure_templates, disposal_procedures, parameter_value_kinds,
     procedure_parameter_values, procedure_statuses, procedure_template_parameters,
     procedure_template_step_parameters, procedures, quantity_kinds, retrieval_procedures,
-    storage_procedures,
+    storage_procedures, weighing_device_models, weighing_procedure_templates, weighing_procedures,
 };
 pub use aps_resources::{
     self, AssetModel, Brand, DigitalAssetModel, Grant, Ownable, PhotographModel, Resource,
@@ -102,22 +127,9 @@ pub use aps_resources::{
     resource_parents, resources, table_name_admitted_parents, table_name_ancestors,
     table_name_instances, table_names,
 };
-pub use aps_sample_models::{
-    self, AliquotingProcedure, AliquotingProcedureTemplate, AssetModelAncestor,
-    FractioningProcedure, FractioningProcedureTemplate, HarvestingProcedure,
-    HarvestingProcedureTemplate, PackagingModel, PackagingProcedure, PackagingProcedureTemplate,
-    PouringProcedure, PouringProcedureTemplate, ProcedureAsset, ProcedureTemplateSlotBinding,
-    Sample, SampleModel, SlotRolePair, SupernatantProcedure, SupernatantProcedureTemplate,
-    aliquoting_procedure_templates, aliquoting_procedures, asset_model_ancestors,
-    fractioning_procedure_templates, fractioning_procedures, harvesting_procedure_templates,
-    harvesting_procedures, packaging_models, packaging_procedure_templates, packaging_procedures,
-    pouring_procedure_templates, pouring_procedures, procedure_assets,
-    procedure_template_slot_bindings, sample_models, samples, slot_role_pairs,
-    supernatant_procedure_templates, supernatant_procedures,
-};
-pub use aps_weighing_device_models::{
-    self, WeighingDeviceModel, WeighingProcedure, WeighingProcedureTemplate,
-    weighing_device_models, weighing_procedure_templates, weighing_procedures,
+pub use aps_supernatant_procedure_templates::{
+    self, SupernatantProcedure, SupernatantProcedureTemplate, supernatant_procedure_templates,
+    supernatant_procedures,
 };
 /// The shape of the typed procedure table named `table_name_id`.
 #[must_use]
@@ -125,29 +137,35 @@ pub fn procedure_shape(
     table_name_id: &str,
 ) -> Option<&'static procedure_like::shape::ProcedureShape> {
     match table_name_id {
-        "aliquoting_procedures" => Some(&aps_sample_models::ALIQUOTING_PROCEDURES_SHAPE),
+        "aliquoting_procedures" => {
+            Some(&aps_aliquoting_procedure_templates::ALIQUOTING_PROCEDURES_SHAPE)
+        }
         "ball_mill_procedures" => Some(&aps_ball_mill_machine_models::BALL_MILL_PROCEDURES_SHAPE),
         "centrifuge_procedures" => Some(&aps_centrifuge_models::CENTRIFUGE_PROCEDURES_SHAPE),
         "container_sealing_procedures" => Some(&aps_procedures::CONTAINER_SEALING_PROCEDURES_SHAPE),
         "disposal_procedures" => Some(&aps_procedures::DISPOSAL_PROCEDURES_SHAPE),
-        "fractioning_procedures" => Some(&aps_sample_models::FRACTIONING_PROCEDURES_SHAPE),
+        "fractioning_procedures" => {
+            Some(&aps_fractioning_procedure_templates::FRACTIONING_PROCEDURES_SHAPE)
+        }
         "freeze_drying_procedures" => {
             Some(&aps_freeze_dryer_models::FREEZE_DRYING_PROCEDURES_SHAPE)
         }
-        "freezing_procedures" => Some(&aps_procedures::FREEZING_PROCEDURES_SHAPE),
+        "freezing_procedures" => Some(&aps_freezer_models::FREEZING_PROCEDURES_SHAPE),
         "geopositioning_procedures" => {
             Some(&aps_commercial_products::GEOPOSITIONING_PROCEDURES_SHAPE)
         }
-        "harvesting_procedures" => Some(&aps_sample_models::HARVESTING_PROCEDURES_SHAPE),
-        "packaging_procedures" => Some(&aps_sample_models::PACKAGING_PROCEDURES_SHAPE),
+        "harvesting_procedures" => Some(&aps_asset_model_ancestors::HARVESTING_PROCEDURES_SHAPE),
+        "packaging_procedures" => Some(&aps_packaging_models::PACKAGING_PROCEDURES_SHAPE),
         "photograph_procedures" => {
             Some(&aps_photograph_procedure_templates::PHOTOGRAPH_PROCEDURES_SHAPE)
         }
-        "pouring_procedures" => Some(&aps_sample_models::POURING_PROCEDURES_SHAPE),
+        "pouring_procedures" => Some(&aps_pouring_procedure_templates::POURING_PROCEDURES_SHAPE),
         "retrieval_procedures" => Some(&aps_procedures::RETRIEVAL_PROCEDURES_SHAPE),
         "storage_procedures" => Some(&aps_procedures::STORAGE_PROCEDURES_SHAPE),
-        "supernatant_procedures" => Some(&aps_sample_models::SUPERNATANT_PROCEDURES_SHAPE),
-        "weighing_procedures" => Some(&aps_weighing_device_models::WEIGHING_PROCEDURES_SHAPE),
+        "supernatant_procedures" => {
+            Some(&aps_supernatant_procedure_templates::SUPERNATANT_PROCEDURES_SHAPE)
+        }
+        "weighing_procedures" => Some(&aps_procedures::WEIGHING_PROCEDURES_SHAPE),
         _ => None,
     }
 }
@@ -158,7 +176,7 @@ pub fn template_shape(
 ) -> Option<&'static procedure_like::shape::TemplateShape> {
     match table_name_id {
         "aliquoting_procedure_templates" => {
-            Some(&aps_sample_models::ALIQUOTING_PROCEDURE_TEMPLATES_SHAPE)
+            Some(&aps_aliquoting_procedure_templates::ALIQUOTING_PROCEDURE_TEMPLATES_SHAPE)
         }
         "ball_mill_procedure_templates" => {
             Some(&aps_ball_mill_machine_models::BALL_MILL_PROCEDURE_TEMPLATES_SHAPE)
@@ -171,26 +189,28 @@ pub fn template_shape(
         }
         "disposal_procedure_templates" => Some(&aps_procedures::DISPOSAL_PROCEDURE_TEMPLATES_SHAPE),
         "fractioning_procedure_templates" => {
-            Some(&aps_sample_models::FRACTIONING_PROCEDURE_TEMPLATES_SHAPE)
+            Some(&aps_fractioning_procedure_templates::FRACTIONING_PROCEDURE_TEMPLATES_SHAPE)
         }
         "freeze_drying_procedure_templates" => {
             Some(&aps_freeze_dryer_models::FREEZE_DRYING_PROCEDURE_TEMPLATES_SHAPE)
         }
-        "freezing_procedure_templates" => Some(&aps_procedures::FREEZING_PROCEDURE_TEMPLATES_SHAPE),
+        "freezing_procedure_templates" => {
+            Some(&aps_freezer_models::FREEZING_PROCEDURE_TEMPLATES_SHAPE)
+        }
         "geopositioning_procedure_templates" => {
             Some(&aps_commercial_products::GEOPOSITIONING_PROCEDURE_TEMPLATES_SHAPE)
         }
         "harvesting_procedure_templates" => {
-            Some(&aps_sample_models::HARVESTING_PROCEDURE_TEMPLATES_SHAPE)
+            Some(&aps_asset_model_ancestors::HARVESTING_PROCEDURE_TEMPLATES_SHAPE)
         }
         "packaging_procedure_templates" => {
-            Some(&aps_sample_models::PACKAGING_PROCEDURE_TEMPLATES_SHAPE)
+            Some(&aps_packaging_models::PACKAGING_PROCEDURE_TEMPLATES_SHAPE)
         }
         "photograph_procedure_templates" => {
             Some(&aps_photograph_procedure_templates::PHOTOGRAPH_PROCEDURE_TEMPLATES_SHAPE)
         }
         "pouring_procedure_templates" => {
-            Some(&aps_sample_models::POURING_PROCEDURE_TEMPLATES_SHAPE)
+            Some(&aps_pouring_procedure_templates::POURING_PROCEDURE_TEMPLATES_SHAPE)
         }
         "retrieval_procedure_templates" => {
             Some(&aps_physical_asset_models::RETRIEVAL_PROCEDURE_TEMPLATES_SHAPE)
@@ -199,11 +219,9 @@ pub fn template_shape(
             Some(&aps_physical_asset_models::STORAGE_PROCEDURE_TEMPLATES_SHAPE)
         }
         "supernatant_procedure_templates" => {
-            Some(&aps_sample_models::SUPERNATANT_PROCEDURE_TEMPLATES_SHAPE)
+            Some(&aps_supernatant_procedure_templates::SUPERNATANT_PROCEDURE_TEMPLATES_SHAPE)
         }
-        "weighing_procedure_templates" => {
-            Some(&aps_weighing_device_models::WEIGHING_PROCEDURE_TEMPLATES_SHAPE)
-        }
+        "weighing_procedure_templates" => Some(&aps_procedures::WEIGHING_PROCEDURE_TEMPLATES_SHAPE),
         _ => None,
     }
 }
@@ -298,7 +316,7 @@ pub fn asset_model_shape(
         "container_sealer_models" => Some(&aps_procedures::CONTAINER_SEALER_MODELS_SHAPE),
         "digital_asset_models" => Some(&aps_resources::DIGITAL_ASSET_MODELS_SHAPE),
         "freeze_dryer_models" => Some(&aps_freeze_dryer_models::FREEZE_DRYER_MODELS_SHAPE),
-        "freezer_models" => Some(&aps_procedures::FREEZER_MODELS_SHAPE),
+        "freezer_models" => Some(&aps_freezer_models::FREEZER_MODELS_SHAPE),
         "geopositioning_device_models" => {
             Some(&aps_commercial_products::GEOPOSITIONING_DEVICE_MODELS_SHAPE)
         }
@@ -306,7 +324,7 @@ pub fn asset_model_shape(
         "mass_spectrometer_models" => {
             Some(&aps_commercial_products::MASS_SPECTROMETER_MODELS_SHAPE)
         }
-        "packaging_models" => Some(&aps_sample_models::PACKAGING_MODELS_SHAPE),
+        "packaging_models" => Some(&aps_packaging_models::PACKAGING_MODELS_SHAPE),
         "panel_models" => Some(&aps_assets::PANEL_MODELS_SHAPE),
         "personal_protective_equipment_models" => {
             Some(&aps_assets::PERSONAL_PROTECTIVE_EQUIPMENT_MODELS_SHAPE)
@@ -315,7 +333,7 @@ pub fn asset_model_shape(
         "photograph_models" => Some(&aps_resources::PHOTOGRAPH_MODELS_SHAPE),
         "physical_asset_models" => Some(&aps_physical_asset_models::PHYSICAL_ASSET_MODELS_SHAPE),
         "pipette_tip_models" => Some(&aps_assets::PIPETTE_TIP_MODELS_SHAPE),
-        "sample_models" => Some(&aps_sample_models::SAMPLE_MODELS_SHAPE),
+        "sample_models" => Some(&aps_assets::SAMPLE_MODELS_SHAPE),
         "sample_source_models" => Some(&aps_assets::SAMPLE_SOURCE_MODELS_SHAPE),
         "volume_measuring_device_models" => {
             Some(&aps_physical_asset_models::VOLUME_MEASURING_DEVICE_MODELS_SHAPE)
@@ -329,7 +347,7 @@ pub fn asset_model_shape(
         "weighed_volumetric_container_models" => {
             Some(&aps_physical_asset_models::WEIGHED_VOLUMETRIC_CONTAINER_MODELS_SHAPE)
         }
-        "weighing_device_models" => Some(&aps_weighing_device_models::WEIGHING_DEVICE_MODELS_SHAPE),
+        "weighing_device_models" => Some(&aps_procedures::WEIGHING_DEVICE_MODELS_SHAPE),
         _ => None,
     }
 }

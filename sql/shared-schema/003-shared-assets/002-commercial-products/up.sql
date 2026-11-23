@@ -57,12 +57,15 @@ CREATE TABLE commercial_product_lots (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- connetto project holding the lot, kept equal to its ownable's.
+    project_id UUID NOT NULL,
     -- Manufacturer or supplier lot label.
     lot TEXT NOT NULL CHECK (lot <> '' AND length(lot) <= 255),
     -- Commercial product model associated with this lot.
     product_model_id UUID NOT NULL REFERENCES commercial_products (id) ON DELETE RESTRICT,
-    UNIQUE (lot, product_model_id),
+    UNIQUE (project_id, lot, product_model_id),
     FOREIGN KEY (id, product_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_product_lots (product_model_id);
@@ -128,13 +131,16 @@ GRANT SELECT, INSERT, UPDATE (lot), DELETE ON commercial_product_lots TO app;
 ALTER TABLE commercial_product_lots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE commercial_product_lots FORCE ROW LEVEL SECURITY;
 CREATE POLICY commercial_product_lots_select ON commercial_product_lots FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY commercial_product_lots_insert ON commercial_product_lots FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND product_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY commercial_product_lots_update ON commercial_product_lots FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
-    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY commercial_product_lots_delete ON commercial_product_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_product_lots_archived_insert ON commercial_product_lots AS RESTRICTIVE FOR INSERT TO app

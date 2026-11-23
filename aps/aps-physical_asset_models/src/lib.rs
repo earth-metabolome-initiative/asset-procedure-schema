@@ -51,6 +51,15 @@ pub mod container_compatibility_rules_model {
     )]
     #[table_model(
         foreign_key(
+            (container_model_id, project_id),
+            (
+                ::aps_resources::asset_models::id,
+                ::aps_resources::asset_models::project_id
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
             (organization_id, container_model_id),
             (::aps_resources::resources::organization_id, ::aps_resources::resources::id)
         )
@@ -70,7 +79,7 @@ pub mod container_compatibility_rules_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
-        /// Project containing this ownable.
+        /// Project containing this ownable, the container model's project.
         #[same_as(aps_resources::ownables::project_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
@@ -92,6 +101,7 @@ pub mod container_compatibility_rules_model {
     }
     ::diesel_builders::prelude::unique_index!(
         container_compatibility_rules::container_model_id,
+        container_compatibility_rules::project_id,
         container_compatibility_rules::contained_asset_model_id
     );
     impl ::diesel_builders::ValidateColumn<container_compatibility_rules::table_name_id>
@@ -174,6 +184,10 @@ pub mod container_compatibility_rules_model {
             &self.id
         }
     }
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        container_compatibility_rules,
+        ::aps_resources::asset_models
+    );
     ::diesel::allow_tables_to_appear_in_same_query!(
         container_compatibility_rules,
         ::aps_physical_asset_models::container_models

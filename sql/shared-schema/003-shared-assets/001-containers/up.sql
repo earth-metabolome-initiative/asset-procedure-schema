@@ -61,7 +61,7 @@ CREATE TABLE container_compatibility_rules (
     id UUID PRIMARY KEY REFERENCES ownables (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    -- Project containing this ownable.
+    -- Project containing this ownable, the container model's project.
     project_id UUID NOT NULL,
     -- Concrete APS table holding this row.
     table_name_id TEXT NOT NULL REFERENCES table_names (id) CHECK (table_name_id = 'container_compatibility_rules'),
@@ -71,11 +71,13 @@ CREATE TABLE container_compatibility_rules (
     contained_asset_model_id UUID NOT NULL REFERENCES physical_asset_models (id) ON DELETE RESTRICT,
     -- Maximum allowed count of `contained_asset_model_id` in the container.
     quantity SMALLINT NOT NULL DEFAULT 1 CHECK (quantity > 0),
-    UNIQUE(container_model_id, contained_asset_model_id),
+    UNIQUE (container_model_id, project_id, contained_asset_model_id),
     CHECK (
     container_model_id <> contained_asset_model_id
     ),
     FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    -- Moving a container model moves its rules in the same transaction.
+    FOREIGN KEY (container_model_id, project_id) REFERENCES asset_models (id, project_id) DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (organization_id, container_model_id) REFERENCES resources (organization_id, id),
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
@@ -362,9 +364,11 @@ GRANT SELECT, INSERT, UPDATE (quantity), DELETE ON container_compatibility_rules
 ALTER TABLE container_compatibility_rules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE container_compatibility_rules FORCE ROW LEVEL SECURITY;
 CREATE POLICY container_compatibility_rules_select ON container_compatibility_rules FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY container_compatibility_rules_insert ON container_compatibility_rules FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND container_model_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND contained_asset_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY container_compatibility_rules_update ON container_compatibility_rules FOR UPDATE TO app

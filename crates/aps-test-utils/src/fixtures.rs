@@ -3,6 +3,7 @@
 
 use std::fmt::Debug;
 
+use aps_asset_model_ancestors::*;
 use aps_authz_grantee_kind::GranteeKind;
 use aps_authz_membership_state::MembershipState;
 use aps_authz_resource_kind::ResourceKind;
@@ -11,7 +12,6 @@ use aps_grantees::*;
 use aps_physical_asset_models::*;
 use aps_procedure_templates::*;
 use aps_resources::*;
-use aps_sample_models::*;
 use diesel_builders::{BuildableTable, Insert, LoadMany, NestedModel, TableBuilder};
 use rosetta_uuid::Uuid;
 

@@ -395,7 +395,7 @@ pub mod procedure_template_step_edges_model {
     /// form a DAG without a recursive check.
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(primary_key(predecessor_step_id, successor_step_id))]
+    #[diesel(primary_key(predecessor_step_id, parent_template_id, successor_step_id))]
     #[table_model(
         foreign_key(
             (
@@ -809,7 +809,6 @@ pub mod procedure_templates_model {
         #[infallible]
         previous_version: Option<i32>,
     }
-    ::diesel_builders::prelude::unique_index!(procedure_templates::previous_version_id);
     ::diesel_builders::prelude::unique_index!(
         procedure_templates::project_id,
         procedure_templates::name,

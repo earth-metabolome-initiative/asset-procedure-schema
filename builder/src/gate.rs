@@ -563,6 +563,7 @@ const CASCADES: &[(&str, &[(&str, &str)])] = &[
             ("brands", "brands_id_project_id_fkey"),
             ("container_compatibility_rules", "container_compatibility_rules_id_fkey"),
             ("container_compatibility_rules", "container_compatibility_rules_id_project_id_fkey"),
+            ("commercial_product_lots", "commercial_product_lots_id_project_id_fkey"),
             ("procedure_templates", "procedure_templates_id_fkey"),
             ("procedure_templates", "procedure_templates_id_project_id_fkey"),
             ("procedures", "procedures_id_fkey"),
@@ -991,49 +992,31 @@ const OPTIONAL_REFERENCES: &[(&str, &str)] = &[
 
 /// Keys that copy a column of the parent through a key wider than its primary
 /// key, with `ON UPDATE CASCADE` keeping the copy current.
-const COPIES: &[(&str, &[(&str, &str)])] = &[
-    (
-        "The status copy lets the closed-procedure guards and the production and consumption indexes read the status without a join",
-        &[
-            (
-                "container_sealing_procedures",
-                "container_sealing_procedures_id_container_sealing_procedur_fkey",
-            ),
-            (
-                "disposal_procedures",
-                "disposal_procedures_id_disposal_procedure_template_id_stat_fkey",
-            ),
-            (
-                "harvesting_procedures",
-                "harvesting_procedures_id_harvesting_procedure_template_id__fkey",
-            ),
-            (
-                "packaging_procedures",
-                "packaging_procedures_id_packaging_procedure_template_id_st_fkey",
-            ),
-            (
-                "photograph_procedures",
-                "photograph_procedures_id_photograph_procedure_template_id__fkey",
-            ),
-            ("procedure_assets", "procedure_assets_procedure_id_procedure_template_id_status_fkey"),
-            (
-                "procedure_parameter_values",
-                "procedure_parameter_values_procedure_id_procedure_template_fkey",
-            ),
-            (
-                "retrieval_procedures",
-                "retrieval_procedures_id_retrieval_procedure_template_id_st_fkey",
-            ),
-        ],
-    ),
-    (
-        "The project copy scopes root rows to their project, which policies and unique names read, and moves with the ownable",
-        &[
-            ("container_compatibility_rules", "container_compatibility_rules_id_project_id_fkey"),
-            ("procedures", "procedures_id_project_id_fkey"),
-        ],
-    ),
-];
+const COPIES: &[(&str, &[(&str, &str)])] = &[(
+    "The status copy lets the closed-procedure guards and the production and consumption indexes read the status without a join",
+    &[
+        (
+            "container_sealing_procedures",
+            "container_sealing_procedures_id_container_sealing_procedur_fkey",
+        ),
+        ("disposal_procedures", "disposal_procedures_id_disposal_procedure_template_id_stat_fkey"),
+        (
+            "harvesting_procedures",
+            "harvesting_procedures_id_harvesting_procedure_template_id__fkey",
+        ),
+        ("packaging_procedures", "packaging_procedures_id_packaging_procedure_template_id_st_fkey"),
+        (
+            "photograph_procedures",
+            "photograph_procedures_id_photograph_procedure_template_id__fkey",
+        ),
+        ("procedure_assets", "procedure_assets_procedure_id_procedure_template_id_status_fkey"),
+        (
+            "procedure_parameter_values",
+            "procedure_parameter_values_procedure_id_procedure_template_fkey",
+        ),
+        ("retrieval_procedures", "retrieval_procedures_id_retrieval_procedure_template_id_st_fkey"),
+    ],
+)];
 
 /// Keys whose existence-oracle findings the APS schema keeps on purpose,
 /// grouped by the reason each group stays.
@@ -1065,11 +1048,30 @@ const ORACLES: &[(&str, &[(&str, &str)])] = &[(
     ],
 )];
 
-/// Tables whose unique keys repeat NULL on purpose, with the reason.
-const REPEATED_NULLS: &[(&str, &str)] = &[
-    ("procedure_templates", "Every first version has no previous version"),
-    ("procedures", "Every root procedure has no parent and runs no step"),
+/// Unique keys whose existence-oracle findings the APS schema keeps on
+/// purpose, grouped by the reason each group stays.
+const UNIQUES: &[(&str, &[(&str, &str)])] = &[
+    (
+        "The offline client mints the row's random UUID, so a collision only confirms an identifier the writer already holds and never discovers one",
+        &[
+            ("procedure_assets", "procedure_assets_pkey"),
+            ("procedure_template_parameters", "procedure_template_parameters_pkey"),
+            ("procedure_template_slots", "procedure_template_slots_pkey"),
+            ("procedure_template_steps", "procedure_template_steps_pkey"),
+        ],
+    ),
+    (
+        "An asset is produced once and consumed once across every organization, and the writer already holds `writer` on the asset whose history the collision reveals",
+        &[
+            ("procedure_assets", "procedure_assets_produced_once"),
+            ("procedure_assets", "procedure_assets_consumed_once"),
+        ],
+    ),
 ];
+
+/// Tables whose unique keys repeat NULL on purpose, with the reason.
+const REPEATED_NULLS: &[(&str, &str)] =
+    &[("procedures", "Every root procedure has no parent and runs no step")];
 
 /// Functions whose findings of a rule the APS schema keeps on purpose, with
 /// the reason.
@@ -1093,6 +1095,11 @@ const FUNCTIONS: &[(&str, &str, &str)] = &[
         "cross_tenant_cap",
         "container_compatible",
         "A model may extend a model another organization shares with it, and a compatibility rule may name a shared model, so its ancestry rows and the rules they match need not share an organization",
+    ),
+    (
+        "cross_tenant_cap",
+        "require_publishable_procedure_template",
+        "A step may run a template another organization shares with it, so a binding and the child slot it fills need not share an organization",
     ),
 ];
 
@@ -1122,6 +1129,15 @@ fn allow(constrainer: &mut DefaultConstrainer<ParserDB>) {
             for (table, foreign_key) in *keys {
                 constrainer.allow_foreign_key(rule, TargetName::new(table, false), foreign_key);
             }
+        }
+    }
+    for (_reason, keys) in UNIQUES {
+        for (table, index) in *keys {
+            constrainer.allow_index(
+                "unique_key_existence_oracle",
+                TargetName::new(table, false),
+                index,
+            );
         }
     }
     for (table, _reason) in REPEATED_NULLS {

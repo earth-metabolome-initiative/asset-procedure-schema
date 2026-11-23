@@ -22,7 +22,7 @@ CREATE TABLE procedure_templates (
     -- Version number, one more than the previous version's.
     version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
     -- Published version this draft revises, absent on the first version.
-    previous_version_id UUID UNIQUE,
+    previous_version_id UUID,
     -- Version number of `previous_version_id`.
     previous_version INTEGER,
     CHECK ((previous_version_id IS NULL) = (version = 1)),
@@ -35,6 +35,7 @@ CREATE TABLE procedure_templates (
     FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
+CREATE INDEX ON procedure_templates (previous_version_id);
 CREATE INDEX ON procedure_templates (state_id);
 CREATE INDEX ON procedure_templates (table_name_id);
 INSERT INTO table_names (id) VALUES ('procedure_templates');
@@ -139,7 +140,7 @@ CREATE TABLE procedure_template_step_edges (
     predecessor_position INTEGER NOT NULL,
     -- Position of the successor, kept equal by the cascade.
     successor_position INTEGER NOT NULL,
-    PRIMARY KEY (predecessor_step_id, successor_step_id),
+    PRIMARY KEY (predecessor_step_id, parent_template_id, successor_step_id),
     CHECK (predecessor_position < successor_position),
     FOREIGN KEY (predecessor_step_id, parent_template_id, predecessor_position, organization_id)
         REFERENCES procedure_template_steps (id, parent_template_id, position, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -178,7 +179,7 @@ CREATE TABLE procedure_template_slot_bindings (
     parent_role_id TEXT NOT NULL,
     -- connetto organization owning the parent template.
     organization_id UUID NOT NULL,
-    PRIMARY KEY (step_id, child_slot_id),
+    PRIMARY KEY (step_id, parent_template_id, child_slot_id),
     FOREIGN KEY (step_id, parent_template_id, child_template_id, organization_id)
         REFERENCES procedure_template_steps (id, parent_template_id, child_template_id, organization_id) ON DELETE CASCADE,
     FOREIGN KEY (child_slot_id, child_template_id, child_asset_model_id, child_role_id)
@@ -191,9 +192,9 @@ CREATE TABLE procedure_template_slot_bindings (
     FOREIGN KEY (organization_id, parent_template_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_template_slot_bindings (parent_slot_id);
-CREATE UNIQUE INDEX procedure_template_slot_bindings_produced_once ON procedure_template_slot_bindings (parent_slot_id)
+CREATE UNIQUE INDEX procedure_template_slot_bindings_produced_once ON procedure_template_slot_bindings (parent_slot_id, parent_template_id)
     WHERE child_role_id = 'produced';
-CREATE UNIQUE INDEX procedure_template_slot_bindings_consumed_once ON procedure_template_slot_bindings (parent_slot_id)
+CREATE UNIQUE INDEX procedure_template_slot_bindings_consumed_once ON procedure_template_slot_bindings (parent_slot_id, parent_template_id)
     WHERE child_role_id = 'consumed';
 CREATE INDEX ON procedure_template_slot_bindings (child_role_id, parent_role_id);
 CREATE INDEX ON procedure_template_slot_bindings (child_slot_id, child_template_id, child_asset_model_id, child_role_id);
@@ -285,7 +286,7 @@ CREATE TABLE procedure_template_step_parameters (
     text_value TEXT CHECK (text_value <> '' AND length(text_value) <= 8192),
     -- Value of a boolean parameter.
     boolean_value BOOLEAN,
-    PRIMARY KEY (step_id, parameter_id),
+    PRIMARY KEY (step_id, parent_template_id, parameter_id),
     CHECK ((number_value IS NOT NULL) = (value_kind_id = 'number')),
     CHECK ((text_value IS NOT NULL) = (value_kind_id = 'text')),
     CHECK ((boolean_value IS NOT NULL) = (value_kind_id = 'boolean')),
@@ -554,13 +555,16 @@ GRANT SELECT, INSERT, UPDATE (name, description, instruction, state_id), DELETE 
 ALTER TABLE procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procedure_templates FORCE ROW LEVEL SECURITY;
 CREATE POLICY procedure_templates_select ON procedure_templates FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY procedure_templates_insert ON procedure_templates FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND (previous_version_id IS NULL OR previous_version_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));
 CREATE POLICY procedure_templates_update ON procedure_templates FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
-    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_templates_delete ON procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY procedure_templates_archived_insert ON procedure_templates AS RESTRICTIVE FOR INSERT TO app

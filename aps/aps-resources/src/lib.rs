@@ -62,6 +62,7 @@ pub mod asset_models_model {
         parent_model_id: Option<::rosetta_uuid::Uuid>,
     }
     ::diesel_builders::prelude::unique_index!(asset_models::project_id, asset_models::name);
+    ::diesel_builders::prelude::unique_index!(asset_models::id, asset_models::project_id);
     ::diesel_builders::prelude::unique_index!(asset_models::id, asset_models::parent_model_id);
     ::diesel_builders::prelude::unique_index!(
         asset_models::id,

@@ -2766,6 +2766,11 @@ pub mod commercial_product_lots_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
+        /// connetto project holding the lot, kept equal to its ownable's.
+        #[same_as(aps_resources::asset_models::project_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        project_id: ::rosetta_uuid::Uuid,
         /// Manufacturer or supplier lot label.
         lot: String,
         /// Commercial product model associated with this lot.
@@ -2775,6 +2780,7 @@ pub mod commercial_product_lots_model {
         product_model_id: ::rosetta_uuid::Uuid,
     }
     ::diesel_builders::prelude::unique_index!(
+        commercial_product_lots::project_id,
         commercial_product_lots::lot,
         commercial_product_lots::product_model_id
     );
@@ -2872,7 +2878,7 @@ pub mod commercial_product_lots_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_product_lots,
-        ::aps_procedures::freezer_models
+        ::aps_freezer_models::freezer_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_product_lots,
@@ -2912,7 +2918,7 @@ pub mod commercial_product_lots_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_product_lots,
-        ::aps_weighing_device_models::weighing_device_models
+        ::aps_procedures::weighing_device_models
     );
 }
 pub use commercial_product_lots_model::*;
@@ -2998,7 +3004,7 @@ pub mod commercial_products_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_products,
-        ::aps_procedures::freezer_models
+        ::aps_freezer_models::freezer_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_products,
@@ -3035,7 +3041,7 @@ pub mod commercial_products_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_products,
-        ::aps_weighing_device_models::weighing_device_models
+        ::aps_procedures::weighing_device_models
     );
 }
 pub use commercial_products_model::*;
@@ -3421,7 +3427,7 @@ pub mod commercial_weighing_device_lots_model {
         aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
-        aps_weighing_device_models::weighing_device_models,
+        aps_procedures::weighing_device_models,
         aps_commercial_products::commercial_product_lots
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
@@ -3434,9 +3440,7 @@ pub mod commercial_weighing_device_lots_model {
             foreign_key = commercial_weighing_device_model_id
         )
     )]
-    #[diesel(
-        belongs_to(aps_weighing_device_models::WeighingDeviceModel, foreign_key = id)
-    )]
+    #[diesel(belongs_to(aps_procedures::WeighingDeviceModel, foreign_key = id))]
     #[table_model(
         foreign_key((id), (::aps_commercial_products::commercial_product_lots::id))
     )]
@@ -3446,9 +3450,7 @@ pub mod commercial_weighing_device_lots_model {
             (::aps_commercial_products::commercial_weighing_device_models::id)
         )
     )]
-    #[table_model(
-        foreign_key((id), (::aps_weighing_device_models::weighing_device_models::id))
-    )]
+    #[table_model(foreign_key((id), (::aps_procedures::weighing_device_models::id)))]
     #[table_model(default(
         aps_resources::resources::kind,
         ::aps_authz_resource_kind::ResourceKind::Ownable
@@ -3461,7 +3463,7 @@ pub mod commercial_weighing_device_lots_model {
         id: ::rosetta_uuid::Uuid,
         /// Organization containing this resource.
         #[same_as(aps_commercial_products::commercial_product_lots::organization_id)]
-        #[same_as(aps_weighing_device_models::weighing_device_models::organization_id)]
+        #[same_as(aps_procedures::weighing_device_models::organization_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
@@ -3515,7 +3517,7 @@ pub mod commercial_weighing_device_lots_model {
             &self.id
         }
     }
-    impl ::diesel_builders::GetColumn<aps_weighing_device_models::weighing_device_models::id>
+    impl ::diesel_builders::GetColumn<aps_procedures::weighing_device_models::id>
         for CommercialWeighingDeviceLot
     {
         fn get_column_ref(
@@ -3574,7 +3576,7 @@ pub mod commercial_weighing_device_lots_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_weighing_device_lots,
-        ::aps_weighing_device_models::weighing_device_models
+        ::aps_procedures::weighing_device_models
     );
 }
 pub use commercial_weighing_device_lots_model::*;
@@ -3603,17 +3605,15 @@ pub mod commercial_weighing_device_models_model {
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
         aps_commercial_products::commercial_products,
-        aps_weighing_device_models::weighing_device_models
+        aps_procedures::weighing_device_models
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_commercial_products::CommercialProduct, foreign_key = id))]
-    #[table_model(
-        foreign_key((id), (::aps_weighing_device_models::weighing_device_models::id))
-    )]
+    #[table_model(foreign_key((id), (::aps_procedures::weighing_device_models::id)))]
     #[table_model(
         foreign_key(
             (weighing_device_model_id),
-            (::aps_weighing_device_models::weighing_device_models::id)
+            (::aps_procedures::weighing_device_models::id)
         )
     )]
     #[table_model(
@@ -3631,7 +3631,7 @@ pub mod commercial_weighing_device_models_model {
         id: ::rosetta_uuid::Uuid,
         /// Organization containing this resource.
         #[same_as(aps_commercial_products::commercial_products::organization_id)]
-        #[same_as(aps_weighing_device_models::weighing_device_models::organization_id)]
+        #[same_as(aps_procedures::weighing_device_models::organization_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
@@ -3687,7 +3687,7 @@ pub mod commercial_weighing_device_models_model {
             &self.id
         }
     }
-    impl ::diesel_builders::GetColumn<aps_weighing_device_models::weighing_device_models::id>
+    impl ::diesel_builders::GetColumn<aps_procedures::weighing_device_models::id>
         for CommercialWeighingDeviceModel
     {
         fn get_column_ref(
@@ -3743,7 +3743,7 @@ pub mod commercial_weighing_device_models_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_weighing_device_models,
-        ::aps_weighing_device_models::weighing_device_models
+        ::aps_procedures::weighing_device_models
     );
 }
 pub use commercial_weighing_device_models_model::*;

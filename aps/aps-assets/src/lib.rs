@@ -1318,6 +1318,142 @@ pub mod pipette_tips_model {
     ::diesel::allow_tables_to_appear_in_same_query!(pipette_tips, ::aps_resources::resources);
 }
 pub use pipette_tips_model::*;
+pub mod sample_models_model {
+    #[derive(
+        Copy,
+        Clone,
+        Debug,
+        Hash,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel::Associations,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Catalog of sample models and the source-model family they require.
+    #[table_model(ancestors(
+        aps_resources::resources,
+        aps_resources::ownables,
+        aps_resources::asset_models,
+        aps_physical_asset_models::physical_asset_models
+    ))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[diesel(
+        belongs_to(aps_physical_asset_models::PhysicalAssetModel, foreign_key = id)
+    )]
+    #[diesel(
+        belongs_to(aps_assets::SampleSourceModel, foreign_key = sample_source_model_id)
+    )]
+    #[table_model(
+        foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
+    )]
+    #[table_model(
+        foreign_key((sample_source_model_id), (::aps_assets::sample_source_models::id))
+    )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
+    #[diesel(table_name = sample_models)]
+    pub struct SampleModel {
+        /// Stable model identifier inherited from `physical_asset_models`.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::organization_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Source-model family that sample instances of this model must
+        /// reference.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        sample_source_model_id: ::rosetta_uuid::Uuid,
+    }
+    ::diesel_builders::prelude::unique_index!(
+        sample_models::id,
+        sample_models::sample_source_model_id
+    );
+    impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for SampleModel {
+        fn get_column_ref(
+            &self,
+        ) -> &<sample_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for SampleModel {
+        fn get_column_ref(
+            &self,
+        ) -> &<sample_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+        for SampleModel
+    {
+        fn get_column_ref(
+            &self,
+        ) -> &<sample_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for SampleModel {
+        fn get_column_ref(
+            &self,
+        ) -> &<sample_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    /// Shape of `sample_models` the procedure runner renders.
+    pub const SAMPLE_MODELS_SHAPE: procedure_like::shape::AssetModelShape =
+        procedure_like::shape::AssetModelShape {
+            table_name: "sample_models",
+            asset_table_name: "samples",
+            model_column: "sample_model_id",
+            required: &[
+                procedure_like::shape::ColumnShape {
+                    name: "organization_id",
+                    label: "Organization containing this resource.",
+                    sql_type: procedure_like::shape::SqlType::Uuid,
+                    unit: None,
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "sample_model_id",
+                    label: "Sample model instantiated by this physical sample.",
+                    sql_type: procedure_like::shape::SqlType::Uuid,
+                    unit: None,
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "sample_source_model_id",
+                    label: "Required source-model family of the sample model.",
+                    sql_type: procedure_like::shape::SqlType::Uuid,
+                    unit: None,
+                    required: true,
+                },
+            ],
+        };
+    ::diesel::allow_tables_to_appear_in_same_query!(sample_models, ::aps_resources::asset_models);
+    ::diesel::allow_tables_to_appear_in_same_query!(sample_models, ::aps_resources::ownables);
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        sample_models,
+        ::aps_physical_asset_models::physical_asset_models
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(sample_models, ::aps_resources::resources);
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        sample_models,
+        ::aps_assets::sample_source_models
+    );
+}
+pub use sample_models_model::*;
 pub mod sample_source_models_model {
     #[derive(
         Copy,
@@ -1530,6 +1666,102 @@ pub mod sample_sources_model {
     );
 }
 pub use sample_sources_model::*;
+pub mod samples_model {
+    #[derive(
+        Copy,
+        Clone,
+        Debug,
+        Hash,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel::Associations,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Physical samples with their model's required source family.
+    #[table_model(ancestors(
+        aps_resources::resources,
+        aps_resources::ownables,
+        aps_assets::assets,
+        aps_assets::physical_assets
+    ))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[diesel(belongs_to(aps_assets::PhysicalAsset, foreign_key = id))]
+    #[diesel(
+        belongs_to(aps_assets::SampleSourceModel, foreign_key = sample_source_model_id)
+    )]
+    #[table_model(foreign_key((id), (::aps_assets::physical_assets::id)))]
+    #[table_model(
+        foreign_key((sample_source_model_id), (::aps_assets::sample_source_models::id))
+    )]
+    #[table_model(
+        foreign_key(
+            (sample_model_id, sample_source_model_id),
+            (
+                ::aps_assets::sample_models::id,
+                ::aps_assets::sample_models::sample_source_model_id
+            )
+        )
+    )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
+    #[diesel(table_name = samples)]
+    pub struct Sample {
+        /// Stable asset identifier inherited from `physical_assets`.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing this resource.
+        #[same_as(aps_assets::physical_assets::organization_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Sample model instantiated by this physical sample.
+        #[same_as(aps_assets::physical_assets::physical_asset_model_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        sample_model_id: ::rosetta_uuid::Uuid,
+        /// Required source-model family of the sample model.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        sample_source_model_id: ::rosetta_uuid::Uuid,
+    }
+    impl ::diesel_builders::GetColumn<aps_assets::assets::id> for Sample {
+        fn get_column_ref(&self) -> &<samples::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for Sample {
+        fn get_column_ref(&self) -> &<samples::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_assets::physical_assets::id> for Sample {
+        fn get_column_ref(&self) -> &<samples::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for Sample {
+        fn get_column_ref(&self) -> &<samples::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    ::diesel::allow_tables_to_appear_in_same_query!(samples, ::aps_assets::assets);
+    ::diesel::allow_tables_to_appear_in_same_query!(samples, ::aps_resources::ownables);
+    ::diesel::allow_tables_to_appear_in_same_query!(samples, ::aps_assets::physical_assets);
+    ::diesel::allow_tables_to_appear_in_same_query!(samples, ::aps_resources::resources);
+    ::diesel::allow_tables_to_appear_in_same_query!(samples, ::aps_assets::sample_models);
+    ::diesel::allow_tables_to_appear_in_same_query!(samples, ::aps_assets::sample_source_models);
+}
+pub use samples_model::*;
 pub mod volume_measuring_devices_model {
     #[derive(
         Copy,
@@ -1787,7 +2019,7 @@ pub mod weighing_devices_model {
     #[diesel(belongs_to(aps_assets::PhysicalAsset, foreign_key = id))]
     #[diesel(
         belongs_to(
-            aps_weighing_device_models::WeighingDeviceModel,
+            aps_procedures::WeighingDeviceModel,
             foreign_key = weighing_device_model_id
         )
     )]
@@ -1795,7 +2027,7 @@ pub mod weighing_devices_model {
     #[table_model(
         foreign_key(
             (weighing_device_model_id),
-            (::aps_weighing_device_models::weighing_device_models::id)
+            (::aps_procedures::weighing_device_models::id)
         )
     )]
     #[table_model(default(
@@ -1856,7 +2088,7 @@ pub mod weighing_devices_model {
     ::diesel::allow_tables_to_appear_in_same_query!(weighing_devices, ::aps_resources::resources);
     ::diesel::allow_tables_to_appear_in_same_query!(
         weighing_devices,
-        ::aps_weighing_device_models::weighing_device_models
+        ::aps_procedures::weighing_device_models
     );
 }
 pub use weighing_devices_model::*;

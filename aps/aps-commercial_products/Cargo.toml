@@ -16,8 +16,8 @@ aps-resources.workspace = true
 aps-physical_asset_models.workspace = true
 aps-assets.workspace = true
 aps-freeze_dryer_models.workspace = true
+aps-freezer_models.workspace = true
 aps-procedures.workspace = true
-aps-weighing_device_models.workspace = true
 aps-procedure_templates.workspace = true
 procedure-like = { path = "../../crates/procedure-like" }
 

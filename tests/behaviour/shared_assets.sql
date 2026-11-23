@@ -16,7 +16,7 @@ INSERT INTO commercial_weighing_device_models (id, organization_id, weighing_dev
 SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000004', 'Smoke balance lot', '70000000-0000-7000-8000-000000000003', 'commercial_weighing_device_lots');
 INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001');
 INSERT INTO weighing_device_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001');
-INSERT INTO commercial_product_lots (id, organization_id, lot, product_model_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001', 'lot-1', '70000000-0000-7000-8000-000000000003');
+INSERT INTO commercial_product_lots (id, organization_id, project_id, lot, product_model_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'lot-1', '70000000-0000-7000-8000-000000000003');
 INSERT INTO commercial_weighing_device_lots (id, organization_id, commercial_weighing_device_model_id) VALUES ('70000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001', '70000000-0000-7000-8000-000000000003');
 SELECT pg_temp.new_model('70000000-0000-7000-8000-000000000005', 'Smoke tube', NULL, 'weighed_volumetric_container_models');
 INSERT INTO physical_asset_models (id, organization_id) VALUES ('70000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001');

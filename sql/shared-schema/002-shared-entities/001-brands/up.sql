@@ -31,12 +31,15 @@ GRANT SELECT, INSERT, UPDATE (name), DELETE ON brands TO app;
 ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brands FORCE ROW LEVEL SECURITY;
 CREATE POLICY brands_select ON brands FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY brands_insert ON brands FOR INSERT TO app
-    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY brands_update ON brands FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
-    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY brands_delete ON brands FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY brands_archived_insert ON brands AS RESTRICTIVE FOR INSERT TO app

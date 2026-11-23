@@ -4,12 +4,14 @@
 mod error;
 mod slots;
 
+use aps_asset_model_ancestors::{
+    ProcedureAsset, procedure_assets, procedure_template_slot_bindings,
+};
 use aps_procedure_templates::{
     ProcedureTemplateSlot, procedure_template_slots, procedure_template_steps, procedure_templates,
 };
 use aps_procedures::procedures;
 use aps_resources::{ownables, resources};
-use aps_sample_models::{ProcedureAsset, procedure_assets, procedure_template_slot_bindings};
 use aps_traits::validation::{IntoValidationError, flatten, validated};
 use diesel::{
     Connection, ExpressionMethods, QueryDsl, RunQueryDsl,

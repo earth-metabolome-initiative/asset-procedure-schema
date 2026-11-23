@@ -18,6 +18,7 @@ CREATE TABLE asset_models (
     -- `asset_model_ancestors` never go stale.
     parent_model_id UUID REFERENCES asset_models (id) CHECK (parent_model_id <> id),
     UNIQUE (project_id, name),
+    UNIQUE (id, project_id),
     UNIQUE (id, parent_model_id),
     UNIQUE (id, parent_model_id, organization_id),
     FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -387,13 +388,16 @@ GRANT SELECT, INSERT, UPDATE (name, description), DELETE ON asset_models TO app;
 ALTER TABLE asset_models ENABLE ROW LEVEL SECURITY;
 ALTER TABLE asset_models FORCE ROW LEVEL SECURITY;
 CREATE POLICY asset_models_select ON asset_models FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY asset_models_insert ON asset_models FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND (parent_model_id IS NULL OR parent_model_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));
 CREATE POLICY asset_models_update ON asset_models FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
-    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY asset_models_delete ON asset_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY asset_models_archived_insert ON asset_models AS RESTRICTIVE FOR INSERT TO app
@@ -463,12 +467,16 @@ GRANT SELECT, INSERT, UPDATE (name, description), DELETE ON assets TO app;
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assets FORCE ROW LEVEL SECURITY;
 CREATE POLICY assets_select ON assets FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY assets_insert ON assets FOR INSERT TO app
-    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY assets_update ON assets FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
-    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY assets_delete ON assets FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY assets_archived_insert ON assets AS RESTRICTIVE FOR INSERT TO app

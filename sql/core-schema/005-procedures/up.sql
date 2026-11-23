@@ -56,25 +56,29 @@ CREATE TABLE procedures (
     UNIQUE (id, procedure_template_id, status_id, organization_id),
     UNIQUE (id, root_procedure_id, organization_id),
     UNIQUE (id, parent_procedure_id, organization_id),
+    UNIQUE (id, project_id, organization_id),
     FOREIGN KEY (parent_procedure_id, parent_template_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, organization_id) ON DELETE CASCADE,
     FOREIGN KEY (parent_procedure_id, root_procedure_id, organization_id)
         REFERENCES procedures (id, root_procedure_id, organization_id) ON DELETE CASCADE,
+    -- A child runs in its parent's project. Moving a run moves its whole tree in one transaction.
+    FOREIGN KEY (parent_procedure_id, project_id, organization_id)
+        REFERENCES procedures (id, project_id, organization_id) DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (step_id, parent_template_id, procedure_template_id)
         REFERENCES procedure_template_steps (id, parent_template_id, child_template_id),
     FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
 CREATE INDEX ON procedures (procedure_template_id);
-CREATE INDEX ON procedures (parent_procedure_id);
+CREATE INDEX ON procedures (parent_procedure_id, project_id);
 CREATE INDEX ON procedures (root_procedure_id);
 CREATE INDEX ON procedures (performed_by_id);
 CREATE INDEX ON procedures (repeat_procedure_asset_id);
 -- A step runs at most once under a parent, and a repeated step at most once
 -- per bound asset of its repeat slot, aborted attempts aside.
-CREATE UNIQUE INDEX procedures_step_once ON procedures (parent_procedure_id, step_id)
+CREATE UNIQUE INDEX procedures_step_once ON procedures (parent_procedure_id, project_id, step_id)
     WHERE repeat_procedure_asset_id IS NULL AND status_id <> 'aborted';
-CREATE UNIQUE INDEX procedures_repeat_once ON procedures (parent_procedure_id, step_id, repeat_procedure_asset_id)
+CREATE UNIQUE INDEX procedures_repeat_once ON procedures (parent_procedure_id, project_id, step_id, repeat_procedure_asset_id)
     WHERE repeat_procedure_asset_id IS NOT NULL AND status_id <> 'aborted';
 CREATE INDEX ON procedures (status_id);
 CREATE INDEX ON procedures (step_id, parent_template_id, procedure_template_id);
@@ -824,9 +828,11 @@ GRANT SELECT, INSERT, UPDATE (status_id, planned_for, started_at, ended_at, perf
 ALTER TABLE procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY procedures_select ON procedures FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY procedures_insert ON procedures FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader')))
         AND (parent_procedure_id IS NULL OR parent_procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
         AND (parent_template_id IS NULL OR parent_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
@@ -834,6 +840,7 @@ CREATE POLICY procedures_insert ON procedures FOR INSERT TO app
 CREATE POLICY procedures_update ON procedures FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND (performed_by_id IS NULL OR performed_by_id = ANY (ARRAY(SELECT authz.co_member_users()))));
 CREATE POLICY procedures_delete ON procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
