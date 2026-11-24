@@ -7,17 +7,22 @@ use aps_procedure_templates::{
     ProcedureTemplateStep, ProcedureTemplateStepEdge, procedure_template_step_edges,
     procedure_template_steps,
 };
+use aps_procedures::{ProcedureTemplateStepParameter, procedure_template_step_parameters};
 use diesel_builders::GetColumnExt;
 use rosetta_uuid::Uuid;
 
 /// A step of a procedure template, with the slot bindings handing its child
-/// template's slots the parent's assets.
+/// template's slots the parent's assets and the values it fixes for its child
+/// template's parameters.
 #[derive(Debug, Clone, PartialEq)]
 pub struct StepNode {
     /// The step.
     step: ProcedureTemplateStep,
     /// The bindings of the step, sorted by child slot.
     bindings: Vec<ProcedureTemplateSlotBinding>,
+    /// The values the step fixes for parameters of its child template, sorted
+    /// by parameter.
+    parameters: Vec<ProcedureTemplateStepParameter>,
     /// Indices of the steps that complete before this one starts.
     predecessors: Vec<usize>,
     /// Indices of the steps that start after this one completes.
@@ -50,6 +55,13 @@ impl StepNode {
             .ok()
             .map(|index| &self.bindings[index])
     }
+
+    /// The values the step fixes for parameters of its child template, sorted
+    /// by parameter.
+    #[must_use]
+    pub fn parameters(&self) -> &[ProcedureTemplateStepParameter] {
+        &self.parameters
+    }
 }
 
 /// The steps of a procedure template in `position` order, which is
@@ -62,17 +74,19 @@ pub struct TaskGraph {
 }
 
 impl TaskGraph {
-    /// Builds the task graph of `steps`, ordered by `edges` and binding slots
-    /// through `bindings`, all of one parent template.
+    /// Builds the task graph of `steps`, ordered by `edges`, binding slots
+    /// through `bindings` and fixing child parameters through `parameters`,
+    /// all of one parent template.
     ///
     /// # Panics
     ///
-    /// Panics when an edge or a binding names a step outside `steps`, which
-    /// the composite keys of the schema rule out.
+    /// Panics when an edge, a binding or a fixed parameter names a step
+    /// outside `steps`, which the composite keys of the schema rule out.
     pub(crate) fn new(
         mut steps: Vec<ProcedureTemplateStep>,
         edges: Vec<ProcedureTemplateStepEdge>,
         bindings: Vec<ProcedureTemplateSlotBinding>,
+        parameters: Vec<ProcedureTemplateStepParameter>,
     ) -> Self {
         steps.sort_unstable_by_key(|step| {
             (
@@ -91,6 +105,7 @@ impl TaskGraph {
                 StepNode {
                     step,
                     bindings: Vec::new(),
+                    parameters: Vec::new(),
                     predecessors: Vec::new(),
                     successors: Vec::new(),
                 }
@@ -108,11 +123,19 @@ impl TaskGraph {
             let step = index[binding.get_column_ref::<procedure_template_slot_bindings::step_id>()];
             steps[step].bindings.push(binding);
         }
+        for parameter in parameters {
+            let step =
+                index[parameter.get_column_ref::<procedure_template_step_parameters::step_id>()];
+            steps[step].parameters.push(parameter);
+        }
         for step in &mut steps {
             step.predecessors.sort_unstable();
             step.successors.sort_unstable();
             step.bindings.sort_unstable_by_key(|binding| {
                 binding.get_column::<procedure_template_slot_bindings::child_slot_id>()
+            });
+            step.parameters.sort_unstable_by_key(|parameter| {
+                parameter.get_column::<procedure_template_step_parameters::parameter_id>()
             });
         }
         Self { steps }

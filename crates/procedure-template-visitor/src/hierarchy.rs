@@ -1,5 +1,5 @@
 //! The procedure templates a root template runs through its steps, each with
-//! its slots and the task graph of its steps.
+//! its slots, its parameters and the task graph of its steps.
 
 use std::collections::BTreeMap;
 
@@ -8,18 +8,24 @@ use aps_procedure_templates::{
     ProcedureTemplate, ProcedureTemplateSlot, procedure_template_slots,
     procedure_template_step_edges, procedure_template_steps, procedure_templates,
 };
+use aps_procedures::{
+    ProcedureTemplateParameter, procedure_template_parameters, procedure_template_step_parameters,
+};
 use diesel_builders::{GetColumnExt, LoadFirst, LoadMany};
 use rosetta_uuid::Uuid;
 
 use crate::{StepNode, TaskGraph};
 
-/// A procedure template with its slots and the task graph of its steps.
+/// A procedure template with its slots, its parameters and the task graph of
+/// its steps.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TemplateNode {
     /// The template.
     template: ProcedureTemplate,
     /// The slots of the template, sorted by name and then by identifier.
     slots: Vec<ProcedureTemplateSlot>,
+    /// The parameters of the template, sorted by name.
+    parameters: Vec<ProcedureTemplateParameter>,
     /// The steps the template runs.
     task_graph: TaskGraph,
 }
@@ -41,6 +47,12 @@ impl TemplateNode {
     #[must_use]
     pub fn slot(&self, id: Uuid) -> Option<&ProcedureTemplateSlot> {
         self.slots.iter().find(|slot| slot.get_column::<procedure_template_slots::id>() == id)
+    }
+
+    /// The parameters of the template, sorted by name.
+    #[must_use]
+    pub fn parameters(&self) -> &[ProcedureTemplateParameter] {
+        &self.parameters
     }
 
     /// The steps the template runs.
@@ -102,6 +114,8 @@ impl ProcedureTemplateGraph {
         (procedure_template_steps::parent_template_id,): LoadMany<C>,
         (procedure_template_step_edges::parent_template_id,): LoadMany<C>,
         (procedure_template_slot_bindings::parent_template_id,): LoadMany<C>,
+        (procedure_template_parameters::procedure_template_id,): LoadMany<C>,
+        (procedure_template_step_parameters::parent_template_id,): LoadMany<C>,
     {
         let root = root.get_column();
         let mut templates = BTreeMap::new();
@@ -121,6 +135,12 @@ impl ProcedureTemplateGraph {
                             .cmp(right.get_column_ref::<procedure_template_slots::id>())
                     })
             });
+            let mut parameters =
+                <(procedure_template_parameters::procedure_template_id,)>::load_many((id,), conn)?;
+            parameters.sort_unstable_by(|left, right| {
+                left.get_column_ref::<procedure_template_parameters::name>()
+                    .cmp(right.get_column_ref::<procedure_template_parameters::name>())
+            });
             let steps = <(procedure_template_steps::parent_template_id,)>::load_many((id,), conn)?;
             pending.extend(
                 steps
@@ -131,12 +151,18 @@ impl ProcedureTemplateGraph {
                 <(procedure_template_step_edges::parent_template_id,)>::load_many((id,), conn)?;
             let bindings =
                 <(procedure_template_slot_bindings::parent_template_id,)>::load_many((id,), conn)?;
+            let fixed_parameters =
+                <(procedure_template_step_parameters::parent_template_id,)>::load_many(
+                    (id,),
+                    conn,
+                )?;
             templates.insert(
                 id,
                 TemplateNode {
                     template,
                     slots,
-                    task_graph: TaskGraph::new(steps, edges, bindings),
+                    parameters,
+                    task_graph: TaskGraph::new(steps, edges, bindings, fixed_parameters),
                 },
             );
         }
