@@ -291,6 +291,7 @@ BEGIN
 END;
 $$;
 GRANT USAGE ON SCHEMA authz TO aps_writer;
+GRANT EXECUTE ON FUNCTION authz.resources_with(authz.role), authz.caller_id() TO aps_writer;
 GRANT SELECT ON asset_models, asset_model_ancestors TO aps_writer;
 GRANT SELECT, UPDATE (id) ON assets TO aps_writer;
 ALTER FUNCTION lock_asset(UUID) OWNER TO aps_writer;
@@ -387,9 +388,6 @@ CREATE CONSTRAINT TRIGGER digital_assets_kept AFTER DELETE ON digital_assets
 GRANT SELECT, INSERT, UPDATE (name, description), DELETE ON asset_models TO app;
 ALTER TABLE asset_models ENABLE ROW LEVEL SECURITY;
 ALTER TABLE asset_models FORCE ROW LEVEL SECURITY;
-CREATE POLICY asset_models_select ON asset_models FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
-        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY asset_models_insert ON asset_models FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
@@ -413,8 +411,6 @@ CREATE POLICY asset_models_blocked ON asset_models AS RESTRICTIVE FOR ALL TO app
 GRANT SELECT, INSERT ON asset_model_ancestors TO app;
 ALTER TABLE asset_model_ancestors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE asset_model_ancestors FORCE ROW LEVEL SECURITY;
-CREATE POLICY asset_model_ancestors_select ON asset_model_ancestors FOR SELECT TO app
-    USING (descendant_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY asset_model_ancestors_insert ON asset_model_ancestors FOR INSERT TO app
     WITH CHECK (descendant_model_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND (parent_model_id IS NULL OR parent_model_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));

@@ -204,14 +204,30 @@ DECLARE
 BEGIN
     SELECT template.stored_into_slot_id INTO stored_into_slot
     FROM public.storage_procedure_templates template
-    WHERE template.id = NEW.id OR template.stored_into_slot_id = NEW.id;
+    WHERE template.id = NEW.id;
     PERFORM public.require_single_typed_slot(stored_into_slot);
     RETURN NULL;
 END;
 $$;
 ALTER FUNCTION check_storage_slots() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_storage_slots() FROM PUBLIC;
+
+-- Checks the storage destination slot after cardinality edits.
+CREATE FUNCTION public.check_storage_slot_cardinality() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    stored_into_slot UUID;
+BEGIN
+    SELECT template.stored_into_slot_id INTO stored_into_slot
+    FROM public.storage_procedure_templates template
+    WHERE template.id = NEW.procedure_template_id AND template.stored_into_slot_id = NEW.id;
+    PERFORM public.require_single_typed_slot(stored_into_slot);
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_storage_slot_cardinality() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_storage_slot_cardinality() FROM PUBLIC;
 CREATE CONSTRAINT TRIGGER storage_template_slots AFTER INSERT OR UPDATE ON storage_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_storage_slots();
 CREATE CONSTRAINT TRIGGER storage_slot_counts AFTER UPDATE ON procedure_template_slots
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_storage_slots();
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_storage_slot_cardinality();

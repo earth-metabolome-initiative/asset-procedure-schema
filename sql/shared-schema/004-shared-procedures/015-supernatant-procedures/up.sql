@@ -112,7 +112,7 @@ CREATE POLICY supernatant_procedure_templates_select ON supernatant_procedure_te
 CREATE POLICY supernatant_procedure_templates_insert ON supernatant_procedure_templates FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND stratified_source_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND supernatant_destination_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND supernatant_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND transferred_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND source_sample_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY supernatant_procedure_templates_update ON supernatant_procedure_templates FOR UPDATE TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND supernatant_destination_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY supernatant_procedure_templates_delete ON supernatant_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
@@ -238,17 +238,33 @@ DECLARE
 BEGIN
     SELECT template.supernatant_destination_slot_id INTO supernatant_destination_slot
     FROM public.supernatant_procedure_templates template
-    WHERE template.id = NEW.id OR template.supernatant_destination_slot_id = NEW.id;
+    WHERE template.id = NEW.id;
     PERFORM public.require_single_typed_slot(supernatant_destination_slot);
     RETURN NULL;
 END;
 $$;
 ALTER FUNCTION public.check_supernatant_slots() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_supernatant_slots() FROM PUBLIC;
+
+-- Checks the supernatant slot contract after cardinality edits.
+CREATE FUNCTION public.check_supernatant_slot_cardinality() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    supernatant_destination_slot UUID;
+BEGIN
+    SELECT template.supernatant_destination_slot_id INTO supernatant_destination_slot
+    FROM public.supernatant_procedure_templates template
+    WHERE template.id = NEW.procedure_template_id AND template.supernatant_destination_slot_id = NEW.id;
+    PERFORM public.require_single_typed_slot(supernatant_destination_slot);
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_supernatant_slot_cardinality() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_supernatant_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.supernatant_procedure_templates TO aps_writer;
 CREATE CONSTRAINT TRIGGER supernatant_template_slots AFTER INSERT OR UPDATE ON public.supernatant_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_supernatant_slots();
 CREATE CONSTRAINT TRIGGER supernatant_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
-    EXECUTE FUNCTION public.check_supernatant_slots();
+    EXECUTE FUNCTION public.check_supernatant_slot_cardinality();

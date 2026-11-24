@@ -112,7 +112,7 @@ CREATE POLICY pouring_procedure_templates_select ON pouring_procedure_templates 
 CREATE POLICY pouring_procedure_templates_insert ON pouring_procedure_templates FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND measured_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND poured_from_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND poured_into_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND poured_sample_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND source_sample_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY pouring_procedure_templates_update ON pouring_procedure_templates FOR UPDATE TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND poured_into_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY pouring_procedure_templates_delete ON pouring_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
@@ -238,17 +238,33 @@ DECLARE
 BEGIN
     SELECT template.poured_into_slot_id INTO poured_into_slot
     FROM public.pouring_procedure_templates template
-    WHERE template.id = NEW.id OR template.poured_into_slot_id = NEW.id;
+    WHERE template.id = NEW.id;
     PERFORM public.require_single_typed_slot(poured_into_slot);
     RETURN NULL;
 END;
 $$;
 ALTER FUNCTION public.check_pouring_slots() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_pouring_slots() FROM PUBLIC;
+
+-- Checks the pouring slot contract after cardinality edits.
+CREATE FUNCTION public.check_pouring_slot_cardinality() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    poured_into_slot UUID;
+BEGIN
+    SELECT template.poured_into_slot_id INTO poured_into_slot
+    FROM public.pouring_procedure_templates template
+    WHERE template.id = NEW.procedure_template_id AND template.poured_into_slot_id = NEW.id;
+    PERFORM public.require_single_typed_slot(poured_into_slot);
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_pouring_slot_cardinality() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_pouring_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.pouring_procedure_templates TO aps_writer;
 CREATE CONSTRAINT TRIGGER pouring_template_slots AFTER INSERT OR UPDATE ON public.pouring_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_pouring_slots();
 CREATE CONSTRAINT TRIGGER pouring_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
-    EXECUTE FUNCTION public.check_pouring_slots();
+    EXECUTE FUNCTION public.check_pouring_slot_cardinality();

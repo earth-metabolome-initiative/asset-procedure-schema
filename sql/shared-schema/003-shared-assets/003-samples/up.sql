@@ -142,6 +142,8 @@ CREATE CONSTRAINT TRIGGER sample_models_row AFTER INSERT ON asset_models
 CREATE CONSTRAINT TRIGGER sample_models_kept AFTER DELETE ON sample_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_sample_models_row();
 
+-- Requires a sample model's source family to descend from its parent's. Sample
+-- models are never updated, so the check of each child covers its pair.
 CREATE FUNCTION check_sample_model_family() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
@@ -149,7 +151,7 @@ BEGIN
         SELECT 1 FROM public.sample_models child
         JOIN public.asset_models model ON model.id = child.id
         JOIN public.sample_models parent ON parent.id = model.parent_model_id
-        WHERE (child.id = NEW.id OR parent.id = NEW.id)
+        WHERE child.id = NEW.id
           AND NOT EXISTS (
               SELECT 1 FROM public.asset_model_ancestors family
               WHERE family.descendant_model_id = child.sample_source_model_id

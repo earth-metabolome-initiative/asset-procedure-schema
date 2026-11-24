@@ -1,14 +1,15 @@
--- Serializes checks against one container model's capacities.
-CREATE FUNCTION lock_container_model(locked_model_id UUID) RETURNS VOID
+-- Marks a volumetric model as relied on, after any concurrent change of its
+-- volume commits, so the caller reads the volume that stays.
+CREATE FUNCTION use_volumetric_model(used_model_id UUID) RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
     PERFORM authz.refuse_repeatable_read();
-    PERFORM model.id FROM public.container_models model WHERE model.id = locked_model_id FOR NO KEY UPDATE;
+    UPDATE public.volumetric_container_models model SET in_use = TRUE WHERE model.id = used_model_id AND NOT model.in_use;
 END;
 $$;
-ALTER FUNCTION lock_container_model(UUID) OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION lock_container_model(UUID) FROM PUBLIC;
-GRANT SELECT, UPDATE (id) ON container_models TO aps_writer;
+ALTER FUNCTION use_volumetric_model(UUID) OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION use_volumetric_model(UUID) FROM PUBLIC;
+GRANT SELECT, UPDATE (in_use) ON volumetric_container_models TO aps_writer;
 
 -- Lists measured deviations visible to the caller.
 CREATE FUNCTION procedure_deviations(checked_procedure_id UUID) RETURNS SETOF TEXT
@@ -59,12 +60,13 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
     bound_model_id UUID;
 BEGIN
-    FOR bound_model_id IN SELECT DISTINCT binding.asset_model_id FROM public.procedure_assets binding
-        JOIN public.container_models model ON model.id = binding.asset_model_id
-        WHERE binding.procedure_id = NEW.id ORDER BY binding.asset_model_id
-    LOOP
-        PERFORM public.lock_container_model(bound_model_id);
-    END LOOP;
+    IF EXISTS (SELECT 1 FROM public.procedures run WHERE run.id = NEW.id AND run.status_id = 'completed') THEN
+        FOR bound_model_id IN SELECT DISTINCT binding.asset_model_id FROM public.procedure_assets binding
+            WHERE binding.procedure_id = NEW.id ORDER BY binding.asset_model_id
+        LOOP
+            PERFORM public.use_volumetric_model(bound_model_id);
+        END LOOP;
+    END IF;
     IF EXISTS (SELECT 1 FROM public.procedures run WHERE run.id = NEW.id AND run.status_id = 'completed'
         AND (run.note IS NULL OR btrim(run.note) = '') AND EXISTS (SELECT 1 FROM public.procedure_deviations(run.id))) THEN
         RAISE EXCEPTION 'procedure % requires a note for its deviations', NEW.id USING ERRCODE = 'check_violation';
@@ -97,7 +99,7 @@ CREATE CONSTRAINT TRIGGER fractioning_deviations AFTER INSERT OR UPDATE ON fract
 CREATE FUNCTION check_pouring_volume() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
-    PERFORM public.lock_container_model(NEW.poured_into_model_id);
+    PERFORM public.use_volumetric_model(NEW.poured_into_model_id);
     IF NEW.volume_l > (SELECT model.volume_l FROM public.volumetric_container_models model WHERE model.id = NEW.poured_into_model_id) THEN
         RAISE EXCEPTION 'transfer volume exceeds destination capacity' USING ERRCODE = 'check_violation';
     END IF;
@@ -113,7 +115,7 @@ CREATE TRIGGER pouring_template_volume AFTER INSERT OR UPDATE ON pouring_procedu
 CREATE FUNCTION check_aliquoting_volume() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
-    PERFORM public.lock_container_model(NEW.aliquoted_into_model_id);
+    PERFORM public.use_volumetric_model(NEW.aliquoted_into_model_id);
     IF NEW.volume_l > (SELECT model.volume_l FROM public.volumetric_container_models model WHERE model.id = NEW.aliquoted_into_model_id) THEN
         RAISE EXCEPTION 'transfer volume exceeds destination capacity' USING ERRCODE = 'check_violation';
     END IF;
@@ -129,7 +131,7 @@ CREATE TRIGGER aliquoting_template_volume AFTER INSERT OR UPDATE ON aliquoting_p
 CREATE FUNCTION check_supernatant_volume() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
-    PERFORM public.lock_container_model(NEW.supernatant_destination_model_id);
+    PERFORM public.use_volumetric_model(NEW.supernatant_destination_model_id);
     IF NEW.volume_l > (SELECT model.volume_l FROM public.volumetric_container_models model WHERE model.id = NEW.supernatant_destination_model_id) THEN
         RAISE EXCEPTION 'transfer volume exceeds destination capacity' USING ERRCODE = 'check_violation';
     END IF;
@@ -144,29 +146,3 @@ GRANT SELECT ON weighing_procedure_templates, weighing_procedures, storage_proce
 
 CREATE CONSTRAINT TRIGGER procedures_measured_deviations AFTER INSERT OR UPDATE ON procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-
--- Keeps model capacities consistent with transfer setpoints and recorded runs.
-CREATE FUNCTION check_volume_model_capacity() RETURNS TRIGGER
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-BEGIN
-    PERFORM public.lock_container_model(NEW.id);
-    IF EXISTS (
-        SELECT 1 FROM public.pouring_procedure_templates template JOIN public.volumetric_container_models model ON model.id = template.poured_into_model_id WHERE model.id = NEW.id AND template.volume_l > model.volume_l
-        UNION ALL
-        SELECT 1 FROM public.aliquoting_procedure_templates template JOIN public.volumetric_container_models model ON model.id = template.aliquoted_into_model_id WHERE model.id = NEW.id AND template.volume_l > model.volume_l
-        UNION ALL
-        SELECT 1 FROM public.supernatant_procedure_templates template JOIN public.volumetric_container_models model ON model.id = template.supernatant_destination_model_id WHERE model.id = NEW.id AND template.volume_l > model.volume_l
-    ) OR EXISTS (
-        SELECT 1 FROM public.procedures run WHERE EXISTS (SELECT 1 FROM public.procedure_assets binding WHERE binding.procedure_id = run.id AND binding.asset_model_id = NEW.id) AND run.status_id = 'completed' AND (run.note IS NULL OR btrim(run.note) = '')
-            AND EXISTS (SELECT 1 FROM public.procedure_deviations(run.id))
-    ) THEN
-        RAISE EXCEPTION 'container volume conflicts with a transfer' USING ERRCODE = 'check_violation';
-    END IF;
-    RETURN NULL;
-END;
-$$;
-ALTER FUNCTION check_volume_model_capacity() OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION check_volume_model_capacity() FROM PUBLIC;
-CREATE CONSTRAINT TRIGGER volumetric_models_transfer_capacity AFTER INSERT OR UPDATE ON volumetric_container_models
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_volume_model_capacity();
-GRANT SELECT, UPDATE (id) ON container_models TO aps_writer;

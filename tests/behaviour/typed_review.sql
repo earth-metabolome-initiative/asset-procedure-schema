@@ -56,6 +56,7 @@ SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 SELECT throws_ok($$SELECT pg_temp.store('75000000-0000-7000-8000-000000000003', '74000000-0000-7000-8000-000000000002', '74000000-0000-7000-8000-000000000001', '2026-01-01 02:00+00', '2026-01-01 03:00+00'); SET CONSTRAINTS ALL IMMEDIATE; DO $reject$ BEGIN RAISE EXCEPTION 'unexpected acceptance' USING ERRCODE = 'ZX001'; END; $reject$; $$, '23514', 'containment cycle', 'storage refuses a temporal containment cycle');
 SELECT throws_ok($$SELECT pg_temp.store('75000000-0000-7000-8000-000000000004', '74000000-0000-7000-8000-000000000003', '74000000-0000-7000-8000-000000000002', '2026-01-01 02:00+00', '2026-01-01 03:00+00'); SET CONSTRAINTS ALL IMMEDIATE; DO $reject$ BEGIN RAISE EXCEPTION 'unexpected acceptance' USING ERRCODE = 'ZX001'; END; $reject$; $$, '23514', 'container capacity exceeded', 'descendant container obeys ancestor capacity');
+SAVEPOINT retrieval;
 SELECT pg_temp.new_procedure('75000000-0000-7000-8000-000000000005', '72000000-0000-7000-8000-000000000002', 'in_progress', NULL, NULL, NULL, 'retrieval_procedures');
 UPDATE procedures SET started_at = '2026-01-01 04:00+00' WHERE id = '75000000-0000-7000-8000-000000000005';
 INSERT INTO retrieval_procedures (id, organization_id, retrieval_procedure_template_id, status_id) VALUES ('75000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000002', 'in_progress');
@@ -63,8 +64,8 @@ SELECT pg_temp.bind('76000000-0000-7000-8000-000000000001', '75000000-0000-7000-
 SELECT pg_temp.bind('76000000-0000-7000-8000-000000000002', '75000000-0000-7000-8000-000000000005', '73000000-0000-7000-8000-000000000004', '74000000-0000-7000-8000-000000000003');
 SELECT throws_ok($$UPDATE procedures SET status_id = 'completed', ended_at = '2026-01-01 05:00+00' WHERE id = '75000000-0000-7000-8000-000000000005'; SET CONSTRAINTS ALL IMMEDIATE; DO $reject$ BEGIN RAISE EXCEPTION 'unexpected acceptance' USING ERRCODE = 'ZX001'; END; $reject$; $$, '23514', 'retrieved asset is not in its source container', 'retrieval refuses the wrong source');
 SELECT lives_ok($statement$UPDATE procedure_assets SET asset_id = '74000000-0000-7000-8000-000000000002', asset_model_id = '71000000-0000-7000-8000-000000000002' WHERE id = '76000000-0000-7000-8000-000000000002'; UPDATE procedures SET status_id = 'completed', ended_at = '2026-01-01 05:00+00' WHERE id = '75000000-0000-7000-8000-000000000005'; SET CONSTRAINTS ALL IMMEDIATE$statement$, 'retrieval accepts its holding container');
+ROLLBACK TO retrieval;
 SET CONSTRAINTS ALL DEFERRED;
-DELETE FROM procedures WHERE id = '75000000-0000-7000-8000-000000000005';
 SELECT pg_temp.new_procedure('75000000-0000-7000-8000-000000000006', '72000000-0000-7000-8000-000000000003', 'in_progress', NULL, NULL);
 UPDATE procedures SET started_at = '2026-01-01 06:00+00' WHERE id = '75000000-0000-7000-8000-000000000006';
 SELECT pg_temp.bind('76000000-0000-7000-8000-000000000003', '75000000-0000-7000-8000-000000000006', '73000000-0000-7000-8000-000000000005', '74000000-0000-7000-8000-000000000002');
@@ -403,11 +404,11 @@ SELECT pg_temp.new_slot('78000000-0000-7000-8000-000000000241', '78000000-0000-7
 SELECT pg_temp.new_slot('78000000-0000-7000-8000-000000000242', '78000000-0000-7000-8000-000000000240', 'sample', '78000000-0000-7000-8000-000000000002', 'produced', 1, 1);
 SELECT lives_ok($statement$INSERT INTO harvesting_procedure_templates (id, organization_id, sample_source_slot_id, sample_source_model_id, sample_slot_id, sample_model_id, source_family_model_id) VALUES ('78000000-0000-7000-8000-000000000240', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000241', '78000000-0000-7000-8000-000000000006', '78000000-0000-7000-8000-000000000242', '78000000-0000-7000-8000-000000000002', '78000000-0000-7000-8000-000000000001'); SET CONSTRAINTS ALL IMMEDIATE$statement$, 'harvesting accepts descendant source model');
 SET CONSTRAINTS ALL DEFERRED;
-SELECT throws_ok($statement$DELETE FROM container_compatibility_rules WHERE id = '78000000-0000-7000-8000-000000000090'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23503', NULL, 'transfer compatibility survives rule deletion');
-SET CONSTRAINTS ALL DEFERRED;
+SELECT is_empty($statement$DELETE FROM container_compatibility_rules WHERE id = '78000000-0000-7000-8000-000000000090' RETURNING id$statement$,
+  'a compatibility rule a transfer template relies on cannot be deleted');
+SELECT is_empty($statement$UPDATE container_compatibility_rules SET quantity = quantity + 1 WHERE id = '78000000-0000-7000-8000-000000000090' RETURNING id$statement$,
+  'a compatibility rule a transfer template relies on cannot be edited');
 RESET ROLE;
-SELECT throws_ok($statement$UPDATE container_compatibility_rules SET contained_asset_model_id = '78000000-0000-7000-8000-000000000001' WHERE id = '78000000-0000-7000-8000-000000000090'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23503', NULL, 'transfer compatibility survives rule edits');
-SET CONSTRAINTS ALL DEFERRED;
 SELECT throws_ok($statement$UPDATE retrieval_procedure_templates SET retrieved_asset_slot_id = retrieved_from_slot_id, retrieved_asset_model_id = retrieved_from_model_id WHERE id = '78000000-0000-7000-8000-000000000220'$statement$, '23514', NULL, 'retrieval requires distinct asset and container slots');
 SELECT throws_ok($statement$UPDATE fractioning_procedure_templates SET source_sample_slot_id = fraction_slot_id, source_sample_model_id = fraction_model_id WHERE id = '78000000-0000-7000-8000-000000000160'$statement$, '23503', NULL, 'source sample requires an input slot');
 SET ROLE app;

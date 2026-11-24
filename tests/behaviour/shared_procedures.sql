@@ -218,7 +218,8 @@ SELECT lives_ok($statement$UPDATE procedures SET status_id = 'completed', ended_
 SET CONSTRAINTS ALL DEFERRED;
 SELECT throws_ok($statement$UPDATE procedures SET started_at = '2026-01-02 04:00:00+00' WHERE id = '60000000-0000-7000-8000-000000000240'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', NULL, 'retrieval time edits preserve historical capacity');
 SELECT throws_ok($statement$DELETE FROM procedures WHERE id = '60000000-0000-7000-8000-000000000240'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', NULL, 'retrieval deletion cannot overfill a historical container');
-SELECT throws_ok($statement$UPDATE procedures SET status_id = 'aborted', ended_at = '2026-01-02 03:30:00+00' WHERE id = '60000000-0000-7000-8000-000000000240'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', NULL, 'aborted retrieval cannot free capacity');
+SELECT lives_ok($statement$UPDATE procedures SET status_id = 'aborted', ended_at = '2026-01-02 03:30:00+00' WHERE id = '60000000-0000-7000-8000-000000000240'; SET CONSTRAINTS ALL IMMEDIATE$statement$, 'an aborted retrieval keeps the capacity it freed');
+SET CONSTRAINTS ALL DEFERRED;
 
 SELECT pg_temp.new_model('60000000-0000-7000-8000-000000000300', 'freezer model', NULL, 'freezer_models');
 INSERT INTO physical_asset_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000300', '20000000-0000-7000-8000-000000000001');
@@ -312,7 +313,7 @@ UPDATE procedures SET status_id = 'completed', ended_at = '2026-01-06 01:00:00+0
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 RESET ROLE;
-SELECT results_eq($query$SELECT asset_id, container_id FROM asset_containment() WHERE container_id = '60000000-0000-7000-8000-000000000603'$query$,
+SELECT results_eq($query$SELECT asset_id, container_id FROM asset_moves WHERE kind_id = 'into' AND container_id = '60000000-0000-7000-8000-000000000603'$query$,
   $expected$VALUES ('60000000-0000-7000-8000-000000000040'::uuid, '60000000-0000-7000-8000-000000000603'::uuid)$expected$, 'untyped slot placement produces containment');
 SELECT col_not_null('public', 'freezing_procedure_templates', 'duration_s', 'freezing duration is required');
 SELECT col_default_is('public', 'freezing_procedure_templates', 'duration_tolerance_percentage', '5.0', 'freezing duration tolerance defaults to five percent');

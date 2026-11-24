@@ -551,11 +551,27 @@ CREATE TRIGGER procedure_template_slot_bindings_guard AFTER INSERT OR UPDATE OR 
 CREATE TRIGGER procedure_template_step_parameters_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_template_step_parameters
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_step_relation();
 
+-- Lists the templates the caller reads, which are those connetto grants the
+-- caller and, transitively, the templates their steps run.
+CREATE FUNCTION readable_templates() RETURNS SETOF UUID
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+    WITH RECURSIVE readable (id) AS (
+        SELECT authz.resources_with('reader')
+        UNION
+        SELECT step.child_template_id FROM public.procedure_template_steps step
+        JOIN readable ON readable.id = step.parent_template_id
+    )
+    SELECT readable.id FROM readable
+$$;
+ALTER FUNCTION readable_templates() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION readable_templates() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION readable_templates() TO app;
+
 GRANT SELECT, INSERT, UPDATE (name, description, instruction, state_id), DELETE ON procedure_templates TO app;
 ALTER TABLE procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procedure_templates FORCE ROW LEVEL SECURITY;
 CREATE POLICY procedure_templates_select ON procedure_templates FOR SELECT TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+    USING (id = ANY (ARRAY(SELECT public.readable_templates()))
         OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY procedure_templates_insert ON procedure_templates FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
@@ -582,7 +598,7 @@ GRANT SELECT, INSERT, UPDATE (name, description, asset_model_id, role_id, minimu
 ALTER TABLE procedure_template_slots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procedure_template_slots FORCE ROW LEVEL SECURITY;
 CREATE POLICY procedure_template_slots_select ON procedure_template_slots FOR SELECT TO app
-    USING (procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+    USING (procedure_template_id = ANY (ARRAY(SELECT public.readable_templates())));
 CREATE POLICY procedure_template_slots_insert ON procedure_template_slots FOR INSERT TO app
     WITH CHECK (procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND asset_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));

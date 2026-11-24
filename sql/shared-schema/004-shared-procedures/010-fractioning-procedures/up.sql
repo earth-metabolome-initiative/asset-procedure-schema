@@ -239,7 +239,7 @@ BEGIN
     SELECT template.fragment_placed_into_slot_id, template.fraction_slot_id
     INTO fragment_placed_into_slot, fraction_slot
     FROM public.fractioning_procedure_templates template
-    WHERE template.id = NEW.id OR template.fragment_placed_into_slot_id = NEW.id OR template.fraction_slot_id = NEW.id;
+    WHERE template.id = NEW.id;
     PERFORM public.require_single_typed_slot(fragment_placed_into_slot);
     PERFORM public.require_single_typed_slot(fraction_slot);
     RETURN NULL;
@@ -247,10 +247,30 @@ END;
 $$;
 ALTER FUNCTION public.check_fractioning_slots() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_fractioning_slots() FROM PUBLIC;
+
+-- Checks the fractioning slot contract after cardinality edits.
+CREATE FUNCTION public.check_fractioning_slot_cardinality() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    fragment_placed_into_slot UUID;
+    fraction_slot UUID;
+BEGIN
+    SELECT template.fragment_placed_into_slot_id, template.fraction_slot_id
+    INTO fragment_placed_into_slot, fraction_slot
+    FROM public.fractioning_procedure_templates template
+    WHERE template.id = NEW.procedure_template_id
+      AND (template.fragment_placed_into_slot_id = NEW.id OR template.fraction_slot_id = NEW.id);
+    PERFORM public.require_single_typed_slot(fragment_placed_into_slot);
+    PERFORM public.require_single_typed_slot(fraction_slot);
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_fractioning_slot_cardinality() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_fractioning_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.fractioning_procedure_templates TO aps_writer;
 CREATE CONSTRAINT TRIGGER fractioning_template_slots AFTER INSERT OR UPDATE ON public.fractioning_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_fractioning_slots();
 CREATE CONSTRAINT TRIGGER fractioning_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
-    EXECUTE FUNCTION public.check_fractioning_slots();
+    EXECUTE FUNCTION public.check_fractioning_slot_cardinality();

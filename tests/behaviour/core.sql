@@ -217,10 +217,9 @@ SELECT results_eq($query$SELECT count(DISTINCT procedure_id) FROM procedure_asse
 SELECT throws_ok($statement$DELETE FROM assets WHERE id = 'b0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23503', 'update or delete on table "assets" violates foreign key constraint "procedure_assets_asset_id_asset_model_id_fkey" on table "procedure_assets"', 'asset bound to a procedure cannot be deleted');
 DELETE FROM procedure_templates WHERE id = 'c0000000-0000-7000-8000-000000000009';
 SELECT throws_ok($statement$DELETE FROM procedure_templates WHERE id = 'c0000000-0000-7000-8000-000000000003'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23503', NULL, 'template with procedures cannot be deleted');
-DELETE FROM procedures WHERE id = 'f0000000-0000-7000-8000-000000000001';
-SET CONSTRAINTS ALL IMMEDIATE;
+SELECT throws_ok($statement$DELETE FROM procedures WHERE id = 'f0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514',
+  'procedure f0000000-0000-7000-8000-000000000001 is completed and uses an asset, so it cannot be deleted', 'a completed run that used an asset stays on the ledger');
 SET CONSTRAINTS ALL DEFERRED;
-SELECT is_empty($query$SELECT id FROM procedures WHERE root_procedure_id = 'f0000000-0000-7000-8000-000000000001' UNION ALL SELECT id FROM procedure_assets$query$, 'admin deletes a completed procedure with its children and bindings');
 
 
 SELECT pg_temp.new_procedure('f0000000-0000-7000-8000-000000000005', 'c0000000-0000-7000-8000-000000000004', 'in_progress', NULL, NULL);

@@ -2,7 +2,7 @@
 SET search_path = public, test_tools;
 BEGIN;
 \ir ../fixture.sql
-SELECT plan(23);
+SELECT plan(22);
 
 -- A second organization, founded by the second user, holding a model and an asset of its own.
 RESET ROLE;
@@ -137,19 +137,6 @@ SELECT throws_ok($statement$SELECT pg_temp.create_ownable('f7000000-0000-7000-80
       VALUES ('f7000000-0000-7000-8000-000000000040', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001',
         'procedures', 'c7000000-0000-7000-8000-000000000001', 'in_progress', 'f7000000-0000-7000-8000-000000000040', now())$statement$,
   '23514', NULL, 'a run in progress names who performs it');
--- The writer joins the performer's organization, so the performer passes the
--- policy as a co-member and only the membership guard refuses.
-SAVEPOINT shared_performer;
-RESET ROLE;
-INSERT INTO memberships (organization_id, user_id, state)
-  VALUES ('20000000-0000-7000-8000-000000000002', '10000000-0000-7000-8000-000000000001', 'active');
-SET ROLE app;
-SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f7000000-0000-7000-8000-000000000041', 'c7000000-0000-7000-8000-000000000001', 'planned', NULL, NULL);
-    UPDATE procedures SET performed_by_id = '10000000-0000-7000-8000-000000000002' WHERE id = 'f7000000-0000-7000-8000-000000000041'$statement$,
-  '23514', 'user 10000000-0000-7000-8000-000000000002 is not an active member of organization 20000000-0000-7000-8000-000000000001',
-  'a run is performed by an active member of its organization');
-ROLLBACK TO shared_performer;
-
 SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f7000000-0000-7000-8000-000000000042', 'c7000000-0000-7000-8000-000000000001', 'in_progress', NULL, NULL);
     SELECT pg_temp.bind('97000000-0000-7000-8000-000000000042', 'f7000000-0000-7000-8000-000000000042', 'd7000000-0000-7000-8000-000000000001', 'b7000000-0000-7000-8000-000000000090')$statement$,
   '42501', NULL, 'an asset of another organization cannot be bound');

@@ -206,7 +206,7 @@ DECLARE
 BEGIN
     FOR weighed_asset_slot IN
         SELECT template.weighed_asset_slot_id FROM public.weighing_procedure_templates template
-        WHERE template.id = NEW.id OR template.weighed_asset_slot_id = NEW.id
+        WHERE template.id = NEW.id
     LOOP
         PERFORM public.require_single_typed_slot(weighed_asset_slot);
     END LOOP;
@@ -215,10 +215,28 @@ END;
 $$;
 ALTER FUNCTION public.check_weighing_slots() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_weighing_slots() FROM PUBLIC;
+
+-- Checks the weighing slot contract after cardinality edits.
+CREATE FUNCTION public.check_weighing_slot_cardinality() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    weighed_asset_slot UUID;
+BEGIN
+    FOR weighed_asset_slot IN
+        SELECT template.weighed_asset_slot_id FROM public.weighing_procedure_templates template
+        WHERE template.id = NEW.procedure_template_id AND template.weighed_asset_slot_id = NEW.id
+    LOOP
+        PERFORM public.require_single_typed_slot(weighed_asset_slot);
+    END LOOP;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_weighing_slot_cardinality() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_weighing_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.weighing_procedure_templates TO aps_writer;
 CREATE CONSTRAINT TRIGGER weighing_template_slots AFTER INSERT OR UPDATE ON public.weighing_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_weighing_slots();
 CREATE CONSTRAINT TRIGGER weighing_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
-    EXECUTE FUNCTION public.check_weighing_slots();
+    EXECUTE FUNCTION public.check_weighing_slot_cardinality();

@@ -112,7 +112,7 @@ CREATE POLICY aliquoting_procedure_templates_select ON aliquoting_procedure_temp
 CREATE POLICY aliquoting_procedure_templates_insert ON aliquoting_procedure_templates FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND aliquoted_from_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND aliquoted_into_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND aliquot_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND aliquoted_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND source_sample_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY aliquoting_procedure_templates_update ON aliquoting_procedure_templates FOR UPDATE TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND aliquoted_into_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY aliquoting_procedure_templates_delete ON aliquoting_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
@@ -238,17 +238,33 @@ DECLARE
 BEGIN
     SELECT template.aliquoted_into_slot_id INTO aliquoted_into_slot
     FROM public.aliquoting_procedure_templates template
-    WHERE template.id = NEW.id OR template.aliquoted_into_slot_id = NEW.id;
+    WHERE template.id = NEW.id;
     PERFORM public.require_single_typed_slot(aliquoted_into_slot);
     RETURN NULL;
 END;
 $$;
 ALTER FUNCTION public.check_aliquoting_slots() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_aliquoting_slots() FROM PUBLIC;
+
+-- Checks the aliquoting slot contract after cardinality edits.
+CREATE FUNCTION public.check_aliquoting_slot_cardinality() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    aliquoted_into_slot UUID;
+BEGIN
+    SELECT template.aliquoted_into_slot_id INTO aliquoted_into_slot
+    FROM public.aliquoting_procedure_templates template
+    WHERE template.id = NEW.procedure_template_id AND template.aliquoted_into_slot_id = NEW.id;
+    PERFORM public.require_single_typed_slot(aliquoted_into_slot);
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_aliquoting_slot_cardinality() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_aliquoting_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.aliquoting_procedure_templates TO aps_writer;
 CREATE CONSTRAINT TRIGGER aliquoting_template_slots AFTER INSERT OR UPDATE ON public.aliquoting_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_aliquoting_slots();
 CREATE CONSTRAINT TRIGGER aliquoting_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
-    EXECUTE FUNCTION public.check_aliquoting_slots();
+    EXECUTE FUNCTION public.check_aliquoting_slot_cardinality();

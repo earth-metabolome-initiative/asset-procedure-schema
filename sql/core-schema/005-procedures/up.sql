@@ -290,23 +290,18 @@ $$;
 ALTER FUNCTION require_executable_template(UUID, UUID, BOOLEAN) OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_executable_template(UUID, UUID, BOOLEAN) FROM PUBLIC;
 
--- Rejects naming as performer a user who is not an active member of the
--- procedure's organization.
-CREATE FUNCTION require_active_performer(performer_id UUID, performing_organization_id UUID) RETURNS VOID
+-- Rejects naming as performer anyone but the caller.
+CREATE FUNCTION require_caller_performer(procedure_id UUID, performer_id UUID) RETURNS VOID
 LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
-    IF performer_id IS NOT NULL AND NOT EXISTS (
-        SELECT 1 FROM public.memberships membership
-        WHERE membership.organization_id = performing_organization_id AND membership.user_id = performer_id
-          AND membership.state = 'active'
-    ) THEN
-        RAISE EXCEPTION 'user % is not an active member of organization %', performer_id, performing_organization_id
+    IF performer_id IS DISTINCT FROM authz.caller_id() THEN
+        RAISE EXCEPTION 'procedure % names performer %, who is not the caller', procedure_id, performer_id
             USING ERRCODE = 'check_violation';
     END IF;
 END;
 $$;
-ALTER FUNCTION require_active_performer(UUID, UUID) OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION require_active_performer(UUID, UUID) FROM PUBLIC;
+ALTER FUNCTION require_caller_performer(UUID, UUID) OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_caller_performer(UUID, UUID) FROM PUBLIC;
 
 CREATE FUNCTION guard_procedure() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
@@ -339,7 +334,9 @@ BEGIN
                 USING ERRCODE = 'check_violation';
         END IF;
         PERFORM public.require_executable_template(NEW.id, NEW.procedure_template_id, NEW.parent_procedure_id IS NOT NULL);
-        PERFORM public.require_active_performer(NEW.performed_by_id, NEW.organization_id);
+        IF NEW.performed_by_id IS NOT NULL THEN
+            PERFORM public.require_caller_performer(NEW.id, NEW.performed_by_id);
+        END IF;
         IF NEW.parent_procedure_id IS NOT NULL THEN
             PERFORM public.lock_procedure(NEW.parent_procedure_id);
             SELECT parent.status_id INTO parent_status FROM public.procedures parent WHERE parent.id = NEW.parent_procedure_id;
@@ -381,9 +378,9 @@ BEGIN
         RETURN NEW;
     END IF;
 
-    IF NEW.performed_by_id IS DISTINCT FROM OLD.performed_by_id
+    IF (NEW.performed_by_id IS DISTINCT FROM OLD.performed_by_id AND NEW.performed_by_id IS NOT NULL)
         OR (OLD.status_id = 'planned' AND NEW.status_id = 'in_progress') THEN
-        PERFORM public.require_active_performer(NEW.performed_by_id, NEW.organization_id);
+        PERFORM public.require_caller_performer(NEW.id, NEW.performed_by_id);
     END IF;
 
     IF NEW.status_id = OLD.status_id THEN
@@ -570,7 +567,9 @@ CREATE CONSTRAINT TRIGGER procedures_times AFTER INSERT OR UPDATE OF started_at,
 -- Rejects bindings on closed procedures, enforces `maximum_count`, and makes
 -- a row filling a child slot its step binds inherit the parent's row of the
 -- bound parent slot, the repeat binding itself for a repeated step's repeat
--- slot. A row other rows or runs inherit keeps its asset and stays.
+-- slot. A row other rows or runs inherit keeps its asset and stays. A run in
+-- progress or completed that binds an asset keeps its history and is aborted
+-- instead of deleted.
 CREATE FUNCTION guard_procedure_asset() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
     bound_parent_slot UUID;
@@ -588,6 +587,9 @@ BEGIN
             IF EXISTS (SELECT 1 FROM public.procedures run WHERE run.repeat_procedure_asset_id = OLD.id) THEN
                 RAISE EXCEPTION 'binding % has runs of a repeated step', OLD.id USING ERRCODE = 'check_violation';
             END IF;
+        ELSIF OLD.asset_id IS NOT NULL AND OLD.status_id IN ('in_progress', 'completed') THEN
+            RAISE EXCEPTION 'procedure % is % and uses an asset, so it cannot be deleted', OLD.procedure_id, OLD.status_id
+                USING ERRCODE = 'check_violation';
         END IF;
         RETURN OLD;
     END IF;
@@ -655,46 +657,131 @@ REVOKE EXECUTE ON FUNCTION guard_procedure_asset() FROM PUBLIC;
 CREATE TRIGGER procedure_assets_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_assets
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_asset();
 
--- Whether one procedure is the other or descends from it.
-CREATE FUNCTION procedures_nested(first_id UUID, second_id UUID) RETURNS BOOLEAN LANGUAGE sql STABLE SET search_path = pg_catalog, pg_temp AS $$
-    WITH RECURSIVE first_line (id) AS (
-        SELECT first_id
-        UNION
-        SELECT procedure.parent_procedure_id FROM public.procedures procedure JOIN first_line ON procedure.id = first_line.id
-        WHERE procedure.parent_procedure_id IS NOT NULL
-    ), second_line (id) AS (
-        SELECT second_id
-        UNION
-        SELECT procedure.parent_procedure_id FROM public.procedures procedure JOIN second_line ON procedure.id = second_line.id
-        WHERE procedure.parent_procedure_id IS NOT NULL
-    )
-    SELECT EXISTS (SELECT 1 FROM first_line WHERE id = second_id) OR EXISTS (SELECT 1 FROM second_line WHERE id = first_id)
-$$;
-ALTER FUNCTION procedures_nested(UUID, UUID) OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION procedures_nested(UUID, UUID) FROM PUBLIC;
+-- One row per binding naming an asset, kept equal to the binding and its
+-- procedure by trusted triggers, so an asset's readers check its lifetime
+-- without reading the procedures that used it.
+CREATE TABLE asset_uses (
+    -- Binding naming the asset.
+    binding_id UUID PRIMARY KEY REFERENCES procedure_assets (id) ON DELETE CASCADE,
+    -- connetto organization owning the procedure.
+    organization_id UUID NOT NULL,
+    -- Asset the binding names.
+    asset_id UUID NOT NULL REFERENCES assets (id),
+    -- Procedure binding the asset.
+    procedure_id UUID NOT NULL,
+    -- Identifiers of the procedure's ancestors and the procedure, from the
+    -- root down, each followed by `/`, so a use nested in another has the
+    -- other's lineage as prefix.
+    lineage TEXT NOT NULL CHECK (lineage <> '' AND length(lineage) <= 4096),
+    -- Whether the binding produces the asset.
+    produces BOOLEAN NOT NULL,
+    -- Whether the binding consumes the asset.
+    consumes BOOLEAN NOT NULL,
+    -- Status of the procedure.
+    status_id TEXT NOT NULL REFERENCES procedure_statuses (id),
+    -- When the procedure started.
+    started_at TIMESTAMPTZ,
+    -- When the procedure ended.
+    ended_at TIMESTAMPTZ
+);
+CREATE INDEX ON asset_uses (asset_id);
+CREATE INDEX ON asset_uses (procedure_id);
+CREATE INDEX ON asset_uses (status_id);
+INSERT INTO table_names (id) VALUES ('asset_uses');
+GRANT SELECT, INSERT, UPDATE, DELETE ON asset_uses TO aps_writer;
 
--- Rejects uses of an asset outside its life. Among procedures that are neither
--- aborted nor skipped and not nested in one another, a procedure using the asset starts
--- no earlier than its producer ended and ends no later than its consumer
--- started. An unknown time counts against the started procedure.
+-- Lists the assets whose ledgers the caller reads, which are the assets the
+-- caller reads and those bound by procedures the caller reads.
+CREATE FUNCTION ledger_assets() RETURNS SETOF UUID
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+    WITH readable (id) AS (SELECT authz.resources_with('reader'))
+    SELECT readable.id FROM readable
+    UNION
+    SELECT binding.asset_id FROM public.procedure_assets binding
+    WHERE binding.asset_id IS NOT NULL AND binding.procedure_id IN (SELECT readable.id FROM readable)
+$$;
+ALTER FUNCTION ledger_assets() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION ledger_assets() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION ledger_assets() TO app;
+
+-- Serialises the checks of one asset's ledger without reading its row.
+CREATE FUNCTION lock_ledger_asset(locked_asset_id UUID) RETURNS VOID
+LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM authz.refuse_repeatable_read();
+    PERFORM pg_advisory_xact_lock(hashtextextended(locked_asset_id::text, 0));
+END;
+$$;
+ALTER FUNCTION lock_ledger_asset(UUID) OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION lock_ledger_asset(UUID) FROM PUBLIC;
+
+-- The lineage of a procedure, as `asset_uses.lineage` holds it.
+CREATE FUNCTION procedure_lineage(lineage_procedure_id UUID) RETURNS TEXT
+LANGUAGE sql STABLE SET search_path = pg_catalog, pg_temp AS $$
+    WITH RECURSIVE line (id, parent_id, depth) AS (
+        SELECT run.id, run.parent_procedure_id, 0 FROM public.procedures run WHERE run.id = lineage_procedure_id
+        UNION ALL
+        SELECT run.id, run.parent_procedure_id, line.depth + 1
+        FROM public.procedures run JOIN line ON run.id = line.parent_id
+    )
+    SELECT string_agg(line.id::text || '/', '' ORDER BY line.depth DESC) FROM line
+$$;
+ALTER FUNCTION procedure_lineage(UUID) OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION procedure_lineage(UUID) FROM PUBLIC;
+
+-- Rewrites the use of a written binding.
+CREATE FUNCTION record_asset_use() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    IF TG_OP = 'UPDATE' THEN
+        DELETE FROM public.asset_uses used WHERE used.binding_id = OLD.id;
+    END IF;
+    IF NEW.asset_id IS NOT NULL THEN
+        INSERT INTO public.asset_uses
+            (binding_id, organization_id, asset_id, procedure_id, lineage, produces, consumes, status_id, started_at, ended_at)
+        SELECT NEW.id, NEW.organization_id, NEW.asset_id, NEW.procedure_id, public.procedure_lineage(run.id),
+            NEW.slot_role_id IN ('produced', 'intermediate'), NEW.slot_role_id IN ('consumed', 'intermediate'),
+            run.status_id, run.started_at, run.ended_at
+        FROM public.procedures run WHERE run.id = NEW.procedure_id;
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION record_asset_use() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION record_asset_use() FROM PUBLIC;
+CREATE TRIGGER procedure_assets_use AFTER INSERT OR UPDATE OF asset_id ON procedure_assets
+    FOR EACH ROW EXECUTE FUNCTION record_asset_use();
+
+-- Copies a procedure's status and times into the uses of its bindings.
+CREATE FUNCTION copy_procedure_use_times() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.asset_uses SET status_id = NEW.status_id, started_at = NEW.started_at, ended_at = NEW.ended_at
+    WHERE procedure_id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION copy_procedure_use_times() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_procedure_use_times() FROM PUBLIC;
+CREATE TRIGGER procedures_use_times AFTER UPDATE OF status_id, started_at, ended_at ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.started_at IS DISTINCT FROM NEW.started_at
+        OR OLD.ended_at IS DISTINCT FROM NEW.ended_at)
+    EXECUTE FUNCTION copy_procedure_use_times();
+
+-- Rejects uses of an asset outside its life. Among uses whose procedures are
+-- neither aborted nor skipped and not nested in one another, a use starts no
+-- earlier than the producing one ended and ends no later than the consuming
+-- one started. An unknown time counts against the started procedure.
 CREATE FUNCTION require_asset_lifetime(checked_asset_id UUID) RETURNS VOID LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
     IF EXISTS (
-        WITH uses AS (
-            SELECT procedure.id, procedure.started_at, procedure.ended_at,
-                bool_or(binding.slot_role_id IN ('produced', 'intermediate')) AS produces,
-                bool_or(binding.slot_role_id IN ('consumed', 'intermediate')) AS consumes
-            FROM public.procedure_assets binding
-            JOIN public.procedures procedure ON procedure.id = binding.procedure_id
-            WHERE binding.asset_id = checked_asset_id AND procedure.status_id NOT IN ('aborted', 'skipped')
-            GROUP BY procedure.id, procedure.started_at, procedure.ended_at
-        )
-        SELECT 1 FROM uses edge JOIN uses other ON other.id <> edge.id
-        WHERE ((edge.produces AND other.started_at IS NOT NULL
+        SELECT 1 FROM public.asset_uses edge
+        JOIN public.asset_uses other ON other.asset_id = edge.asset_id AND other.procedure_id <> edge.procedure_id
+        WHERE edge.asset_id = checked_asset_id
+          AND edge.status_id NOT IN ('aborted', 'skipped') AND other.status_id NOT IN ('aborted', 'skipped')
+          AND ((edge.produces AND other.started_at IS NOT NULL
                     AND (edge.ended_at IS NULL OR other.started_at < edge.ended_at))
                OR (edge.consumes AND edge.started_at IS NOT NULL AND other.started_at IS NOT NULL
                     AND (other.ended_at IS NULL OR other.ended_at > edge.started_at)))
-          AND NOT public.procedures_nested(edge.id, other.id)
+          AND other.lineage NOT LIKE edge.lineage || '%' AND edge.lineage NOT LIKE other.lineage || '%'
     ) THEN
         RAISE EXCEPTION 'asset % is used outside the time between its production and its consumption', checked_asset_id
             USING ERRCODE = 'check_violation';
@@ -704,57 +791,17 @@ $$;
 ALTER FUNCTION require_asset_lifetime(UUID) OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_asset_lifetime(UUID) FROM PUBLIC;
 
-CREATE FUNCTION check_procedure_asset_lifetime() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+CREATE FUNCTION check_asset_use_lifetime() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
-    IF NEW.asset_id IS NOT NULL THEN
-        PERFORM public.lock_asset(NEW.asset_id);
-        PERFORM public.require_asset_lifetime(NEW.asset_id);
-    END IF;
+    PERFORM public.lock_ledger_asset(NEW.asset_id);
+    PERFORM public.require_asset_lifetime(NEW.asset_id);
     RETURN NULL;
 END;
 $$;
-ALTER FUNCTION check_procedure_asset_lifetime() OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION check_procedure_asset_lifetime() FROM PUBLIC;
-CREATE CONSTRAINT TRIGGER procedure_assets_lifetime AFTER INSERT OR UPDATE ON procedure_assets
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_asset_lifetime();
-
--- Locks the assets a procedure binds in id order, so the lifetime checks of
--- two procedures sharing assets run one after the other.
-CREATE FUNCTION lock_procedure_assets(locked_procedure_id UUID) RETURNS VOID
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-BEGIN
-    PERFORM authz.refuse_repeatable_read();
-    PERFORM asset.id FROM public.assets asset
-    WHERE asset.id IN (
-        SELECT binding.asset_id FROM public.procedure_assets binding
-        WHERE binding.procedure_id = locked_procedure_id
-    )
-    ORDER BY asset.id
-    FOR NO KEY UPDATE;
-END;
-$$;
-ALTER FUNCTION lock_procedure_assets(UUID) OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION lock_procedure_assets(UUID) FROM PUBLIC;
-
-CREATE FUNCTION check_procedure_lifetime() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-DECLARE
-    used_asset_id UUID;
-BEGIN
-    PERFORM public.lock_procedure_assets(NEW.id);
-    FOR used_asset_id IN
-        SELECT DISTINCT binding.asset_id FROM public.procedure_assets binding
-        WHERE binding.procedure_id = NEW.id AND binding.asset_id IS NOT NULL
-        ORDER BY binding.asset_id
-    LOOP
-        PERFORM public.require_asset_lifetime(used_asset_id);
-    END LOOP;
-    RETURN NULL;
-END;
-$$;
-ALTER FUNCTION check_procedure_lifetime() OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION check_procedure_lifetime() FROM PUBLIC;
-CREATE CONSTRAINT TRIGGER procedures_lifetime AFTER UPDATE ON procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_lifetime();
+ALTER FUNCTION check_asset_use_lifetime() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION check_asset_use_lifetime() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER asset_uses_lifetime AFTER INSERT OR UPDATE ON asset_uses
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_asset_use_lifetime();
 
 -- Guards a typed procedure subtype, which carries a copy of `status_id` held
 -- equal to its procedure by a deferred `FOREIGN KEY (id, ..., status_id)
@@ -856,14 +903,15 @@ CREATE POLICY procedures_insert ON procedures FOR INSERT TO app
         AND procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader')))
         AND (parent_procedure_id IS NULL OR parent_procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
         AND (parent_template_id IS NULL OR parent_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
-        AND (performed_by_id IS NULL OR performed_by_id = ANY (ARRAY(SELECT authz.co_member_users()))));
+        AND (performed_by_id IS NULL OR performed_by_id = (SELECT authz.caller_id())));
 CREATE POLICY procedures_update ON procedures FOR UPDATE TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
-        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
-        AND (performed_by_id IS NULL OR performed_by_id = ANY (ARRAY(SELECT authz.co_member_users()))));
+        AND project_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedures_delete ON procedures FOR DELETE TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin')))
+        AND (parent_procedure_id IS NULL OR parent_procedure_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));
 CREATE POLICY procedures_archived_insert ON procedures AS RESTRICTIVE FOR INSERT TO app
     WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(procedure_template_id)
         AND NOT authz.is_archived(parent_procedure_id));
@@ -887,12 +935,15 @@ CREATE POLICY procedure_assets_insert ON procedure_assets FOR INSERT TO app
         AND procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader')))
         AND (parent_procedure_id IS NULL OR parent_procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer')))));
 CREATE POLICY procedure_assets_update ON procedure_assets FOR UPDATE TO app
-    USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader')))
+        AND (asset_id IS NULL OR asset_id = ANY (ARRAY(SELECT authz.resources_with('reader')))))
     WITH CHECK (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND asset_model_id = ANY (ARRAY(SELECT authz.resources_with('reader')))
         AND (asset_id IS NULL OR asset_id = ANY (ARRAY(SELECT authz.resources_with('writer')))));
 CREATE POLICY procedure_assets_delete ON procedure_assets FOR DELETE TO app
-    USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+    USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND (asset_id IS NULL OR asset_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));
 CREATE POLICY procedure_assets_archived_insert ON procedure_assets AS RESTRICTIVE FOR INSERT TO app
     WITH CHECK (NOT authz.is_archived(procedure_id) AND NOT authz.is_archived(asset_model_id) AND NOT authz.is_archived(asset_id));
 CREATE POLICY procedure_assets_archived_update ON procedure_assets AS RESTRICTIVE FOR UPDATE TO app
@@ -913,7 +964,8 @@ CREATE POLICY procedure_parameter_values_insert ON procedure_parameter_values FO
     WITH CHECK (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY procedure_parameter_values_update ON procedure_parameter_values FOR UPDATE TO app
-    USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
+        AND procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
     WITH CHECK (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_parameter_values_delete ON procedure_parameter_values FOR DELETE TO app
     USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
@@ -926,6 +978,43 @@ CREATE POLICY procedure_parameter_values_archived_delete ON procedure_parameter_
 CREATE POLICY procedure_parameter_values_blocked ON procedure_parameter_values AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+GRANT SELECT ON asset_uses TO app;
+ALTER TABLE asset_uses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE asset_uses FORCE ROW LEVEL SECURITY;
+CREATE POLICY asset_uses_select ON asset_uses FOR SELECT TO app
+    USING (asset_id = ANY (ARRAY(SELECT public.ledger_assets())));
+CREATE POLICY asset_uses_blocked ON asset_uses AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Lists the models the caller reads, which are those connetto grants the
+-- caller, those bound by procedures the caller reads and those named by slots
+-- of templates the caller reads, with all their ancestors.
+CREATE FUNCTION readable_models() RETURNS SETOF UUID
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+    WITH readable (id) AS (SELECT authz.resources_with('reader')),
+    named (id) AS (
+        SELECT readable.id FROM readable
+        UNION
+        SELECT binding.asset_model_id FROM public.procedure_assets binding
+        WHERE binding.procedure_id IN (SELECT readable.id FROM readable)
+        UNION
+        SELECT slot.asset_model_id FROM public.procedure_template_slots slot
+        WHERE slot.procedure_template_id IN (SELECT public.readable_templates())
+    )
+    SELECT ancestry.ancestor_model_id FROM public.asset_model_ancestors ancestry
+    WHERE ancestry.descendant_model_id IN (SELECT named.id FROM named)
+$$;
+ALTER FUNCTION readable_models() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION readable_models() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION readable_models() TO app;
+
+CREATE POLICY asset_models_select ON asset_models FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT public.readable_models()))
+        OR project_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY asset_model_ancestors_select ON asset_model_ancestors FOR SELECT TO app
+    USING (descendant_model_id = ANY (ARRAY(SELECT public.readable_models())));
 
 -- Records every change in connetto's `audit_events`.
 CREATE TRIGGER procedures_audit AFTER INSERT OR DELETE ON procedures

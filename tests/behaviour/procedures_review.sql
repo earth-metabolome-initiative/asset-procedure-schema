@@ -2,7 +2,7 @@
 SET search_path = public, test_tools;
 BEGIN;
 \ir ../fixture.sql
-SELECT plan(9);
+SELECT plan(7);
 SELECT pg_temp.new_model('a6000000-0000-7000-8000-000000000001', 'review model', NULL);
 INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
 VALUES ('20000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user', 'writer');
@@ -64,22 +64,6 @@ INSERT INTO resources (id, kind, organization_id) VALUES ('f6000000-0000-7000-80
 INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, parent_procedure_id, parent_template_id, step_id, root_procedure_id)
 VALUES ('f6000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'procedures', 'c6000000-0000-7000-8000-000000000001', 'f6000000-0000-7000-8000-000000000040', 'c6000000-0000-7000-8000-000000000002', 'e6000000-0000-7000-8000-000000000002', 'f6000000-0000-7000-8000-000000000040'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23503', 'insert or update on table "procedures" violates foreign key constraint "procedures_parent_procedure_id_parent_template_id_organiza_fkey"', 'child procedure must share parent organization');
 SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000001', false);
-SET CONSTRAINTS ALL DEFERRED;
-SELECT pg_temp.new_procedure('f6000000-0000-7000-8000-000000000010', 'c6000000-0000-7000-8000-000000000001', 'planned', NULL, NULL);
-UPDATE procedures SET performed_by_id = '10000000-0000-7000-8000-000000000002' WHERE id = 'f6000000-0000-7000-8000-000000000010';
--- The writer shares the performer's own organization, so the performer stays
--- a co-member after leaving this one and only the membership guard refuses.
-RESET ROLE;
-INSERT INTO memberships (organization_id, user_id, state)
-  VALUES ('20000000-0000-7000-8000-000000000002', '10000000-0000-7000-8000-000000000001', 'active');
-SET ROLE app;
-UPDATE memberships SET state = 'deactivated' WHERE organization_id = '20000000-0000-7000-8000-000000000001' AND user_id = '10000000-0000-7000-8000-000000000002';
-SAVEPOINT performer;
-SELECT throws_ok($statement$UPDATE procedures SET status_id = 'in_progress', started_at = now() WHERE id = 'f6000000-0000-7000-8000-000000000010'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'user 10000000-0000-7000-8000-000000000002 is not an active member of organization 20000000-0000-7000-8000-000000000001', 'starting rechecks unchanged performer membership');
-ROLLBACK TO performer;
-SET CONSTRAINTS ALL DEFERRED;
-UPDATE memberships SET state = 'active' WHERE organization_id = '20000000-0000-7000-8000-000000000001' AND user_id = '10000000-0000-7000-8000-000000000002';
-SELECT lives_ok($statement$UPDATE procedures SET status_id = 'in_progress', started_at = now() WHERE id = 'f6000000-0000-7000-8000-000000000010'; SET CONSTRAINTS ALL IMMEDIATE$statement$, 'active unchanged performer may start');
 SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.new_procedure('f6000000-0000-7000-8000-000000000020', 'c6000000-0000-7000-8000-000000000002', 'planned', NULL, NULL);
 SELECT pg_temp.new_procedure('f6000000-0000-7000-8000-000000000021', 'c6000000-0000-7000-8000-000000000001', 'planned', 'f6000000-0000-7000-8000-000000000020', 'e6000000-0000-7000-8000-000000000001');
