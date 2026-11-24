@@ -178,7 +178,7 @@ GRANT SELECT ON asset_move_kinds TO aps_writer;
 CREATE FUNCTION enclosing_assets() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     WITH RECURSIVE enclosing (id) AS (
-        SELECT public.ledger_assets()
+        SELECT ledger.id FROM public.ledger_assets() ledger (id)
         UNION
         SELECT placement.container_id FROM public.asset_moves placement
         JOIN enclosing ON enclosing.id = placement.asset_id

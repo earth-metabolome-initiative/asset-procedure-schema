@@ -694,11 +694,10 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON asset_uses TO aps_writer;
 -- caller reads and those bound by procedures the caller reads.
 CREATE FUNCTION ledger_assets() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-    WITH readable (id) AS (SELECT authz.resources_with('reader'))
-    SELECT readable.id FROM readable
+    SELECT readable.id FROM authz.resources_with('reader') readable (id)
     UNION
     SELECT binding.asset_id FROM public.procedure_assets binding
-    WHERE binding.asset_id IS NOT NULL AND binding.procedure_id IN (SELECT readable.id FROM readable)
+    WHERE binding.asset_id IS NOT NULL AND binding.procedure_id IN (SELECT authz.resources_with('reader'))
 $$;
 ALTER FUNCTION ledger_assets() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION ledger_assets() FROM PUBLIC;
@@ -988,23 +987,27 @@ CREATE POLICY asset_uses_blocked ON asset_uses AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
 
--- Lists the models the caller reads, which are those connetto grants the
--- caller, those bound by procedures the caller reads and those named by slots
--- of templates the caller reads, with all their ancestors.
+-- Lists the models the caller reads through connetto grants, procedures the
+-- caller reads that bind them, and slots of templates the caller reads.
+CREATE FUNCTION named_models() RETURNS SETOF UUID
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+    SELECT readable.id FROM authz.resources_with('reader') readable (id)
+    UNION
+    SELECT binding.asset_model_id FROM public.procedure_assets binding
+    WHERE binding.procedure_id IN (SELECT authz.resources_with('reader'))
+    UNION
+    SELECT slot.asset_model_id FROM public.procedure_template_slots slot
+    WHERE slot.procedure_template_id IN (SELECT public.readable_templates())
+$$;
+ALTER FUNCTION named_models() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION named_models() FROM PUBLIC;
+
+-- Lists the models the caller reads, which are the named models with all
+-- their ancestors.
 CREATE FUNCTION readable_models() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
-    WITH readable (id) AS (SELECT authz.resources_with('reader')),
-    named (id) AS (
-        SELECT readable.id FROM readable
-        UNION
-        SELECT binding.asset_model_id FROM public.procedure_assets binding
-        WHERE binding.procedure_id IN (SELECT readable.id FROM readable)
-        UNION
-        SELECT slot.asset_model_id FROM public.procedure_template_slots slot
-        WHERE slot.procedure_template_id IN (SELECT public.readable_templates())
-    )
     SELECT ancestry.ancestor_model_id FROM public.asset_model_ancestors ancestry
-    WHERE ancestry.descendant_model_id IN (SELECT named.id FROM named)
+    WHERE ancestry.descendant_model_id IN (SELECT public.named_models())
 $$;
 ALTER FUNCTION readable_models() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION readable_models() FROM PUBLIC;

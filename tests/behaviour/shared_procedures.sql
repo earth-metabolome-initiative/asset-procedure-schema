@@ -161,6 +161,8 @@ SET CONSTRAINTS ALL DEFERRED;
 SELECT isnt_empty($query$SELECT 1 FROM supernatant_procedure_templates WHERE id = '60000000-0000-7000-8000-000000000130'$query$, 'supernatant accepts input containers and a produced sample');
 
 SELECT throws_ok($statement$UPDATE pouring_procedure_templates SET volume_l = 2.0 WHERE id = '60000000-0000-7000-8000-000000000110'$statement$, '23514', NULL, 'transfer template respects destination capacity');
+SELECT throws_ok($statement$UPDATE volumetric_container_models SET volume_l = 10.0 WHERE id = '60000000-0000-7000-8000-000000000003'$statement$, '23514',
+  'definition 60000000-0000-7000-8000-000000000003 is used, so it is frozen', 'a volumetric model a transfer template relies on keeps its volume');
 SELECT has_column('public', 'storage_procedures', 'temperature_k', 'storage records temperature');
 SELECT has_column('public', 'freezing_procedures', 'temperature_k', 'freezing records temperature');
 SELECT has_column('public', 'freeze_drying_procedures', 'pressure_pa', 'freeze drying records pressure');

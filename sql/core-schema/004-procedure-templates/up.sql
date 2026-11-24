@@ -556,7 +556,7 @@ CREATE TRIGGER procedure_template_step_parameters_guard AFTER INSERT OR UPDATE O
 CREATE FUNCTION readable_templates() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     WITH RECURSIVE readable (id) AS (
-        SELECT authz.resources_with('reader')
+        SELECT granted.id FROM authz.resources_with('reader') granted (id)
         UNION
         SELECT step.child_template_id FROM public.procedure_template_steps step
         JOIN readable ON readable.id = step.parent_template_id

@@ -89,6 +89,18 @@ CREATE INDEX ON container_compatibility_rules (table_name_id);
 CREATE INDEX ON container_compatibility_rules (organization_id, container_model_id);
 INSERT INTO table_names (id) VALUES ('container_compatibility_rules');
 
+-- Refuses changing or deleting a definition something already relies on.
+CREATE FUNCTION refuse_frozen_definition() RETURNS TRIGGER
+LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    RAISE EXCEPTION 'definition % is used, so it is frozen', OLD.id USING ERRCODE = 'check_violation';
+END;
+$$;
+ALTER FUNCTION refuse_frozen_definition() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION refuse_frozen_definition() FROM PUBLIC;
+CREATE TRIGGER container_compatibility_rules_frozen BEFORE UPDATE OR DELETE ON container_compatibility_rules
+    FOR EACH ROW WHEN (OLD.in_use) EXECUTE FUNCTION refuse_frozen_definition();
+
 -- Specialization of container models with known empty mass.
 CREATE TABLE weighed_container_models (
     -- Stable model identifier inherited from `container_models`.
@@ -150,6 +162,8 @@ INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_
     UNION SELECT 'volumetric_container_models', 'volumetric_container_models';
 CREATE TRIGGER volumetric_container_models_path AFTER INSERT ON volumetric_container_models
     FOR EACH ROW EXECUTE FUNCTION check_asset_model_subtype();
+CREATE TRIGGER volumetric_container_models_frozen BEFORE UPDATE OR DELETE ON volumetric_container_models
+    FOR EACH ROW WHEN (OLD.in_use) EXECUTE FUNCTION refuse_frozen_definition();
 
 CREATE FUNCTION require_volumetric_container_models_row() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
@@ -380,11 +394,11 @@ CREATE POLICY container_compatibility_rules_insert ON container_compatibility_ru
         AND contained_asset_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
 CREATE POLICY container_compatibility_rules_update ON container_compatibility_rules FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer')))
-        AND container_model_id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND NOT in_use)
+        AND container_model_id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY container_compatibility_rules_delete ON container_compatibility_rules FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin')))
-        AND container_model_id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND NOT in_use);
+        AND container_model_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY container_compatibility_rules_archived_insert ON container_compatibility_rules AS RESTRICTIVE FOR INSERT TO app
     WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(container_model_id) AND NOT authz.is_archived(contained_asset_model_id));
 CREATE POLICY container_compatibility_rules_archived_update ON container_compatibility_rules AS RESTRICTIVE FOR UPDATE TO app
@@ -425,10 +439,10 @@ CREATE POLICY volumetric_container_models_select ON volumetric_container_models 
 CREATE POLICY volumetric_container_models_insert ON volumetric_container_models FOR INSERT TO app
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY volumetric_container_models_update ON volumetric_container_models FOR UPDATE TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND NOT in_use)
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY volumetric_container_models_delete ON volumetric_container_models FOR DELETE TO app
-    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))) AND NOT in_use);
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY volumetric_container_models_archived_insert ON volumetric_container_models AS RESTRICTIVE FOR INSERT TO app
     WITH CHECK (NOT authz.is_archived(id));
 CREATE POLICY volumetric_container_models_archived_update ON volumetric_container_models AS RESTRICTIVE FOR UPDATE TO app

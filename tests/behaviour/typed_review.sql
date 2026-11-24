@@ -404,10 +404,10 @@ SELECT pg_temp.new_slot('78000000-0000-7000-8000-000000000241', '78000000-0000-7
 SELECT pg_temp.new_slot('78000000-0000-7000-8000-000000000242', '78000000-0000-7000-8000-000000000240', 'sample', '78000000-0000-7000-8000-000000000002', 'produced', 1, 1);
 SELECT lives_ok($statement$INSERT INTO harvesting_procedure_templates (id, organization_id, sample_source_slot_id, sample_source_model_id, sample_slot_id, sample_model_id, source_family_model_id) VALUES ('78000000-0000-7000-8000-000000000240', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000241', '78000000-0000-7000-8000-000000000006', '78000000-0000-7000-8000-000000000242', '78000000-0000-7000-8000-000000000002', '78000000-0000-7000-8000-000000000001'); SET CONSTRAINTS ALL IMMEDIATE$statement$, 'harvesting accepts descendant source model');
 SET CONSTRAINTS ALL DEFERRED;
-SELECT is_empty($statement$DELETE FROM container_compatibility_rules WHERE id = '78000000-0000-7000-8000-000000000090' RETURNING id$statement$,
-  'a compatibility rule a transfer template relies on cannot be deleted');
-SELECT is_empty($statement$UPDATE container_compatibility_rules SET quantity = quantity + 1 WHERE id = '78000000-0000-7000-8000-000000000090' RETURNING id$statement$,
-  'a compatibility rule a transfer template relies on cannot be edited');
+SELECT throws_ok($statement$DELETE FROM container_compatibility_rules WHERE id = '78000000-0000-7000-8000-000000000090'$statement$, '23514',
+  'definition 78000000-0000-7000-8000-000000000090 is used, so it is frozen', 'a compatibility rule a transfer template relies on cannot be deleted');
+SELECT throws_ok($statement$UPDATE container_compatibility_rules SET quantity = quantity + 1 WHERE id = '78000000-0000-7000-8000-000000000090'$statement$, '23514',
+  'definition 78000000-0000-7000-8000-000000000090 is used, so it is frozen', 'a compatibility rule a transfer template relies on cannot be edited');
 RESET ROLE;
 SELECT throws_ok($statement$UPDATE retrieval_procedure_templates SET retrieved_asset_slot_id = retrieved_from_slot_id, retrieved_asset_model_id = retrieved_from_model_id WHERE id = '78000000-0000-7000-8000-000000000220'$statement$, '23514', NULL, 'retrieval requires distinct asset and container slots');
 SELECT throws_ok($statement$UPDATE fractioning_procedure_templates SET source_sample_slot_id = fraction_slot_id, source_sample_model_id = fraction_model_id WHERE id = '78000000-0000-7000-8000-000000000160'$statement$, '23503', NULL, 'source sample requires an input slot');

@@ -72,10 +72,10 @@ SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 SELECT ok((SELECT in_use FROM container_compatibility_rules WHERE id = '88000000-0000-7000-8000-000000000001'),
   'a placement marks the rule it counts against as used');
-SELECT is_empty($$UPDATE container_compatibility_rules SET quantity = 2 WHERE id = '88000000-0000-7000-8000-000000000001' RETURNING id$$,
-  'a used rule keeps its quantity');
-SELECT is_empty($$DELETE FROM container_compatibility_rules WHERE id = '88000000-0000-7000-8000-000000000001' RETURNING id$$,
-  'a used rule stays');
+SELECT throws_ok($$UPDATE container_compatibility_rules SET quantity = 2 WHERE id = '88000000-0000-7000-8000-000000000001'$$, '23514',
+  'definition 88000000-0000-7000-8000-000000000001 is used, so it is frozen', 'a used rule keeps its quantity');
+SELECT throws_ok($$DELETE FROM container_compatibility_rules WHERE id = '88000000-0000-7000-8000-000000000001'$$, '23514',
+  'definition 88000000-0000-7000-8000-000000000001 is used, so it is frozen', 'a used rule stays');
 
 SELECT pg_temp.consume('f8000000-0000-7000-8000-000000000002', 'b8000000-0000-7000-8000-000000000001', '2026-03-01 03:00+00');
 SET CONSTRAINTS ALL IMMEDIATE;
