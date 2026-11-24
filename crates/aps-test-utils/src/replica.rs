@@ -119,7 +119,8 @@ fn deployment() -> Deployment {
     .expect("deployment")
 }
 
-/// The PostgreSQL major the replica stands in for, the default of `tests/Dockerfile`.
+/// The PostgreSQL major the replica stands in for, the default of
+/// `tests/Dockerfile`.
 const SERVER_POSTGRES_MAJOR: u16 = 18;
 
 /// The options the replica translates under.

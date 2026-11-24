@@ -145,15 +145,8 @@ fn storage() -> (Replica, Tenant, Storage) {
         })
         .unwrap();
     replica.write(|conn| publish(root, conn)).unwrap();
-    let storage = Storage {
-        template: template_id,
-        fridge,
-        vial,
-        fridge_slot,
-        vial_slot,
-        root,
-        step,
-    };
+    let storage =
+        Storage { template: template_id, fridge, vial, fridge_slot, vial_slot, root, step };
     (replica, tenant, storage)
 }
 
@@ -231,11 +224,16 @@ fn insert_root(columns: &ProcedureColumns, conn: &mut SqliteConnection) -> Query
 
 /// Binds the slots of the storage run `run` to the fridge and vial models,
 /// with the assets left open.
-fn bind_models(storage: &Storage, run: &ProcedureColumns, conn: &mut SqliteConnection) -> QueryResult<()> {
+fn bind_models(
+    storage: &Storage,
+    run: &ProcedureColumns,
+    conn: &mut SqliteConnection,
+) -> QueryResult<()> {
     let (organization, procedure, template) =
         (blob(run.organization_id), blob(run.id), blob(storage.template));
     let status = &run.status_id;
-    for (slot, model) in [(storage.fridge_slot, storage.fridge), (storage.vial_slot, storage.vial)] {
+    for (slot, model) in [(storage.fridge_slot, storage.fridge), (storage.vial_slot, storage.vial)]
+    {
         let (id, slot, model) = (blob(Uuid::new_v4()), blob(slot), blob(model));
         conn.batch_execute(&format!(
             "INSERT INTO procedure_assets
@@ -248,7 +246,12 @@ fn bind_models(storage: &Storage, run: &ProcedureColumns, conn: &mut SqliteConne
 }
 
 /// Moves procedure `id` to `status`, ending it at `at`.
-fn end(id: Uuid, status: &str, at: TimestampUTC, conn: &mut SqliteConnection) -> QueryResult<usize> {
+fn end(
+    id: Uuid,
+    status: &str,
+    at: TimestampUTC,
+    conn: &mut SqliteConnection,
+) -> QueryResult<usize> {
     diesel::update(procedures::table.filter(procedures::id.eq(id)))
         .set((procedures::status_id.eq(status), procedures::ended_at.eq(Some(at))))
         .execute(conn)
@@ -334,7 +337,10 @@ fn a_planned_step_run_holds_no_measurement_until_skipped() {
     let (mut replica, step) = planned();
     let conn = replica.connection();
     assert_eq!(typed_status(step.id, conn), "planned");
-    assert_eq!(conn.typed_values("storage_procedures", step.id).unwrap(), vec![("temperature_k", None)]);
+    assert_eq!(
+        conn.typed_values("storage_procedures", step.id).unwrap(),
+        vec![("temperature_k", None)]
+    );
     replica
         .write(|conn| {
             diesel::update(procedures::table.filter(procedures::id.eq(step.id)))
@@ -348,7 +354,10 @@ fn a_planned_step_run_holds_no_measurement_until_skipped() {
         .unwrap();
     let conn = replica.connection();
     assert_eq!(typed_status(step.id, conn), "skipped");
-    assert_eq!(conn.typed_values("storage_procedures", step.id).unwrap(), vec![("temperature_k", None)]);
+    assert_eq!(
+        conn.typed_values("storage_procedures", step.id).unwrap(),
+        vec![("temperature_k", None)]
+    );
 }
 
 #[test]
@@ -357,7 +366,10 @@ fn an_aborted_step_run_keeps_no_measurement() {
     replica.write(|conn| end(step.id, "aborted", TimestampUTC::now(), conn)).unwrap();
     let conn = replica.connection();
     assert_eq!(typed_status(step.id, conn), "aborted");
-    assert_eq!(conn.typed_values("storage_procedures", step.id).unwrap(), vec![("temperature_k", None)]);
+    assert_eq!(
+        conn.typed_values("storage_procedures", step.id).unwrap(),
+        vec![("temperature_k", None)]
+    );
 }
 
 #[test]
@@ -388,7 +400,11 @@ fn a_measurement_refuses_an_unknown_table_an_unknown_column_and_a_wrong_type() {
         Err(TypedRowError::UnknownColumn { table: "storage_procedures", column }) if column == "temperature_c"
     ));
     assert!(matches!(
-        conn.set_measurements("storage_procedures", id, &[("temperature_k", Some(ColumnValue::SmallInt(4)))]),
+        conn.set_measurements(
+            "storage_procedures",
+            id,
+            &[("temperature_k", Some(ColumnValue::SmallInt(4)))]
+        ),
         Err(TypedRowError::ColumnType {
             table: "storage_procedures",
             column: "temperature_k",

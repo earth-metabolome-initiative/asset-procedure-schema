@@ -248,10 +248,12 @@ fn procedure_copy_setters(
                 "organization_id" => quote! { columns.organization_id },
                 "procedure_template_id" => quote! { columns.procedure_template_id },
                 "status_id" => quote! { columns.status_id.clone() },
-                other => panic!(
-                    "`{}` copies `procedures.{other}`, which `ProcedureColumns` does not hold",
-                    table.table_name()
-                ),
+                other => {
+                    panic!(
+                        "`{}` copies `procedures.{other}`, which `ProcedureColumns` does not hold",
+                        table.table_name()
+                    )
+                }
             };
             let ident = column.column_snake_ident();
             setters.push(quote! { .set_column::<#table_module::#ident>(#value) });
@@ -427,7 +429,10 @@ fn insert_asset_arm(asset: &AssetTable<'_>) -> TokenStream {
 /// # Errors
 ///
 /// Returns an error if a table or column cannot be looked up in `database`.
-pub fn typed_rows(tables: &[&CreateTable], database: &ParserDB) -> Result<TokenStream, synql::Error> {
+pub fn typed_rows(
+    tables: &[&CreateTable],
+    database: &ParserDB,
+) -> Result<TokenStream, synql::Error> {
     let mut procedures = Vec::new();
     let mut templates = Vec::new();
     let mut assets: Vec<AssetTable<'_>> = Vec::new();
@@ -476,8 +481,11 @@ pub fn typed_rows(tables: &[&CreateTable], database: &ParserDB) -> Result<TokenS
         for column in &procedure.columns {
             let ident = &column.ident;
             let rust_type = &column.rust_type;
-            let value_type =
-                if column.nullable { quote! { Option<#rust_type> } } else { quote! { #rust_type } };
+            let value_type = if column.nullable {
+                quote! { Option<#rust_type> }
+            } else {
+                quote! { #rust_type }
+            };
             bounds.push(quote! {
                 ::diesel::dsl::Update<
                     ::diesel::dsl::Filter<#table_module::table, ::diesel::dsl::Eq<#table_module::id, ::rosetta_uuid::Uuid>>,

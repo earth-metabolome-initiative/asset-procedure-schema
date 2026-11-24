@@ -92,11 +92,8 @@ pub fn column_value<T: ColumnValueType>(
     column: &'static str,
     value: ColumnValue,
 ) -> Result<T, TypedRowError> {
-    T::from_column_value(value).map_err(|value| TypedRowError::ColumnType {
-        table,
-        column,
-        expected: T::SQL_TYPE,
-        given: value.sql_type(),
+    T::from_column_value(value).map_err(|value| {
+        TypedRowError::ColumnType { table, column, expected: T::SQL_TYPE, given: value.sql_type() }
     })
 }
 
