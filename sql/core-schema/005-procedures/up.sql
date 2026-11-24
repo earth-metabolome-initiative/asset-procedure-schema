@@ -122,7 +122,8 @@ CREATE TABLE procedure_assets (
     UNIQUE (procedure_id, slot_id, asset_id),
     UNIQUE (id, procedure_id, asset_model_id, organization_id),
     FOREIGN KEY (procedure_id, procedure_template_id, status_id, organization_id)
-        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (slot_id, procedure_template_id, slot_asset_model_id, slot_role_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id),
     FOREIGN KEY (asset_model_id, slot_asset_model_id)
@@ -171,7 +172,8 @@ CREATE TABLE procedure_parameter_values (
     CHECK ((text_value IS NOT NULL) = (value_kind_id = 'text')),
     CHECK ((boolean_value IS NOT NULL) = (value_kind_id = 'boolean')),
     FOREIGN KEY (procedure_id, procedure_template_id, status_id, organization_id)
-        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (parameter_id, procedure_template_id, value_kind_id)
         REFERENCES procedure_template_parameters (id, procedure_template_id, value_kind_id),
     FOREIGN KEY (organization_id, procedure_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
@@ -485,6 +487,23 @@ REVOKE EXECUTE ON FUNCTION guard_procedure() FROM PUBLIC;
 CREATE TRIGGER procedures_guard AFTER INSERT OR UPDATE OR DELETE ON procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure();
 
+-- Writes a procedure's new status into its bindings and parameter values,
+-- whose deferred foreign keys hold them equal to it at commit. The
+-- `procedures_status_copy` triggers sort after `procedures_guard`, so a refused
+-- status change is refused by the procedure's own guard first.
+CREATE FUNCTION copy_procedure_status() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.procedure_assets SET status_id = NEW.status_id WHERE procedure_id = NEW.id;
+    UPDATE public.procedure_parameter_values SET status_id = NEW.status_id WHERE procedure_id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+GRANT UPDATE (status_id) ON procedure_assets, procedure_parameter_values TO aps_writer;
+ALTER FUNCTION copy_procedure_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_procedure_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_procedure_status();
+
 -- Rejects, wherever both times are known, a procedure starting before its
 -- parent started or ending after its parent ended, and a run starting before
 -- a run of a predecessor step under the same parent ended. An aborted
@@ -737,9 +756,10 @@ REVOKE EXECUTE ON FUNCTION check_procedure_lifetime() FROM PUBLIC;
 CREATE CONSTRAINT TRIGGER procedures_lifetime AFTER UPDATE ON procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_lifetime();
 
--- Guards a typed procedure subtype, which carries `status_id` through
--- `FOREIGN KEY (id, ..., status_id) REFERENCES procedures (...) ON UPDATE CASCADE`,
--- and keeps its table on the path of the procedure's `table_name_id`.
+-- Guards a typed procedure subtype, which carries a copy of `status_id` held
+-- equal to its procedure by a deferred `FOREIGN KEY (id, ..., status_id)
+-- REFERENCES procedures (...)`, and keeps its table on the path of the
+-- procedure's `table_name_id`.
 CREATE FUNCTION guard_procedure_subtype() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
     IF TG_OP = 'DELETE' THEN

@@ -21,7 +21,7 @@ use crate::shape::named;
 /// by the reason each group stays.
 const CASCADES: &[(&str, &[(&str, &str)])] = &[
     (
-        "The status copy follows its procedure, which the closed-procedure guards rely on",
+        "The status copy belongs to its procedure and leaves with it",
         &[
             (
                 "aliquoting_procedures",
@@ -991,7 +991,8 @@ const OPTIONAL_REFERENCES: &[(&str, &str)] = &[
 ];
 
 /// Keys that copy a column of the parent through a key wider than its primary
-/// key, with `ON UPDATE CASCADE` keeping the copy current.
+/// key, with a trigger on the parent writing the copy and the deferred key
+/// holding it equal at commit.
 const COPIES: &[(&str, &[(&str, &str)])] = &[(
     "The status copy lets the closed-procedure guards and the production and consumption indexes read the status without a join",
     &[

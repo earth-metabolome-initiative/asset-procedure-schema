@@ -97,7 +97,8 @@ CREATE TABLE geopositioning_procedures (
     -- Measured geographic position in the WGS 84 reference system.
     location GEOGRAPHY(POINT, 4326),
     FOREIGN KEY (id, geopositioning_procedure_template_id, status_id, organization_id)
-        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
     CHECK (status_id <> 'completed' OR location IS NOT NULL),
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
@@ -112,6 +113,21 @@ CREATE TRIGGER geopositioning_procedures_guard AFTER INSERT OR UPDATE ON geoposi
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER geopositioning_procedures_delete_guard BEFORE DELETE ON geopositioning_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `geopositioning_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_geopositioning_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.geopositioning_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+GRANT UPDATE (status_id) ON geopositioning_procedures TO aps_writer;
+ALTER FUNCTION copy_geopositioning_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_geopositioning_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_geopositioning_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_geopositioning_procedures_status();
 
 CREATE FUNCTION require_geopositioning_procedures_row() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$

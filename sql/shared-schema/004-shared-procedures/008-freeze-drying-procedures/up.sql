@@ -118,7 +118,8 @@ CREATE TABLE freeze_drying_procedures (
     pressure_pa DOUBLE PRECISION CHECK (pressure_pa >= 0.0 AND pressure_pa < 'Infinity'::double precision),
     CHECK (status_id <> 'completed' OR pressure_pa IS NOT NULL),
     FOREIGN KEY (id, freeze_drying_procedure_template_id, status_id, organization_id)
-        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
 CREATE INDEX ON freeze_drying_procedures (freeze_drying_procedure_template_id);
@@ -132,6 +133,21 @@ CREATE TRIGGER freeze_drying_procedures_guard AFTER INSERT OR UPDATE ON freeze_d
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER freeze_drying_procedures_delete_guard BEFORE DELETE ON freeze_drying_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `freeze_drying_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_freeze_drying_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.freeze_drying_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+GRANT UPDATE (status_id) ON freeze_drying_procedures TO aps_writer;
+ALTER FUNCTION copy_freeze_drying_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_freeze_drying_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_freeze_drying_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_freeze_drying_procedures_status();
 
 CREATE FUNCTION require_freeze_drying_procedures_row() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$

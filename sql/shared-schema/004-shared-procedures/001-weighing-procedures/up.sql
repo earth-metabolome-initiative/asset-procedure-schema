@@ -97,7 +97,8 @@ CREATE TABLE weighing_procedures (
     -- Mass in kilograms.
     mass_kg DOUBLE PRECISION CHECK (mass_kg > 0.0 AND mass_kg < 'Infinity'::double precision),
     FOREIGN KEY (id, weighing_procedure_template_id, status_id, organization_id)
-        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
     CHECK (status_id <> 'completed' OR mass_kg IS NOT NULL),
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
@@ -112,6 +113,21 @@ CREATE TRIGGER weighing_procedures_guard AFTER INSERT OR UPDATE ON weighing_proc
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER weighing_procedures_delete_guard BEFORE DELETE ON weighing_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `weighing_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_weighing_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.weighing_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+GRANT UPDATE (status_id) ON weighing_procedures TO aps_writer;
+ALTER FUNCTION copy_weighing_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_weighing_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_weighing_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_weighing_procedures_status();
 
 CREATE FUNCTION require_weighing_procedures_row() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$

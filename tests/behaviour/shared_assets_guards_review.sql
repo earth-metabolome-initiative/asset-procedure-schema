@@ -67,13 +67,11 @@ SELECT lives_ok($$SELECT pg_temp.new_model('ad000000-0000-7000-8000-000000000007
 SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.new_model('ad000000-0000-7000-8000-000000000008', 'Phone lot', NULL, 'commercial_phone_device_lots');
 SELECT throws_ok($$SELECT pg_temp.new_asset('ad000000-0000-7000-8000-000000000009', 'Phone as camera', 'ad000000-0000-7000-8000-000000000008', 'cameras')$$, '23514', NULL, 'N19 phone lot cannot instantiate a plain camera');
-SAVEPOINT instance_tables;
 SELECT throws_ok($$SELECT pg_temp.new_asset('ad000000-0000-7000-8000-000000000020', 'Panel as plain asset', 'ad000000-0000-7000-8000-000000000004', 'physical_assets')$$, '23514', NULL, 'N19 panel model cannot instantiate a plain physical asset');
 SELECT lives_ok($$SELECT pg_temp.new_asset('ad000000-0000-7000-8000-000000000021', 'Phone', 'ad000000-0000-7000-8000-000000000008', 'phone_devices')$$, 'N19 phone lot instantiates a phone device');
 SELECT pg_temp.new_model('ad000000-0000-7000-8000-000000000022', 'Weighed tube', NULL, 'weighed_volumetric_container_models');
 SELECT throws_ok($$SELECT pg_temp.new_asset('ad000000-0000-7000-8000-000000000023', 'Tube as plain container', 'ad000000-0000-7000-8000-000000000022', 'containers')$$, '23514', NULL, 'N19 weighed volumetric model cannot instantiate a plain container');
 SELECT lives_ok($$SELECT pg_temp.new_asset('ad000000-0000-7000-8000-000000000024', 'Tube', 'ad000000-0000-7000-8000-000000000022', 'volumetric_containers')$$, 'N19 weighed volumetric model instantiates its most concrete container table');
-ROLLBACK TO SAVEPOINT instance_tables;
 RESET ROLE;
 SELECT * FROM finish();
 ROLLBACK;

@@ -130,7 +130,8 @@ CREATE TABLE ball_mill_procedures (
     frequency_hz DOUBLE PRECISION CHECK (frequency_hz >= 0.0 AND frequency_hz < 'Infinity'::double precision),
     CHECK (status_id <> 'completed' OR frequency_hz IS NOT NULL),
     FOREIGN KEY (id, ball_mill_procedure_template_id, status_id, organization_id)
-        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
 CREATE INDEX ON ball_mill_procedures (ball_mill_procedure_template_id);
@@ -144,6 +145,21 @@ CREATE TRIGGER ball_mill_procedures_guard AFTER INSERT OR UPDATE ON ball_mill_pr
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER ball_mill_procedures_delete_guard BEFORE DELETE ON ball_mill_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `ball_mill_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_ball_mill_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.ball_mill_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+GRANT UPDATE (status_id) ON ball_mill_procedures TO aps_writer;
+ALTER FUNCTION copy_ball_mill_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_ball_mill_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_ball_mill_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_ball_mill_procedures_status();
 
 CREATE FUNCTION require_ball_mill_procedures_row() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$

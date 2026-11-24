@@ -140,7 +140,8 @@ CREATE TABLE aliquoting_procedures (
     volume_l DOUBLE PRECISION CHECK (volume_l > 0.0 AND volume_l < 'Infinity'::double precision),
     CHECK (status_id <> 'completed' OR volume_l IS NOT NULL),
     FOREIGN KEY (id, aliquoting_procedure_template_id, status_id, organization_id)
-        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
 );
 CREATE INDEX ON aliquoting_procedures (aliquoting_procedure_template_id);
@@ -154,6 +155,21 @@ CREATE TRIGGER aliquoting_procedures_guard AFTER INSERT OR UPDATE ON aliquoting_
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER aliquoting_procedures_delete_guard BEFORE DELETE ON aliquoting_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `aliquoting_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_aliquoting_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.aliquoting_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+GRANT UPDATE (status_id) ON aliquoting_procedures TO aps_writer;
+ALTER FUNCTION copy_aliquoting_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_aliquoting_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_aliquoting_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_aliquoting_procedures_status();
 
 CREATE FUNCTION require_aliquoting_procedures_row() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
