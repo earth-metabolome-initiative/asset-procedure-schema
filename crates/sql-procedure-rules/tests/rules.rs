@@ -8,7 +8,7 @@ use sqlparser::dialect::PostgreSqlDialect;
 const ROOTS: &str = "CREATE TABLE procedure_templates (id UUID PRIMARY KEY); CREATE TABLE procedures (id UUID PRIMARY KEY, organization_id UUID, procedure_template_id UUID, status_id TEXT, UNIQUE (id, procedure_template_id, status_id), UNIQUE (id, procedure_template_id, status_id, organization_id));";
 const TEMPLATE: &str = "CREATE TABLE weighing_procedure_templates (id UUID PRIMARY KEY REFERENCES procedure_templates(id), organization_id UUID, weighed_slot_id UUID, weighed_model_id UUID, weighed_slot_role_id TEXT, FOREIGN KEY (weighed_slot_id, id, weighed_model_id, weighed_slot_role_id, organization_id) REFERENCES procedure_template_slots(id, procedure_template_id, asset_model_id, role_id, organization_id)); CREATE TRIGGER guard BEFORE INSERT OR UPDATE OR DELETE ON weighing_procedure_templates FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();";
 const SLOTS: &str = "CREATE TABLE procedure_template_slots (id UUID PRIMARY KEY, organization_id UUID, procedure_template_id UUID, asset_model_id UUID, role_id TEXT, UNIQUE (id, procedure_template_id, asset_model_id, role_id), UNIQUE (id, procedure_template_id, asset_model_id, role_id, organization_id));";
-const PROCEDURE: &str = "CREATE TABLE weighing_procedures (id UUID PRIMARY KEY REFERENCES procedures(id), organization_id UUID, weighing_procedure_template_id UUID REFERENCES weighing_procedure_templates(id), status_id TEXT, FOREIGN KEY (id, weighing_procedure_template_id, status_id, organization_id) REFERENCES procedures(id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE); CREATE TRIGGER guard BEFORE INSERT OR UPDATE OR DELETE ON weighing_procedures FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();";
+const PROCEDURE: &str = "CREATE TABLE weighing_procedures (id UUID PRIMARY KEY REFERENCES procedures(id), organization_id UUID, weighing_procedure_template_id UUID REFERENCES weighing_procedure_templates(id), status_id TEXT, FOREIGN KEY (id, weighing_procedure_template_id, status_id, organization_id) REFERENCES procedures(id, procedure_template_id, status_id, organization_id) DEFERRABLE INITIALLY DEFERRED); CREATE TRIGGER guard BEFORE INSERT OR UPDATE OR DELETE ON weighing_procedures FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();";
 const SUPPORT: &str = "CREATE ROLE app; CREATE ROLE unrelated; CREATE FUNCTION guard_procedure_template_subtype() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$; CREATE FUNCTION guard_procedure_subtype() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$; CREATE FUNCTION wrong_guard() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$;";
 
 fn check(rule: impl TableRule<Database = ParserDB> + 'static, sql: &str, violation: Option<&str>) {
@@ -114,11 +114,12 @@ fn procedure_status() {
     check(TypedProcedureSubtype::default(), &schema, None);
     for (before, after, violation) in [
         (
-            "status_id TEXT, FOREIGN KEY (id, weighing_procedure_template_id, status_id, organization_id) REFERENCES procedures(id, procedure_template_id, status_id, organization_id) ON UPDATE CASCADE",
+            "status_id TEXT, FOREIGN KEY (id, weighing_procedure_template_id, status_id, organization_id) REFERENCES procedures(id, procedure_template_id, status_id, organization_id) DEFERRABLE INITIALLY DEFERRED",
             "CHECK (true)",
             "requires status_id",
         ),
-        ("ON UPDATE CASCADE", "ON UPDATE RESTRICT", "status-copy foreign key"),
+        ("DEFERRABLE INITIALLY DEFERRED", "DEFERRABLE INITIALLY IMMEDIATE", "status-copy foreign key"),
+        ("DEFERRABLE INITIALLY DEFERRED", "", "status-copy foreign key"),
         (
             "(id, weighing_procedure_template_id, status_id, organization_id)",
             "(weighing_procedure_template_id, id, status_id, organization_id)",

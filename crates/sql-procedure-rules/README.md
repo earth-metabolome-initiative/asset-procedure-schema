@@ -8,7 +8,7 @@ APS schema contracts built on [`sqlippy`](https://github.com/connetto-rs/SQLippy
 - `MatchingProcedureAndTemplateTables` pairs typed procedure and template subtypes.
 - `AssetModelColumnNaming` requires `_model_id` for typed subtype references to asset models.
 - `TypedTemplateSubtype` checks slot companions, ownership keys and the template guard.
-- `TypedProcedureSubtype` checks typed template references, cascading status-copy keys and the procedure guard.
+- `TypedProcedureSubtype` checks typed template references, deferred status-copy keys and the procedure guard.
 - `OrganizationTenancy` checks organization identity, enabled RLS and the connetto restrictive `_blocked` policy, delegating forced RLS to `sqlippy`.
 - `QuantityUnits` pairs `DOUBLE PRECISION` with `_kg`, `_l`, `_k`, `_s`, `_pa`, `_hz`, `_rpm` or `_percentage`, leaving integer counts such as `bead_count` outside that set.
 

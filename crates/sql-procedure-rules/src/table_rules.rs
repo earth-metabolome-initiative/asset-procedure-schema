@@ -2,6 +2,7 @@
 
 use sql_traits::{
     errors::LookupError,
+    structs::ConstraintDeferral,
     traits::{
         ColumnLike, DataTypeLike, DatabaseLike, ForeignKeyLike, PolicyLike, TableLike, TriggerLike,
     },
@@ -10,7 +11,7 @@ use sqlippy::{
     error::Interruption,
     traits::{Reporter, TableRule},
 };
-use sqlparser::ast::{CreatePolicyCommand, CreatePolicyType, Expr, Owner, ReferentialAction};
+use sqlparser::ast::{CreatePolicyCommand, CreatePolicyType, Expr, Owner};
 
 /// The root procedure table.
 pub const PROCEDURES_TABLE_NAME: &str = "procedures";
