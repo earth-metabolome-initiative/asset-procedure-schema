@@ -4,7 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
-pg2sqlite = { git = "https://github.com/connetto-rs/pg2sqlite", branch = "main", default-features = false, features = [
+pg2sqlite = { git = "https://github.com/connetto-rs/pg2sqlite", rev = "549c5ee091ae5186c8beb66fe282d6e878ea55b6", default-features = false, features = [
   "std",
   "diesel",
   "sqlitegis",
@@ -30,6 +30,11 @@ aps-authz-membership_state.workspace = true
 aps-authz-resource_kind.workspace = true
 aps-authz-role.workspace = true
 aps-traits.workspace = true
+
+[dev-dependencies]
+aps = { path = "../../aps/aps" }
+procedure-like.workspace = true
+rosetta-utc.workspace = true
 
 [lints]
 workspace = true

@@ -67,7 +67,11 @@ dependencies = [
  "aps-procedures",
  "aps-resources",
  "aps-supernatant_procedure_templates",
+ "diesel",
+ "diesel-builders",
  "procedure-like",
+ "rosetta-uuid",
+ "sqlitegis",
 ]
 
 [[package]]
@@ -576,6 +580,7 @@ dependencies = [
 name = "aps-test-utils"
 version = "0.1.0"
 dependencies = [
+ "aps",
  "aps-asset_model_ancestors",
  "aps-authz-grantee_kind",
  "aps-authz-membership_state",
@@ -589,6 +594,8 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "pg2sqlite",
+ "procedure-like",
+ "rosetta-utc",
  "rosetta-uuid",
  "serde",
  "serde_json",
@@ -883,8 +890,7 @@ checksum = "abd57806937c9cc163efc8ea3910e00a62e2aeb0b8119f1793a978088f8f6b04"
 [[package]]
 name = "diesel"
 version = "2.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9824c36a57a17ece4c8883baed41dc3eb81b2b949364c174750acc462e19b5ec"
+source = "git+https://github.com/diesel-rs/diesel?branch=upstream%2Fsqlite-table-valued-functions-dynamic#e598203dd02a6cc96b1d7521014fda9e588b532d"
 dependencies = [
  "bitflags",
  "byteorder",
@@ -902,9 +908,9 @@ dependencies = [
 
 [[package]]
 name = "diesel-builders"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "082fe2db436d4bd6c1f558e70c0d0428bcf8931209ef27ec7dbe231bcc34b104"
+checksum = "e6780fc5e5cba61c6c60fed47046adf47f96b9431af81b0b73af48cd8f1be9ce"
 dependencies = [
  "diesel",
  "diesel-builders-derive",
@@ -916,9 +922,9 @@ dependencies = [
 
 [[package]]
 name = "diesel-builders-derive"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e491dee18357d5e4eeca2ca05593aacc06b13190fd50b6299e2e3e3b1f7fe953"
+checksum = "041b7926f934c04cccb6365e1975e7841feb5b397e01b8334297c8f1afad3972"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -926,10 +932,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "diesel-dynamic-schema"
+version = "0.3.0"
+source = "git+https://github.com/diesel-rs/diesel?branch=upstream%2Fsqlite-table-valued-functions-dynamic#e598203dd02a6cc96b1d7521014fda9e588b532d"
+dependencies = [
+ "diesel",
+]
+
+[[package]]
 name = "diesel_attribute_parser"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de6c008369e0bc4e26f385874b8d1da517112b4ebe2f8e6b1e3331c781039d71"
+source = "git+https://github.com/diesel-rs/diesel?branch=upstream%2Fsqlite-table-valued-functions-dynamic#e598203dd02a6cc96b1d7521014fda9e588b532d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -939,8 +952,7 @@ dependencies = [
 [[package]]
 name = "diesel_derives"
 version = "2.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90c0b085880f70a6668dd2365040f4dd07aaf6ebe9e6b8626528efcb0553a780"
+source = "git+https://github.com/diesel-rs/diesel?branch=upstream%2Fsqlite-table-valued-functions-dynamic#e598203dd02a6cc96b1d7521014fda9e588b532d"
 dependencies = [
  "diesel_attribute_parser",
  "diesel_table_macro_syntax",
@@ -953,8 +965,7 @@ dependencies = [
 [[package]]
 name = "diesel_table_macro_syntax"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d05c7977b58892eda3f17d46fd57fb23e865d1e54f59b224a6cc09935013747c"
+source = "git+https://github.com/diesel-rs/diesel?branch=upstream%2Fsqlite-table-valued-functions-dynamic#e598203dd02a6cc96b1d7521014fda9e588b532d"
 dependencies = [
  "syn 3.0.10",
 ]
@@ -978,8 +989,7 @@ checksum = "117240f60069e65410b3ae1bb213295bd828f707b5bec6596a1afc8793ce0cbc"
 [[package]]
 name = "dsl_auto_type"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc51ea5a4c1cfac05a51e51cdbb6a5471bbb88091fcb045a27ff13b38e9a3204"
+source = "git+https://github.com/diesel-rs/diesel?branch=upstream%2Fsqlite-table-valued-functions-dynamic#e598203dd02a6cc96b1d7521014fda9e588b532d"
 dependencies = [
  "darling",
  "either",
@@ -1628,10 +1638,11 @@ checksum = "4ec91767ecc0a0bbe558ce8c9da33c068066c57ecc8bb8477ef8c1ad3ef77c27"
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?branch=main#cc7c408a51c1cbd92c5ad6d5963b31bae7be5d4f"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=549c5ee091ae5186c8beb66fe282d6e878ea55b6#549c5ee091ae5186c8beb66fe282d6e878ea55b6"
 dependencies = [
  "diesel",
  "libsqlite3-sys",
+ "pg2sqlite-runtime",
  "recursive",
  "sql-traits",
  "sql-values",
@@ -1641,6 +1652,16 @@ dependencies = [
  "sqlstate",
  "stacker",
  "thiserror 2.0.21",
+]
+
+[[package]]
+name = "pg2sqlite-runtime"
+version = "0.1.0"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=549c5ee091ae5186c8beb66fe282d6e878ea55b6#549c5ee091ae5186c8beb66fe282d6e878ea55b6"
+dependencies = [
+ "diesel",
+ "diesel-dynamic-schema",
+ "sql-values",
 ]
 
 [[package]]
@@ -1734,7 +1755,11 @@ version = "0.1.0"
 dependencies = [
  "diesel",
  "diesel-builders",
+ "rosetta-utc",
  "rosetta-uuid",
+ "sqlitegis",
+ "thiserror 2.0.21",
+ "validation-errors",
 ]
 
 [[package]]
@@ -2194,7 +2219,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sql-traits?branch=main#940e38519677f9113be056fa56cbab7b7c8b5923"
+source = "git+https://github.com/connetto-rs/sql-traits?branch=main#4c054147b99cb6e48acff2ba5b18bd5ba4df55ec"
 dependencies = [
  "geometric-traits",
  "once_cell",
@@ -2224,7 +2249,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/synql?branch=main#96891e78e546765113cc0f1348d7c3ddaa7b3e74"
+source = "git+https://github.com/connetto-rs/synql?branch=main#4a389073cb78fc180629167ba71eb04810799dd7"
 dependencies = [
  "sql-traits",
  "sqlparser",
@@ -2276,7 +2301,7 @@ dependencies = [
 [[package]]
 name = "sqlparser"
 version = "0.64.0"
-source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#ba850faff0d7bde0193e4c8635fdf5155a801d97"
+source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#ccacedc53e2449028c504068f8767f89a103b408"
 dependencies = [
  "log",
  "recursive",
@@ -2298,7 +2323,7 @@ dependencies = [
 [[package]]
 name = "sqlparser-expr-eval"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sqlparser-expr-eval?branch=main#46deb4392399a9658ac504ad39fd32556d4f9475"
+source = "git+https://github.com/connetto-rs/sqlparser-expr-eval?branch=main#1ec72234469ef6b0ab3ca24c871574409f6fd054"
 dependencies = [
  "rpds",
  "sql-values",
@@ -2318,7 +2343,7 @@ dependencies = [
 [[package]]
 name = "sqlparser_derive"
 version = "0.7.0"
-source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#ba850faff0d7bde0193e4c8635fdf5155a801d97"
+source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#ccacedc53e2449028c504068f8767f89a103b408"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2328,8 +2353,7 @@ dependencies = [
 [[package]]
 name = "sqlstate"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "858cea190fe7555971c35a5eb336858f1bf962a2bd7ceb8704fb1759b36af2cd"
+source = "git+https://github.com/diesel-rs/diesel?branch=upstream%2Fsqlite-table-valued-functions-dynamic#e598203dd02a6cc96b1d7521014fda9e588b532d"
 
 [[package]]
 name = "stable_deref_trait"
@@ -2408,7 +2432,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/synql?branch=main#96891e78e546765113cc0f1348d7c3ddaa7b3e74"
+source = "git+https://github.com/connetto-rs/synql?branch=main#4a389073cb78fc180629167ba71eb04810799dd7"
 dependencies = [
  "enumflags2",
  "geometric-traits",
@@ -2656,9 +2680,9 @@ dependencies = [
 
 [[package]]
 name = "validation-errors"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69409ae0bc186369a8f4b191b40595919bd818cea52f4579fb70730c0914f990"
+checksum = "a50cfafa0daa455f97a50386945b42e7405d9eb840ab33ed4f42e2514575b342"
 dependencies = [
  "diesel",
  "diesel-builders",

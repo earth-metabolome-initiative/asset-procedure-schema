@@ -105,10 +105,10 @@ rosetta-utc = { version = "0.3.0", features = [
 ] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
-validation-errors = { version = "0.2.0" }
+validation-errors = { version = "0.2.1" }
 sqlitegis = { version = "0.3.1", features = ["diesel-postgres", "serde"] }
 diesel = { version = "2.4.0", features = ["serde_json", "32-column-tables"] }
-diesel-builders = { version = "0.2.0", features = [
+diesel-builders = { version = "0.2.1", features = [
   "postgres",
   "sqlite",
   "size-64",
@@ -123,6 +123,8 @@ rosetta-uuid = { version = "0.2.0", features = [
 [patch.crates-io]
 sqlparser = { git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
 sql-values = { git = "https://github.com/connetto-rs/sql-values", branch = "main" }
+diesel = { git = "https://github.com/diesel-rs/diesel", branch = "upstream/sqlite-table-valued-functions-dynamic" }
+sqlstate = { git = "https://github.com/diesel-rs/diesel", branch = "upstream/sqlite-table-valued-functions-dynamic" }
 
 [workspace.lints.rust]
 unused_macro_rules = "forbid"

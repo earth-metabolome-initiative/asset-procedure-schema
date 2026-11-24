@@ -28,6 +28,10 @@ aps-pouring_procedure_templates.workspace = true
 aps-procedure_templates.workspace = true
 aps-supernatant_procedure_templates.workspace = true
 procedure-like = { path = "../../crates/procedure-like" }
+diesel.workspace = true
+diesel-builders.workspace = true
+rosetta-uuid.workspace = true
+sqlitegis.workspace = true
 
 [lints]
 workspace = true

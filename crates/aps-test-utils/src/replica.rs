@@ -15,12 +15,12 @@ use std::{
 use diesel::{
     Connection, QueryResult, SqliteConnection,
     connection::SimpleConnection,
-    sql_types::{Binary, Bool, Nullable, Text},
+    sql_types::{Binary, Bool, Integer, Nullable, Text},
 };
 use pg2sqlite::{
     prelude::{
-        CaseFoldFunctions, JsonbFunctions, Pg2Sqlite, Pg2SqliteOptions, SessionVariableMapping,
-        UuidRepresentation,
+        CaseFoldFunctions, HelperFunction, JsonbFunctions, Pg2Sqlite, Pg2SqliteOptions,
+        SessionVariableMapping, UuidRepresentation,
     },
     programs::unprepared_programs,
 };
@@ -63,6 +63,10 @@ diesel::define_sql_function! {
 diesel::define_sql_function! {
     /// Answers whether the running write is a delivery from the server.
     fn connetto_write_exempt() -> Bool;
+}
+diesel::define_sql_function! {
+    /// Marks the start (`1`) and end (`-1`) of the writes a trigger derives.
+    fn server_derived_write(step: Integer) -> Integer;
 }
 diesel::define_sql_function! {
     /// Answers a random version 4 UUID as its 16 bytes.
@@ -115,6 +119,9 @@ fn deployment() -> Deployment {
     .expect("deployment")
 }
 
+/// The PostgreSQL major the replica stands in for, the default of `tests/Dockerfile`.
+const SERVER_POSTGRES_MAJOR: u16 = 18;
+
 /// The options the replica translates under.
 fn options() -> Pg2SqliteOptions {
     let mut options = Pg2SqliteOptions::default()
@@ -124,10 +131,11 @@ fn options() -> Pg2SqliteOptions {
         .with_rls_exemption_function("connetto_write_exempt")
         .with_deployment(deployment())
         .with_acting_role(ACTING_ROLE)
-        .with_server_derived_writes_omitted()
+        .with_server_derived_write_function("server_derived_write")
         .with_jsonb_functions(jsonb_functions())
         .with_sqlitegis_enabled()
-        .with_case_fold_functions(CaseFoldFunctions::new("pg_lower", "pg_upper"));
+        .with_case_fold_functions(CaseFoldFunctions::new("pg_lower", "pg_upper"))
+        .with_postgres_major(SERVER_POSTGRES_MAJOR);
     for setting in SETTINGS {
         options = options
             .with_session_variable(SessionVariableMapping::new(setting, setting_function(setting)));
@@ -178,6 +186,46 @@ struct ReplicaScript {
     statements: Vec<String>,
     /// The statements run before every `COMMIT` of a writing transaction.
     before_commit: Vec<String>,
+    /// The helpers every connection registers as table-valued functions
+    /// before running any statement.
+    functions: Vec<ReplicaFunction>,
+}
+
+/// A helper the statements call as a table-valued function, as text.
+#[derive(Serialize, Deserialize)]
+struct ReplicaFunction {
+    /// The name a call site reads the function by.
+    name: String,
+    /// The parameters, in the order a call site passes them.
+    parameters: Vec<String>,
+    /// The columns of each row the function answers.
+    columns: Vec<String>,
+    /// The query answering a call.
+    body: String,
+}
+
+impl<S: ToString> From<&HelperFunction<S>> for ReplicaFunction {
+    fn from(function: &HelperFunction<S>) -> Self {
+        Self {
+            name: function.name.clone(),
+            parameters: function.parameters.clone(),
+            columns: function.columns.clone(),
+            body: function.body.to_string(),
+        }
+    }
+}
+
+impl ReplicaFunction {
+    /// Registers the helper on `connection`.
+    fn register(&self, connection: &mut SqliteConnection) -> QueryResult<()> {
+        HelperFunction {
+            name: self.name.clone(),
+            parameters: self.parameters.clone(),
+            columns: self.columns.clone(),
+            body: self.body.as_str(),
+        }
+        .register(connection)
+    }
 }
 
 /// Translates every source slice.
@@ -193,6 +241,7 @@ fn translate(sources: &[PathBuf]) -> ReplicaScript {
     ReplicaScript {
         statements: report.script.iter().map(ToString::to_string).collect(),
         before_commit: report.script.before_commit.iter().map(ToString::to_string).collect(),
+        functions: report.script.functions.iter().map(ReplicaFunction::from).collect(),
     }
 }
 
@@ -213,9 +262,10 @@ fn external_packages() -> Vec<String> {
 /// or translated and cached there.
 ///
 /// Translating the whole schema takes pg2sqlite minutes, so the script is
-/// cached under a key hashing every source slice and the external packages
-/// of `Cargo.lock`, which pin pg2sqlite. A file lock lets one test process
-/// translate while the others wait for its result.
+/// cached under a key hashing every source slice, the external packages of
+/// `Cargo.lock`, which pin pg2sqlite, and this file, which holds the
+/// translation options and the cached form. A file lock lets one test
+/// process translate while the others wait for its result.
 fn cached_script() -> ReplicaScript {
     let sources = sources();
     let mut hasher = DefaultHasher::new();
@@ -226,6 +276,7 @@ fn cached_script() -> ReplicaScript {
         content.hash(&mut hasher);
     }
     external_packages().hash(&mut hasher);
+    include_str!("replica.rs").hash(&mut hasher);
     let directory = repository().join("target/aps-replica");
     std::fs::create_dir_all(&directory).expect("replica cache directory");
     let cached = directory.join(format!("{:016x}.json", hasher.finish()));
@@ -318,6 +369,15 @@ impl Replica {
             flag.load(Ordering::Relaxed)
         })
         .expect("connetto_write_exempt");
+        server_derived_write_utils::register_nondeterministic_impl(&mut connection, |step: i32| {
+            step
+        })
+        .expect("server_derived_write");
+        for function in &SCRIPT.functions {
+            function
+                .register(&mut connection)
+                .unwrap_or_else(|error| panic!("SQLite refuses helper {}: {error}", function.name));
+        }
         for statement in &SCRIPT.statements {
             connection
                 .batch_execute(statement)

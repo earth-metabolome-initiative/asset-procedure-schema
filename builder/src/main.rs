@@ -13,9 +13,16 @@ use synql::prelude::*;
 use time_requirements::{prelude::TimeTracker, task::Task};
 mod gate;
 mod shape;
+mod typed_rows;
 mod visualize_dags;
 mod visualize_workspace;
 use sql_procedure_rules::table_rules::{PROCEDURE_TEMPLATES_TABLE_NAME, PROCEDURES_TABLE_NAME};
+
+/// The diesel repository.
+const DIESEL_GIT: &str = "https://github.com/diesel-rs/diesel";
+/// The diesel branch carrying SQLite table-valued functions and their
+/// run-time declaration, diesel-rs/diesel#5395 and #5396.
+const DIESEL_TABLE_FUNCTIONS: &str = "upstream/sqlite-table-valued-functions-dynamic";
 
 /// Returns the table named `name`.
 ///
@@ -118,6 +125,24 @@ fn generate_sink_toml_procedure_like(
     Ok(Some(TomlDependency::new("procedure-like").path("../../crates/procedure-like")?))
 }
 
+/// Sink callback emitting the `TypedRows` trait over the tables the sink
+/// crate re-exports.
+fn generate_typed_rows(
+    tables: &[&CreateTable],
+    db: &ParserDB,
+    _workspace: &Workspace,
+) -> Result<Option<TokenStream>, synql::Error> {
+    Ok(Some(typed_rows::typed_rows(tables, db)?))
+}
+
+/// Sink callbacks adding the workspace crates the `TypedRows` implementation
+/// names.
+fn generate_sink_toml_typed_rows(
+    name: &'static str,
+) -> impl Fn(&ParserDB) -> Result<Option<TomlDependency>, synql::Error> {
+    move |_db| Ok(Some(TomlDependency::new(name).workspace(true)?))
+}
+
 /// Validates the schema and generates the `aps/` workspace crates.
 pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut tracker = TimeTracker::new("APS Generation");
@@ -165,6 +190,14 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .git("https://github.com/connetto-rs/sql-values", "main")?
                     .into(),
             )
+            // pg2sqlite, which `aps-test-utils` builds, registers its runtime
+            // functions through diesel's table-valued function branch.
+            .crates_io_patch(
+                TomlDependency::new("diesel").git(DIESEL_GIT, Some(DIESEL_TABLE_FUNCTIONS))?,
+            )
+            .crates_io_patch(
+                TomlDependency::new("sqlstate").git(DIESEL_GIT, Some(DIESEL_TABLE_FUNCTIONS))?,
+            )
             .sink_crate("aps")
             .dag_sink_crate_prefix("aps-dag-")
             .group_tables(1.0)
@@ -174,7 +207,12 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
             .callback(generate_shape)
             .toml_callback(generate_toml_procedure_like)
             .sink_callback(generate_shape_lookups)
+            .sink_callback(generate_typed_rows)
             .sink_toml_callback(generate_sink_toml_procedure_like)
+            .sink_toml_callback(generate_sink_toml_typed_rows("diesel"))
+            .sink_toml_callback(generate_sink_toml_typed_rows("diesel-builders"))
+            .sink_toml_callback(generate_sink_toml_typed_rows("rosetta-uuid"))
+            .sink_toml_callback(generate_sink_toml_typed_rows("sqlitegis"))
             .members([
                 TomlDependency::new("builder").path("builder")?,
                 TomlDependency::new("sql-procedure-rules").path("crates/sql-procedure-rules")?,
