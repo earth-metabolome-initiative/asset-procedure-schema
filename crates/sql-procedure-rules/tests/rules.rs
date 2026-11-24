@@ -118,7 +118,11 @@ fn procedure_status() {
             "CHECK (true)",
             "requires status_id",
         ),
-        ("DEFERRABLE INITIALLY DEFERRED", "DEFERRABLE INITIALLY IMMEDIATE", "status-copy foreign key"),
+        (
+            "DEFERRABLE INITIALLY DEFERRED",
+            "DEFERRABLE INITIALLY IMMEDIATE",
+            "status-copy foreign key",
+        ),
         ("DEFERRABLE INITIALLY DEFERRED", "", "status-copy foreign key"),
         (
             "(id, weighing_procedure_template_id, status_id, organization_id)",
