@@ -13,7 +13,10 @@ use sql_traits::{
     traits::{ColumnLike, DatabaseLike, FunctionLike, TableLike},
 };
 use sqlippy::prelude::{Constrainer, DefaultConstrainer, Error, TargetName};
-use sqlparser::{ast::CreateTable, dialect::PostgreSqlDialect};
+use sqlparser::{
+    ast::{CreateTable, FunctionSecurity},
+    dialect::PostgreSqlDialect,
+};
 
 use crate::shape::named;
 
@@ -854,7 +857,10 @@ impl Schema {
 
     /// The policy clauses `rls2fga` translates below confidence A under
     /// connetto-schema's translation deployment, empty when the model it
-    /// builds answers as `PostgreSQL` does.
+    /// builds answers as `PostgreSQL` does. The set-returning `SECURITY
+    /// DEFINER` helpers of the `public` schema join connetto-schema's
+    /// `authz` helpers, so the policies calling them translate through their
+    /// bodies.
     ///
     /// # Panics
     ///
@@ -865,6 +871,16 @@ impl Schema {
         for (table, column) in OPTIONAL_REFERENCES {
             registry.register_attribute_column(*table, *column);
         }
+        registry.declare_helpers(
+            self.database
+                .functions()
+                .filter(|function| {
+                    function.target_name().schema().is_none_or(|schema| schema == "public")
+                        && function.returns_set()
+                        && function.security_mode() == FunctionSecurity::Definer
+                })
+                .map(|function| format!("public.{}", function.name())),
+        );
         let translator = translator(translation::deployment(), registry);
         divergences(&translator, &self.database).expect("rls2fga plans the model")
     }
