@@ -1028,6 +1028,11 @@ const SHARED_REFERENCES: &[(&str, &str, &str)] = &[
         "assets",
         "An exit keeps the placement's organization and names its container, which another organization may share",
     ),
+    (
+        "asset_uses",
+        "assets",
+        "A use copies the asset of its binding, which another organization may share",
+    ),
 ];
 
 /// Optional references whose policies admit a missing reference with

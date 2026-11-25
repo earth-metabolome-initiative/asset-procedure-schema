@@ -670,7 +670,7 @@ CREATE TABLE asset_uses (
     -- connetto organization owning the procedure.
     organization_id UUID NOT NULL,
     -- Asset the binding names.
-    asset_id UUID NOT NULL,
+    asset_id UUID NOT NULL REFERENCES assets (id),
     -- Procedure binding the asset.
     procedure_id UUID NOT NULL,
     -- Identifiers of the procedure's ancestors and the procedure, from the
