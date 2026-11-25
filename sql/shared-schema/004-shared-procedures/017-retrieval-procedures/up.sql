@@ -70,6 +70,7 @@ CREATE CONSTRAINT TRIGGER retrieval_procedure_templates_row AFTER INSERT ON proc
 CREATE CONSTRAINT TRIGGER retrieval_procedure_templates_kept AFTER DELETE ON retrieval_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_retrieval_procedure_templates_row();
 
+REVOKE ALL ON retrieval_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, DELETE ON retrieval_procedure_templates TO app;
 ALTER TABLE retrieval_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE retrieval_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -123,6 +124,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON retrieval_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON retrieval_procedures TO aps_writer;
 ALTER FUNCTION copy_retrieval_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_retrieval_procedures_status() FROM PUBLIC;

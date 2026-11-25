@@ -91,6 +91,7 @@ CREATE CONSTRAINT TRIGGER ball_mill_procedure_templates_row AFTER INSERT ON proc
 CREATE CONSTRAINT TRIGGER ball_mill_procedure_templates_kept AFTER DELETE ON ball_mill_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_ball_mill_procedure_templates_row();
 
+REVOKE ALL ON ball_mill_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE (temperature_k, temperature_tolerance_percentage, duration_s, duration_tolerance_percentage, frequency_hz, frequency_hz_tolerance_percentage, bead_count), DELETE ON ball_mill_procedure_templates TO app;
 ALTER TABLE ball_mill_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ball_mill_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -155,6 +156,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON ball_mill_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON ball_mill_procedures TO aps_writer;
 ALTER FUNCTION copy_ball_mill_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_ball_mill_procedures_status() FROM PUBLIC;

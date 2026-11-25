@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_personal_protective_equipment_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_personal_protective_equipment_models_row() FROM PUBLIC;
+REVOKE ALL ON personal_protective_equipment_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON personal_protective_equipment_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER personal_protective_equipment_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'personal_protective_equipment_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_personal_protective_equipment_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_personal_protective_equipment_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_personal_protective_equipment_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_personal_protective_equipment_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_personal_protective_equipment_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_personal_protective_equipment_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_personal_protective_equipment_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_personal_protective_equipment_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_personal_protective_equipment_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_personal_protective_equipment_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_personal_protective_equipment_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_personal_protective_equipment_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_personal_protective_equipments_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_personal_protective_equipments_row() FROM PUBLIC;
+REVOKE ALL ON personal_protective_equipments FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON personal_protective_equipments TO aps_writer;
 CREATE CONSTRAINT TRIGGER personal_protective_equipments_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'personal_protective_equipments')

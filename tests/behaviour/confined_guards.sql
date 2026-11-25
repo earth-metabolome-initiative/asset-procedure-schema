@@ -76,6 +76,13 @@ SELECT throws_ok($$UPDATE container_compatibility_rules SET quantity = 2 WHERE i
   'definition 88000000-0000-7000-8000-000000000001 is used, so it is frozen', 'a used rule keeps its quantity');
 SELECT throws_ok($$DELETE FROM container_compatibility_rules WHERE id = '88000000-0000-7000-8000-000000000001'$$, '23514',
   'definition 88000000-0000-7000-8000-000000000001 is used, so it is frozen', 'a used rule stays');
+SELECT throws_ok($$INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id, quantity, in_use)
+  VALUES ('88000000-0000-7000-8000-000000000009', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_compatibility_rules',
+  'a8000000-0000-7000-8000-000000000003', 'a8000000-0000-7000-8000-000000000002', 1, TRUE)$$, '42501', 'permission denied for table container_compatibility_rules',
+  'a client cannot create a rule already marked used');
+SELECT throws_ok($$INSERT INTO volumetric_container_models (id, organization_id, volume_l, in_use)
+  VALUES ('a8000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', 1.0, TRUE)$$, '42501', 'permission denied for table volumetric_container_models',
+  'a client cannot create a volumetric model already marked used');
 
 SELECT pg_temp.consume('f8000000-0000-7000-8000-000000000002', 'b8000000-0000-7000-8000-000000000001', '2026-03-01 03:00+00');
 SET CONSTRAINTS ALL IMMEDIATE;
@@ -219,6 +226,9 @@ ROLLBACK TO template_access;
 SELECT throws_ok($$UPDATE procedures SET performed_by_id = '10000000-0000-7000-8000-000000000002' WHERE id = 'f8000000-0000-7000-8000-000000000007'$$,
   '23514', 'procedure f8000000-0000-7000-8000-000000000007 names performer 10000000-0000-7000-8000-000000000002, who is not the caller',
   'a writer cannot name someone else as performer');
+SELECT throws_ok($$UPDATE procedures SET performed_by_id = '10000000-0000-7000-8000-0000000000ff' WHERE id = 'f8000000-0000-7000-8000-000000000007'$$,
+  '23514', 'procedure f8000000-0000-7000-8000-000000000007 names performer 10000000-0000-7000-8000-0000000000ff, who is not the caller',
+  'naming a user who does not exist fails as naming a hidden one does');
 
 -- Deleting a step run needs reader access to its parent.
 SELECT pg_temp.new_procedure('f8000000-0000-7000-8000-000000000020', 'c8000000-0000-7000-8000-000000000010', 'planned', NULL, NULL);

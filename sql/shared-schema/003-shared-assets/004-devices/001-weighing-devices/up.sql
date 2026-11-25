@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_weighing_device_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_weighing_device_models_row() FROM PUBLIC;
+REVOKE ALL ON weighing_device_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON weighing_device_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER weighing_device_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'weighing_device_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_weighing_device_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_weighing_device_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_weighing_device_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_weighing_device_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_weighing_device_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_weighing_device_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_weighing_device_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_weighing_device_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_weighing_device_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_weighing_device_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_weighing_device_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_weighing_device_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_weighing_devices_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_weighing_devices_row() FROM PUBLIC;
+REVOKE ALL ON weighing_devices FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON weighing_devices TO aps_writer;
 CREATE CONSTRAINT TRIGGER weighing_devices_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'weighing_devices')

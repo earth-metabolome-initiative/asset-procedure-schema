@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_mass_spectrometer_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_mass_spectrometer_models_row() FROM PUBLIC;
+REVOKE ALL ON mass_spectrometer_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON mass_spectrometer_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER mass_spectrometer_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'mass_spectrometer_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_mass_spectrometer_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_mass_spectrometer_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_mass_spectrometer_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_mass_spectrometer_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_mass_spectrometer_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_mass_spectrometer_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_mass_spectrometer_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_mass_spectrometer_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_mass_spectrometer_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_mass_spectrometer_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_mass_spectrometer_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_mass_spectrometer_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_mass_spectrometers_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_mass_spectrometers_row() FROM PUBLIC;
+REVOKE ALL ON mass_spectrometers FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON mass_spectrometers TO aps_writer;
 CREATE CONSTRAINT TRIGGER mass_spectrometers_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'mass_spectrometers')

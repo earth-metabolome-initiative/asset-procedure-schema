@@ -79,6 +79,7 @@ CREATE CONSTRAINT TRIGGER freeze_drying_procedure_templates_row AFTER INSERT ON 
 CREATE CONSTRAINT TRIGGER freeze_drying_procedure_templates_kept AFTER DELETE ON freeze_drying_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_freeze_drying_procedure_templates_row();
 
+REVOKE ALL ON freeze_drying_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE (temperature_k, temperature_tolerance_percentage, pressure_pa, pressure_pa_tolerance_percentage, duration_s, duration_tolerance_percentage), DELETE ON freeze_drying_procedure_templates TO app;
 ALTER TABLE freeze_drying_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE freeze_drying_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -143,6 +144,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON freeze_drying_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON freeze_drying_procedures TO aps_writer;
 ALTER FUNCTION copy_freeze_drying_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_freeze_drying_procedures_status() FROM PUBLIC;

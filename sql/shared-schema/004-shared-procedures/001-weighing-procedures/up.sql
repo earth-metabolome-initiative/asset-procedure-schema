@@ -67,6 +67,7 @@ CREATE CONSTRAINT TRIGGER weighing_procedure_templates_row AFTER INSERT ON proce
 CREATE CONSTRAINT TRIGGER weighing_procedure_templates_kept AFTER DELETE ON weighing_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_weighing_procedure_templates_row();
 
+REVOKE ALL ON weighing_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, DELETE ON weighing_procedure_templates TO app;
 ALTER TABLE weighing_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE weighing_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -123,6 +124,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON weighing_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON weighing_procedures TO aps_writer;
 ALTER FUNCTION copy_weighing_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_weighing_procedures_status() FROM PUBLIC;

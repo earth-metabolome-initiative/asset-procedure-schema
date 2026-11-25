@@ -168,8 +168,10 @@ CREATE INDEX ON move_exits (removal_binding_id);
 CREATE INDEX ON move_exits (container_id);
 CREATE INDEX ON move_exits (removal_procedure_id);
 INSERT INTO table_names (id) VALUES ('move_exits');
+REVOKE ALL ON asset_moves, container_occupancy, move_exits FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE, DELETE ON asset_moves TO aps_writer;
 GRANT SELECT, INSERT ON container_occupancy, move_exits TO aps_writer;
+REVOKE ALL ON asset_move_kinds FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON asset_move_kinds TO aps_writer;
 
 -- Lists the assets whose enclosures the caller reads, those of the caller's

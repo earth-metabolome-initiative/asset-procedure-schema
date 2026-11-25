@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_marker_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_marker_models_row() FROM PUBLIC;
+REVOKE ALL ON marker_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON marker_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER marker_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'marker_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_marker_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_marker_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_marker_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_marker_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_marker_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_marker_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_marker_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_marker_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_marker_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_marker_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_marker_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_marker_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_markers_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_markers_row() FROM PUBLIC;
+REVOKE ALL ON markers FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON markers TO aps_writer;
 CREATE CONSTRAINT TRIGGER markers_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'markers')

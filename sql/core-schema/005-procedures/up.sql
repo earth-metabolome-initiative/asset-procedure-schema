@@ -190,7 +190,10 @@ BEGIN
     PERFORM procedure.id FROM public.procedures procedure WHERE procedure.id = locked_procedure_id FOR NO KEY UPDATE;
 END;
 $$;
+REVOKE ALL ON procedures FROM PUBLIC, app, identity_writer;
 GRANT SELECT, UPDATE (id) ON procedures TO aps_writer;
+REVOKE ALL ON procedure_assets FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_parameter_values FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON procedure_assets, procedure_parameter_values, memberships TO aps_writer;
 ALTER FUNCTION lock_procedure(UUID) OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION lock_procedure(UUID) FROM PUBLIC;
@@ -290,18 +293,21 @@ $$;
 ALTER FUNCTION require_executable_template(UUID, UUID, BOOLEAN) OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_executable_template(UUID, UUID, BOOLEAN) FROM PUBLIC;
 
--- Rejects naming as performer anyone but the caller.
-CREATE FUNCTION require_caller_performer(procedure_id UUID, performer_id UUID) RETURNS VOID
+-- Rejects an update naming as performer anyone but the caller, before the
+-- users key can tell an existing user from a missing one. The insert policy
+-- already confines a new row's performer to the caller.
+CREATE FUNCTION require_caller_performer() RETURNS TRIGGER
 LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
-    IF performer_id IS DISTINCT FROM authz.caller_id() THEN
-        RAISE EXCEPTION 'procedure % names performer %, who is not the caller', procedure_id, performer_id
+    IF NEW.performed_by_id IS DISTINCT FROM authz.caller_id() THEN
+        RAISE EXCEPTION 'procedure % names performer %, who is not the caller', NEW.id, NEW.performed_by_id
             USING ERRCODE = 'check_violation';
     END IF;
+    RETURN NEW;
 END;
 $$;
-ALTER FUNCTION require_caller_performer(UUID, UUID) OWNER TO aps_writer;
-REVOKE EXECUTE ON FUNCTION require_caller_performer(UUID, UUID) FROM PUBLIC;
+ALTER FUNCTION require_caller_performer() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_caller_performer() FROM PUBLIC;
 
 CREATE FUNCTION guard_procedure() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
@@ -334,9 +340,6 @@ BEGIN
                 USING ERRCODE = 'check_violation';
         END IF;
         PERFORM public.require_executable_template(NEW.id, NEW.procedure_template_id, NEW.parent_procedure_id IS NOT NULL);
-        IF NEW.performed_by_id IS NOT NULL THEN
-            PERFORM public.require_caller_performer(NEW.id, NEW.performed_by_id);
-        END IF;
         IF NEW.parent_procedure_id IS NOT NULL THEN
             PERFORM public.lock_procedure(NEW.parent_procedure_id);
             SELECT parent.status_id INTO parent_status FROM public.procedures parent WHERE parent.id = NEW.parent_procedure_id;
@@ -376,11 +379,6 @@ BEGIN
             PERFORM public.require_skip_reason(NEW.id, NEW.step_id, NEW.note);
         END IF;
         RETURN NEW;
-    END IF;
-
-    IF (NEW.performed_by_id IS DISTINCT FROM OLD.performed_by_id AND NEW.performed_by_id IS NOT NULL)
-        OR (OLD.status_id = 'planned' AND NEW.status_id = 'in_progress') THEN
-        PERFORM public.require_caller_performer(NEW.id, NEW.performed_by_id);
     END IF;
 
     IF NEW.status_id = OLD.status_id THEN
@@ -483,6 +481,11 @@ ALTER FUNCTION guard_procedure() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure() FROM PUBLIC;
 CREATE TRIGGER procedures_guard AFTER INSERT OR UPDATE OR DELETE ON procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure();
+CREATE TRIGGER procedures_performer BEFORE UPDATE OF performed_by_id, status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id NOT IN ('completed', 'aborted', 'skipped')
+        AND ((NEW.performed_by_id IS DISTINCT FROM OLD.performed_by_id AND NEW.performed_by_id IS NOT NULL)
+            OR (OLD.status_id = 'planned' AND NEW.status_id = 'in_progress')))
+    EXECUTE FUNCTION require_caller_performer();
 
 -- Writes a procedure's new status into its bindings and parameter values,
 -- whose deferred foreign keys hold them equal to it at commit. The
@@ -688,6 +691,7 @@ CREATE INDEX ON asset_uses (asset_id);
 CREATE INDEX ON asset_uses (procedure_id);
 CREATE INDEX ON asset_uses (status_id);
 INSERT INTO table_names (id) VALUES ('asset_uses');
+REVOKE ALL ON asset_uses FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE, DELETE ON asset_uses TO aps_writer;
 
 -- Lists the assets whose ledgers the caller reads, which are the assets the
@@ -714,7 +718,9 @@ $$;
 ALTER FUNCTION lock_ledger_asset(UUID) OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION lock_ledger_asset(UUID) FROM PUBLIC;
 
--- The lineage of a procedure, as `asset_uses.lineage` holds it.
+-- The lineage of a procedure, as `asset_uses.lineage` holds it. The walk
+-- stops after 111 procedures, whose 37-character segments already exceed the
+-- 4096 characters `asset_uses.lineage` admits.
 CREATE FUNCTION procedure_lineage(lineage_procedure_id UUID) RETURNS TEXT
 LANGUAGE sql STABLE SET search_path = pg_catalog, pg_temp AS $$
     WITH RECURSIVE line (id, parent_id, depth) AS (
@@ -722,6 +728,7 @@ LANGUAGE sql STABLE SET search_path = pg_catalog, pg_temp AS $$
         UNION ALL
         SELECT run.id, run.parent_procedure_id, line.depth + 1
         FROM public.procedures run JOIN line ON run.id = line.parent_id
+        WHERE line.depth < 110
     )
     SELECT string_agg(line.id::text || '/', '' ORDER BY line.depth DESC) FROM line
 $$;

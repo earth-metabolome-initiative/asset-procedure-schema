@@ -27,6 +27,7 @@ CREATE TABLE brands (
 CREATE INDEX ON brands (table_name_id);
 INSERT INTO table_names (id) VALUES ('brands');
 
+REVOKE ALL ON brands FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE (name), DELETE ON brands TO app;
 ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brands FORCE ROW LEVEL SECURITY;

@@ -67,6 +67,7 @@ CREATE CONSTRAINT TRIGGER container_sealing_procedure_templates_row AFTER INSERT
 CREATE CONSTRAINT TRIGGER container_sealing_procedure_templates_kept AFTER DELETE ON container_sealing_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_container_sealing_procedure_templates_row();
 
+REVOKE ALL ON container_sealing_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, DELETE ON container_sealing_procedure_templates TO app;
 ALTER TABLE container_sealing_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE container_sealing_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -120,6 +121,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON container_sealing_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON container_sealing_procedures TO aps_writer;
 ALTER FUNCTION copy_container_sealing_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_container_sealing_procedures_status() FROM PUBLIC;

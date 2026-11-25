@@ -73,6 +73,7 @@ CREATE CONSTRAINT TRIGGER harvesting_procedure_templates_row AFTER INSERT ON pro
 CREATE CONSTRAINT TRIGGER harvesting_procedure_templates_kept AFTER DELETE ON harvesting_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_harvesting_procedure_templates_row();
 
+REVOKE ALL ON harvesting_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, DELETE ON harvesting_procedure_templates TO app;
 ALTER TABLE harvesting_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE harvesting_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -126,6 +127,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON harvesting_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON harvesting_procedures TO aps_writer;
 ALTER FUNCTION copy_harvesting_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_harvesting_procedures_status() FROM PUBLIC;

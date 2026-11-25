@@ -218,6 +218,7 @@ INSERT INTO quantity_kinds (id, unit_symbol, ucum_code) VALUES
 ALTER TABLE quantity_kinds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quantity_kinds FORCE ROW LEVEL SECURITY;
 CREATE POLICY quantity_kinds_select ON quantity_kinds FOR SELECT TO app USING (true);
+REVOKE ALL ON quantity_kinds FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON quantity_kinds TO app;
 
 -- A named procedure value with an optional default in its quantity kind's unit.
@@ -450,7 +451,14 @@ BEGIN
     PERFORM template.id FROM public.procedure_templates template WHERE template.id = locked_template_id FOR NO KEY UPDATE;
 END;
 $$;
+REVOKE ALL ON procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, UPDATE (id) ON procedure_templates TO aps_writer;
+REVOKE ALL ON procedure_template_slots FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_template_steps FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_template_step_edges FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_template_slot_bindings FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_template_parameters FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_template_step_parameters FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON procedure_template_slots, procedure_template_steps, procedure_template_step_edges, procedure_template_slot_bindings,
     procedure_template_parameters, procedure_template_step_parameters TO aps_writer;
 ALTER FUNCTION lock_procedure_template(UUID) OWNER TO aps_writer;

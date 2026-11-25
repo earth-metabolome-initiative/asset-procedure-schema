@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_camera_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_camera_models_row() FROM PUBLIC;
+REVOKE ALL ON camera_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON camera_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER camera_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'camera_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_camera_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_camera_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_camera_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_camera_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_camera_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_camera_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_camera_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_camera_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_camera_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_camera_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_camera_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_camera_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_cameras_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_cameras_row() FROM PUBLIC;
+REVOKE ALL ON cameras FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON cameras TO aps_writer;
 CREATE CONSTRAINT TRIGGER cameras_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'cameras')

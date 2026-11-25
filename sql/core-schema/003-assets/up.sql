@@ -170,6 +170,7 @@ END;
 $$;
 ALTER FUNCTION require_physical_asset_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_physical_asset_models_row() FROM PUBLIC;
+REVOKE ALL ON physical_asset_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON physical_asset_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER physical_asset_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'physical_asset_models')
@@ -212,6 +213,7 @@ END;
 $$;
 ALTER FUNCTION require_digital_asset_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_digital_asset_models_row() FROM PUBLIC;
+REVOKE ALL ON digital_asset_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON digital_asset_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER digital_asset_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'digital_asset_models')
@@ -292,7 +294,10 @@ END;
 $$;
 GRANT USAGE ON SCHEMA authz TO aps_writer;
 GRANT EXECUTE ON FUNCTION authz.resources_with(authz.role), authz.caller_id() TO aps_writer;
+REVOKE ALL ON asset_model_ancestors FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON asset_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON asset_models, asset_model_ancestors TO aps_writer;
+REVOKE ALL ON assets FROM PUBLIC, app, identity_writer;
 GRANT SELECT, UPDATE (id) ON assets TO aps_writer;
 ALTER FUNCTION lock_asset(UUID) OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION lock_asset(UUID) FROM PUBLIC;
@@ -334,6 +339,7 @@ END;
 $$;
 ALTER FUNCTION require_physical_assets_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_physical_assets_row() FROM PUBLIC;
+REVOKE ALL ON physical_assets FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON physical_assets TO aps_writer;
 CREATE CONSTRAINT TRIGGER physical_assets_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'physical_assets')
@@ -378,6 +384,7 @@ END;
 $$;
 ALTER FUNCTION require_digital_assets_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_digital_assets_row() FROM PUBLIC;
+REVOKE ALL ON digital_assets FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON digital_assets TO aps_writer;
 CREATE CONSTRAINT TRIGGER digital_assets_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'digital_assets')

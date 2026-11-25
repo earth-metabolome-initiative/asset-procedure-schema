@@ -44,6 +44,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_products_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_products_row() FROM PUBLIC;
+REVOKE ALL ON commercial_products FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_products TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_products_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_products')
@@ -96,6 +97,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_product_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_product_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_product_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_product_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_product_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_product_lots')

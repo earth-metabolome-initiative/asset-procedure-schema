@@ -48,6 +48,7 @@ END;
 $$;
 ALTER FUNCTION require_container_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_container_models_row() FROM PUBLIC;
+REVOKE ALL ON container_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON container_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER container_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'container_models')
@@ -136,6 +137,7 @@ END;
 $$;
 ALTER FUNCTION require_weighed_container_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_weighed_container_models_row() FROM PUBLIC;
+REVOKE ALL ON weighed_container_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON weighed_container_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER weighed_container_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'weighed_container_models')
@@ -183,6 +185,7 @@ END;
 $$;
 ALTER FUNCTION require_volumetric_container_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_volumetric_container_models_row() FROM PUBLIC;
+REVOKE ALL ON volumetric_container_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON volumetric_container_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER volumetric_container_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'volumetric_container_models')
@@ -224,6 +227,7 @@ END;
 $$;
 ALTER FUNCTION require_weighed_volumetric_container_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_weighed_volumetric_container_models_row() FROM PUBLIC;
+REVOKE ALL ON weighed_volumetric_container_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON weighed_volumetric_container_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER weighed_volumetric_container_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'weighed_volumetric_container_models')
@@ -270,6 +274,7 @@ END;
 $$;
 ALTER FUNCTION require_containers_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_containers_row() FROM PUBLIC;
+REVOKE ALL ON containers FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON containers TO aps_writer;
 CREATE CONSTRAINT TRIGGER containers_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'containers')
@@ -316,6 +321,7 @@ END;
 $$;
 ALTER FUNCTION require_volumetric_containers_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_volumetric_containers_row() FROM PUBLIC;
+REVOKE ALL ON volumetric_containers FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON volumetric_containers TO aps_writer;
 CREATE CONSTRAINT TRIGGER volumetric_containers_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'volumetric_containers')
@@ -356,6 +362,7 @@ END;
 $$;
 ALTER FUNCTION require_container_sealer_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_container_sealer_models_row() FROM PUBLIC;
+REVOKE ALL ON container_sealer_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON container_sealer_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER container_sealer_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'container_sealer_models')
@@ -380,7 +387,9 @@ CREATE POLICY container_models_blocked ON container_models AS RESTRICTIVE FOR AL
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
 
-GRANT SELECT, INSERT, UPDATE (quantity), DELETE ON container_compatibility_rules TO app;
+REVOKE ALL ON container_compatibility_rules FROM PUBLIC, app, identity_writer;
+GRANT SELECT, INSERT (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id, quantity), UPDATE (quantity), DELETE
+    ON container_compatibility_rules TO app;
 ALTER TABLE container_compatibility_rules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE container_compatibility_rules FORCE ROW LEVEL SECURITY;
 CREATE POLICY container_compatibility_rules_select ON container_compatibility_rules FOR SELECT TO app
@@ -431,7 +440,7 @@ CREATE POLICY weighed_container_models_blocked ON weighed_container_models AS RE
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
 
-GRANT SELECT, INSERT, UPDATE (volume_l), DELETE ON volumetric_container_models TO app;
+GRANT SELECT, INSERT (id, organization_id, volume_l), UPDATE (volume_l), DELETE ON volumetric_container_models TO app;
 ALTER TABLE volumetric_container_models ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volumetric_container_models FORCE ROW LEVEL SECURITY;
 CREATE POLICY volumetric_container_models_select ON volumetric_container_models FOR SELECT TO app

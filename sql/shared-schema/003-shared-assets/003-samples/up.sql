@@ -45,6 +45,7 @@ END;
 $$;
 ALTER FUNCTION require_sample_source_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_sample_source_models_row() FROM PUBLIC;
+REVOKE ALL ON sample_source_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON sample_source_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER sample_source_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'sample_source_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_sample_sources_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_sample_sources_row() FROM PUBLIC;
+REVOKE ALL ON sample_sources FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON sample_sources TO aps_writer;
 CREATE CONSTRAINT TRIGGER sample_sources_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'sample_sources')
@@ -135,6 +137,7 @@ END;
 $$;
 ALTER FUNCTION require_sample_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_sample_models_row() FROM PUBLIC;
+REVOKE ALL ON sample_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON sample_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER sample_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'sample_models')
@@ -213,6 +216,7 @@ END;
 $$;
 ALTER FUNCTION require_samples_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_samples_row() FROM PUBLIC;
+REVOKE ALL ON samples FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON samples TO aps_writer;
 CREATE CONSTRAINT TRIGGER samples_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'samples')

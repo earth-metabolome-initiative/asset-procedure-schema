@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_geopositioning_device_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_geopositioning_device_models_row() FROM PUBLIC;
+REVOKE ALL ON geopositioning_device_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON geopositioning_device_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER geopositioning_device_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'geopositioning_device_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_geopositioning_device_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_geopositioning_device_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_geopositioning_device_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_geopositioning_device_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_geopositioning_device_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_geopositioning_device_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_geopositioning_device_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_geopositioning_device_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_geopositioning_device_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_geopositioning_device_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_geopositioning_device_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_geopositioning_device_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_geopositioning_devices_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_geopositioning_devices_row() FROM PUBLIC;
+REVOKE ALL ON geopositioning_devices FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON geopositioning_devices TO aps_writer;
 CREATE CONSTRAINT TRIGGER geopositioning_devices_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'geopositioning_devices')

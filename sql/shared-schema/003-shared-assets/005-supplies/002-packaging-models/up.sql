@@ -40,6 +40,7 @@ END;
 $$;
 ALTER FUNCTION require_packaging_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_packaging_models_row() FROM PUBLIC;
+REVOKE ALL ON packaging_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON packaging_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER packaging_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'packaging_models')

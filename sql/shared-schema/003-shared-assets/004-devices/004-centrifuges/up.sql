@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_centrifuge_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_centrifuge_models_row() FROM PUBLIC;
+REVOKE ALL ON centrifuge_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON centrifuge_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER centrifuge_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'centrifuge_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_centrifuge_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_centrifuge_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_centrifuge_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_centrifuge_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_centrifuge_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_centrifuge_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_centrifuge_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_centrifuge_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_centrifuge_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_centrifuge_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_centrifuge_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_centrifuge_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_centrifuges_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_centrifuges_row() FROM PUBLIC;
+REVOKE ALL ON centrifuges FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON centrifuges TO aps_writer;
 CREATE CONSTRAINT TRIGGER centrifuges_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'centrifuges')

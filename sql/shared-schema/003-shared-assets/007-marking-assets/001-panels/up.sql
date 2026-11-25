@@ -43,6 +43,7 @@ END;
 $$;
 ALTER FUNCTION require_panel_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_panel_models_row() FROM PUBLIC;
+REVOKE ALL ON panel_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON panel_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER panel_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'panel_models')
@@ -89,6 +90,7 @@ END;
 $$;
 ALTER FUNCTION require_panels_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_panels_row() FROM PUBLIC;
+REVOKE ALL ON panels FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON panels TO aps_writer;
 CREATE CONSTRAINT TRIGGER panels_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'panels')

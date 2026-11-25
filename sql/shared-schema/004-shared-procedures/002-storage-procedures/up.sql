@@ -73,6 +73,7 @@ CREATE CONSTRAINT TRIGGER storage_procedure_templates_row AFTER INSERT ON proced
 CREATE CONSTRAINT TRIGGER storage_procedure_templates_kept AFTER DELETE ON storage_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_storage_procedure_templates_row();
 
+REVOKE ALL ON storage_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE (temperature_k, temperature_tolerance_percentage), DELETE ON storage_procedure_templates TO app;
 ALTER TABLE storage_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE storage_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -134,6 +135,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON storage_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON storage_procedures TO aps_writer;
 ALTER FUNCTION copy_storage_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_storage_procedures_status() FROM PUBLIC;

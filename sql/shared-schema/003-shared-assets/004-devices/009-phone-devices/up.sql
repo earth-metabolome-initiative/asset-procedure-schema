@@ -52,6 +52,7 @@ END;
 $$;
 ALTER FUNCTION require_phone_device_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_phone_device_models_row() FROM PUBLIC;
+REVOKE ALL ON phone_device_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON phone_device_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER phone_device_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'phone_device_models')
@@ -93,6 +94,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_phone_device_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_phone_device_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_phone_device_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_phone_device_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_phone_device_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_phone_device_models')
@@ -137,6 +139,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_phone_device_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_phone_device_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_phone_device_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_phone_device_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_phone_device_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_phone_device_lots')
@@ -185,6 +188,7 @@ END;
 $$;
 ALTER FUNCTION require_phone_devices_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_phone_devices_row() FROM PUBLIC;
+REVOKE ALL ON phone_devices FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON phone_devices TO aps_writer;
 CREATE CONSTRAINT TRIGGER phone_devices_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'phone_devices')

@@ -43,6 +43,7 @@ END;
 $$;
 ALTER FUNCTION require_photograph_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_photograph_models_row() FROM PUBLIC;
+REVOKE ALL ON photograph_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON photograph_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER photograph_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'photograph_models')
@@ -89,6 +90,7 @@ END;
 $$;
 ALTER FUNCTION require_photographs_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_photographs_row() FROM PUBLIC;
+REVOKE ALL ON photographs FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON photographs TO aps_writer;
 CREATE CONSTRAINT TRIGGER photographs_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'photographs')

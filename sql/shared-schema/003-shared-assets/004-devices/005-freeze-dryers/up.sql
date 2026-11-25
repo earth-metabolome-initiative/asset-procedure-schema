@@ -46,6 +46,7 @@ END;
 $$;
 ALTER FUNCTION require_freeze_dryer_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_freeze_dryer_models_row() FROM PUBLIC;
+REVOKE ALL ON freeze_dryer_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON freeze_dryer_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER freeze_dryer_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'freeze_dryer_models')
@@ -91,6 +92,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_freeze_dryer_models_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_freeze_dryer_models_row() FROM PUBLIC;
+REVOKE ALL ON commercial_freeze_dryer_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_freeze_dryer_models TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_freeze_dryer_models_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_freeze_dryer_models')
@@ -138,6 +140,7 @@ END;
 $$;
 ALTER FUNCTION require_commercial_freeze_dryer_lots_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_commercial_freeze_dryer_lots_row() FROM PUBLIC;
+REVOKE ALL ON commercial_freeze_dryer_lots FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON commercial_freeze_dryer_lots TO aps_writer;
 CREATE CONSTRAINT TRIGGER commercial_freeze_dryer_lots_row AFTER INSERT ON asset_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'commercial_freeze_dryer_lots')
@@ -184,6 +187,7 @@ END;
 $$;
 ALTER FUNCTION require_freeze_dryers_row() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION require_freeze_dryers_row() FROM PUBLIC;
+REVOKE ALL ON freeze_dryers FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON freeze_dryers TO aps_writer;
 CREATE CONSTRAINT TRIGGER freeze_dryers_row AFTER INSERT ON assets
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'freeze_dryers')

@@ -175,6 +175,15 @@ ALTER TABLE table_name_instances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE table_name_instances FORCE ROW LEVEL SECURITY;
 CREATE POLICY table_name_instances_select ON table_name_instances FOR SELECT TO app USING (true);
 
+REVOKE ALL ON table_names FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON table_name_ancestors FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON table_name_admitted_parents FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON table_name_instances FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON slot_roles FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON slot_role_pairs FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON parameter_value_kinds FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_template_states FROM PUBLIC, app, identity_writer;
+REVOKE ALL ON procedure_statuses FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON table_names, table_name_ancestors, table_name_admitted_parents, table_name_instances, slot_roles, slot_role_pairs,
     parameter_value_kinds, procedure_template_states, procedure_statuses TO app;
 GRANT SELECT ON table_name_ancestors, table_name_admitted_parents, table_name_instances TO aps_writer;

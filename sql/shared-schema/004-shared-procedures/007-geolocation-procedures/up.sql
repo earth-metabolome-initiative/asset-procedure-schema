@@ -67,6 +67,7 @@ CREATE CONSTRAINT TRIGGER geopositioning_procedure_templates_row AFTER INSERT ON
 CREATE CONSTRAINT TRIGGER geopositioning_procedure_templates_kept AFTER DELETE ON geopositioning_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_geopositioning_procedure_templates_row();
 
+REVOKE ALL ON geopositioning_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, DELETE ON geopositioning_procedure_templates TO app;
 ALTER TABLE geopositioning_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE geopositioning_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -123,6 +124,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON geopositioning_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON geopositioning_procedures TO aps_writer;
 ALTER FUNCTION copy_geopositioning_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_geopositioning_procedures_status() FROM PUBLIC;

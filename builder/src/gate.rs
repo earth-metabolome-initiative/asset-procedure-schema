@@ -990,35 +990,6 @@ const OPTIONAL_REFERENCES: &[(&str, &str)] = &[
     ("procedure_assets", "parent_procedure_id"),
 ];
 
-/// Keys that copy a column of the parent through a key wider than its primary
-/// key, with a trigger on the parent writing the copy and the deferred key
-/// holding it equal at commit.
-const COPIES: &[(&str, &[(&str, &str)])] = &[(
-    "The status copy lets the closed-procedure guards and the production and consumption indexes read the status without a join",
-    &[
-        (
-            "container_sealing_procedures",
-            "container_sealing_procedures_id_container_sealing_procedur_fkey",
-        ),
-        ("disposal_procedures", "disposal_procedures_id_disposal_procedure_template_id_stat_fkey"),
-        (
-            "harvesting_procedures",
-            "harvesting_procedures_id_harvesting_procedure_template_id__fkey",
-        ),
-        ("packaging_procedures", "packaging_procedures_id_packaging_procedure_template_id_st_fkey"),
-        (
-            "photograph_procedures",
-            "photograph_procedures_id_photograph_procedure_template_id__fkey",
-        ),
-        ("procedure_assets", "procedure_assets_procedure_id_procedure_template_id_status_fkey"),
-        (
-            "procedure_parameter_values",
-            "procedure_parameter_values_procedure_id_procedure_template_fkey",
-        ),
-        ("retrieval_procedures", "retrieval_procedures_id_retrieval_procedure_template_id_st_fkey"),
-    ],
-)];
-
 /// Keys whose existence-oracle findings the APS schema keeps on purpose,
 /// grouped by the reason each group stays.
 const ORACLES: &[(&str, &[(&str, &str)])] = &[(
@@ -1089,11 +1060,6 @@ const FUNCTIONS: &[(&str, &str, &str)] = &[
     ),
     (
         "cross_tenant_cap",
-        "lock_container_model_ancestors",
-        "A model may extend a model another organization shares with it, so its ancestry rows and the container models they name need not share an organization",
-    ),
-    (
-        "cross_tenant_cap",
         "container_compatible",
         "A model may extend a model another organization shares with it, and a compatibility rule may name a shared model, so its ancestry rows and the rules they match need not share an organization",
     ),
@@ -1123,7 +1089,6 @@ const TABLES: &[(&str, &str, &str)] = &[
 fn allow(constrainer: &mut DefaultConstrainer<ParserDB>) {
     for (rule, groups) in [
         ("cascade_into_row_level_security_table", CASCADES),
-        ("copied_column_through_superkey", COPIES),
         ("foreign_key_existence_oracle", ORACLES),
     ] {
         for (_reason, keys) in groups {

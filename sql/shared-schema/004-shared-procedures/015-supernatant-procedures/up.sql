@@ -104,6 +104,7 @@ CREATE CONSTRAINT TRIGGER supernatant_procedure_templates_row AFTER INSERT ON pr
 CREATE CONSTRAINT TRIGGER supernatant_procedure_templates_kept AFTER DELETE ON supernatant_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_supernatant_procedure_templates_row();
 
+REVOKE ALL ON supernatant_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE (volume_l, volume_l_tolerance_percentage), DELETE ON supernatant_procedure_templates TO app;
 ALTER TABLE supernatant_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE supernatant_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -165,6 +166,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON supernatant_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON supernatant_procedures TO aps_writer;
 ALTER FUNCTION copy_supernatant_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_supernatant_procedures_status() FROM PUBLIC;

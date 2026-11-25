@@ -104,6 +104,7 @@ CREATE CONSTRAINT TRIGGER pouring_procedure_templates_row AFTER INSERT ON proced
 CREATE CONSTRAINT TRIGGER pouring_procedure_templates_kept AFTER DELETE ON pouring_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_pouring_procedure_templates_row();
 
+REVOKE ALL ON pouring_procedure_templates FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE (volume_l, volume_l_tolerance_percentage), DELETE ON pouring_procedure_templates TO app;
 ALTER TABLE pouring_procedure_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pouring_procedure_templates FORCE ROW LEVEL SECURITY;
@@ -165,6 +166,7 @@ BEGIN
     RETURN NULL;
 END;
 $$;
+REVOKE ALL ON pouring_procedures FROM PUBLIC, app, identity_writer;
 GRANT UPDATE (status_id) ON pouring_procedures TO aps_writer;
 ALTER FUNCTION copy_pouring_procedures_status() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION copy_pouring_procedures_status() FROM PUBLIC;
