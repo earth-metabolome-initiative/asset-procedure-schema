@@ -250,5 +250,20 @@ SELECT pg_temp.act('10000000-0000-7000-8000-000000000002');
 SELECT isnt_empty($$DELETE FROM procedures WHERE id = 'f8000000-0000-7000-8000-000000000021' RETURNING id$$,
   'a step run admin who reads the parent deletes the step run');
 SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
+
+-- A binding of a blocking organization's run opens no asset ledger.
+INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
+VALUES ('20000000-0000-7000-8000-000000000001', 'f8000000-0000-7000-8000-000000000005', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT pg_temp.act('10000000-0000-7000-8000-000000000002');
+SELECT ok('b8000000-0000-7000-8000-000000000011' IN (SELECT ledger_assets()), 'a run reader reads the ledgers of the assets the run binds');
+RESET ROLE;
+INSERT INTO organization_blocks (organization_id, principal_id, principal_kind)
+VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user');
+SET ROLE app;
+SELECT ok('b8000000-0000-7000-8000-000000000011' NOT IN (SELECT ledger_assets()),
+  'a run reader blocked by the run''s organization reads no ledger through its bindings');
+SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
 SELECT * FROM finish();
 ROLLBACK;

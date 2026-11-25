@@ -699,13 +699,15 @@ REVOKE ALL ON asset_uses FROM PUBLIC, app, identity_writer;
 GRANT SELECT, INSERT, UPDATE, DELETE ON asset_uses TO aps_writer;
 
 -- Lists the assets whose ledgers the caller reads, which are the assets the
--- caller reads and those bound by procedures the caller reads.
+-- caller reads and those bound by procedures the caller reads, outside the
+-- organizations blocking the caller.
 CREATE FUNCTION ledger_assets() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     SELECT readable.id FROM authz.resources_with('reader') readable (id)
     UNION
     SELECT binding.asset_id FROM public.procedure_assets binding
     WHERE binding.asset_id IS NOT NULL AND binding.procedure_id IN (SELECT authz.resources_with('reader'))
+      AND NOT (binding.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
 $$;
 ALTER FUNCTION ledger_assets() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION ledger_assets() FROM PUBLIC;

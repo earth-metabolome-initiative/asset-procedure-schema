@@ -293,7 +293,7 @@ BEGIN
 END;
 $$;
 GRANT USAGE ON SCHEMA authz TO aps_writer;
-GRANT EXECUTE ON FUNCTION authz.resources_with(authz.role), authz.caller_id() TO aps_writer;
+GRANT EXECUTE ON FUNCTION authz.resources_with(authz.role), authz.caller_id(), authz.blocking_organizations() TO aps_writer;
 REVOKE ALL ON asset_model_ancestors FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON asset_models FROM PUBLIC, app, identity_writer;
 GRANT SELECT ON asset_models, asset_model_ancestors TO aps_writer;
