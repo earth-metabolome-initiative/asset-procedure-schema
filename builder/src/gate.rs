@@ -609,6 +609,7 @@ const CASCADES: &[(&str, &[(&str, &str)])] = &[
     (
         "Only the deleted model's own closure rows go, since a model with children cannot be deleted",
         &[
+            ("asset_model_ancestors", "asset_model_ancestors_ancestor_model_id_fkey"),
             ("asset_model_ancestors", "asset_model_ancestors_descendant_model_id_fkey"),
             (
                 "asset_model_ancestors",
@@ -1087,6 +1088,10 @@ const ORACLES: &[(&str, &[(&str, &str)])] = &[
             "asset_model_ancestors",
             "asset_model_ancestors_descendant_model_id_parent_model_id__fkey",
         )],
+    ),
+    (
+        "The key restates what the closure already proves, since a reflexive row's ancestor is its descendant and any other row's ancestor is the ancestor of the row its own key names",
+        &[("asset_model_ancestors", "asset_model_ancestors_ancestor_model_id_fkey")],
     ),
 ];
 

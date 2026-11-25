@@ -38,7 +38,7 @@ CREATE TABLE asset_model_ancestors (
     -- Model whose ancestors the row lists.
     descendant_model_id UUID NOT NULL REFERENCES asset_models (id) ON DELETE CASCADE,
     -- Ancestor of the descendant, or the descendant itself.
-    ancestor_model_id UUID NOT NULL,
+    ancestor_model_id UUID NOT NULL REFERENCES asset_models (id) ON DELETE CASCADE,
     -- connetto organization owning the descendant.
     organization_id UUID NOT NULL,
     -- Parent of the descendant, through which the ancestor is reached. Null on
