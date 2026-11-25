@@ -15,6 +15,20 @@ CREATE FUNCTION pg_temp.create_ownable(ownable UUID) RETURNS VOID LANGUAGE sql A
     VALUES (ownable, '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', authz.caller_id());
   INSERT INTO public.resources (id, kind, organization_id) VALUES (ownable, 'ownable', '20000000-0000-7000-8000-000000000001');
 $$;
+-- The caller invites the member, who accepts, as an organization admin and the invitee do.
+CREATE FUNCTION pg_temp.add_member(organization UUID, member UUID) RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+  inviter TEXT := current_setting('app.user_id');
+  email TEXT := current_setting('app.verified_email');
+  invitation UUID := gen_random_uuid();
+BEGIN
+  INSERT INTO public.invitations (id, organization_id, email, expires_at, invited_by_id)
+    VALUES (invitation, organization, member || '@example.com', now() + interval '1 day', inviter::uuid);
+  PERFORM set_config('app.user_id', member::text, false), set_config('app.verified_email', member || '@example.com', false);
+  INSERT INTO public.memberships (organization_id, user_id, state, invitation_id) VALUES (organization, member, 'active', invitation);
+  PERFORM set_config('app.user_id', inviter, false), set_config('app.verified_email', email, false);
+END
+$$;
 -- A model with its complete ancestor rows, held by `model_table` as its most concrete table.
 CREATE FUNCTION pg_temp.new_model(model UUID, model_name TEXT, parent UUID, model_table TEXT DEFAULT 'asset_models')
 RETURNS VOID LANGUAGE sql AS $$
@@ -106,7 +120,8 @@ CREATE FUNCTION pg_temp.record_number(procedure UUID, parameter UUID, recorded D
     SELECT procedure, parameter, executed.procedure_template_id, executed.status_id, 'number', executed.organization_id, recorded
     FROM public.procedures executed WHERE executed.id = procedure;
 $$;
-GRANT EXECUTE ON FUNCTION pg_temp.create_ownable(UUID), pg_temp.new_model(UUID, TEXT, UUID, TEXT), pg_temp.new_asset(UUID, TEXT, UUID, TEXT),
+GRANT EXECUTE ON FUNCTION pg_temp.create_ownable(UUID), pg_temp.add_member(UUID, UUID), pg_temp.new_model(UUID, TEXT, UUID, TEXT),
+  pg_temp.new_asset(UUID, TEXT, UUID, TEXT),
   pg_temp.new_template(UUID, TEXT, TEXT), pg_temp.new_slot(UUID, UUID, TEXT, UUID, TEXT, INTEGER, INTEGER),
   pg_temp.new_step(UUID, UUID, UUID, TEXT, INTEGER), pg_temp.new_edge(UUID, UUID), pg_temp.new_binding(UUID, UUID, UUID),
   pg_temp.new_procedure(UUID, UUID, TEXT, UUID, UUID, UUID, TEXT), pg_temp.bind_model(UUID, UUID, UUID, UUID, UUID),
@@ -122,11 +137,11 @@ INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role
   VALUES ('20000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('50000000-0000-7000-8000-000000000001', 'project', '20000000-0000-7000-8000-000000000001');
 INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'project',
     '20000000-0000-7000-8000-000000000001', 'organization');
+INSERT INTO resources (id, kind, organization_id)
+  VALUES ('50000000-0000-7000-8000-000000000001', 'project', '20000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 

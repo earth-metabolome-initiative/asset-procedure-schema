@@ -63,9 +63,9 @@ fn template(
     let (id, fridge_slot, vial_slot) = (blob(id), blob(fridge_slot), blob(vial_slot));
     let (fridge, vial) = (blob(fridge), blob(vial));
     conn.batch_execute(&format!(
-        "INSERT INTO resources (id, kind, organization_id) VALUES ({id}, 'ownable', {organization});
-        INSERT INTO ownables (id, organization_id, project_id, created_by_id)
+        "INSERT INTO ownables (id, organization_id, project_id, created_by_id)
             VALUES ({id}, {organization}, {project}, {user});
+        INSERT INTO resources (id, kind, organization_id) VALUES ({id}, 'ownable', {organization});
         INSERT INTO procedure_templates (id, organization_id, project_id, table_name_id, name)
             VALUES ({id}, {organization}, {project}, '{table}', '{name}');
         INSERT INTO procedure_template_slots

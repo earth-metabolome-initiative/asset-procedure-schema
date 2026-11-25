@@ -772,7 +772,7 @@ checksum = "65036b2f761dc2d20b4634890f73bdbad811d5edb677f84fd652ae9256051fcb"
 [[package]]
 name = "connetto-schema-lint"
 version = "0.0.0"
-source = "git+https://github.com/connetto-rs/connetto-schema?rev=f1c652535a19bc9a67f4b6959f06ce99d2751659#f1c652535a19bc9a67f4b6959f06ce99d2751659"
+source = "git+https://github.com/connetto-rs/connetto-schema?rev=3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb#3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb"
 dependencies = [
  "connetto-schema-source",
  "rls2fga",
@@ -783,7 +783,7 @@ dependencies = [
 [[package]]
 name = "connetto-schema-source"
 version = "0.0.0"
-source = "git+https://github.com/connetto-rs/connetto-schema?rev=f1c652535a19bc9a67f4b6959f06ce99d2751659#f1c652535a19bc9a67f4b6959f06ce99d2751659"
+source = "git+https://github.com/connetto-rs/connetto-schema?rev=3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb#3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb"
 
 [[package]]
 name = "core-foundation-sys"
@@ -1919,7 +1919,7 @@ checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 [[package]]
 name = "rls2fga"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/rls2fga?branch=main#4945b6a00f807ab95c1785cd773a5cf8ddec377e"
+source = "git+https://github.com/connetto-rs/rls2fga?branch=main#5adb9b96b0c1078f147ad1d1b001b498433fff70"
 dependencies = [
  "rls2fga-types",
  "serde",
@@ -1933,7 +1933,7 @@ dependencies = [
 [[package]]
 name = "rls2fga-types"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/rls2fga?branch=main#4945b6a00f807ab95c1785cd773a5cf8ddec377e"
+source = "git+https://github.com/connetto-rs/rls2fga?branch=main#5adb9b96b0c1078f147ad1d1b001b498433fff70"
 dependencies = [
  "serde",
  "sql-values",
@@ -2219,7 +2219,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sql-traits?branch=main#8085eda5c3471c508eb3a926065db8192904542f"
+source = "git+https://github.com/connetto-rs/sql-traits?branch=main#156bbb0d90e24f086b0d9616a14e12d67a105766"
 dependencies = [
  "geometric-traits",
  "once_cell",
@@ -2259,7 +2259,7 @@ dependencies = [
 [[package]]
 name = "sqlippy"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/SQLippy?branch=main#9f660671774d287614af6134125ffce1ad208817"
+source = "git+https://github.com/connetto-rs/SQLippy?branch=main#01c3d809135e3a5f310f0e191446384d1799de3d"
 dependencies = [
  "heck",
  "inflection-rs",

@@ -275,6 +275,7 @@ SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 SELECT is_empty($query$SELECT id FROM asset_models UNION ALL SELECT id FROM procedure_templates UNION ALL SELECT id FROM procedure_template_slots UNION ALL SELECT id FROM procedures UNION ALL SELECT id FROM procedure_assets$query$, 'stranger sees no APS rows');
 SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000001', true);
+SELECT pg_temp.add_member('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002');
 SELECT throws_ok($statement$INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
       VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
     SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000002', true);

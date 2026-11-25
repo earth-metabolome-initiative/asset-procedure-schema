@@ -121,7 +121,8 @@ SELECT throws_ok($$DELETE FROM procedures WHERE id = 'f8000000-0000-7000-8000-00
   '23514', 'procedure f8000000-0000-7000-8000-000000000004 is in_progress and uses an asset, so it cannot be deleted',
   'a started run using an asset cannot be deleted');
 
--- A second user reads ledgers through the runs and assets shared with them.
+-- A second user, a member of the organization, reads ledgers through the runs and assets shared with them.
+SELECT pg_temp.add_member('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002');
 SAVEPOINT shared_reader;
 INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
 VALUES ('20000000-0000-7000-8000-000000000001', 'f8000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
@@ -175,11 +176,11 @@ SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
 ROLLBACK TO template_reader;
 
 -- Runs freeze for a writer who cannot read their template, here one of another project.
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000001');
 INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000002', 'project',
     '20000000-0000-7000-8000-000000000001', 'organization');
+INSERT INTO resources (id, kind, organization_id)
+  VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO ownables (id, organization_id, project_id, created_by_id)

@@ -40,7 +40,7 @@ SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.create_ownable('a0000000-0000-7000-8000-000000000008');
 SELECT throws_ok($$INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id) VALUES ('a0000000-0000-7000-8000-000000000008', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'assets', 'a0000000-0000-7000-8000-000000000003', 'a0000000-0000-7000-8000-000000000004')$$, '23514', 'new row for relation "container_compatibility_rules" violates check constraint "container_compatibility_rules_table_name_id_check"', 'compatibility rule fixes its table identity');
 DELETE FROM container_compatibility_rules WHERE id = 'a0000000-0000-7000-8000-000000000008';
-INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'active');
+SELECT pg_temp.add_member('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002');
 INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role) VALUES
 ('20000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000003', '10000000-0000-7000-8000-000000000002', 'user', 'reader'),
 ('20000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000004', '10000000-0000-7000-8000-000000000002', 'user', 'reader'),
@@ -73,10 +73,10 @@ INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role
 VALUES ('20000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000002', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resources (id, kind, organization_id)
-VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002');
 INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
 VALUES ('20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002', 'organization');
+INSERT INTO resources (id, kind, organization_id)
+VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO ownables (id, organization_id, project_id, created_by_id)
