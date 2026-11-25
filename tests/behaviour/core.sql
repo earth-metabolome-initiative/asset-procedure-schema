@@ -2,7 +2,7 @@
 SET search_path = public, test_tools;
 BEGIN;
 \ir ../fixture.sql
-SELECT plan(57);
+SELECT plan(58);
 
 
 SELECT pg_temp.new_model('a0000000-0000-7000-8000-000000000001', 'tube', NULL);
@@ -179,6 +179,7 @@ SELECT throws_ok($statement$UPDATE procedure_assets SET asset_id = NULL WHERE id
 SELECT throws_ok($statement$DELETE FROM procedure_assets WHERE id = '90000000-0000-7000-8000-000000000004'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f0000000-0000-7000-8000-000000000002 is completed, so its assets cannot change', 'binding on a completed procedure cannot be removed');
 SELECT throws_ok($statement$UPDATE procedures SET status_id = 'in_progress', ended_at = NULL WHERE id = 'f0000000-0000-7000-8000-000000000002'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f0000000-0000-7000-8000-000000000002 is completed, so only its note can change', 'completed procedure cannot reopen');
 SELECT throws_ok($statement$UPDATE procedures SET started_at = started_at - interval '1 hour' WHERE id = 'f0000000-0000-7000-8000-000000000002'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f0000000-0000-7000-8000-000000000002 is completed, so only its note can change', 'completed procedure cannot change its times');
+SELECT throws_ok($statement$UPDATE procedures SET performed_by_id = '10000000-0000-7000-8000-0000000000ff' WHERE id = 'f0000000-0000-7000-8000-000000000002'$statement$, '23514', 'procedure f0000000-0000-7000-8000-000000000002 names performer 10000000-0000-7000-8000-0000000000ff, who is not the caller', 'a completed procedure cannot name a missing performer either');
 UPDATE procedures SET note = 'balance recalibrated afterwards' WHERE id = 'f0000000-0000-7000-8000-000000000002';
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;

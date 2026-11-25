@@ -121,6 +121,8 @@ CREATE TABLE procedure_assets (
     CHECK ((parent_procedure_asset_id IS NULL) = (parent_procedure_id IS NULL)),
     UNIQUE (procedure_id, slot_id, asset_id),
     UNIQUE (id, procedure_id, asset_model_id, organization_id),
+    UNIQUE (id, organization_id),
+    UNIQUE (id, organization_id, asset_id, procedure_id, status_id),
     FOREIGN KEY (procedure_id, procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
@@ -482,9 +484,8 @@ REVOKE EXECUTE ON FUNCTION guard_procedure() FROM PUBLIC;
 CREATE TRIGGER procedures_guard AFTER INSERT OR UPDATE OR DELETE ON procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure();
 CREATE TRIGGER procedures_performer BEFORE UPDATE OF performed_by_id, status_id ON procedures
-    FOR EACH ROW WHEN (OLD.status_id NOT IN ('completed', 'aborted', 'skipped')
-        AND ((NEW.performed_by_id IS DISTINCT FROM OLD.performed_by_id AND NEW.performed_by_id IS NOT NULL)
-            OR (OLD.status_id = 'planned' AND NEW.status_id = 'in_progress')))
+    FOR EACH ROW WHEN ((NEW.performed_by_id IS DISTINCT FROM OLD.performed_by_id AND NEW.performed_by_id IS NOT NULL)
+        OR (OLD.status_id = 'planned' AND NEW.status_id = 'in_progress'))
     EXECUTE FUNCTION require_caller_performer();
 
 -- Writes a procedure's new status into its bindings and parameter values,
@@ -665,11 +666,11 @@ CREATE TRIGGER procedure_assets_guard AFTER INSERT OR UPDATE OR DELETE ON proced
 -- without reading the procedures that used it.
 CREATE TABLE asset_uses (
     -- Binding naming the asset.
-    binding_id UUID PRIMARY KEY REFERENCES procedure_assets (id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY,
     -- connetto organization owning the procedure.
     organization_id UUID NOT NULL,
     -- Asset the binding names.
-    asset_id UUID NOT NULL REFERENCES assets (id),
+    asset_id UUID NOT NULL,
     -- Procedure binding the asset.
     procedure_id UUID NOT NULL,
     -- Identifiers of the procedure's ancestors and the procedure, from the
@@ -681,11 +682,14 @@ CREATE TABLE asset_uses (
     -- Whether the binding consumes the asset.
     consumes BOOLEAN NOT NULL,
     -- Status of the procedure.
-    status_id TEXT NOT NULL REFERENCES procedure_statuses (id),
+    status_id TEXT NOT NULL,
     -- When the procedure started.
     started_at TIMESTAMPTZ,
     -- When the procedure ended.
-    ended_at TIMESTAMPTZ
+    ended_at TIMESTAMPTZ,
+    FOREIGN KEY (id, organization_id, asset_id, procedure_id, status_id)
+        REFERENCES procedure_assets (id, organization_id, asset_id, procedure_id, status_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED
 );
 CREATE INDEX ON asset_uses (asset_id);
 CREATE INDEX ON asset_uses (procedure_id);
@@ -739,11 +743,11 @@ REVOKE EXECUTE ON FUNCTION procedure_lineage(UUID) FROM PUBLIC;
 CREATE FUNCTION record_asset_use() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
     IF TG_OP = 'UPDATE' THEN
-        DELETE FROM public.asset_uses used WHERE used.binding_id = OLD.id;
+        DELETE FROM public.asset_uses used WHERE used.id = OLD.id;
     END IF;
     IF NEW.asset_id IS NOT NULL THEN
         INSERT INTO public.asset_uses
-            (binding_id, organization_id, asset_id, procedure_id, lineage, produces, consumes, status_id, started_at, ended_at)
+            (id, organization_id, asset_id, procedure_id, lineage, produces, consumes, status_id, started_at, ended_at)
         SELECT NEW.id, NEW.organization_id, NEW.asset_id, NEW.procedure_id, public.procedure_lineage(run.id),
             NEW.slot_role_id IN ('produced', 'intermediate'), NEW.slot_role_id IN ('consumed', 'intermediate'),
             run.status_id, run.started_at, run.ended_at
@@ -754,8 +758,10 @@ END;
 $$;
 ALTER FUNCTION record_asset_use() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION record_asset_use() FROM PUBLIC;
-CREATE TRIGGER procedure_assets_use AFTER INSERT OR UPDATE OF asset_id ON procedure_assets
+CREATE TRIGGER procedure_assets_use AFTER INSERT ON procedure_assets
     FOR EACH ROW EXECUTE FUNCTION record_asset_use();
+CREATE TRIGGER procedure_assets_use_update AFTER UPDATE OF asset_id ON procedure_assets
+    FOR EACH ROW WHEN (OLD.asset_id IS DISTINCT FROM NEW.asset_id) EXECUTE FUNCTION record_asset_use();
 
 -- Copies a procedure's status and times into the uses of its bindings.
 CREATE FUNCTION copy_procedure_use_times() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$

@@ -76,24 +76,42 @@ END;
 $$;
 ALTER FUNCTION check_procedure_deviations() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_procedure_deviations() FROM PUBLIC;
-CREATE CONSTRAINT TRIGGER storage_deviations AFTER INSERT OR UPDATE ON storage_procedures
+CREATE CONSTRAINT TRIGGER storage_deviations AFTER INSERT ON storage_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER freezing_deviations AFTER INSERT OR UPDATE ON freezing_procedures
+CREATE CONSTRAINT TRIGGER storage_deviations_update AFTER UPDATE ON storage_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER freezing_deviations AFTER INSERT ON freezing_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER freeze_drying_deviations AFTER INSERT OR UPDATE ON freeze_drying_procedures
+CREATE CONSTRAINT TRIGGER freezing_deviations_update AFTER UPDATE ON freezing_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER freeze_drying_deviations AFTER INSERT ON freeze_drying_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER centrifuge_deviations AFTER INSERT OR UPDATE ON centrifuge_procedures
+CREATE CONSTRAINT TRIGGER freeze_drying_deviations_update AFTER UPDATE ON freeze_drying_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER centrifuge_deviations AFTER INSERT ON centrifuge_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER ball_mill_deviations AFTER INSERT OR UPDATE ON ball_mill_procedures
+CREATE CONSTRAINT TRIGGER centrifuge_deviations_update AFTER UPDATE ON centrifuge_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER ball_mill_deviations AFTER INSERT ON ball_mill_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER pouring_deviations AFTER INSERT OR UPDATE ON pouring_procedures
+CREATE CONSTRAINT TRIGGER ball_mill_deviations_update AFTER UPDATE ON ball_mill_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER pouring_deviations AFTER INSERT ON pouring_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER aliquoting_deviations AFTER INSERT OR UPDATE ON aliquoting_procedures
+CREATE CONSTRAINT TRIGGER pouring_deviations_update AFTER UPDATE ON pouring_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER aliquoting_deviations AFTER INSERT ON aliquoting_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER supernatant_deviations AFTER INSERT OR UPDATE ON supernatant_procedures
+CREATE CONSTRAINT TRIGGER aliquoting_deviations_update AFTER UPDATE ON aliquoting_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER supernatant_deviations AFTER INSERT ON supernatant_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER fractioning_deviations AFTER INSERT OR UPDATE ON fractioning_procedures
+CREATE CONSTRAINT TRIGGER supernatant_deviations_update AFTER UPDATE ON supernatant_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER fractioning_deviations AFTER INSERT ON fractioning_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER fractioning_deviations_update AFTER UPDATE ON fractioning_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
 
 -- Rejects a transfer setpoint exceeding the destination model's capacity.
 CREATE FUNCTION check_pouring_volume() RETURNS TRIGGER
@@ -108,8 +126,10 @@ END;
 $$;
 ALTER FUNCTION check_pouring_volume() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_pouring_volume() FROM PUBLIC;
-CREATE TRIGGER pouring_template_volume AFTER INSERT OR UPDATE ON pouring_procedure_templates
+CREATE TRIGGER pouring_template_volume AFTER INSERT ON pouring_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION check_pouring_volume();
+CREATE TRIGGER pouring_template_volume_update AFTER UPDATE OF poured_into_model_id, volume_l ON pouring_procedure_templates
+    FOR EACH ROW WHEN (OLD.poured_into_model_id IS DISTINCT FROM NEW.poured_into_model_id OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION check_pouring_volume();
 
 -- Rejects a transfer setpoint exceeding the destination model's capacity.
 CREATE FUNCTION check_aliquoting_volume() RETURNS TRIGGER
@@ -124,8 +144,10 @@ END;
 $$;
 ALTER FUNCTION check_aliquoting_volume() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_aliquoting_volume() FROM PUBLIC;
-CREATE TRIGGER aliquoting_template_volume AFTER INSERT OR UPDATE ON aliquoting_procedure_templates
+CREATE TRIGGER aliquoting_template_volume AFTER INSERT ON aliquoting_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION check_aliquoting_volume();
+CREATE TRIGGER aliquoting_template_volume_update AFTER UPDATE OF aliquoted_into_model_id, volume_l ON aliquoting_procedure_templates
+    FOR EACH ROW WHEN (OLD.aliquoted_into_model_id IS DISTINCT FROM NEW.aliquoted_into_model_id OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION check_aliquoting_volume();
 
 -- Rejects a transfer setpoint exceeding the destination model's capacity.
 CREATE FUNCTION check_supernatant_volume() RETURNS TRIGGER
@@ -140,9 +162,13 @@ END;
 $$;
 ALTER FUNCTION check_supernatant_volume() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_supernatant_volume() FROM PUBLIC;
-CREATE TRIGGER supernatant_template_volume AFTER INSERT OR UPDATE ON supernatant_procedure_templates
+CREATE TRIGGER supernatant_template_volume AFTER INSERT ON supernatant_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION check_supernatant_volume();
+CREATE TRIGGER supernatant_template_volume_update AFTER UPDATE OF supernatant_destination_model_id, volume_l ON supernatant_procedure_templates
+    FOR EACH ROW WHEN (OLD.supernatant_destination_model_id IS DISTINCT FROM NEW.supernatant_destination_model_id OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION check_supernatant_volume();
 GRANT SELECT ON weighing_procedure_templates, weighing_procedures, storage_procedure_templates, storage_procedures, container_sealing_procedure_templates, container_sealing_procedures, disposal_procedure_templates, disposal_procedures, packaging_procedure_templates, packaging_procedures, photograph_procedure_templates, photograph_procedures, geopositioning_procedure_templates, geopositioning_procedures, freeze_drying_procedure_templates, freeze_drying_procedures, freezing_procedure_templates, freezing_procedures, fractioning_procedure_templates, fractioning_procedures, centrifuge_procedure_templates, centrifuge_procedures, ball_mill_procedure_templates, ball_mill_procedures, pouring_procedure_templates, pouring_procedures, aliquoting_procedure_templates, aliquoting_procedures, supernatant_procedure_templates, supernatant_procedures, harvesting_procedure_templates, harvesting_procedures, volumetric_container_models TO aps_writer;
 
-CREATE CONSTRAINT TRIGGER procedures_measured_deviations AFTER INSERT OR UPDATE ON procedures
+CREATE CONSTRAINT TRIGGER procedures_measured_deviations AFTER INSERT ON procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER procedures_measured_deviations_update AFTER UPDATE ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();

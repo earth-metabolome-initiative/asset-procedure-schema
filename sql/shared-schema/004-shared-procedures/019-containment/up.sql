@@ -71,8 +71,10 @@ END;
 $$;
 ALTER FUNCTION check_slot_holders() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_slot_holders() FROM PUBLIC;
-CREATE CONSTRAINT TRIGGER procedure_template_slot_holders AFTER INSERT OR UPDATE ON procedure_template_slots
+CREATE CONSTRAINT TRIGGER procedure_template_slot_holders AFTER INSERT ON procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_slot_holders();
+CREATE CONSTRAINT TRIGGER procedure_template_slot_holders_update AFTER UPDATE ON procedure_template_slots
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_slot_holders();
 
 -- How one bound asset moves relative to another bound in the same procedure.
 CREATE TABLE asset_move_kinds (
@@ -88,9 +90,9 @@ INSERT INTO asset_move_kinds (id) VALUES ('into'), ('from'), ('source');
 -- slots and typed row, and keep the procedure's status and times on them.
 CREATE TABLE asset_moves (
     -- Binding of the moving asset.
-    contained_binding_id UUID NOT NULL REFERENCES procedure_assets (id) ON DELETE CASCADE,
+    contained_binding_id UUID NOT NULL,
     -- Binding of the container.
-    holder_binding_id UUID NOT NULL REFERENCES procedure_assets (id) ON DELETE CASCADE,
+    holder_binding_id UUID NOT NULL,
     -- How the asset moves.
     kind_id TEXT NOT NULL REFERENCES asset_move_kinds (id),
     -- connetto organization owning the procedure.
@@ -108,7 +110,9 @@ CREATE TABLE asset_moves (
     -- When the procedure ended, the time a completed placement's asset enters
     -- its container.
     ended_at TIMESTAMPTZ,
-    PRIMARY KEY (contained_binding_id, holder_binding_id, kind_id)
+    PRIMARY KEY (contained_binding_id, holder_binding_id, kind_id),
+    FOREIGN KEY (contained_binding_id, organization_id) REFERENCES procedure_assets (id, organization_id) ON DELETE CASCADE,
+    FOREIGN KEY (holder_binding_id, organization_id) REFERENCES procedure_assets (id, organization_id) ON DELETE CASCADE
 );
 CREATE INDEX ON asset_moves (holder_binding_id);
 CREATE INDEX ON asset_moves (kind_id);
@@ -134,8 +138,8 @@ CREATE TABLE container_occupancy (
     -- When the placement completed.
     entered_at TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (contained_binding_id, holder_binding_id, rule_id),
-    FOREIGN KEY (contained_binding_id) REFERENCES procedure_assets (id) ON DELETE CASCADE,
-    FOREIGN KEY (holder_binding_id) REFERENCES procedure_assets (id) ON DELETE CASCADE
+    FOREIGN KEY (contained_binding_id, organization_id) REFERENCES procedure_assets (id, organization_id) ON DELETE CASCADE,
+    FOREIGN KEY (holder_binding_id, organization_id) REFERENCES procedure_assets (id, organization_id) ON DELETE CASCADE
 );
 CREATE INDEX ON container_occupancy (holder_binding_id);
 CREATE INDEX ON container_occupancy (rule_id);
@@ -148,9 +152,9 @@ INSERT INTO table_names (id) VALUES ('container_occupancy');
 -- an aborted or deleted removal still took the asset out.
 CREATE TABLE move_exits (
     -- Binding of the placed asset.
-    contained_binding_id UUID NOT NULL REFERENCES procedure_assets (id) ON DELETE CASCADE,
+    contained_binding_id UUID NOT NULL,
     -- Binding of the container.
-    holder_binding_id UUID NOT NULL REFERENCES procedure_assets (id) ON DELETE CASCADE,
+    holder_binding_id UUID NOT NULL,
     -- Binding through which the removal took the asset out.
     removal_binding_id UUID NOT NULL,
     -- connetto organization owning the placement.
@@ -161,7 +165,9 @@ CREATE TABLE move_exits (
     removal_procedure_id UUID NOT NULL,
     -- When the removal started.
     left_at TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY (contained_binding_id, holder_binding_id, removal_binding_id)
+    PRIMARY KEY (contained_binding_id, holder_binding_id, removal_binding_id),
+    FOREIGN KEY (contained_binding_id, organization_id) REFERENCES procedure_assets (id, organization_id) ON DELETE CASCADE,
+    FOREIGN KEY (holder_binding_id, organization_id) REFERENCES procedure_assets (id, organization_id) ON DELETE CASCADE
 );
 CREATE INDEX ON move_exits (holder_binding_id);
 CREATE INDEX ON move_exits (removal_binding_id);
@@ -282,7 +288,7 @@ BEGIN
     INSERT INTO public.move_exits (contained_binding_id, holder_binding_id, removal_binding_id, organization_id, container_id,
         removal_procedure_id, left_at)
     WITH removals (binding_id, asset_id) AS (
-        SELECT used.binding_id, used.asset_id FROM public.asset_uses used WHERE used.procedure_id = removal_procedure AND used.consumes
+        SELECT used.id, used.asset_id FROM public.asset_uses used WHERE used.procedure_id = removal_procedure AND used.consumes
         UNION
         SELECT moved.contained_binding_id, moved.asset_id FROM public.asset_moves moved
         WHERE moved.procedure_id = removal_procedure AND moved.kind_id IN ('into', 'from')
@@ -334,7 +340,7 @@ BEGIN
         INSERT INTO public.move_exits (contained_binding_id, holder_binding_id, removal_binding_id, organization_id, container_id,
             removal_procedure_id, left_at)
         WITH removals (binding_id, procedure_id, started_at) AS (
-            SELECT used.binding_id, used.procedure_id, used.started_at FROM public.asset_uses used
+            SELECT used.id, used.procedure_id, used.started_at FROM public.asset_uses used
             WHERE used.asset_id = placement.asset_id AND used.consumes
             UNION
             SELECT moved.contained_binding_id, moved.procedure_id, moved.started_at FROM public.asset_moves moved
@@ -374,8 +380,10 @@ END;
 $$;
 ALTER FUNCTION record_binding_moves() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION record_binding_moves() FROM PUBLIC;
-CREATE TRIGGER procedure_assets_whereabouts AFTER INSERT OR UPDATE OF asset_id OR DELETE ON procedure_assets
+CREATE TRIGGER procedure_assets_whereabouts AFTER INSERT OR DELETE ON procedure_assets
     FOR EACH ROW EXECUTE FUNCTION record_binding_moves();
+CREATE TRIGGER procedure_assets_whereabouts_update AFTER UPDATE OF asset_id ON procedure_assets
+    FOR EACH ROW WHEN (OLD.asset_id IS DISTINCT FROM NEW.asset_id) EXECUTE FUNCTION record_binding_moves();
 
 -- Keeps the moves of a transfer equal to its typed row.
 CREATE FUNCTION record_transfer_moves() RETURNS TRIGGER
@@ -579,7 +587,7 @@ BEGIN
     IF EXISTS (
         SELECT 1 FROM public.asset_uses consumption
         JOIN public.container_occupancy occupied ON occupied.container_id = consumption.asset_id
-        WHERE consumption.binding_id = NEW.binding_id AND consumption.status_id = 'completed'
+        WHERE consumption.id = NEW.id AND consumption.status_id = 'completed'
           AND occupied.entered_at <= consumption.started_at
           AND public.placement_exit(occupied.contained_binding_id, occupied.holder_binding_id) > consumption.started_at
     ) THEN

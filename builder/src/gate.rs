@@ -749,6 +749,21 @@ const CASCADES: &[(&str, &[(&str, &str)])] = &[
         "A photograph model's media type copy follows its digital model, and the image check refuses a type that is not an image",
         &[("photograph_models", "photograph_models_id_mime_type_organization_id_fkey")],
     ),
+    (
+        "A binding's use, moves, occupancy and exits belong to it and leave with it, while the binding guard keeps the bindings of active and completed runs",
+        &[
+            ("asset_moves", "asset_moves_contained_binding_id_organization_id_fkey"),
+            ("asset_moves", "asset_moves_holder_binding_id_organization_id_fkey"),
+            ("asset_uses", "asset_uses_id_organization_id_asset_id_procedure_id_status_fkey"),
+            (
+                "container_occupancy",
+                "container_occupancy_contained_binding_id_organization_id_fkey",
+            ),
+            ("container_occupancy", "container_occupancy_holder_binding_id_organization_id_fkey"),
+            ("move_exits", "move_exits_contained_binding_id_organization_id_fkey"),
+            ("move_exits", "move_exits_holder_binding_id_organization_id_fkey"),
+        ],
+    ),
 ];
 
 /// The schema the gate checks and the builder generates from.
@@ -971,11 +986,33 @@ const SHARED: &[(&str, &str)] = &[
 
 /// Keys from a table into a table of rows an organization keeps to itself
 /// that may still name another organization's row, with the reason.
-const SHARED_REFERENCES: &[(&str, &str, &str)] = &[(
-    "procedure_assets",
-    "assets",
-    "A run may bind an asset another organization shares with the writer",
-)];
+const SHARED_REFERENCES: &[(&str, &str, &str)] = &[
+    (
+        "procedure_assets",
+        "assets",
+        "A run may bind an asset another organization shares with the writer",
+    ),
+    (
+        "asset_moves",
+        "assets",
+        "A move copies the assets of its run's bindings, which may name an asset or container another organization shares",
+    ),
+    (
+        "container_occupancy",
+        "assets",
+        "Occupancy copies the container of its placement, which another organization may share",
+    ),
+    (
+        "container_occupancy",
+        "container_compatibility_rules",
+        "A placement counts against a rule of the container's model or its ancestry, which another organization may own and share",
+    ),
+    (
+        "move_exits",
+        "assets",
+        "An exit keeps the placement's organization and names its container, which another organization may share",
+    ),
+];
 
 /// Optional references whose policies admit a missing reference with
 /// `IS NULL` and otherwise require access to the referenced row.
@@ -992,33 +1029,45 @@ const OPTIONAL_REFERENCES: &[(&str, &str)] = &[
 
 /// Keys whose existence-oracle findings the APS schema keeps on purpose,
 /// grouped by the reason each group stays.
-const ORACLES: &[(&str, &[(&str, &str)])] = &[(
-    "The key names a row another organization shares with the writer, so it cannot carry `organization_id`, and the insert check confines it to rows the writer reads through `authz.resources_with`, which until connetto-schema leaves blocking organizations out of it still admits a row its organization's restrictive policy hides",
-    &[
-        ("asset_model_ancestors", "asset_model_ancestors_parent_model_id_ancestor_model_id_fkey"),
-        ("asset_models", "asset_models_parent_model_id_fkey"),
-        ("procedure_assets", "procedure_assets_slot_id_procedure_template_id_slot_asset__fkey"),
-        ("procedure_assets", "procedure_assets_asset_model_id_slot_asset_model_id_fkey"),
-        ("procedure_assets", "procedure_assets_asset_id_asset_model_id_fkey"),
-        (
-            "procedure_parameter_values",
-            "procedure_parameter_values_parameter_id_procedure_template_fkey",
-        ),
-        (
-            "procedure_template_slot_bindings",
-            "procedure_template_slot_bindi_child_slot_id_child_template_fkey",
-        ),
-        (
-            "procedure_template_slot_bindings",
-            "procedure_template_slot_bindi_parent_asset_model_id_child__fkey",
-        ),
-        (
-            "procedure_template_step_parameters",
-            "procedure_template_step_param_parameter_id_child_template__fkey",
-        ),
-        ("procedures", "procedures_step_id_parent_template_id_procedure_template_i_fkey"),
-    ],
-)];
+const ORACLES: &[(&str, &[(&str, &str)])] = &[
+    (
+        "The key names a row another organization shares with the writer, so it cannot carry `organization_id`, and the insert check confines it to rows the writer reads through `authz.resources_with`, which until connetto-schema leaves blocking organizations out of it still admits a row its organization's restrictive policy hides",
+        &[
+            (
+                "asset_model_ancestors",
+                "asset_model_ancestors_parent_model_id_ancestor_model_id_fkey",
+            ),
+            ("asset_models", "asset_models_parent_model_id_fkey"),
+            ("procedure_assets", "procedure_assets_slot_id_procedure_template_id_slot_asset__fkey"),
+            ("procedure_assets", "procedure_assets_asset_model_id_slot_asset_model_id_fkey"),
+            ("procedure_assets", "procedure_assets_asset_id_asset_model_id_fkey"),
+            (
+                "procedure_parameter_values",
+                "procedure_parameter_values_parameter_id_procedure_template_fkey",
+            ),
+            (
+                "procedure_template_slot_bindings",
+                "procedure_template_slot_bindi_child_slot_id_child_template_fkey",
+            ),
+            (
+                "procedure_template_slot_bindings",
+                "procedure_template_slot_bindi_parent_asset_model_id_child__fkey",
+            ),
+            (
+                "procedure_template_step_parameters",
+                "procedure_template_step_param_parameter_id_child_template__fkey",
+            ),
+            ("procedures", "procedures_step_id_parent_template_id_procedure_template_i_fkey"),
+        ],
+    ),
+    (
+        "The key names a descendant model of the writer's organization, whose required reflexive ancestor row makes it readable through `readable_models`",
+        &[(
+            "asset_model_ancestors",
+            "asset_model_ancestors_descendant_model_id_parent_model_id__fkey",
+        )],
+    ),
+];
 
 /// Unique keys whose existence-oracle findings the APS schema keeps on
 /// purpose, grouped by the reason each group stays.
@@ -1030,6 +1079,7 @@ const UNIQUES: &[(&str, &[(&str, &str)])] = &[
             ("procedure_template_parameters", "procedure_template_parameters_pkey"),
             ("procedure_template_slots", "procedure_template_slots_pkey"),
             ("procedure_template_steps", "procedure_template_steps_pkey"),
+            ("procedure_assets", "procedure_assets_id_organization_id_key"),
         ],
     ),
     (
@@ -1038,6 +1088,10 @@ const UNIQUES: &[(&str, &[(&str, &str)])] = &[
             ("procedure_assets", "procedure_assets_produced_once"),
             ("procedure_assets", "procedure_assets_consumed_once"),
         ],
+    ),
+    (
+        "The collision names a model of the writer's organization, whose required reflexive ancestor row makes it readable through `readable_models`",
+        &[("asset_models", "asset_models_id_parent_model_id_organization_id_key")],
     ),
 ];
 
@@ -1068,6 +1122,21 @@ const FUNCTIONS: &[(&str, &str, &str)] = &[
         "require_publishable_procedure_template",
         "A step may run a template another organization shares with it, so a binding and the child slot it fills need not share an organization",
     ),
+    (
+        "cross_tenant_cap",
+        "record_removal_exits",
+        "A removal closes an asset's earlier placements in every organization, so the removal's run and the placement need not share an organization",
+    ),
+    (
+        "cross_tenant_cap",
+        "refresh_asset_moves",
+        "A run may execute a template another organization shares with it, so the run and its template's slots need not share an organization",
+    ),
+    (
+        "cross_tenant_cap",
+        "use_compatibility_rules",
+        "A model may extend a model another organization shares with it, so its ancestry rows and the compatibility rules they match need not share an organization",
+    ),
 ];
 
 /// Tables whose findings of a rule the APS schema keeps on purpose, with the
@@ -1082,6 +1151,11 @@ const TABLES: &[(&str, &str, &str)] = &[
         "catalog_name_as_text",
         "container_compatibility_rules",
         "The `table_names` catalog names tables by text, which the SQLite translation keeps, and the check pins the root row to its table",
+    ),
+    (
+        "singular_table_name",
+        "container_occupancy",
+        "Occupancy names a container's placement ledger, whose rows each pair a placement with the compatibility rule it counts against",
     ),
 ];
 
