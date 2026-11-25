@@ -560,7 +560,8 @@ CREATE TRIGGER procedure_template_step_parameters_guard AFTER INSERT OR UPDATE O
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_step_relation();
 
 -- Lists the templates the caller reads, which are those connetto grants the
--- caller and, transitively, the templates their steps run.
+-- caller and, transitively, the templates their steps run, through steps
+-- outside the organizations blocking the caller.
 CREATE FUNCTION readable_templates() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     WITH RECURSIVE readable (id) AS (
@@ -568,6 +569,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
         UNION
         SELECT step.child_template_id FROM public.procedure_template_steps step
         JOIN readable ON readable.id = step.parent_template_id
+        WHERE NOT (step.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
     )
     SELECT readable.id FROM readable
 $$;

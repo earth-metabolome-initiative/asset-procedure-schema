@@ -1157,6 +1157,11 @@ const TABLES: &[(&str, &str, &str)] = &[
         "container_occupancy",
         "Occupancy names a container's placement ledger, whose rows each pair a placement with the compatibility rule it counts against",
     ),
+    (
+        "authorization_in_trigger",
+        "asset_moves",
+        "The containment cycle check climbs only the enclosures the caller reads, so a refused placement reveals no placement the caller's policies hide",
+    ),
 ];
 
 /// Excuses the findings the APS schema keeps on purpose.

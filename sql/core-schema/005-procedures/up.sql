@@ -1003,26 +1003,30 @@ CREATE POLICY asset_uses_blocked ON asset_uses AS RESTRICTIVE FOR ALL TO app
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
 
 -- Lists the models the caller reads through connetto grants, procedures the
--- caller reads that bind them, and slots of templates the caller reads.
+-- caller reads that bind them, and slots of templates the caller reads,
+-- outside the organizations blocking the caller.
 CREATE FUNCTION named_models() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     SELECT readable.id FROM authz.resources_with('reader') readable (id)
     UNION
     SELECT binding.asset_model_id FROM public.procedure_assets binding
     WHERE binding.procedure_id IN (SELECT authz.resources_with('reader'))
+      AND NOT (binding.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
     UNION
     SELECT slot.asset_model_id FROM public.procedure_template_slots slot
     WHERE slot.procedure_template_id IN (SELECT public.readable_templates())
+      AND NOT (slot.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
 $$;
 ALTER FUNCTION named_models() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION named_models() FROM PUBLIC;
 
 -- Lists the models the caller reads, which are the named models with all
--- their ancestors.
+-- their ancestors, outside the organizations blocking the caller.
 CREATE FUNCTION readable_models() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     SELECT ancestry.ancestor_model_id FROM public.asset_model_ancestors ancestry
     WHERE ancestry.descendant_model_id IN (SELECT public.named_models())
+      AND NOT (ancestry.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
 $$;
 ALTER FUNCTION readable_models() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION readable_models() FROM PUBLIC;

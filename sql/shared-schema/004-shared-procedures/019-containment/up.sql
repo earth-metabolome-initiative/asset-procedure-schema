@@ -182,7 +182,8 @@ GRANT SELECT ON asset_move_kinds TO aps_writer;
 
 -- Lists the assets whose enclosures the caller reads, those of the caller's
 -- ledgers and, transitively, the containers their completed placements put
--- them into.
+-- them into, through placements outside the organizations blocking the
+-- caller.
 CREATE FUNCTION enclosing_assets() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     WITH RECURSIVE enclosing (id) AS (
@@ -191,6 +192,7 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
         SELECT placement.container_id FROM public.asset_moves placement
         JOIN enclosing ON enclosing.id = placement.asset_id
         WHERE placement.kind_id = 'into' AND placement.status_id = 'completed'
+          AND NOT (placement.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
     )
     SELECT enclosing.id FROM enclosing
 $$;
@@ -199,11 +201,13 @@ REVOKE EXECUTE ON FUNCTION enclosing_assets() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION enclosing_assets() TO app;
 
 -- Lists the bindings of the placements whose exits the caller reads through
--- the enclosures of the assets placed.
+-- the enclosures of the assets placed, outside the organizations blocking the
+-- caller.
 CREATE FUNCTION enclosing_placements() RETURNS SETOF UUID
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     SELECT placement.contained_binding_id FROM public.asset_moves placement
     WHERE placement.kind_id = 'into' AND placement.asset_id IN (SELECT public.enclosing_assets())
+      AND NOT (placement.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
 $$;
 ALTER FUNCTION enclosing_placements() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION enclosing_placements() FROM PUBLIC;

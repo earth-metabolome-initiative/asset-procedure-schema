@@ -251,19 +251,34 @@ SELECT isnt_empty($$DELETE FROM procedures WHERE id = 'f8000000-0000-7000-8000-0
   'a step run admin who reads the parent deletes the step run');
 SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
 
--- A binding of a blocking organization's run opens no asset ledger.
+-- A blocking organization's rows open nothing the caller would otherwise
+-- derive from the runs, templates and assets it reads.
 INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
-VALUES ('20000000-0000-7000-8000-000000000001', 'f8000000-0000-7000-8000-000000000005', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
+VALUES ('20000000-0000-7000-8000-000000000001', 'f8000000-0000-7000-8000-000000000005', '10000000-0000-7000-8000-000000000002', 'user', 'reader'),
+  ('20000000-0000-7000-8000-000000000001', 'c8000000-0000-7000-8000-000000000010', '10000000-0000-7000-8000-000000000002', 'user', 'reader'),
+  ('20000000-0000-7000-8000-000000000001', 'b8000000-0000-7000-8000-000000000010', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.act('10000000-0000-7000-8000-000000000002');
 SELECT ok('b8000000-0000-7000-8000-000000000011' IN (SELECT ledger_assets()), 'a run reader reads the ledgers of the assets the run binds');
+SELECT ok('c8000000-0000-7000-8000-000000000011' IN (SELECT readable_templates()), 'a template reader reads the templates its steps run');
+SELECT ok('a8000000-0000-7000-8000-000000000001' IN (SELECT readable_models()), 'a template reader reads the models its step slots name and their ancestors');
+SELECT ok('b8000000-0000-7000-8000-000000000011' IN (SELECT enclosing_assets()), 'an asset reader reads the container it was placed into');
+SELECT ok('98000000-0000-7000-8000-000000000005' IN (SELECT enclosing_placements()), 'an asset reader reads the placement that put it into its container');
 RESET ROLE;
 INSERT INTO organization_blocks (organization_id, principal_id, principal_kind)
 VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user');
 SET ROLE app;
 SELECT ok('b8000000-0000-7000-8000-000000000011' NOT IN (SELECT ledger_assets()),
   'a run reader blocked by the run''s organization reads no ledger through its bindings');
+SELECT ok('c8000000-0000-7000-8000-000000000011' NOT IN (SELECT readable_templates()),
+  'a template reader blocked by the template''s organization reads no template through its steps');
+SELECT ok('a8000000-0000-7000-8000-000000000001' NOT IN (SELECT readable_models()),
+  'a reader blocked by the organization naming a model reads no model through its slots, bindings or ancestry');
+SELECT ok('b8000000-0000-7000-8000-000000000011' NOT IN (SELECT enclosing_assets()),
+  'an asset reader blocked by the placing organization reads no container through its placement');
+SELECT ok('98000000-0000-7000-8000-000000000005' NOT IN (SELECT enclosing_placements()),
+  'an asset reader blocked by the placing organization reads no placement of its own');
 SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
 SELECT * FROM finish();
 ROLLBACK;
