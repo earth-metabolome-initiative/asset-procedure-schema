@@ -1638,7 +1638,7 @@ checksum = "4ec91767ecc0a0bbe558ce8c9da33c068066c57ecc8bb8477ef8c1ad3ef77c27"
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=bbaff8e883414038e41a3831595152b816335bf2#bbaff8e883414038e41a3831595152b816335bf2"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=bd74269003717163005d7055ad7945bb3e0d922d#bd74269003717163005d7055ad7945bb3e0d922d"
 dependencies = [
  "diesel",
  "libsqlite3-sys",
@@ -1657,7 +1657,7 @@ dependencies = [
 [[package]]
 name = "pg2sqlite-runtime"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=bbaff8e883414038e41a3831595152b816335bf2#bbaff8e883414038e41a3831595152b816335bf2"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=bd74269003717163005d7055ad7945bb3e0d922d#bd74269003717163005d7055ad7945bb3e0d922d"
 dependencies = [
  "diesel",
  "diesel-dynamic-schema",
@@ -2225,7 +2225,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sql-traits?branch=main#156bbb0d90e24f086b0d9616a14e12d67a105766"
+source = "git+https://github.com/connetto-rs/sql-traits?branch=main#84c54661b52543641b131501e4641b0fd3e26dba"
 dependencies = [
  "geometric-traits",
  "once_cell",
@@ -2308,7 +2308,7 @@ dependencies = [
 [[package]]
 name = "sqlparser"
 version = "0.64.0"
-source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#4a5bba20dcc3a6e6185cfe53f09f28cab2810c84"
+source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#323a60ea7bcd2e593cfea2f68fc851bf873f687e"
 dependencies = [
  "log",
  "recursive",
@@ -2330,7 +2330,7 @@ dependencies = [
 [[package]]
 name = "sqlparser-expr-eval"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sqlparser-expr-eval?branch=main#1eaf42b7f6a460b5e6d949b28dc34a4844a8be21"
+source = "git+https://github.com/connetto-rs/sqlparser-expr-eval?branch=main#0747feeca17d09d257e708d14a667213350a5f88"
 dependencies = [
  "quine-mc_cluskey",
  "rpds",
@@ -2351,7 +2351,7 @@ dependencies = [
 [[package]]
 name = "sqlparser-plpgsql-dataflow"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sqlparser-plpgsql-dataflow?branch=main#8e1ad97f3229fae337d015c39a668767acebd6a0"
+source = "git+https://github.com/connetto-rs/sqlparser-plpgsql-dataflow?branch=main#d9353560282a17191b70bf650cbffbddf984c0c3"
 dependencies = [
  "sqlparser",
  "sqlparser-expr-eval",
@@ -2363,7 +2363,7 @@ dependencies = [
 [[package]]
 name = "sqlparser_derive"
 version = "0.7.0"
-source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#4a5bba20dcc3a6e6185cfe53f09f28cab2810c84"
+source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#323a60ea7bcd2e593cfea2f68fc851bf873f687e"
 dependencies = [
  "proc-macro2",
  "quote",

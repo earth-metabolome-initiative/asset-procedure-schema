@@ -91,7 +91,8 @@ fn jsonb_functions() -> JsonbFunctions {
     JsonbFunctions::new("pg_jsonb", "pg_jsonb_text", "pg_jsonb_order")
 }
 
-/// The deployment the replica serves, declaring what each setting holds.
+/// The deployment the replica serves, declaring what each setting holds and
+/// that every resource a role administers it may also write and read.
 fn deployment() -> Deployment {
     let unset = |name: &str, value| {
         SessionSetting::value(name, value).expect("session setting").may_be_unset()
@@ -117,6 +118,10 @@ fn deployment() -> Deployment {
         ],
     )
     .expect("deployment")
+    .with_set_within("authz.resources_with('admin')", "authz.resources_with('writer')")
+    .expect("a set expression")
+    .with_set_within("authz.resources_with('writer')", "authz.resources_with('reader')")
+    .expect("a set expression")
 }
 
 /// The PostgreSQL major the replica stands in for, the default of
@@ -217,15 +222,14 @@ impl<S: ToString> From<&HelperFunction<S>> for ReplicaFunction {
 }
 
 impl ReplicaFunction {
-    /// Registers the helper on `connection`.
-    fn register(&self, connection: &mut SqliteConnection) -> QueryResult<()> {
+    /// The helper as pg2sqlite registers and prepares it.
+    fn helper(&self) -> HelperFunction<&str> {
         HelperFunction {
             name: self.name.clone(),
             parameters: self.parameters.clone(),
             columns: self.columns.clone(),
             body: self.body.as_str(),
         }
-        .register(connection)
     }
 }
 
@@ -374,10 +378,12 @@ impl Replica {
             step
         })
         .expect("server_derived_write");
-        for function in &SCRIPT.functions {
-            function
+        let helpers: Vec<HelperFunction<&str>> =
+            SCRIPT.functions.iter().map(ReplicaFunction::helper).collect();
+        for helper in &helpers {
+            helper
                 .register(&mut connection)
-                .unwrap_or_else(|error| panic!("SQLite refuses helper {}: {error}", function.name));
+                .unwrap_or_else(|error| panic!("SQLite refuses helper {}: {error}", helper.name));
         }
         for statement in &SCRIPT.statements {
             connection
@@ -385,7 +391,8 @@ impl Replica {
                 .unwrap_or_else(|error| panic!("SQLite refuses {statement}: {error}"));
         }
         PREPARED.call_once(|| {
-            let unprepared = unprepared_programs(&mut connection).expect("replica programs");
+            let unprepared =
+                unprepared_programs(&mut connection, &helpers).expect("replica programs");
             assert!(
                 unprepared.is_empty(),
                 "SQLite cannot prepare {}",
