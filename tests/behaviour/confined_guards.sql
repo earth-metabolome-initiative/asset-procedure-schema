@@ -280,6 +280,113 @@ SELECT ok('b8000000-0000-7000-8000-000000000011' NOT IN (SELECT enclosing_assets
   'an asset reader blocked by the placing organization reads no container through its placement');
 SELECT ok('98000000-0000-7000-8000-000000000005' NOT IN (SELECT enclosing_placements()),
   'an asset reader blocked by the placing organization reads no placement of its own');
+
+-- A blocking organization's compatibility rules neither admit a holder slot of the caller it blocks nor count what that caller places.
+SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
+RESET ROLE;
+DELETE FROM organization_blocks WHERE organization_id = '20000000-0000-7000-8000-000000000001';
+CREATE FUNCTION pg_temp.place_elsewhere(run UUID, item UUID, started TIMESTAMPTZ, ended TIMESTAMPTZ) RETURNS VOID LANGUAGE sql AS $$
+INSERT INTO public.procedures (id, organization_id, project_id, table_name_id, procedure_template_id, status_id, root_procedure_id,
+    started_at, performed_by_id)
+  VALUES (run, '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'procedures',
+    'c8000000-0000-7000-8000-000000000021', 'in_progress', run, started, authz.caller_id());
+SELECT pg_temp.bind(('9' || substring(run::text FROM 2))::uuid, run, 'd8000000-0000-7000-8000-000000000021', item);
+SELECT pg_temp.bind(('8' || substring(run::text FROM 2))::uuid, run, 'd8000000-0000-7000-8000-000000000022', 'b8000000-0000-7000-8000-000000000023');
+UPDATE public.procedures SET status_id = 'completed', ended_at = ended WHERE id = run;
+$$;
+GRANT EXECUTE ON FUNCTION pg_temp.place_elsewhere(UUID, UUID, TIMESTAMPTZ, TIMESTAMPTZ) TO app;
+SET ROLE app;
+INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
+VALUES ('20000000-0000-7000-8000-000000000001', 'a8000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user', 'reader'),
+  ('20000000-0000-7000-8000-000000000001', 'a8000000-0000-7000-8000-000000000003', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT pg_temp.act('10000000-0000-7000-8000-000000000002');
+INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-000000000003', authz.caller_id());
+INSERT INTO resources (id, kind, organization_id) VALUES ('20000000-0000-7000-8000-000000000003', 'organization', '20000000-0000-7000-8000-000000000003');
+INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000003', authz.caller_id(), 'active');
+INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
+VALUES ('20000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000003', authz.caller_id(), 'user', 'admin');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+VALUES ('20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'project', '20000000-0000-7000-8000-000000000003', 'organization');
+INSERT INTO resources (id, kind, organization_id) VALUES ('50000000-0000-7000-8000-000000000003', 'project', '20000000-0000-7000-8000-000000000003');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+INSERT INTO ownables (id, organization_id, project_id, created_by_id)
+SELECT identifier, '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', authz.caller_id()
+FROM unnest(ARRAY['a8000000-0000-7000-8000-000000000021', 'a8000000-0000-7000-8000-000000000023', 'c8000000-0000-7000-8000-000000000021',
+  'c8000000-0000-7000-8000-000000000022', 'b8000000-0000-7000-8000-000000000021', 'b8000000-0000-7000-8000-000000000022',
+  'b8000000-0000-7000-8000-000000000023', 'f8000000-0000-7000-8000-000000000031', 'f8000000-0000-7000-8000-000000000032']::uuid[]) identifier;
+INSERT INTO resources (id, kind, organization_id)
+SELECT identifier, 'ownable', '20000000-0000-7000-8000-000000000003'
+FROM unnest(ARRAY['a8000000-0000-7000-8000-000000000021', 'a8000000-0000-7000-8000-000000000023', 'c8000000-0000-7000-8000-000000000021',
+  'c8000000-0000-7000-8000-000000000022', 'b8000000-0000-7000-8000-000000000021', 'b8000000-0000-7000-8000-000000000022',
+  'b8000000-0000-7000-8000-000000000023', 'f8000000-0000-7000-8000-000000000031', 'f8000000-0000-7000-8000-000000000032']::uuid[]) identifier;
+INSERT INTO asset_models (id, organization_id, project_id, table_name_id, name, parent_model_id)
+VALUES ('a8000000-0000-7000-8000-000000000021', '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'physical_asset_models',
+    'borrowed item', 'a8000000-0000-7000-8000-000000000001'),
+  ('a8000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'container_models',
+    'borrowed box', 'a8000000-0000-7000-8000-000000000003');
+INSERT INTO asset_model_ancestors (descendant_model_id, ancestor_model_id, organization_id, parent_model_id)
+VALUES ('a8000000-0000-7000-8000-000000000021', 'a8000000-0000-7000-8000-000000000021', '20000000-0000-7000-8000-000000000003', NULL),
+  ('a8000000-0000-7000-8000-000000000021', 'a8000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000003', 'a8000000-0000-7000-8000-000000000001'),
+  ('a8000000-0000-7000-8000-000000000023', 'a8000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000003', NULL),
+  ('a8000000-0000-7000-8000-000000000023', 'a8000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000003', 'a8000000-0000-7000-8000-000000000003');
+INSERT INTO physical_asset_models (id, organization_id)
+VALUES ('a8000000-0000-7000-8000-000000000021', '20000000-0000-7000-8000-000000000003'), ('a8000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000003');
+INSERT INTO container_models (id, organization_id) VALUES ('a8000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000003');
+INSERT INTO procedure_templates (id, organization_id, project_id, table_name_id, name)
+VALUES ('c8000000-0000-7000-8000-000000000021', '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'procedure_templates', 'borrowed store'),
+  ('c8000000-0000-7000-8000-000000000022', '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'procedure_templates', 'borrowed restore');
+INSERT INTO procedure_template_slots (id, organization_id, procedure_template_id, name, asset_model_id, role_id, minimum_count, maximum_count)
+VALUES ('d8000000-0000-7000-8000-000000000021', '20000000-0000-7000-8000-000000000003', 'c8000000-0000-7000-8000-000000000021', 'item',
+    'a8000000-0000-7000-8000-000000000021', 'input', 1, 1),
+  ('d8000000-0000-7000-8000-000000000022', '20000000-0000-7000-8000-000000000003', 'c8000000-0000-7000-8000-000000000021', 'box',
+    'a8000000-0000-7000-8000-000000000023', 'input', 1, 1),
+  ('d8000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000003', 'c8000000-0000-7000-8000-000000000022', 'item',
+    'a8000000-0000-7000-8000-000000000021', 'input', 1, 1),
+  ('d8000000-0000-7000-8000-000000000024', '20000000-0000-7000-8000-000000000003', 'c8000000-0000-7000-8000-000000000022', 'box',
+    'a8000000-0000-7000-8000-000000000023', 'input', 1, 1);
+SELECT lives_ok($$UPDATE procedure_template_slots SET placed_into_slot_id = 'd8000000-0000-7000-8000-000000000022'
+  WHERE id = 'd8000000-0000-7000-8000-000000000021'; SET CONSTRAINTS ALL IMMEDIATE$$,
+  'a rule of another organization admits a holder slot through the models it names');
+SET CONSTRAINTS ALL DEFERRED;
+UPDATE procedure_templates SET state_id = 'published' WHERE id = 'c8000000-0000-7000-8000-000000000021';
+INSERT INTO assets (id, organization_id, project_id, table_name_id, model_id, name)
+VALUES ('b8000000-0000-7000-8000-000000000021', '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'physical_assets',
+    'a8000000-0000-7000-8000-000000000021', 'borrowed item one'),
+  ('b8000000-0000-7000-8000-000000000022', '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'physical_assets',
+    'a8000000-0000-7000-8000-000000000021', 'borrowed item two'),
+  ('b8000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'containers',
+    'a8000000-0000-7000-8000-000000000023', 'borrowed box');
+INSERT INTO physical_assets (id, organization_id, physical_asset_model_id)
+SELECT id, organization_id, model_id FROM assets WHERE organization_id = '20000000-0000-7000-8000-000000000003';
+INSERT INTO containers (id, organization_id, container_model_id)
+VALUES ('b8000000-0000-7000-8000-000000000023', '20000000-0000-7000-8000-000000000003', 'a8000000-0000-7000-8000-000000000023');
+SELECT pg_temp.place_elsewhere('f8000000-0000-7000-8000-000000000031', 'b8000000-0000-7000-8000-000000000021', '2026-04-01 00:00+00', '2026-04-01 01:00+00');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+RESET ROLE;
+SELECT isnt_empty($$SELECT 1 FROM container_occupancy
+  WHERE contained_binding_id = '98000000-0000-7000-8000-000000000031' AND rule_id = '88000000-0000-7000-8000-000000000001'$$,
+  'a placement counts against the rule of another organization admitting it');
+INSERT INTO organization_blocks (organization_id, principal_id, principal_kind)
+VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user');
+SET ROLE app;
+SELECT lives_ok($$SELECT pg_temp.place_elsewhere('f8000000-0000-7000-8000-000000000032', 'b8000000-0000-7000-8000-000000000022',
+  '2026-04-01 02:00+00', '2026-04-01 03:00+00'); SET CONSTRAINTS ALL IMMEDIATE$$,
+  'a blocking organization''s rule does not cap a container of the caller it blocks');
+SET CONSTRAINTS ALL DEFERRED;
+RESET ROLE;
+SELECT is_empty($$SELECT 1 FROM container_occupancy WHERE contained_binding_id = '98000000-0000-7000-8000-000000000032'$$,
+  'a placement by a blocked caller counts against no rule of the blocking organization');
+SET ROLE app;
+SELECT throws_ok($$UPDATE procedure_template_slots SET placed_into_slot_id = 'd8000000-0000-7000-8000-000000000024'
+  WHERE id = 'd8000000-0000-7000-8000-000000000023'; SET CONSTRAINTS ALL IMMEDIATE$$,
+  '23503', 'holder slot requires compatible models', 'a blocking organization''s rule admits no holder slot of the caller it blocks');
+SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
 SELECT * FROM finish();
 ROLLBACK;

@@ -16,3 +16,4 @@ All notable changes to this project will be documented in this file.
 * A run's performer can only be the user who names them, and an in-progress or completed run that uses an asset cannot be deleted.
 * A compatibility rule or volumetric container model is frozen once a template or run relies on it.
 * Whoever reads a model reads its ancestors and their rules, and whoever reads a template reads the child templates its steps run.
+* The compatibility rules of an organization neither admit a holder slot nor count a placement of a caller it blocks.

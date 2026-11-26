@@ -1,4 +1,5 @@
--- Whether a compatibility rule covers both model families.
+-- Whether a compatibility rule of an organization not blocking the caller
+-- covers both model families.
 CREATE FUNCTION container_compatible(container_model UUID, contained_model UUID) RETURNS BOOLEAN
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
     SELECT EXISTS (
@@ -6,14 +7,15 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
         JOIN public.asset_model_ancestors container ON container.ancestor_model_id = compatibility.container_model_id
         JOIN public.asset_model_ancestors contained ON contained.ancestor_model_id = compatibility.contained_asset_model_id
         WHERE container.descendant_model_id = container_model AND contained.descendant_model_id = contained_model
+          AND NOT (compatibility.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
     )
 $$;
 ALTER FUNCTION container_compatible(UUID, UUID) OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION container_compatible(UUID, UUID) FROM PUBLIC;
 
--- Marks every compatibility rule covering both model families as relied on,
--- after any concurrent change of those rules commits, so the caller reads the
--- rules that stay.
+-- Marks every compatibility rule of an organization not blocking the caller
+-- covering both model families as relied on, after any concurrent change of
+-- those rules commits, so the caller reads the rules that stay.
 CREATE FUNCTION use_compatibility_rules(container_model UUID, contained_model UUID) RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
@@ -24,6 +26,7 @@ BEGIN
         JOIN public.asset_model_ancestors container ON container.ancestor_model_id = matching.container_model_id
         JOIN public.asset_model_ancestors contained ON contained.ancestor_model_id = matching.contained_asset_model_id
         WHERE container.descendant_model_id = container_model AND contained.descendant_model_id = contained_model
+          AND NOT (matching.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
     );
 END;
 $$;
@@ -340,6 +343,7 @@ BEGIN
         JOIN public.asset_model_ancestors contained ON contained.ancestor_model_id = compatibility.contained_asset_model_id
         WHERE container.descendant_model_id = placement.holder_model_id
           AND contained.descendant_model_id = placement.contained_model_id
+          AND NOT (compatibility.organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))
         ON CONFLICT DO NOTHING;
         INSERT INTO public.move_exits (contained_binding_id, holder_binding_id, removal_binding_id, organization_id, container_id,
             removal_procedure_id, left_at)
