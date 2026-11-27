@@ -2265,7 +2265,7 @@ dependencies = [
 [[package]]
 name = "sqlippy"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/SQLippy?branch=main#dfe734b2dfa9db3b43884f1385697ab3c00bb3c8"
+source = "git+https://github.com/connetto-rs/SQLippy?branch=main#435fedc7082e755de76c64721f7941cb48f1e00d"
 dependencies = [
  "heck",
  "inflection-rs",
