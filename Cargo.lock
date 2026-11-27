@@ -1483,7 +1483,7 @@ checksum = "4ec91767ecc0a0bbe558ce8c9da33c068066c57ecc8bb8477ef8c1ad3ef77c27"
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=804b3fee875cee409e7bc07c12612f88d9ebf908#804b3fee875cee409e7bc07c12612f88d9ebf908"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=24a6278da4462e09f6ba8a1c9e36e1801c563698#24a6278da4462e09f6ba8a1c9e36e1801c563698"
 dependencies = [
  "diesel",
  "libsqlite3-sys",
@@ -1502,7 +1502,7 @@ dependencies = [
 [[package]]
 name = "pg2sqlite-runtime"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=804b3fee875cee409e7bc07c12612f88d9ebf908#804b3fee875cee409e7bc07c12612f88d9ebf908"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=24a6278da4462e09f6ba8a1c9e36e1801c563698#24a6278da4462e09f6ba8a1c9e36e1801c563698"
 dependencies = [
  "diesel",
  "diesel-dynamic-schema",

@@ -19,8 +19,8 @@ use diesel::{
 };
 use pg2sqlite::{
     prelude::{
-        CaseFoldFunctions, HelperFunction, JsonbFunctions, Pg2Sqlite, Pg2SqliteOptions,
-        SessionVariableMapping, UuidRepresentation,
+        ArrayRepresentation, CaseFoldFunctions, HelperFunction, JsonbFunctions, Pg2Sqlite,
+        Pg2SqliteOptions, SessionVariableMapping, UuidRepresentation,
     },
     programs::unprepared_programs,
 };
@@ -139,6 +139,7 @@ fn options() -> Pg2SqliteOptions {
         .with_acting_role(ACTING_ROLE)
         .with_server_derived_write_function("server_derived_write")
         .with_jsonb_functions(jsonb_functions())
+        .with_array_representation(ArrayRepresentation::Json)
         .with_sqlitegis_enabled()
         .with_case_fold_functions(CaseFoldFunctions::new("pg_lower", "pg_upper"))
         .with_postgres_major(SERVER_POSTGRES_MAJOR);

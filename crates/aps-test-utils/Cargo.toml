@@ -4,7 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
-pg2sqlite = { git = "https://github.com/connetto-rs/pg2sqlite", rev = "804b3fee875cee409e7bc07c12612f88d9ebf908", default-features = false, features = [
+pg2sqlite = { git = "https://github.com/connetto-rs/pg2sqlite", rev = "24a6278da4462e09f6ba8a1c9e36e1801c563698", default-features = false, features = [
   "std",
   "diesel",
   "sqlitegis",
