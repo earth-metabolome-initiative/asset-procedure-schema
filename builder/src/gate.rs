@@ -947,6 +947,26 @@ const FUNCTIONS: &[(&str, &str, &str)] = &[
         "use_compatibility_rules",
         "A model may extend a model another organization shares with it, so its ancestry rows and the compatibility rules they match need not share an organization",
     ),
+    (
+        "join_on_non_key_columns",
+        "guard_procedure",
+        "The check pairs each parent asset binding with every child step fulfilling the same slot, since a slot holds several assets and several steps may fill it",
+    ),
+    (
+        "join_on_non_key_columns",
+        "require_asset_lifetime",
+        "The check pairs every two runs using the same asset to find overlapping uses",
+    ),
+    (
+        "join_on_non_key_columns",
+        "require_nested_times",
+        "The check pairs every run of a successor step with every run of its predecessor steps under the same parent, since a step may run repeatedly",
+    ),
+    (
+        "join_on_non_key_columns",
+        "require_publishable_procedure_template",
+        "The check pairs every two steps binding the same parent slot to verify their ordering",
+    ),
 ];
 
 /// Tables whose findings of a rule the APS schema keeps on purpose, with the
