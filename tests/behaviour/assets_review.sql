@@ -69,20 +69,14 @@ INSERT INTO resources (id, kind, organization_id)
 VALUES ('20000000-0000-7000-8000-000000000002', 'organization', '20000000-0000-7000-8000-000000000002');
 INSERT INTO memberships (organization_id, user_id, state)
 VALUES ('20000000-0000-7000-8000-000000000002', authz.caller_id(), 'active');
-INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
-VALUES ('20000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000002', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
 VALUES ('20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002', 'organization');
-INSERT INTO resources (id, kind, organization_id)
-VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-VALUES ('a0000000-0000-7000-8000-000000000010', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id());
-INSERT INTO resources (id, kind, organization_id)
-VALUES ('a0000000-0000-7000-8000-000000000010', 'ownable', '20000000-0000-7000-8000-000000000002');
+INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+VALUES ('a0000000-0000-7000-8000-000000000010', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id(), 'ownable', 'project');
 SELECT throws_ok($$INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id)
 VALUES ('a0000000-0000-7000-8000-000000000010', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'container_compatibility_rules', 'a0000000-0000-7000-8000-000000000003', 'a0000000-0000-7000-8000-000000000004')$$,
 '23503', NULL, 'capacity rule belongs to the container model organization');

@@ -1,7 +1,7 @@
 -- Migration: 006-photograph-procedures
 -- Purpose: Typed photograph slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- photograph_procedure_templates
 -- +-- procedures -- photograph_procedures
 -- Slot | Role | Meaning
@@ -39,7 +39,15 @@ CREATE TABLE photograph_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (photograph_slot_id, id, photograph_model_id, photograph_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    photographed_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    photographed_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    photograph_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (photographed_with_model_id, photographed_with_model_archived) REFERENCES camera_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (photographed_asset_model_id, photographed_asset_model_archived) REFERENCES physical_asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (photograph_model_id, photograph_model_archived) REFERENCES photograph_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON photograph_procedure_templates (photograph_model_id);
 CREATE INDEX ON photograph_procedure_templates (photographed_asset_model_id);
@@ -48,8 +56,19 @@ INSERT INTO table_names (id) VALUES ('photograph_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'photograph_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'photograph_procedure_templates', 'photograph_procedure_templates';
-CREATE TRIGGER photograph_procedure_templates_guard AFTER INSERT OR UPDATE ON photograph_procedure_templates
+CREATE TRIGGER photograph_procedure_templates_guard AFTER INSERT ON photograph_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER photograph_procedure_templates_guard_update AFTER UPDATE OF id, photographed_with_slot_id, photographed_with_model_id, photographed_with_slot_role_id, photographed_asset_slot_id, photographed_asset_model_id, photographed_asset_slot_role_id, photograph_slot_id, photograph_model_id, photograph_slot_role_id ON photograph_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.photographed_with_slot_id IS DISTINCT FROM NEW.photographed_with_slot_id
+        OR OLD.photographed_with_model_id IS DISTINCT FROM NEW.photographed_with_model_id
+        OR OLD.photographed_with_slot_role_id IS DISTINCT FROM NEW.photographed_with_slot_role_id
+        OR OLD.photographed_asset_slot_id IS DISTINCT FROM NEW.photographed_asset_slot_id
+        OR OLD.photographed_asset_model_id IS DISTINCT FROM NEW.photographed_asset_model_id
+        OR OLD.photographed_asset_slot_role_id IS DISTINCT FROM NEW.photographed_asset_slot_role_id
+        OR OLD.photograph_slot_id IS DISTINCT FROM NEW.photograph_slot_id
+        OR OLD.photograph_model_id IS DISTINCT FROM NEW.photograph_model_id
+        OR OLD.photograph_slot_role_id IS DISTINCT FROM NEW.photograph_slot_role_id) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER photograph_procedure_templates_delete_guard BEFORE DELETE ON photograph_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -88,9 +107,9 @@ CREATE POLICY photograph_procedure_templates_insert ON photograph_procedure_temp
 CREATE POLICY photograph_procedure_templates_delete ON photograph_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY photograph_procedure_templates_archived_insert ON photograph_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(photographed_with_model_id) AND NOT authz.is_archived(photographed_asset_model_id) AND NOT authz.is_archived(photograph_model_id));
+    WITH CHECK (NOT archived AND NOT photographed_with_model_archived AND NOT photographed_asset_model_archived AND NOT photograph_model_archived);
 CREATE POLICY photograph_procedure_templates_archived_delete ON photograph_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY photograph_procedure_templates_blocked ON photograph_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -108,7 +127,10 @@ CREATE TABLE photograph_procedures (
     FOREIGN KEY (id, photograph_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    photograph_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (photograph_procedure_template_id, photograph_procedure_template_archived) REFERENCES photograph_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON photograph_procedures (photograph_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('photograph_procedures');
@@ -117,8 +139,12 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'photograph_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'photograph_procedures', 'photograph_procedures';
-CREATE TRIGGER photograph_procedures_guard AFTER INSERT OR UPDATE ON photograph_procedures
+CREATE TRIGGER photograph_procedures_guard AFTER INSERT ON photograph_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER photograph_procedures_guard_update AFTER UPDATE OF id, photograph_procedure_template_id, status_id ON photograph_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.photograph_procedure_template_id IS DISTINCT FROM NEW.photograph_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER photograph_procedures_delete_guard BEFORE DELETE ON photograph_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -162,7 +188,24 @@ CREATE CONSTRAINT TRIGGER photograph_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER photograph_procedures_kept AFTER DELETE ON photograph_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_photograph_procedures_row();
 
-GRANT SELECT, INSERT, DELETE ON photograph_procedures TO app;
+CREATE FUNCTION initialize_photograph_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.photograph_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_photograph_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_photograph_procedures_status() FROM PUBLIC;
+CREATE TRIGGER photograph_procedures_status_initialize BEFORE INSERT ON photograph_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_photograph_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, photograph_procedure_template_id, archived, photograph_procedure_template_archived), DELETE ON photograph_procedures TO app;
 ALTER TABLE photograph_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE photograph_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY photograph_procedures_select ON photograph_procedures FOR SELECT TO app
@@ -172,9 +215,9 @@ CREATE POLICY photograph_procedures_insert ON photograph_procedures FOR INSERT T
 CREATE POLICY photograph_procedures_delete ON photograph_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY photograph_procedures_archived_insert ON photograph_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(photograph_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT photograph_procedure_template_archived);
 CREATE POLICY photograph_procedures_archived_delete ON photograph_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY photograph_procedures_blocked ON photograph_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

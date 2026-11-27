@@ -1,6 +1,6 @@
 # Core Schema
 
-The core schema extends the connetto ownables of [`connetto-schema`](../../connetto-schema) with assets, procedure templates and procedures. Each migration is a single `up.sql` whose comments document every table and column.
+The core schema extends the `resources` of kind `'ownable'` in [`connetto-schema`](../../connetto-schema) with assets, procedure templates and procedures. Root rows follow their resource's project parent and archive state through cascading keys.
 
 | Migration | Contents |
 | --- | --- |

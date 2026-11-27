@@ -1,14 +1,14 @@
 -- Migration: Shared Catalog / Brands
 -- Purpose: Brands for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- brands
 -- Commercial tables decision: No vendor model or lot specialization is required.
 
 -- Project-scoped brand catalog.
 CREATE TABLE brands (
     -- Resource identity.
-    id UUID PRIMARY KEY REFERENCES ownables (id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY REFERENCES resources (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
     -- Project containing this ownable.
@@ -21,8 +21,11 @@ CREATE TABLE brands (
     AND length(name) <= 255
     ),
     UNIQUE (project_id, name),
-    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON brands (table_name_id);
 INSERT INTO table_names (id) VALUES ('brands');
@@ -44,11 +47,11 @@ CREATE POLICY brands_update ON brands FOR UPDATE TO app
 CREATE POLICY brands_delete ON brands FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY brands_archived_insert ON brands AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY brands_archived_update ON brands AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY brands_archived_delete ON brands AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY brands_blocked ON brands AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

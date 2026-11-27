@@ -7,11 +7,12 @@ mod slots;
 use aps_asset_model_ancestors::{
     ProcedureAsset, procedure_assets, procedure_template_slot_bindings,
 };
+use aps_authz_resource_kind::ResourceKind;
 use aps_procedure_templates::{
     ProcedureTemplateSlot, procedure_template_slots, procedure_template_steps, procedure_templates,
 };
 use aps_procedures::procedures;
-use aps_resources::{ownables, resources};
+use aps_resources::resources;
 use aps_traits::validation::{IntoValidationError, flatten, validated};
 use diesel::{
     Connection, ExpressionMethods, QueryDsl, RunQueryDsl,
@@ -54,9 +55,9 @@ pub trait ProcedureBuilder<C>:
     + SetColumn<resources::organization_id>
     + SetColumn<procedures::organization_id>
     + SetColumn<procedures::project_id>
-    + SetColumn<ownables::organization_id>
-    + SetColumn<ownables::project_id>
-    + SetColumn<ownables::created_by_id>
+    + SetColumn<resources::parent_id>
+    + SetColumn<resources::parent_kind>
+    + SetColumn<resources::created_by_id>
     + SetColumn<procedures::table_name_id>
     + SetColumn<procedures::procedure_template_id>
     + SetColumn<procedures::status_id>
@@ -79,9 +80,9 @@ impl<C, B> ProcedureBuilder<C> for B where
         + SetColumn<resources::organization_id>
         + SetColumn<procedures::organization_id>
         + SetColumn<procedures::project_id>
-        + SetColumn<ownables::organization_id>
-        + SetColumn<ownables::project_id>
-        + SetColumn<ownables::created_by_id>
+        + SetColumn<resources::parent_id>
+        + SetColumn<resources::parent_kind>
+        + SetColumn<resources::created_by_id>
         + SetColumn<procedures::table_name_id>
         + SetColumn<procedures::procedure_template_id>
         + SetColumn<procedures::status_id>
@@ -380,9 +381,9 @@ where
             .set_column::<resources::organization_id>(self.organization)
             .set_column::<procedures::organization_id>(self.organization)
             .set_column::<procedures::project_id>(self.project)
-            .set_column::<ownables::organization_id>(self.organization)
-            .set_column::<ownables::project_id>(self.project)
-            .set_column::<ownables::created_by_id>(self.author)
+            .set_column::<resources::parent_id>(Some(self.project))
+            .set_column::<resources::parent_kind>(Some(ResourceKind::Project))
+            .set_column::<resources::created_by_id>(Some(self.author))
             .set_column::<procedures::table_name_id>(<T as TableExt>::TABLE_NAME.to_owned())
             .set_column::<procedures::procedure_template_id>(
                 template.template().get_column::<procedure_templates::id>(),
@@ -467,7 +468,6 @@ where
                 .set_column::<procedure_assets::procedure_template_id>(
                     template.template().get_column::<procedure_templates::id>(),
                 )
-                .set_column::<procedure_assets::status_id>("in_progress".to_owned())
                 .set_column::<procedure_assets::slot_id>(
                     own.slot.get_column::<procedure_template_slots::id>(),
                 )

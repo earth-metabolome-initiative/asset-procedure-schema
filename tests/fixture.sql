@@ -11,9 +11,8 @@ CREATE FUNCTION pg_temp.act(principal TEXT) RETURNS VOID LANGUAGE sql AS $$
          set_config('app.verified_email', '', false)
 $$;
 CREATE FUNCTION pg_temp.create_ownable(ownable UUID) RETURNS VOID LANGUAGE sql AS $$
-  INSERT INTO public.ownables (id, organization_id, project_id, created_by_id)
-    VALUES (ownable, '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', authz.caller_id());
-  INSERT INTO public.resources (id, kind, organization_id) VALUES (ownable, 'ownable', '20000000-0000-7000-8000-000000000001');
+  INSERT INTO public.resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+    VALUES (ownable, '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', authz.caller_id(), 'ownable', 'project');
 $$;
 -- The caller invites the member, who accepts, as an organization admin and the invitee do.
 CREATE FUNCTION pg_temp.add_member(organization UUID, member UUID) RETURNS VOID LANGUAGE plpgsql AS $$
@@ -93,9 +92,9 @@ $$;
 -- Binds an asset, or only a model when `asset` is NULL, inheriting the
 -- parent's row when the procedure's step binds the slot.
 CREATE FUNCTION pg_temp.bind_model(binding UUID, procedure UUID, slot UUID, asset UUID, model UUID) RETURNS VOID LANGUAGE sql AS $$
-  INSERT INTO public.procedure_assets (id, organization_id, procedure_id, procedure_template_id, status_id, slot_id,
+  INSERT INTO public.procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id,
       slot_asset_model_id, slot_role_id, asset_model_id, asset_id, parent_procedure_asset_id, parent_procedure_id)
-    SELECT binding, executed.organization_id, procedure, executed.procedure_template_id, executed.status_id, slot,
+    SELECT binding, executed.organization_id, procedure, executed.procedure_template_id, slot,
       template_slot.asset_model_id, template_slot.role_id, model, asset, inherited.id,
       CASE WHEN inherited.id IS NOT NULL THEN executed.parent_procedure_id END
     FROM public.procedures executed
@@ -116,8 +115,8 @@ CREATE FUNCTION pg_temp.bind(binding UUID, procedure UUID, slot UUID, asset UUID
 $$;
 CREATE FUNCTION pg_temp.record_number(procedure UUID, parameter UUID, recorded DOUBLE PRECISION) RETURNS VOID LANGUAGE sql AS $$
   INSERT INTO public.procedure_parameter_values
-    (procedure_id, parameter_id, procedure_template_id, status_id, value_kind_id, organization_id, number_value)
-    SELECT procedure, parameter, executed.procedure_template_id, executed.status_id, 'number', executed.organization_id, recorded
+    (procedure_id, parameter_id, procedure_template_id, value_kind_id, organization_id, number_value)
+    SELECT procedure, parameter, executed.procedure_template_id, 'number', executed.organization_id, recorded
     FROM public.procedures executed WHERE executed.id = procedure;
 $$;
 GRANT EXECUTE ON FUNCTION pg_temp.create_ownable(UUID), pg_temp.add_member(UUID, UUID), pg_temp.new_model(UUID, TEXT, UUID, TEXT),
@@ -133,15 +132,11 @@ INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-0
 INSERT INTO resources (id, kind, organization_id)
   VALUES ('20000000-0000-7000-8000-000000000001', 'organization', '20000000-0000-7000-8000-000000000001');
 INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000001', authz.caller_id(), 'active');
-INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
-  VALUES ('20000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'project',
     '20000000-0000-7000-8000-000000000001', 'organization');
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('50000000-0000-7000-8000-000000000001', 'project', '20000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 

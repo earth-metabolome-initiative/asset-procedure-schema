@@ -772,7 +772,7 @@ checksum = "65036b2f761dc2d20b4634890f73bdbad811d5edb677f84fd652ae9256051fcb"
 [[package]]
 name = "connetto-schema-lint"
 version = "0.0.0"
-source = "git+https://github.com/connetto-rs/connetto-schema?rev=3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb#3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb"
+source = "git+https://github.com/connetto-rs/connetto-schema?rev=04a428dfb5c87a0205affa26424547276c52d0e3#04a428dfb5c87a0205affa26424547276c52d0e3"
 dependencies = [
  "connetto-schema-source",
  "rls2fga",
@@ -783,7 +783,7 @@ dependencies = [
 [[package]]
 name = "connetto-schema-source"
 version = "0.0.0"
-source = "git+https://github.com/connetto-rs/connetto-schema?rev=3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb#3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb"
+source = "git+https://github.com/connetto-rs/connetto-schema?rev=04a428dfb5c87a0205affa26424547276c52d0e3#04a428dfb5c87a0205affa26424547276c52d0e3"
 
 [[package]]
 name = "core-foundation-sys"
@@ -1638,7 +1638,7 @@ checksum = "4ec91767ecc0a0bbe558ce8c9da33c068066c57ecc8bb8477ef8c1ad3ef77c27"
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=bd74269003717163005d7055ad7945bb3e0d922d#bd74269003717163005d7055ad7945bb3e0d922d"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=80b749887fed201a9ed4004759d5bf3b33fea5a5#80b749887fed201a9ed4004759d5bf3b33fea5a5"
 dependencies = [
  "diesel",
  "libsqlite3-sys",
@@ -1657,7 +1657,7 @@ dependencies = [
 [[package]]
 name = "pg2sqlite-runtime"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=bd74269003717163005d7055ad7945bb3e0d922d#bd74269003717163005d7055ad7945bb3e0d922d"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=80b749887fed201a9ed4004759d5bf3b33fea5a5#80b749887fed201a9ed4004759d5bf3b33fea5a5"
 dependencies = [
  "diesel",
  "diesel-dynamic-schema",
@@ -1925,7 +1925,7 @@ checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 [[package]]
 name = "rls2fga"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/rls2fga?branch=main#5adb9b96b0c1078f147ad1d1b001b498433fff70"
+source = "git+https://github.com/connetto-rs/rls2fga?branch=main#3f818d8a23590c8b9c0e113b7ee2b83b1ecbf812"
 dependencies = [
  "rls2fga-types",
  "serde",
@@ -1939,7 +1939,7 @@ dependencies = [
 [[package]]
 name = "rls2fga-types"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/rls2fga?branch=main#5adb9b96b0c1078f147ad1d1b001b498433fff70"
+source = "git+https://github.com/connetto-rs/rls2fga?branch=main#3f818d8a23590c8b9c0e113b7ee2b83b1ecbf812"
 dependencies = [
  "serde",
  "sql-values",
@@ -2225,7 +2225,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sql-traits?branch=main#84c54661b52543641b131501e4641b0fd3e26dba"
+source = "git+https://github.com/connetto-rs/sql-traits?branch=main#ceca22573c0af4eb20a47adba908b44518c2201f"
 dependencies = [
  "geometric-traits",
  "once_cell",
@@ -2256,7 +2256,7 @@ dependencies = [
 [[package]]
 name = "sql_relations"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/synql?branch=main#4a389073cb78fc180629167ba71eb04810799dd7"
+source = "git+https://github.com/connetto-rs/synql?branch=main#27f477e31faca20651ad8ebe0938bc4802994c63"
 dependencies = [
  "sql-traits",
  "sqlparser",
@@ -2265,12 +2265,13 @@ dependencies = [
 [[package]]
 name = "sqlippy"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/SQLippy?branch=main#ba3d79f5c5645b7de8396248a8e811ce513048e3"
+source = "git+https://github.com/connetto-rs/SQLippy?branch=main#dfe734b2dfa9db3b43884f1385697ab3c00bb3c8"
 dependencies = [
  "heck",
  "inflection-rs",
  "sql-traits",
  "sqlparser",
+ "sqlparser-expr-eval",
  "sqlparser-plpgsql",
  "sqlstate",
  "thiserror 2.0.21",
@@ -2452,7 +2453,7 @@ dependencies = [
 [[package]]
 name = "synql"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/synql?branch=main#4a389073cb78fc180629167ba71eb04810799dd7"
+source = "git+https://github.com/connetto-rs/synql?branch=main#27f477e31faca20651ad8ebe0938bc4802994c63"
 dependencies = [
  "enumflags2",
  "geometric-traits",

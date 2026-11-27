@@ -1,7 +1,7 @@
 -- Migration: 013-pouring-procedures
 -- Purpose: Typed pouring slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- pouring_procedure_templates
 -- +-- procedures -- pouring_procedures
 -- Slot | Role | Meaning
@@ -65,7 +65,19 @@ CREATE TABLE pouring_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (poured_sample_slot_id, id, poured_into_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    measured_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    poured_from_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    poured_into_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    poured_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    source_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (measured_with_model_id, measured_with_model_archived) REFERENCES volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (poured_from_model_id, poured_from_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (poured_into_model_id, poured_into_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (poured_sample_model_id, poured_sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (source_sample_model_id, source_sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON pouring_procedure_templates (measured_with_model_id);
 CREATE INDEX ON pouring_procedure_templates (poured_from_model_id);
@@ -75,8 +87,27 @@ INSERT INTO table_names (id) VALUES ('pouring_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'pouring_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'pouring_procedure_templates', 'pouring_procedure_templates';
-CREATE TRIGGER pouring_procedure_templates_guard AFTER INSERT OR UPDATE ON pouring_procedure_templates
+CREATE TRIGGER pouring_procedure_templates_guard AFTER INSERT ON pouring_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER pouring_procedure_templates_guard_update AFTER UPDATE OF id, source_sample_slot_id, source_sample_model_id, source_sample_slot_role_id, measured_with_slot_id, measured_with_model_id, measured_with_slot_role_id, poured_from_slot_id, poured_from_model_id, poured_from_slot_role_id, poured_into_slot_id, poured_into_model_id, poured_into_slot_role_id, poured_sample_slot_id, poured_sample_model_id, poured_sample_slot_role_id, volume_l, volume_l_tolerance_percentage ON pouring_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.source_sample_slot_id IS DISTINCT FROM NEW.source_sample_slot_id
+        OR OLD.source_sample_model_id IS DISTINCT FROM NEW.source_sample_model_id
+        OR OLD.source_sample_slot_role_id IS DISTINCT FROM NEW.source_sample_slot_role_id
+        OR OLD.measured_with_slot_id IS DISTINCT FROM NEW.measured_with_slot_id
+        OR OLD.measured_with_model_id IS DISTINCT FROM NEW.measured_with_model_id
+        OR OLD.measured_with_slot_role_id IS DISTINCT FROM NEW.measured_with_slot_role_id
+        OR OLD.poured_from_slot_id IS DISTINCT FROM NEW.poured_from_slot_id
+        OR OLD.poured_from_model_id IS DISTINCT FROM NEW.poured_from_model_id
+        OR OLD.poured_from_slot_role_id IS DISTINCT FROM NEW.poured_from_slot_role_id
+        OR OLD.poured_into_slot_id IS DISTINCT FROM NEW.poured_into_slot_id
+        OR OLD.poured_into_model_id IS DISTINCT FROM NEW.poured_into_model_id
+        OR OLD.poured_into_slot_role_id IS DISTINCT FROM NEW.poured_into_slot_role_id
+        OR OLD.poured_sample_slot_id IS DISTINCT FROM NEW.poured_sample_slot_id
+        OR OLD.poured_sample_model_id IS DISTINCT FROM NEW.poured_sample_model_id
+        OR OLD.poured_sample_slot_role_id IS DISTINCT FROM NEW.poured_sample_slot_role_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l
+        OR OLD.volume_l_tolerance_percentage IS DISTINCT FROM NEW.volume_l_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER pouring_procedure_templates_delete_guard BEFORE DELETE ON pouring_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -118,11 +149,11 @@ CREATE POLICY pouring_procedure_templates_update ON pouring_procedure_templates 
 CREATE POLICY pouring_procedure_templates_delete ON pouring_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY pouring_procedure_templates_archived_insert ON pouring_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(measured_with_model_id) AND NOT authz.is_archived(poured_from_model_id) AND NOT authz.is_archived(poured_into_model_id) AND NOT authz.is_archived(poured_sample_model_id) AND NOT authz.is_archived(source_sample_model_id));
+    WITH CHECK (NOT archived AND NOT measured_with_model_archived AND NOT poured_from_model_archived AND NOT poured_into_model_archived AND NOT poured_sample_model_archived AND NOT source_sample_model_archived);
 CREATE POLICY pouring_procedure_templates_archived_update ON pouring_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY pouring_procedure_templates_archived_delete ON pouring_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY pouring_procedure_templates_blocked ON pouring_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -143,7 +174,10 @@ CREATE TABLE pouring_procedures (
     FOREIGN KEY (id, pouring_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    pouring_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (pouring_procedure_template_id, pouring_procedure_template_archived) REFERENCES pouring_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON pouring_procedures (pouring_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('pouring_procedures');
@@ -152,8 +186,13 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'pouring_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'pouring_procedures', 'pouring_procedures';
-CREATE TRIGGER pouring_procedures_guard AFTER INSERT OR UPDATE ON pouring_procedures
+CREATE TRIGGER pouring_procedures_guard AFTER INSERT ON pouring_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER pouring_procedures_guard_update AFTER UPDATE OF id, pouring_procedure_template_id, status_id, volume_l ON pouring_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.pouring_procedure_template_id IS DISTINCT FROM NEW.pouring_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER pouring_procedures_delete_guard BEFORE DELETE ON pouring_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -197,7 +236,24 @@ CREATE CONSTRAINT TRIGGER pouring_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER pouring_procedures_kept AFTER DELETE ON pouring_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_pouring_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (volume_l), DELETE ON pouring_procedures TO app;
+CREATE FUNCTION initialize_pouring_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.pouring_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_pouring_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_pouring_procedures_status() FROM PUBLIC;
+CREATE TRIGGER pouring_procedures_status_initialize BEFORE INSERT ON pouring_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_pouring_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, pouring_procedure_template_id, volume_l, archived, pouring_procedure_template_archived), UPDATE (volume_l), DELETE ON pouring_procedures TO app;
 ALTER TABLE pouring_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pouring_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY pouring_procedures_select ON pouring_procedures FOR SELECT TO app
@@ -207,9 +263,9 @@ CREATE POLICY pouring_procedures_insert ON pouring_procedures FOR INSERT TO app
 CREATE POLICY pouring_procedures_delete ON pouring_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY pouring_procedures_archived_insert ON pouring_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(pouring_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT pouring_procedure_template_archived);
 CREATE POLICY pouring_procedures_archived_delete ON pouring_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY pouring_procedures_blocked ON pouring_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -227,7 +283,7 @@ CREATE POLICY pouring_procedures_update ON pouring_procedures FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY pouring_procedures_archived_update ON pouring_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 
 CREATE INDEX ON public.pouring_procedure_templates (source_sample_model_id);
 CREATE INDEX ON public.pouring_procedure_templates (source_sample_slot_id);

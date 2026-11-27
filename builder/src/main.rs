@@ -213,6 +213,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
             .sink_toml_callback(generate_sink_toml_typed_rows("diesel-builders"))
             .sink_toml_callback(generate_sink_toml_typed_rows("rosetta-uuid"))
             .sink_toml_callback(generate_sink_toml_typed_rows("sqlitegis"))
+            .sink_toml_callback(generate_sink_toml_typed_rows("aps-authz-resource_kind"))
             .members([
                 TomlDependency::new("builder").path("builder")?,
                 TomlDependency::new("sql-procedure-rules").path("crates/sql-procedure-rules")?,

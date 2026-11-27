@@ -6,20 +6,16 @@ setup
   INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001');
   INSERT INTO resources (id, kind, organization_id) VALUES ('20000000-0000-7000-8000-000000000001', 'organization', '20000000-0000-7000-8000-000000000001');
   INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'active');
-  INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
-  VALUES ('20000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'user', 'admin');
   COMMIT;
   BEGIN;
-  INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+  INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'project', '20000000-0000-7000-8000-000000000001', 'organization');
-  INSERT INTO resources (id, kind, organization_id) VALUES ('50000000-0000-7000-8000-000000000001', 'project', '20000000-0000-7000-8000-000000000001');
   COMMIT;
   BEGIN;
-  INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-  SELECT id::uuid, '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001'
+  INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+  SELECT id::uuid, '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'
   FROM (VALUES ('a0000000-0000-7000-8000-000000000001'),
     ('c0000000-0000-7000-8000-000000000001'), ('f0000000-0000-7000-8000-000000000001')) ownable (id);
-  INSERT INTO resources (id, kind, organization_id) SELECT id, 'ownable', organization_id FROM ownables WHERE organization_id = '20000000-0000-7000-8000-000000000001';
   INSERT INTO asset_models (id, organization_id, project_id, table_name_id, name)
   VALUES ('a0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'asset_models', 'sample');
   INSERT INTO asset_model_ancestors (descendant_model_id, ancestor_model_id, organization_id, parent_model_id)
@@ -34,8 +30,8 @@ setup
   INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, status_id, root_procedure_id, started_at, performed_by_id)
   VALUES ('f0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'procedures',
     'c0000000-0000-7000-8000-000000000001', 'in_progress', 'f0000000-0000-7000-8000-000000000001', '2026-01-01 10:00+00', '10000000-0000-7000-8000-000000000001');
-  INSERT INTO procedure_parameter_values (procedure_id, parameter_id, procedure_template_id, status_id, value_kind_id, organization_id, number_value)
-  VALUES ('f0000000-0000-7000-8000-000000000001', '71000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 'in_progress', 'number',
+  INSERT INTO procedure_parameter_values (procedure_id, parameter_id, procedure_template_id, value_kind_id, organization_id, number_value)
+  VALUES ('f0000000-0000-7000-8000-000000000001', '71000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 'number',
     '20000000-0000-7000-8000-000000000001', 0.5);
   COMMIT;
 }

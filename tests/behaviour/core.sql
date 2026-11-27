@@ -165,10 +165,10 @@ SELECT throws_ok($statement$UPDATE procedures SET status_id = 'completed', ended
 SELECT pg_temp.bind('90000000-0000-7000-8000-000000000004', 'f0000000-0000-7000-8000-000000000002',
   'd0000000-0000-7000-8000-000000000002', 'b0000000-0000-7000-8000-000000000003');
 SELECT throws_ok($statement$
-    INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, status_id, slot_id, slot_asset_model_id,
+    INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id,
         slot_role_id, asset_model_id)
       VALUES ('90000000-0000-7000-8000-000000000009', '20000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000002',
-        'c0000000-0000-7000-8000-000000000001', 'in_progress', 'd0000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000001',
+        'c0000000-0000-7000-8000-000000000001', 'd0000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000001',
         'input', 'a0000000-0000-7000-8000-000000000002'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f0000000-0000-7000-8000-000000000002 binds more assets than slot d0000000-0000-7000-8000-000000000001 admits', 'binding past the slot maximum is rejected');
 SELECT throws_ok($statement$UPDATE procedures SET status_id = 'completed' WHERE id = 'f0000000-0000-7000-8000-000000000002'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'new row for relation "procedures" violates check constraint "procedures_check6"', 'completion before ended_at is rejected');
 SELECT throws_ok($statement$UPDATE procedures SET status_id = 'completed', ended_at = now() + interval '1 hour' WHERE id = 'f0000000-0000-7000-8000-000000000002'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'new row for relation "procedures" violates check constraint "procedures_ended_at_check"', 'end beyond the clock tolerance ahead is rejected');
@@ -279,7 +279,7 @@ SELECT pg_temp.add_member('20000000-0000-7000-8000-000000000001', '10000000-0000
 SELECT throws_ok($statement$INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
       VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
     SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000002', true);
-    SELECT pg_temp.new_procedure('f0000000-0000-7000-8000-000000000009', 'c0000000-0000-7000-8000-000000000001', 'planned', NULL, NULL); SET CONSTRAINTS ALL IMMEDIATE$statement$, '42501', 'new row violates row-level security policy for table "ownables"', 'reader cannot record a procedure');
+    SELECT pg_temp.new_procedure('f0000000-0000-7000-8000-000000000009', 'c0000000-0000-7000-8000-000000000001', 'planned', NULL, NULL); SET CONSTRAINTS ALL IMMEDIATE$statement$, '42501', 'new row violates row-level security policy for table "resources"', 'reader cannot record a procedure');
 INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
       VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000002', 'user', 'reader');
     SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000002', true);

@@ -7,7 +7,7 @@ edition = "2024"
 synql = { git = "https://github.com/connetto-rs/synql", branch = "main" }
 sql-traits = { git = "https://github.com/connetto-rs/sql-traits", branch = "main" }
 sqlippy = { git = "https://github.com/connetto-rs/SQLippy", branch = "main" }
-connetto-schema-lint = { git = "https://github.com/connetto-rs/connetto-schema", rev = "3b4b84c5a611a95f0a33fe462e86b8004a8d3aeb" }
+connetto-schema-lint = { git = "https://github.com/connetto-rs/connetto-schema", rev = "04a428dfb5c87a0205affa26424547276c52d0e3" }
 time_requirements = "0.1.0"
 sql-procedure-rules = { path = "../crates/sql-procedure-rules" }
 mermaid-builder = "0.1.1"

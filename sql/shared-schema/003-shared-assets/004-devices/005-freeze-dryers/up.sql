@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Devices / Freeze Dryers
 -- Purpose: Freeze Dryers for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- freeze_dryer_models
@@ -19,7 +19,9 @@ CREATE TABLE freeze_dryer_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('freeze_dryer_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -64,7 +66,11 @@ CREATE TABLE commercial_freeze_dryer_models (
     freeze_dryer_model_id UUID NOT NULL REFERENCES freeze_dryer_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, freeze_dryer_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    freeze_dryer_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (freeze_dryer_model_id, freeze_dryer_model_archived) REFERENCES freeze_dryer_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_freeze_dryer_models (freeze_dryer_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_freeze_dryer_models');
@@ -110,7 +116,11 @@ CREATE TABLE commercial_freeze_dryer_lots (
     -- Commercial freeze dryer model from which this lot derives.
     commercial_freeze_dryer_model_id UUID NOT NULL REFERENCES commercial_freeze_dryer_models (id),
     FOREIGN KEY (id, commercial_freeze_dryer_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_freeze_dryer_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (commercial_freeze_dryer_model_id, commercial_freeze_dryer_model_archived) REFERENCES commercial_freeze_dryer_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_freeze_dryer_lots (commercial_freeze_dryer_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_freeze_dryer_lots');
@@ -157,7 +167,10 @@ CREATE TABLE freeze_dryers (
     -- Commercial lot model instantiated by this physical asset.
     commercial_freeze_dryer_lot_id UUID NOT NULL REFERENCES commercial_freeze_dryer_lots (id),
     FOREIGN KEY (id, commercial_freeze_dryer_lot_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_freeze_dryer_lot_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (commercial_freeze_dryer_lot_id, commercial_freeze_dryer_lot_archived) REFERENCES commercial_freeze_dryer_lots (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON freeze_dryers (commercial_freeze_dryer_lot_id);
 INSERT INTO table_names (id) VALUES ('freeze_dryers');
@@ -205,9 +218,9 @@ CREATE POLICY freeze_dryer_models_insert ON freeze_dryer_models FOR INSERT TO ap
 CREATE POLICY freeze_dryer_models_delete ON freeze_dryer_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY freeze_dryer_models_archived_insert ON freeze_dryer_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY freeze_dryer_models_archived_delete ON freeze_dryer_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY freeze_dryer_models_blocked ON freeze_dryer_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -223,9 +236,9 @@ CREATE POLICY commercial_freeze_dryer_models_insert ON commercial_freeze_dryer_m
 CREATE POLICY commercial_freeze_dryer_models_delete ON commercial_freeze_dryer_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_freeze_dryer_models_archived_insert ON commercial_freeze_dryer_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(freeze_dryer_model_id));
+    WITH CHECK (NOT archived AND NOT freeze_dryer_model_archived);
 CREATE POLICY commercial_freeze_dryer_models_archived_delete ON commercial_freeze_dryer_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_freeze_dryer_models_blocked ON commercial_freeze_dryer_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -241,9 +254,9 @@ CREATE POLICY commercial_freeze_dryer_lots_insert ON commercial_freeze_dryer_lot
 CREATE POLICY commercial_freeze_dryer_lots_delete ON commercial_freeze_dryer_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_freeze_dryer_lots_archived_insert ON commercial_freeze_dryer_lots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_freeze_dryer_model_id));
+    WITH CHECK (NOT archived AND NOT commercial_freeze_dryer_model_archived);
 CREATE POLICY commercial_freeze_dryer_lots_archived_delete ON commercial_freeze_dryer_lots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_freeze_dryer_lots_blocked ON commercial_freeze_dryer_lots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -259,9 +272,9 @@ CREATE POLICY freeze_dryers_insert ON freeze_dryers FOR INSERT TO app
 CREATE POLICY freeze_dryers_delete ON freeze_dryers FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY freeze_dryers_archived_insert ON freeze_dryers AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_freeze_dryer_lot_id));
+    WITH CHECK (NOT archived AND NOT commercial_freeze_dryer_lot_archived);
 CREATE POLICY freeze_dryers_archived_delete ON freeze_dryers AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY freeze_dryers_blocked ON freeze_dryers AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

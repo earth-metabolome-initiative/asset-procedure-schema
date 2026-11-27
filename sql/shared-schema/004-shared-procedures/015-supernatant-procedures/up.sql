@@ -1,7 +1,7 @@
 -- Migration: 015-supernatant-procedures
 -- Purpose: Typed supernatant slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- supernatant_procedure_templates
 -- +-- procedures -- supernatant_procedures
 -- Slot | Role | Meaning
@@ -65,7 +65,19 @@ CREATE TABLE supernatant_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (supernatant_slot_id, id, supernatant_destination_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    stratified_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    supernatant_destination_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    supernatant_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    transferred_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    source_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (stratified_source_model_id, stratified_source_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (supernatant_destination_model_id, supernatant_destination_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (supernatant_model_id, supernatant_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (transferred_with_model_id, transferred_with_model_archived) REFERENCES volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (source_sample_model_id, source_sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON supernatant_procedure_templates (stratified_source_model_id);
 CREATE INDEX ON supernatant_procedure_templates (supernatant_destination_model_id);
@@ -75,8 +87,27 @@ INSERT INTO table_names (id) VALUES ('supernatant_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'supernatant_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'supernatant_procedure_templates', 'supernatant_procedure_templates';
-CREATE TRIGGER supernatant_procedure_templates_guard AFTER INSERT OR UPDATE ON supernatant_procedure_templates
+CREATE TRIGGER supernatant_procedure_templates_guard AFTER INSERT ON supernatant_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER supernatant_procedure_templates_guard_update AFTER UPDATE OF id, source_sample_slot_id, source_sample_model_id, source_sample_slot_role_id, stratified_source_slot_id, stratified_source_model_id, stratified_source_slot_role_id, supernatant_destination_slot_id, supernatant_destination_model_id, supernatant_destination_slot_role_id, supernatant_slot_id, supernatant_model_id, supernatant_slot_role_id, transferred_with_slot_id, transferred_with_model_id, transferred_with_slot_role_id, volume_l, volume_l_tolerance_percentage ON supernatant_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.source_sample_slot_id IS DISTINCT FROM NEW.source_sample_slot_id
+        OR OLD.source_sample_model_id IS DISTINCT FROM NEW.source_sample_model_id
+        OR OLD.source_sample_slot_role_id IS DISTINCT FROM NEW.source_sample_slot_role_id
+        OR OLD.stratified_source_slot_id IS DISTINCT FROM NEW.stratified_source_slot_id
+        OR OLD.stratified_source_model_id IS DISTINCT FROM NEW.stratified_source_model_id
+        OR OLD.stratified_source_slot_role_id IS DISTINCT FROM NEW.stratified_source_slot_role_id
+        OR OLD.supernatant_destination_slot_id IS DISTINCT FROM NEW.supernatant_destination_slot_id
+        OR OLD.supernatant_destination_model_id IS DISTINCT FROM NEW.supernatant_destination_model_id
+        OR OLD.supernatant_destination_slot_role_id IS DISTINCT FROM NEW.supernatant_destination_slot_role_id
+        OR OLD.supernatant_slot_id IS DISTINCT FROM NEW.supernatant_slot_id
+        OR OLD.supernatant_model_id IS DISTINCT FROM NEW.supernatant_model_id
+        OR OLD.supernatant_slot_role_id IS DISTINCT FROM NEW.supernatant_slot_role_id
+        OR OLD.transferred_with_slot_id IS DISTINCT FROM NEW.transferred_with_slot_id
+        OR OLD.transferred_with_model_id IS DISTINCT FROM NEW.transferred_with_model_id
+        OR OLD.transferred_with_slot_role_id IS DISTINCT FROM NEW.transferred_with_slot_role_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l
+        OR OLD.volume_l_tolerance_percentage IS DISTINCT FROM NEW.volume_l_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER supernatant_procedure_templates_delete_guard BEFORE DELETE ON supernatant_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -118,11 +149,11 @@ CREATE POLICY supernatant_procedure_templates_update ON supernatant_procedure_te
 CREATE POLICY supernatant_procedure_templates_delete ON supernatant_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY supernatant_procedure_templates_archived_insert ON supernatant_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(stratified_source_model_id) AND NOT authz.is_archived(supernatant_destination_model_id) AND NOT authz.is_archived(supernatant_model_id) AND NOT authz.is_archived(transferred_with_model_id) AND NOT authz.is_archived(source_sample_model_id));
+    WITH CHECK (NOT archived AND NOT stratified_source_model_archived AND NOT supernatant_destination_model_archived AND NOT supernatant_model_archived AND NOT transferred_with_model_archived AND NOT source_sample_model_archived);
 CREATE POLICY supernatant_procedure_templates_archived_update ON supernatant_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY supernatant_procedure_templates_archived_delete ON supernatant_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY supernatant_procedure_templates_blocked ON supernatant_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -143,7 +174,10 @@ CREATE TABLE supernatant_procedures (
     FOREIGN KEY (id, supernatant_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    supernatant_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (supernatant_procedure_template_id, supernatant_procedure_template_archived) REFERENCES supernatant_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON supernatant_procedures (supernatant_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('supernatant_procedures');
@@ -152,8 +186,13 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'supernatant_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'supernatant_procedures', 'supernatant_procedures';
-CREATE TRIGGER supernatant_procedures_guard AFTER INSERT OR UPDATE ON supernatant_procedures
+CREATE TRIGGER supernatant_procedures_guard AFTER INSERT ON supernatant_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER supernatant_procedures_guard_update AFTER UPDATE OF id, supernatant_procedure_template_id, status_id, volume_l ON supernatant_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.supernatant_procedure_template_id IS DISTINCT FROM NEW.supernatant_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER supernatant_procedures_delete_guard BEFORE DELETE ON supernatant_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -197,7 +236,24 @@ CREATE CONSTRAINT TRIGGER supernatant_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER supernatant_procedures_kept AFTER DELETE ON supernatant_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_supernatant_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (volume_l), DELETE ON supernatant_procedures TO app;
+CREATE FUNCTION initialize_supernatant_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.supernatant_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_supernatant_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_supernatant_procedures_status() FROM PUBLIC;
+CREATE TRIGGER supernatant_procedures_status_initialize BEFORE INSERT ON supernatant_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_supernatant_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, supernatant_procedure_template_id, volume_l, archived, supernatant_procedure_template_archived), UPDATE (volume_l), DELETE ON supernatant_procedures TO app;
 ALTER TABLE supernatant_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE supernatant_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY supernatant_procedures_select ON supernatant_procedures FOR SELECT TO app
@@ -207,9 +263,9 @@ CREATE POLICY supernatant_procedures_insert ON supernatant_procedures FOR INSERT
 CREATE POLICY supernatant_procedures_delete ON supernatant_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY supernatant_procedures_archived_insert ON supernatant_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(supernatant_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT supernatant_procedure_template_archived);
 CREATE POLICY supernatant_procedures_archived_delete ON supernatant_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY supernatant_procedures_blocked ON supernatant_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -227,7 +283,7 @@ CREATE POLICY supernatant_procedures_update ON supernatant_procedures FOR UPDATE
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY supernatant_procedures_archived_update ON supernatant_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 
 CREATE INDEX ON public.supernatant_procedure_templates (source_sample_model_id);
 CREATE INDEX ON public.supernatant_procedure_templates (source_sample_slot_id);

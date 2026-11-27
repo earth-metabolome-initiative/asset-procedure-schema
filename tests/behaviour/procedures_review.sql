@@ -13,21 +13,16 @@ SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000002', false);
 INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-000000000002', authz.caller_id());
 INSERT INTO resources (id, kind, organization_id) VALUES ('20000000-0000-7000-8000-000000000002', 'organization', '20000000-0000-7000-8000-000000000002');
 INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000002', authz.caller_id(), 'active');
-INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role) VALUES ('20000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000002', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind) VALUES ('20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002', 'organization');
-INSERT INTO resources (id, kind, organization_id) VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002');
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind) VALUES ('20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002', 'organization');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-SELECT identifier, '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id()
-FROM unnest(ARRAY['c6000000-0000-7000-8000-000000000001'::uuid, 'c6000000-0000-7000-8000-000000000002'::uuid]) identifier;
-INSERT INTO resources (id, kind, organization_id)
-SELECT identifier, 'ownable', '20000000-0000-7000-8000-000000000002'::uuid
+INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+SELECT identifier, '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id(), 'ownable', 'project'
 FROM unnest(ARRAY['c6000000-0000-7000-8000-000000000001'::uuid, 'c6000000-0000-7000-8000-000000000002'::uuid]) identifier;
 INSERT INTO procedure_templates (id, organization_id, project_id, table_name_id, name)
-SELECT id, organization_id, project_id, 'procedure_templates', id::text FROM ownables WHERE organization_id = '20000000-0000-7000-8000-000000000002';
+SELECT id, organization_id, parent_id, 'procedure_templates', id::text FROM resources WHERE organization_id = '20000000-0000-7000-8000-000000000002' AND kind = 'ownable';
 INSERT INTO procedure_template_slots (id, organization_id, procedure_template_id, name, asset_model_id, role_id, minimum_count, maximum_count)
 VALUES ('d6000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000002', 'c6000000-0000-7000-8000-000000000001', 'input', 'a6000000-0000-7000-8000-000000000001', 'input', 0, 1);
 UPDATE procedure_templates SET state_id = 'published' WHERE id = 'c6000000-0000-7000-8000-000000000001';
@@ -58,8 +53,7 @@ SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.new_procedure('f6000000-0000-7000-8000-000000000040', 'c6000000-0000-7000-8000-000000000002', 'planned', NULL, NULL);
 SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000002', false);
 SELECT throws_ok($statement$
-INSERT INTO ownables (id, organization_id, project_id, created_by_id) VALUES ('f6000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id());
-INSERT INTO resources (id, kind, organization_id) VALUES ('f6000000-0000-7000-8000-000000000004', 'ownable', '20000000-0000-7000-8000-000000000002');
+INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind) VALUES ('f6000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id(), 'ownable', 'project');
 INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, parent_procedure_id, parent_template_id, step_id, root_procedure_id)
 VALUES ('f6000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'procedures', 'c6000000-0000-7000-8000-000000000001', 'f6000000-0000-7000-8000-000000000040', 'c6000000-0000-7000-8000-000000000002', 'e6000000-0000-7000-8000-000000000002', 'f6000000-0000-7000-8000-000000000040'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23503', 'insert or update on table "procedures" violates foreign key constraint "procedures_parent_procedure_id_parent_template_id_organiza_fkey"', 'child procedure must share parent organization');
 SELECT set_config('app.user_id', '10000000-0000-7000-8000-000000000001', false);

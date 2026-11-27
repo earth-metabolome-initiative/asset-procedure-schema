@@ -176,17 +176,13 @@ SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
 ROLLBACK TO template_reader;
 
 -- Runs freeze for a writer who cannot read their template, here one of another project.
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000002', 'project',
     '20000000-0000-7000-8000-000000000001', 'organization');
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-  VALUES ('c8000000-0000-7000-8000-000000000020', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000002', authz.caller_id());
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('c8000000-0000-7000-8000-000000000020', 'ownable', '20000000-0000-7000-8000-000000000001');
+INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+  VALUES ('c8000000-0000-7000-8000-000000000020', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000002', authz.caller_id(), 'ownable', 'project');
 INSERT INTO procedure_templates (id, organization_id, project_id, table_name_id, name)
   VALUES ('c8000000-0000-7000-8000-000000000020', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000002',
     'procedure_templates', 'ledger elsewhere');
@@ -305,22 +301,14 @@ SELECT pg_temp.act('10000000-0000-7000-8000-000000000002');
 INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-000000000003', authz.caller_id());
 INSERT INTO resources (id, kind, organization_id) VALUES ('20000000-0000-7000-8000-000000000003', 'organization', '20000000-0000-7000-8000-000000000003');
 INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000003', authz.caller_id(), 'active');
-INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
-VALUES ('20000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000003', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
 VALUES ('20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', 'project', '20000000-0000-7000-8000-000000000003', 'organization');
-INSERT INTO resources (id, kind, organization_id) VALUES ('50000000-0000-7000-8000-000000000003', 'project', '20000000-0000-7000-8000-000000000003');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-SELECT identifier, '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', authz.caller_id()
-FROM unnest(ARRAY['a8000000-0000-7000-8000-000000000021', 'a8000000-0000-7000-8000-000000000023', 'c8000000-0000-7000-8000-000000000021',
-  'c8000000-0000-7000-8000-000000000022', 'b8000000-0000-7000-8000-000000000021', 'b8000000-0000-7000-8000-000000000022',
-  'b8000000-0000-7000-8000-000000000023', 'f8000000-0000-7000-8000-000000000031', 'f8000000-0000-7000-8000-000000000032']::uuid[]) identifier;
-INSERT INTO resources (id, kind, organization_id)
-SELECT identifier, 'ownable', '20000000-0000-7000-8000-000000000003'
+INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+SELECT identifier, '20000000-0000-7000-8000-000000000003', '50000000-0000-7000-8000-000000000003', authz.caller_id(), 'ownable', 'project'
 FROM unnest(ARRAY['a8000000-0000-7000-8000-000000000021', 'a8000000-0000-7000-8000-000000000023', 'c8000000-0000-7000-8000-000000000021',
   'c8000000-0000-7000-8000-000000000022', 'b8000000-0000-7000-8000-000000000021', 'b8000000-0000-7000-8000-000000000022',
   'b8000000-0000-7000-8000-000000000023', 'f8000000-0000-7000-8000-000000000031', 'f8000000-0000-7000-8000-000000000032']::uuid[]) identifier;

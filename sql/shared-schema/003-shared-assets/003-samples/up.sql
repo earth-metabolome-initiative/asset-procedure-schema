@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Samples
 -- Purpose: Samples for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- sample_source_models
@@ -18,7 +18,9 @@ CREATE TABLE sample_source_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('sample_source_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -62,7 +64,10 @@ CREATE TABLE sample_sources (
     -- Source model instantiated by this physical source asset.
     sample_source_model_id UUID NOT NULL REFERENCES sample_source_models (id),
     FOREIGN KEY (id, sample_source_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    sample_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (sample_source_model_id, sample_source_model_archived) REFERENCES sample_source_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON sample_sources (sample_source_model_id);
 INSERT INTO table_names (id) VALUES ('sample_sources');
@@ -109,7 +114,11 @@ CREATE TABLE sample_models (
     -- Source-model family that sample instances of this model must reference.
     sample_source_model_id UUID NOT NULL REFERENCES sample_source_models (id),
     UNIQUE (id, sample_source_model_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    sample_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (sample_source_model_id, sample_source_model_archived) REFERENCES sample_source_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON sample_models (sample_source_model_id);
 INSERT INTO table_names (id) VALUES ('sample_models');
@@ -185,7 +194,12 @@ CREATE TABLE samples (
     sample_source_model_id UUID NOT NULL REFERENCES sample_source_models (id),
     FOREIGN KEY (id, sample_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
     FOREIGN KEY (sample_model_id, sample_source_model_id) REFERENCES sample_models (id, sample_source_model_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    sample_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (sample_model_id, sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (sample_source_model_id, sample_source_model_archived) REFERENCES sample_source_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON samples (sample_model_id, sample_source_model_id);
 CREATE INDEX ON samples (sample_source_model_id);
@@ -234,9 +248,9 @@ CREATE POLICY sample_source_models_insert ON sample_source_models FOR INSERT TO 
 CREATE POLICY sample_source_models_delete ON sample_source_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY sample_source_models_archived_insert ON sample_source_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY sample_source_models_archived_delete ON sample_source_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY sample_source_models_blocked ON sample_source_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -252,9 +266,9 @@ CREATE POLICY sample_sources_insert ON sample_sources FOR INSERT TO app
 CREATE POLICY sample_sources_delete ON sample_sources FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY sample_sources_archived_insert ON sample_sources AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(sample_source_model_id));
+    WITH CHECK (NOT archived AND NOT sample_source_model_archived);
 CREATE POLICY sample_sources_archived_delete ON sample_sources AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY sample_sources_blocked ON sample_sources AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -270,9 +284,9 @@ CREATE POLICY sample_models_insert ON sample_models FOR INSERT TO app
 CREATE POLICY sample_models_delete ON sample_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY sample_models_archived_insert ON sample_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(sample_source_model_id));
+    WITH CHECK (NOT archived AND NOT sample_source_model_archived);
 CREATE POLICY sample_models_archived_delete ON sample_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY sample_models_blocked ON sample_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -289,9 +303,9 @@ CREATE POLICY samples_insert ON samples FOR INSERT TO app
 CREATE POLICY samples_delete ON samples FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY samples_archived_insert ON samples AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(sample_model_id) AND NOT authz.is_archived(sample_source_model_id));
+    WITH CHECK (NOT archived AND NOT sample_model_archived AND NOT sample_source_model_archived);
 CREATE POLICY samples_archived_delete ON samples AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY samples_blocked ON samples AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

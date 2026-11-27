@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Supplies / Packaging Models
 -- Purpose: Packaging Models for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- packaging_models
@@ -13,7 +13,9 @@ CREATE TABLE packaging_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('packaging_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -58,9 +60,9 @@ CREATE POLICY packaging_models_insert ON packaging_models FOR INSERT TO app
 CREATE POLICY packaging_models_delete ON packaging_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY packaging_models_archived_insert ON packaging_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY packaging_models_archived_delete ON packaging_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY packaging_models_blocked ON packaging_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

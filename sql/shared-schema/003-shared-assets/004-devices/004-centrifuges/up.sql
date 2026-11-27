@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Devices / Centrifuges
 -- Purpose: Centrifuges for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- centrifuge_models
@@ -19,7 +19,9 @@ CREATE TABLE centrifuge_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('centrifuge_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -64,7 +66,11 @@ CREATE TABLE commercial_centrifuge_models (
     centrifuge_model_id UUID NOT NULL REFERENCES centrifuge_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, centrifuge_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    centrifuge_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (centrifuge_model_id, centrifuge_model_archived) REFERENCES centrifuge_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_centrifuge_models (centrifuge_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_centrifuge_models');
@@ -110,7 +116,11 @@ CREATE TABLE commercial_centrifuge_lots (
     -- Commercial centrifuge model from which this lot derives.
     commercial_centrifuge_model_id UUID NOT NULL REFERENCES commercial_centrifuge_models (id),
     FOREIGN KEY (id, commercial_centrifuge_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_centrifuge_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (commercial_centrifuge_model_id, commercial_centrifuge_model_archived) REFERENCES commercial_centrifuge_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_centrifuge_lots (commercial_centrifuge_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_centrifuge_lots');
@@ -157,7 +167,10 @@ CREATE TABLE centrifuges (
     -- Commercial lot model instantiated by this physical asset.
     commercial_centrifuge_lot_id UUID NOT NULL REFERENCES commercial_centrifuge_lots (id),
     FOREIGN KEY (id, commercial_centrifuge_lot_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_centrifuge_lot_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (commercial_centrifuge_lot_id, commercial_centrifuge_lot_archived) REFERENCES commercial_centrifuge_lots (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON centrifuges (commercial_centrifuge_lot_id);
 INSERT INTO table_names (id) VALUES ('centrifuges');
@@ -205,9 +218,9 @@ CREATE POLICY centrifuge_models_insert ON centrifuge_models FOR INSERT TO app
 CREATE POLICY centrifuge_models_delete ON centrifuge_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY centrifuge_models_archived_insert ON centrifuge_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY centrifuge_models_archived_delete ON centrifuge_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY centrifuge_models_blocked ON centrifuge_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -223,9 +236,9 @@ CREATE POLICY commercial_centrifuge_models_insert ON commercial_centrifuge_model
 CREATE POLICY commercial_centrifuge_models_delete ON commercial_centrifuge_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_centrifuge_models_archived_insert ON commercial_centrifuge_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(centrifuge_model_id));
+    WITH CHECK (NOT archived AND NOT centrifuge_model_archived);
 CREATE POLICY commercial_centrifuge_models_archived_delete ON commercial_centrifuge_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_centrifuge_models_blocked ON commercial_centrifuge_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -241,9 +254,9 @@ CREATE POLICY commercial_centrifuge_lots_insert ON commercial_centrifuge_lots FO
 CREATE POLICY commercial_centrifuge_lots_delete ON commercial_centrifuge_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_centrifuge_lots_archived_insert ON commercial_centrifuge_lots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_centrifuge_model_id));
+    WITH CHECK (NOT archived AND NOT commercial_centrifuge_model_archived);
 CREATE POLICY commercial_centrifuge_lots_archived_delete ON commercial_centrifuge_lots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_centrifuge_lots_blocked ON commercial_centrifuge_lots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -259,9 +272,9 @@ CREATE POLICY centrifuges_insert ON centrifuges FOR INSERT TO app
 CREATE POLICY centrifuges_delete ON centrifuges FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY centrifuges_archived_insert ON centrifuges AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_centrifuge_lot_id));
+    WITH CHECK (NOT archived AND NOT commercial_centrifuge_lot_archived);
 CREATE POLICY centrifuges_archived_delete ON centrifuges AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY centrifuges_blocked ON centrifuges AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

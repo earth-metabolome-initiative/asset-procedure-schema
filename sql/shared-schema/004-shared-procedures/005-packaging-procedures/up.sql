@@ -1,7 +1,7 @@
 -- Migration: 005-packaging-procedures
 -- Purpose: Typed packaging slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- packaging_procedure_templates
 -- +-- procedures -- packaging_procedures
 -- Slot | Role | Meaning
@@ -30,7 +30,13 @@ CREATE TABLE packaging_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (sample_slot_id, id, sample_model_id, sample_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    packaged_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (packaged_with_model_id, packaged_with_model_archived) REFERENCES packaging_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (sample_model_id, sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON packaging_procedure_templates (packaged_with_model_id);
 CREATE INDEX ON packaging_procedure_templates (sample_model_id);
@@ -38,8 +44,16 @@ INSERT INTO table_names (id) VALUES ('packaging_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'packaging_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'packaging_procedure_templates', 'packaging_procedure_templates';
-CREATE TRIGGER packaging_procedure_templates_guard AFTER INSERT OR UPDATE ON packaging_procedure_templates
+CREATE TRIGGER packaging_procedure_templates_guard AFTER INSERT ON packaging_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER packaging_procedure_templates_guard_update AFTER UPDATE OF id, packaged_with_slot_id, packaged_with_model_id, packaged_with_slot_role_id, sample_slot_id, sample_model_id, sample_slot_role_id ON packaging_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.packaged_with_slot_id IS DISTINCT FROM NEW.packaged_with_slot_id
+        OR OLD.packaged_with_model_id IS DISTINCT FROM NEW.packaged_with_model_id
+        OR OLD.packaged_with_slot_role_id IS DISTINCT FROM NEW.packaged_with_slot_role_id
+        OR OLD.sample_slot_id IS DISTINCT FROM NEW.sample_slot_id
+        OR OLD.sample_model_id IS DISTINCT FROM NEW.sample_model_id
+        OR OLD.sample_slot_role_id IS DISTINCT FROM NEW.sample_slot_role_id) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER packaging_procedure_templates_delete_guard BEFORE DELETE ON packaging_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -78,9 +92,9 @@ CREATE POLICY packaging_procedure_templates_insert ON packaging_procedure_templa
 CREATE POLICY packaging_procedure_templates_delete ON packaging_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY packaging_procedure_templates_archived_insert ON packaging_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(packaged_with_model_id) AND NOT authz.is_archived(sample_model_id));
+    WITH CHECK (NOT archived AND NOT packaged_with_model_archived AND NOT sample_model_archived);
 CREATE POLICY packaging_procedure_templates_archived_delete ON packaging_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY packaging_procedure_templates_blocked ON packaging_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -98,7 +112,10 @@ CREATE TABLE packaging_procedures (
     FOREIGN KEY (id, packaging_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    packaging_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (packaging_procedure_template_id, packaging_procedure_template_archived) REFERENCES packaging_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON packaging_procedures (packaging_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('packaging_procedures');
@@ -107,8 +124,12 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'packaging_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'packaging_procedures', 'packaging_procedures';
-CREATE TRIGGER packaging_procedures_guard AFTER INSERT OR UPDATE ON packaging_procedures
+CREATE TRIGGER packaging_procedures_guard AFTER INSERT ON packaging_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER packaging_procedures_guard_update AFTER UPDATE OF id, packaging_procedure_template_id, status_id ON packaging_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.packaging_procedure_template_id IS DISTINCT FROM NEW.packaging_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER packaging_procedures_delete_guard BEFORE DELETE ON packaging_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -152,7 +173,24 @@ CREATE CONSTRAINT TRIGGER packaging_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER packaging_procedures_kept AFTER DELETE ON packaging_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_packaging_procedures_row();
 
-GRANT SELECT, INSERT, DELETE ON packaging_procedures TO app;
+CREATE FUNCTION initialize_packaging_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.packaging_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_packaging_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_packaging_procedures_status() FROM PUBLIC;
+CREATE TRIGGER packaging_procedures_status_initialize BEFORE INSERT ON packaging_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_packaging_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, packaging_procedure_template_id, archived, packaging_procedure_template_archived), DELETE ON packaging_procedures TO app;
 ALTER TABLE packaging_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE packaging_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY packaging_procedures_select ON packaging_procedures FOR SELECT TO app
@@ -162,9 +200,9 @@ CREATE POLICY packaging_procedures_insert ON packaging_procedures FOR INSERT TO 
 CREATE POLICY packaging_procedures_delete ON packaging_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY packaging_procedures_archived_insert ON packaging_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(packaging_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT packaging_procedure_template_archived);
 CREATE POLICY packaging_procedures_archived_delete ON packaging_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY packaging_procedures_blocked ON packaging_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

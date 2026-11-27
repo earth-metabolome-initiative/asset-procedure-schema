@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Supplies / Beads
 -- Purpose: Beads for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- bead_models
@@ -15,7 +15,9 @@ CREATE TABLE bead_models (
     organization_id UUID NOT NULL,
     -- Bead diameter in meters.
     diameter_m DOUBLE PRECISION NOT NULL CHECK (diameter_m > 0.0 AND diameter_m < 'Infinity'::double precision),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('bead_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -63,11 +65,11 @@ CREATE POLICY bead_models_update ON bead_models FOR UPDATE TO app
 CREATE POLICY bead_models_delete ON bead_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY bead_models_archived_insert ON bead_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY bead_models_archived_update ON bead_models AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY bead_models_archived_delete ON bead_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY bead_models_blocked ON bead_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

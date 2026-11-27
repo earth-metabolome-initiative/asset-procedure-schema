@@ -41,7 +41,6 @@ impl Tenant {
         TableBuilder<resources::table>: Insert<C, ValidationError: Debug>,
         TableBuilder<memberships::table>: Insert<C, ValidationError: Debug>,
         TableBuilder<grants::table>: Insert<C, ValidationError: Debug>,
-        TableBuilder<resource_parents::table>: Insert<C, ValidationError: Debug>,
     {
         let tenant =
             Self { user: Uuid::new_v4(), organization: Uuid::new_v4(), project: Uuid::new_v4() };
@@ -74,18 +73,10 @@ impl Tenant {
             .id(tenant.project)
             .kind(ResourceKind::Project)
             .organization_id(tenant.organization)
+            .parent_id(tenant.organization)
+            .parent_kind(ResourceKind::Organization)
             .insert(conn)
             .expect("project resource");
-        resource_parents::table::builder()
-            .id(tenant.project)
-            .organization_id(tenant.organization)
-            .try_resource_kind(ResourceKind::Project)
-            .expect("project kind")
-            .parent_id(tenant.organization)
-            .try_parent_kind(ResourceKind::Organization)
-            .expect("organization kind")
-            .insert(conn)
-            .expect("project parent");
         tenant
     }
 
@@ -154,13 +145,14 @@ impl Tenant {
         let id = Uuid::new_v4();
         let builder = SetResourceId::id(asset_models::table::builder(), id);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
+        let builder = SetResourceParentId::parent_id(builder, self.project);
+        let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
         let builder = SetAssetModelProjectId::project_id(builder, self.project)
             .created_by_id(self.user)
             .table_name_id("asset_models")
             .try_name(name)
             .expect("asset model name")
             .parent_model_id(parent);
-        let builder = SetOwnableOrganizationId::organization_id(builder, self.organization);
         let model = SetAssetModelOrganizationId::organization_id(builder, self.organization)
             .insert_nested(conn)
             .expect("asset model");
@@ -186,12 +178,13 @@ impl Tenant {
         let id = Uuid::new_v4();
         let builder = SetResourceId::id(physical_asset_models::table::builder(), id);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
+        let builder = SetResourceParentId::parent_id(builder, self.project);
+        let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
         let builder = SetAssetModelProjectId::project_id(builder, self.project)
             .created_by_id(self.user)
             .try_name(name)
             .expect("physical asset model name");
         let builder = SetAssetModelTableNameId::table_name_id(builder, "physical_asset_models");
-        let builder = SetOwnableOrganizationId::organization_id(builder, self.organization);
         let builder = SetAssetModelOrganizationId::organization_id(builder, self.organization);
         let model =
             SetPhysicalAssetModelOrganizationId::organization_id(builder, self.organization)
@@ -219,12 +212,13 @@ impl Tenant {
         let id = Uuid::new_v4();
         let builder = SetResourceId::id(container_models::table::builder(), id);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
+        let builder = SetResourceParentId::parent_id(builder, self.project);
+        let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
         let builder = SetAssetModelProjectId::project_id(builder, self.project)
             .created_by_id(self.user)
             .try_name(name)
             .expect("container model name");
         let builder = SetAssetModelTableNameId::table_name_id(builder, "container_models");
-        let builder = SetOwnableOrganizationId::organization_id(builder, self.organization);
         let builder = SetAssetModelOrganizationId::organization_id(builder, self.organization);
         let builder =
             SetPhysicalAssetModelOrganizationId::organization_id(builder, self.organization);
@@ -253,12 +247,13 @@ impl Tenant {
             procedure_templates::table::try_builder().expect("procedure template defaults");
         let builder = SetResourceId::id(builder, id);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
+        let builder = SetResourceParentId::parent_id(builder, self.project);
+        let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
         let builder = SetProcedureTemplateProjectId::project_id(builder, self.project)
             .created_by_id(self.user)
             .table_name_id("procedure_templates")
             .try_name(name)
             .expect("procedure template name");
-        let builder = SetOwnableOrganizationId::organization_id(builder, self.organization);
         SetProcedureTemplateOrganizationId::organization_id(builder, self.organization)
             .insert_nested(conn)
             .expect("procedure template")

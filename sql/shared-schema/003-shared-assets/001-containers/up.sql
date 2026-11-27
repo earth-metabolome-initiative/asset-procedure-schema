@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Containers
 -- Purpose: Containers for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- container_models
@@ -21,7 +21,9 @@ CREATE TABLE container_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('container_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -58,8 +60,8 @@ CREATE CONSTRAINT TRIGGER container_models_kept AFTER DELETE ON container_models
 
 -- Rule set that defines which physical asset models can be contained by a specific container model and in what quantity.
 CREATE TABLE container_compatibility_rules (
-    -- Stable rule identifier inherited from `ownables`.
-    id UUID PRIMARY KEY REFERENCES ownables (id) ON DELETE CASCADE,
+    -- Stable rule identifier inherited from ``resources` of kind `'ownable'``.
+    id UUID PRIMARY KEY REFERENCES resources (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
     -- Project containing this ownable, the container model's project.
@@ -79,11 +81,17 @@ CREATE TABLE container_compatibility_rules (
     CHECK (
     container_model_id <> contained_asset_model_id
     ),
-    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
     -- Moving a container model moves its rules in the same transaction.
     FOREIGN KEY (container_model_id, project_id) REFERENCES asset_models (id, project_id) DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, container_model_id) REFERENCES resources (organization_id, id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    FOREIGN KEY (organization_id, container_model_id, container_model_archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    contained_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (container_model_id, container_model_archived) REFERENCES container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (contained_asset_model_id, contained_asset_model_archived) REFERENCES physical_asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON container_compatibility_rules (contained_asset_model_id);
 CREATE INDEX ON container_compatibility_rules (table_name_id);
@@ -99,8 +107,15 @@ END;
 $$;
 ALTER FUNCTION refuse_frozen_definition() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION refuse_frozen_definition() FROM PUBLIC;
-CREATE TRIGGER container_compatibility_rules_frozen BEFORE UPDATE OR DELETE ON container_compatibility_rules
+CREATE TRIGGER container_compatibility_rules_frozen BEFORE DELETE ON container_compatibility_rules
     FOR EACH ROW WHEN (OLD.in_use) EXECUTE FUNCTION refuse_frozen_definition();
+CREATE TRIGGER container_compatibility_rules_frozen_update BEFORE UPDATE OF id, table_name_id, container_model_id, contained_asset_model_id, quantity, in_use ON container_compatibility_rules
+    FOR EACH ROW WHEN (OLD.in_use AND (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.table_name_id IS DISTINCT FROM NEW.table_name_id
+        OR OLD.container_model_id IS DISTINCT FROM NEW.container_model_id
+        OR OLD.contained_asset_model_id IS DISTINCT FROM NEW.contained_asset_model_id
+        OR OLD.quantity IS DISTINCT FROM NEW.quantity
+        OR OLD.in_use IS DISTINCT FROM NEW.in_use)) EXECUTE FUNCTION refuse_frozen_definition();
 
 -- Specialization of container models with known empty mass.
 CREATE TABLE weighed_container_models (
@@ -110,7 +125,8 @@ CREATE TABLE weighed_container_models (
     organization_id UUID NOT NULL,
     -- Empty container mass.
     mass_kg DOUBLE PRECISION NOT NULL CHECK (mass_kg > 0.0 AND mass_kg < 'Infinity'::double precision),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('weighed_container_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -156,7 +172,9 @@ CREATE TABLE volumetric_container_models (
     -- Whether a transfer template or a run relies on the volume, which then
     -- stays as it is.
     in_use BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('volumetric_container_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -164,8 +182,12 @@ INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_
     UNION SELECT 'volumetric_container_models', 'volumetric_container_models';
 CREATE TRIGGER volumetric_container_models_path AFTER INSERT ON volumetric_container_models
     FOR EACH ROW EXECUTE FUNCTION check_asset_model_subtype();
-CREATE TRIGGER volumetric_container_models_frozen BEFORE UPDATE OR DELETE ON volumetric_container_models
+CREATE TRIGGER volumetric_container_models_frozen BEFORE DELETE ON volumetric_container_models
     FOR EACH ROW WHEN (OLD.in_use) EXECUTE FUNCTION refuse_frozen_definition();
+CREATE TRIGGER volumetric_container_models_frozen_update BEFORE UPDATE OF id, volume_l, in_use ON volumetric_container_models
+    FOR EACH ROW WHEN (OLD.in_use AND (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l
+        OR OLD.in_use IS DISTINCT FROM NEW.in_use)) EXECUTE FUNCTION refuse_frozen_definition();
 
 CREATE FUNCTION require_volumetric_container_models_row() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
@@ -200,7 +222,8 @@ CREATE TABLE weighed_volumetric_container_models (
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
     FOREIGN KEY (id) REFERENCES volumetric_container_models (id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('weighed_volumetric_container_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -244,7 +267,10 @@ CREATE TABLE containers (
     -- Container model instantiated by this physical container.
     container_model_id UUID NOT NULL REFERENCES container_models (id),
     FOREIGN KEY (id, container_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (container_model_id, container_model_archived) REFERENCES container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON containers (container_model_id);
 INSERT INTO table_names (id) VALUES ('containers');
@@ -291,7 +317,10 @@ CREATE TABLE volumetric_containers (
     -- Volumetric model instantiated by this container.
     volumetric_container_model_id UUID NOT NULL REFERENCES volumetric_container_models (id),
     FOREIGN KEY (id, volumetric_container_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    volumetric_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (volumetric_container_model_id, volumetric_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON volumetric_containers (volumetric_container_model_id);
 INSERT INTO table_names (id) VALUES ('volumetric_containers');
@@ -335,7 +364,9 @@ CREATE TABLE container_sealer_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('container_sealer_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -380,9 +411,9 @@ CREATE POLICY container_models_insert ON container_models FOR INSERT TO app
 CREATE POLICY container_models_delete ON container_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY container_models_archived_insert ON container_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY container_models_archived_delete ON container_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY container_models_blocked ON container_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -409,11 +440,11 @@ CREATE POLICY container_compatibility_rules_delete ON container_compatibility_ru
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin')))
         AND container_model_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY container_compatibility_rules_archived_insert ON container_compatibility_rules AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(container_model_id) AND NOT authz.is_archived(contained_asset_model_id));
+    WITH CHECK (NOT archived AND NOT container_model_archived AND NOT contained_asset_model_archived);
 CREATE POLICY container_compatibility_rules_archived_update ON container_compatibility_rules AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY container_compatibility_rules_archived_delete ON container_compatibility_rules AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY container_compatibility_rules_blocked ON container_compatibility_rules AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -431,11 +462,11 @@ CREATE POLICY weighed_container_models_update ON weighed_container_models FOR UP
 CREATE POLICY weighed_container_models_delete ON weighed_container_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY weighed_container_models_archived_insert ON weighed_container_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY weighed_container_models_archived_update ON weighed_container_models AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY weighed_container_models_archived_delete ON weighed_container_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY weighed_container_models_blocked ON weighed_container_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -453,11 +484,11 @@ CREATE POLICY volumetric_container_models_update ON volumetric_container_models 
 CREATE POLICY volumetric_container_models_delete ON volumetric_container_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY volumetric_container_models_archived_insert ON volumetric_container_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY volumetric_container_models_archived_update ON volumetric_container_models AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY volumetric_container_models_archived_delete ON volumetric_container_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY volumetric_container_models_blocked ON volumetric_container_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -473,9 +504,9 @@ CREATE POLICY containers_insert ON containers FOR INSERT TO app
 CREATE POLICY containers_delete ON containers FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY containers_archived_insert ON containers AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(container_model_id));
+    WITH CHECK (NOT archived AND NOT container_model_archived);
 CREATE POLICY containers_archived_delete ON containers AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY containers_blocked ON containers AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -491,9 +522,9 @@ CREATE POLICY volumetric_containers_insert ON volumetric_containers FOR INSERT T
 CREATE POLICY volumetric_containers_delete ON volumetric_containers FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY volumetric_containers_archived_insert ON volumetric_containers AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(volumetric_container_model_id));
+    WITH CHECK (NOT archived AND NOT volumetric_container_model_archived);
 CREATE POLICY volumetric_containers_archived_delete ON volumetric_containers AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY volumetric_containers_blocked ON volumetric_containers AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -508,9 +539,9 @@ CREATE POLICY container_sealer_models_insert ON container_sealer_models FOR INSE
 CREATE POLICY container_sealer_models_delete ON container_sealer_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY container_sealer_models_archived_insert ON container_sealer_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY container_sealer_models_archived_delete ON container_sealer_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY container_sealer_models_blocked ON container_sealer_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -525,9 +556,9 @@ CREATE POLICY weighed_volumetric_container_models_insert ON weighed_volumetric_c
 CREATE POLICY weighed_volumetric_container_models_delete ON weighed_volumetric_container_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY weighed_volumetric_container_models_archived_insert ON weighed_volumetric_container_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY weighed_volumetric_container_models_archived_delete ON weighed_volumetric_container_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY weighed_volumetric_container_models_blocked ON weighed_volumetric_container_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

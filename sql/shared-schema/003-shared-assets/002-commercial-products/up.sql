@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Commercial Products
 -- Purpose: Commercial Products for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- commercial_products
 --           +-- physical_asset_models
@@ -16,7 +16,11 @@ CREATE TABLE commercial_products (
     organization_id UUID NOT NULL,
     -- Brand responsible for manufacturing or distributing this product model.
     brand_id UUID NOT NULL REFERENCES brands (id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    brand_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (brand_id, brand_archived) REFERENCES brands (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_products (brand_id);
 INSERT INTO table_names (id) VALUES ('commercial_products');
@@ -66,8 +70,12 @@ CREATE TABLE commercial_product_lots (
     product_model_id UUID NOT NULL REFERENCES commercial_products (id) ON DELETE RESTRICT,
     UNIQUE (project_id, lot, product_model_id),
     FOREIGN KEY (id, product_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    product_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (product_model_id, product_model_archived) REFERENCES commercial_products (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_product_lots (product_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_product_lots');
@@ -120,11 +128,11 @@ CREATE POLICY commercial_products_update ON commercial_products FOR UPDATE TO ap
 CREATE POLICY commercial_products_delete ON commercial_products FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_products_archived_insert ON commercial_products AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(brand_id));
+    WITH CHECK (NOT archived AND NOT brand_archived);
 CREATE POLICY commercial_products_archived_update ON commercial_products AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(brand_id));
+    USING (NOT archived) WITH CHECK (NOT archived AND NOT brand_archived);
 CREATE POLICY commercial_products_archived_delete ON commercial_products AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_products_blocked ON commercial_products AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -146,11 +154,11 @@ CREATE POLICY commercial_product_lots_update ON commercial_product_lots FOR UPDA
 CREATE POLICY commercial_product_lots_delete ON commercial_product_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_product_lots_archived_insert ON commercial_product_lots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(product_model_id));
+    WITH CHECK (NOT archived AND NOT product_model_archived);
 CREATE POLICY commercial_product_lots_archived_update ON commercial_product_lots AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY commercial_product_lots_archived_delete ON commercial_product_lots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_product_lots_blocked ON commercial_product_lots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

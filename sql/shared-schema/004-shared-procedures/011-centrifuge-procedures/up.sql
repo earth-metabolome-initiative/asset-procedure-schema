@@ -1,7 +1,7 @@
 -- Migration: 011-centrifuge-procedures
 -- Purpose: Typed centrifuge slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- centrifuge_procedure_templates
 -- +-- procedures -- centrifuge_procedures
 -- Slot | Role | Meaning
@@ -42,7 +42,13 @@ CREATE TABLE centrifuge_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (centrifuged_container_slot_id, id, centrifuged_container_model_id, centrifuged_container_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    centrifuged_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    centrifuged_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (centrifuged_with_model_id, centrifuged_with_model_archived) REFERENCES centrifuge_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (centrifuged_container_model_id, centrifuged_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON centrifuge_procedure_templates (centrifuged_container_model_id);
 CREATE INDEX ON centrifuge_procedure_templates (centrifuged_with_model_id);
@@ -50,8 +56,22 @@ INSERT INTO table_names (id) VALUES ('centrifuge_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'centrifuge_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'centrifuge_procedure_templates', 'centrifuge_procedure_templates';
-CREATE TRIGGER centrifuge_procedure_templates_guard AFTER INSERT OR UPDATE ON centrifuge_procedure_templates
+CREATE TRIGGER centrifuge_procedure_templates_guard AFTER INSERT ON centrifuge_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER centrifuge_procedure_templates_guard_update AFTER UPDATE OF id, centrifuged_with_slot_id, centrifuged_with_model_id, centrifuged_with_slot_role_id, centrifuged_container_slot_id, centrifuged_container_model_id, centrifuged_container_slot_role_id, temperature_k, temperature_tolerance_percentage, duration_s, duration_tolerance_percentage, speed_rpm, speed_rpm_tolerance_percentage ON centrifuge_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.centrifuged_with_slot_id IS DISTINCT FROM NEW.centrifuged_with_slot_id
+        OR OLD.centrifuged_with_model_id IS DISTINCT FROM NEW.centrifuged_with_model_id
+        OR OLD.centrifuged_with_slot_role_id IS DISTINCT FROM NEW.centrifuged_with_slot_role_id
+        OR OLD.centrifuged_container_slot_id IS DISTINCT FROM NEW.centrifuged_container_slot_id
+        OR OLD.centrifuged_container_model_id IS DISTINCT FROM NEW.centrifuged_container_model_id
+        OR OLD.centrifuged_container_slot_role_id IS DISTINCT FROM NEW.centrifuged_container_slot_role_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.temperature_tolerance_percentage IS DISTINCT FROM NEW.temperature_tolerance_percentage
+        OR OLD.duration_s IS DISTINCT FROM NEW.duration_s
+        OR OLD.duration_tolerance_percentage IS DISTINCT FROM NEW.duration_tolerance_percentage
+        OR OLD.speed_rpm IS DISTINCT FROM NEW.speed_rpm
+        OR OLD.speed_rpm_tolerance_percentage IS DISTINCT FROM NEW.speed_rpm_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER centrifuge_procedure_templates_delete_guard BEFORE DELETE ON centrifuge_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -93,11 +113,11 @@ CREATE POLICY centrifuge_procedure_templates_update ON centrifuge_procedure_temp
 CREATE POLICY centrifuge_procedure_templates_delete ON centrifuge_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY centrifuge_procedure_templates_archived_insert ON centrifuge_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(centrifuged_with_model_id) AND NOT authz.is_archived(centrifuged_container_model_id));
+    WITH CHECK (NOT archived AND NOT centrifuged_with_model_archived AND NOT centrifuged_container_model_archived);
 CREATE POLICY centrifuge_procedure_templates_archived_update ON centrifuge_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY centrifuge_procedure_templates_archived_delete ON centrifuge_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY centrifuge_procedure_templates_blocked ON centrifuge_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -121,7 +141,10 @@ CREATE TABLE centrifuge_procedures (
     FOREIGN KEY (id, centrifuge_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    centrifuge_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (centrifuge_procedure_template_id, centrifuge_procedure_template_archived) REFERENCES centrifuge_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON centrifuge_procedures (centrifuge_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('centrifuge_procedures');
@@ -130,8 +153,14 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'centrifuge_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'centrifuge_procedures', 'centrifuge_procedures';
-CREATE TRIGGER centrifuge_procedures_guard AFTER INSERT OR UPDATE ON centrifuge_procedures
+CREATE TRIGGER centrifuge_procedures_guard AFTER INSERT ON centrifuge_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER centrifuge_procedures_guard_update AFTER UPDATE OF id, centrifuge_procedure_template_id, status_id, temperature_k, speed_rpm ON centrifuge_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.centrifuge_procedure_template_id IS DISTINCT FROM NEW.centrifuge_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.speed_rpm IS DISTINCT FROM NEW.speed_rpm) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER centrifuge_procedures_delete_guard BEFORE DELETE ON centrifuge_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -175,7 +204,24 @@ CREATE CONSTRAINT TRIGGER centrifuge_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER centrifuge_procedures_kept AFTER DELETE ON centrifuge_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_centrifuge_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (temperature_k, speed_rpm), DELETE ON centrifuge_procedures TO app;
+CREATE FUNCTION initialize_centrifuge_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.centrifuge_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_centrifuge_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_centrifuge_procedures_status() FROM PUBLIC;
+CREATE TRIGGER centrifuge_procedures_status_initialize BEFORE INSERT ON centrifuge_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_centrifuge_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, centrifuge_procedure_template_id, temperature_k, speed_rpm, archived, centrifuge_procedure_template_archived), UPDATE (temperature_k, speed_rpm), DELETE ON centrifuge_procedures TO app;
 ALTER TABLE centrifuge_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE centrifuge_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY centrifuge_procedures_select ON centrifuge_procedures FOR SELECT TO app
@@ -185,9 +231,9 @@ CREATE POLICY centrifuge_procedures_insert ON centrifuge_procedures FOR INSERT T
 CREATE POLICY centrifuge_procedures_delete ON centrifuge_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY centrifuge_procedures_archived_insert ON centrifuge_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(centrifuge_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT centrifuge_procedure_template_archived);
 CREATE POLICY centrifuge_procedures_archived_delete ON centrifuge_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY centrifuge_procedures_blocked ON centrifuge_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -205,4 +251,4 @@ CREATE POLICY centrifuge_procedures_update ON centrifuge_procedures FOR UPDATE T
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY centrifuge_procedures_archived_update ON centrifuge_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);

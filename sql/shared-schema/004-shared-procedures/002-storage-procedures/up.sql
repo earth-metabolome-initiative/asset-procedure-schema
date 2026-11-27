@@ -1,7 +1,7 @@
 -- Migration: 002-storage-procedures
 -- Purpose: Typed storage slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- storage_procedure_templates
 -- +-- procedures -- storage_procedures
 -- Slot | Role | Meaning
@@ -36,7 +36,13 @@ CREATE TABLE storage_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (stored_asset_slot_id, id, stored_into_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    stored_into_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    stored_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (stored_into_model_id, stored_into_model_archived) REFERENCES container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (stored_asset_model_id, stored_asset_model_archived) REFERENCES physical_asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON storage_procedure_templates (stored_asset_model_id);
 CREATE INDEX ON storage_procedure_templates (stored_into_model_id, stored_asset_model_id);
@@ -44,8 +50,18 @@ INSERT INTO table_names (id) VALUES ('storage_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'storage_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'storage_procedure_templates', 'storage_procedure_templates';
-CREATE TRIGGER storage_procedure_templates_guard AFTER INSERT OR UPDATE ON storage_procedure_templates
+CREATE TRIGGER storage_procedure_templates_guard AFTER INSERT ON storage_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER storage_procedure_templates_guard_update AFTER UPDATE OF id, stored_into_slot_id, stored_into_model_id, stored_into_slot_role_id, stored_asset_slot_id, stored_asset_model_id, stored_asset_slot_role_id, temperature_k, temperature_tolerance_percentage ON storage_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.stored_into_slot_id IS DISTINCT FROM NEW.stored_into_slot_id
+        OR OLD.stored_into_model_id IS DISTINCT FROM NEW.stored_into_model_id
+        OR OLD.stored_into_slot_role_id IS DISTINCT FROM NEW.stored_into_slot_role_id
+        OR OLD.stored_asset_slot_id IS DISTINCT FROM NEW.stored_asset_slot_id
+        OR OLD.stored_asset_model_id IS DISTINCT FROM NEW.stored_asset_model_id
+        OR OLD.stored_asset_slot_role_id IS DISTINCT FROM NEW.stored_asset_slot_role_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.temperature_tolerance_percentage IS DISTINCT FROM NEW.temperature_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER storage_procedure_templates_delete_guard BEFORE DELETE ON storage_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -87,11 +103,11 @@ CREATE POLICY storage_procedure_templates_update ON storage_procedure_templates 
 CREATE POLICY storage_procedure_templates_delete ON storage_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY storage_procedure_templates_archived_insert ON storage_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(stored_into_model_id) AND NOT authz.is_archived(stored_asset_model_id));
+    WITH CHECK (NOT archived AND NOT stored_into_model_archived AND NOT stored_asset_model_archived);
 CREATE POLICY storage_procedure_templates_archived_update ON storage_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY storage_procedure_templates_archived_delete ON storage_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY storage_procedure_templates_blocked ON storage_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -112,7 +128,10 @@ CREATE TABLE storage_procedures (
     FOREIGN KEY (id, storage_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    storage_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (storage_procedure_template_id, storage_procedure_template_archived) REFERENCES storage_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON storage_procedures (storage_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('storage_procedures');
@@ -121,8 +140,13 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'storage_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'storage_procedures', 'storage_procedures';
-CREATE TRIGGER storage_procedures_guard AFTER INSERT OR UPDATE ON storage_procedures
+CREATE TRIGGER storage_procedures_guard AFTER INSERT ON storage_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER storage_procedures_guard_update AFTER UPDATE OF id, storage_procedure_template_id, status_id, temperature_k ON storage_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.storage_procedure_template_id IS DISTINCT FROM NEW.storage_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER storage_procedures_delete_guard BEFORE DELETE ON storage_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -166,7 +190,24 @@ CREATE CONSTRAINT TRIGGER storage_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER storage_procedures_kept AFTER DELETE ON storage_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_storage_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (temperature_k), DELETE ON storage_procedures TO app;
+CREATE FUNCTION initialize_storage_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.storage_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_storage_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_storage_procedures_status() FROM PUBLIC;
+CREATE TRIGGER storage_procedures_status_initialize BEFORE INSERT ON storage_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_storage_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, storage_procedure_template_id, temperature_k, archived, storage_procedure_template_archived), UPDATE (temperature_k), DELETE ON storage_procedures TO app;
 ALTER TABLE storage_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE storage_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY storage_procedures_select ON storage_procedures FOR SELECT TO app
@@ -176,9 +217,9 @@ CREATE POLICY storage_procedures_insert ON storage_procedures FOR INSERT TO app
 CREATE POLICY storage_procedures_delete ON storage_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY storage_procedures_archived_insert ON storage_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(storage_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT storage_procedure_template_archived);
 CREATE POLICY storage_procedures_archived_delete ON storage_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY storage_procedures_blocked ON storage_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -196,7 +237,7 @@ CREATE POLICY storage_procedures_update ON storage_procedures FOR UPDATE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY storage_procedures_archived_update ON storage_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 
 -- Keeps the storage destination slot singular.
 CREATE FUNCTION check_storage_slots() RETURNS TRIGGER

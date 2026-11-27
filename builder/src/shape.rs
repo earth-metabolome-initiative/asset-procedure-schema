@@ -492,7 +492,9 @@ pub fn procedure_shape(
     let mut template_tables = Vec::new();
     for foreign_key in table.foreign_keys(database)? {
         let referenced = foreign_key.referenced_table(database)?;
-        if is_subtype_of(referenced, PROCEDURE_TEMPLATES_TABLE_NAME, database)? {
+        if is_subtype_of(referenced, PROCEDURE_TEMPLATES_TABLE_NAME, database)?
+            && !template_tables.iter().any(|name| name == referenced.table_name())
+        {
             template_tables.push(referenced.table_name().to_owned());
         }
     }
@@ -527,7 +529,7 @@ pub fn template_shape(
         let key = foreign_key.host_columns(database)?.collect::<Vec<_>>();
         match key.as_slice() {
             [slot_column, _, model_column, role_column, _] => {
-                let mut model_tables = Vec::new();
+                let mut model_table_name = None;
                 for model_key in model_column.foreign_keys(database)? {
                     let referenced = model_key.referenced_table(database)?;
                     if referenced.table_name() != SLOTS_TABLE_NAME
@@ -535,13 +537,23 @@ pub fn template_shape(
                             .referenced_column_for_host_column(database, model_column)?
                             .is_some_and(|column| column.column_name() == "id")
                     {
-                        model_tables.push(referenced.table_name().to_owned());
+                        let candidate_name = referenced.table_name();
+                        if let Some(existing_name) = model_table_name {
+                            assert_eq!(
+                                existing_name,
+                                candidate_name,
+                                "`{}` references different model tables",
+                                model_column.column_name()
+                            );
+                        }
+                        model_table_name = Some(candidate_name);
                     }
                 }
-                let [model_table_name] =
-                    <[String; 1]>::try_from(model_tables).unwrap_or_else(|tables| {
-                        panic!("`{}` references the models {tables:?}", model_column.column_name())
-                    });
+                let model_table_name = model_table_name
+                    .unwrap_or_else(|| {
+                        panic!("`{}` references no model table", model_column.column_name())
+                    })
+                    .to_owned();
                 slots.push(SlotShape {
                     name: slot_name(slot_column).to_owned(),
                     role: SlotRole::of(role_column),

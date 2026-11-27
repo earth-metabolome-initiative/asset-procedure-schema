@@ -108,7 +108,7 @@ SELECT isnt_empty($query$SELECT 1 FROM audit_events WHERE table_name = 'brands' 
 UPDATE weighed_container_models SET mass_kg = 0.003 WHERE id = '70000000-0000-7000-8000-000000000005';
 SELECT isnt_empty($query$SELECT 1 FROM audit_events WHERE table_name = 'weighed_container_models' AND operation = 'UPDATE' AND new_row ->> 'id' = '70000000-0000-7000-8000-000000000005'$query$, 'shared subtype update is audited');
 SELECT pg_temp.create_ownable('70000000-0000-7000-8000-000000000025');
-SELECT throws_ok($statement$UPDATE resources SET archived_at = now() WHERE id = '70000000-0000-7000-8000-000000000012'; INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000025', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_compatibility_rules', '70000000-0000-7000-8000-000000000005', '70000000-0000-7000-8000-000000000012')$statement$, '42501', NULL, 'compatibility rule refuses an archived model');
+SELECT throws_ok($statement$UPDATE resources SET archived_at = now() WHERE id = '70000000-0000-7000-8000-000000000012'; INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id) VALUES ('70000000-0000-7000-8000-000000000025', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_compatibility_rules', '70000000-0000-7000-8000-000000000005', '70000000-0000-7000-8000-000000000012')$statement$, '23503', NULL, 'compatibility rule refuses an archived model');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 SELECT lives_ok($statement$UPDATE digital_asset_models SET mime_type = 'image/jpeg' WHERE id = '70000000-0000-7000-8000-000000000022'$statement$, 'image MIME changes preserve photograph models');
@@ -126,20 +126,15 @@ INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-0
 INSERT INTO resources (id, kind, organization_id)
   VALUES ('20000000-0000-7000-8000-000000000002', 'organization', '20000000-0000-7000-8000-000000000002');
 INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000002', authz.caller_id(), 'active');
-INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
-  VALUES ('20000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000002', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'project',
     '20000000-0000-7000-8000-000000000002', 'organization');
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-VALUES ('70000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id());
-INSERT INTO resources (id, kind, organization_id) VALUES ('70000000-0000-7000-8000-000000000090', 'ownable', '20000000-0000-7000-8000-000000000002');
+INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+VALUES ('70000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id(), 'ownable', 'project');
 INSERT INTO asset_models (id, organization_id, project_id, table_name_id, name)
 VALUES ('70000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'physical_asset_models', 'Foreign physical model');
 INSERT INTO asset_model_ancestors (descendant_model_id, ancestor_model_id, organization_id)

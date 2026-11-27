@@ -1,7 +1,7 @@
 -- Migration: 014-aliquoting-procedures
 -- Purpose: Typed aliquoting slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- aliquoting_procedure_templates
 -- +-- procedures -- aliquoting_procedures
 -- Slot | Role | Meaning
@@ -65,7 +65,19 @@ CREATE TABLE aliquoting_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (aliquot_slot_id, id, aliquoted_into_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    aliquoted_from_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    aliquoted_into_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    aliquot_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    aliquoted_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    source_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (aliquoted_from_model_id, aliquoted_from_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (aliquoted_into_model_id, aliquoted_into_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (aliquot_model_id, aliquot_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (aliquoted_with_model_id, aliquoted_with_model_archived) REFERENCES volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (source_sample_model_id, source_sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON aliquoting_procedure_templates (aliquot_model_id);
 CREATE INDEX ON aliquoting_procedure_templates (aliquoted_from_model_id);
@@ -75,8 +87,27 @@ INSERT INTO table_names (id) VALUES ('aliquoting_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'aliquoting_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'aliquoting_procedure_templates', 'aliquoting_procedure_templates';
-CREATE TRIGGER aliquoting_procedure_templates_guard AFTER INSERT OR UPDATE ON aliquoting_procedure_templates
+CREATE TRIGGER aliquoting_procedure_templates_guard AFTER INSERT ON aliquoting_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER aliquoting_procedure_templates_guard_update AFTER UPDATE OF id, source_sample_slot_id, source_sample_model_id, source_sample_slot_role_id, aliquoted_from_slot_id, aliquoted_from_model_id, aliquoted_from_slot_role_id, aliquoted_into_slot_id, aliquoted_into_model_id, aliquoted_into_slot_role_id, aliquot_slot_id, aliquot_model_id, aliquot_slot_role_id, aliquoted_with_slot_id, aliquoted_with_model_id, aliquoted_with_slot_role_id, volume_l, volume_l_tolerance_percentage ON aliquoting_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.source_sample_slot_id IS DISTINCT FROM NEW.source_sample_slot_id
+        OR OLD.source_sample_model_id IS DISTINCT FROM NEW.source_sample_model_id
+        OR OLD.source_sample_slot_role_id IS DISTINCT FROM NEW.source_sample_slot_role_id
+        OR OLD.aliquoted_from_slot_id IS DISTINCT FROM NEW.aliquoted_from_slot_id
+        OR OLD.aliquoted_from_model_id IS DISTINCT FROM NEW.aliquoted_from_model_id
+        OR OLD.aliquoted_from_slot_role_id IS DISTINCT FROM NEW.aliquoted_from_slot_role_id
+        OR OLD.aliquoted_into_slot_id IS DISTINCT FROM NEW.aliquoted_into_slot_id
+        OR OLD.aliquoted_into_model_id IS DISTINCT FROM NEW.aliquoted_into_model_id
+        OR OLD.aliquoted_into_slot_role_id IS DISTINCT FROM NEW.aliquoted_into_slot_role_id
+        OR OLD.aliquot_slot_id IS DISTINCT FROM NEW.aliquot_slot_id
+        OR OLD.aliquot_model_id IS DISTINCT FROM NEW.aliquot_model_id
+        OR OLD.aliquot_slot_role_id IS DISTINCT FROM NEW.aliquot_slot_role_id
+        OR OLD.aliquoted_with_slot_id IS DISTINCT FROM NEW.aliquoted_with_slot_id
+        OR OLD.aliquoted_with_model_id IS DISTINCT FROM NEW.aliquoted_with_model_id
+        OR OLD.aliquoted_with_slot_role_id IS DISTINCT FROM NEW.aliquoted_with_slot_role_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l
+        OR OLD.volume_l_tolerance_percentage IS DISTINCT FROM NEW.volume_l_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER aliquoting_procedure_templates_delete_guard BEFORE DELETE ON aliquoting_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -118,11 +149,11 @@ CREATE POLICY aliquoting_procedure_templates_update ON aliquoting_procedure_temp
 CREATE POLICY aliquoting_procedure_templates_delete ON aliquoting_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY aliquoting_procedure_templates_archived_insert ON aliquoting_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(aliquoted_from_model_id) AND NOT authz.is_archived(aliquoted_into_model_id) AND NOT authz.is_archived(aliquot_model_id) AND NOT authz.is_archived(aliquoted_with_model_id) AND NOT authz.is_archived(source_sample_model_id));
+    WITH CHECK (NOT archived AND NOT aliquoted_from_model_archived AND NOT aliquoted_into_model_archived AND NOT aliquot_model_archived AND NOT aliquoted_with_model_archived AND NOT source_sample_model_archived);
 CREATE POLICY aliquoting_procedure_templates_archived_update ON aliquoting_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY aliquoting_procedure_templates_archived_delete ON aliquoting_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY aliquoting_procedure_templates_blocked ON aliquoting_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -143,7 +174,10 @@ CREATE TABLE aliquoting_procedures (
     FOREIGN KEY (id, aliquoting_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    aliquoting_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (aliquoting_procedure_template_id, aliquoting_procedure_template_archived) REFERENCES aliquoting_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON aliquoting_procedures (aliquoting_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('aliquoting_procedures');
@@ -152,8 +186,13 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'aliquoting_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'aliquoting_procedures', 'aliquoting_procedures';
-CREATE TRIGGER aliquoting_procedures_guard AFTER INSERT OR UPDATE ON aliquoting_procedures
+CREATE TRIGGER aliquoting_procedures_guard AFTER INSERT ON aliquoting_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER aliquoting_procedures_guard_update AFTER UPDATE OF id, aliquoting_procedure_template_id, status_id, volume_l ON aliquoting_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.aliquoting_procedure_template_id IS DISTINCT FROM NEW.aliquoting_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER aliquoting_procedures_delete_guard BEFORE DELETE ON aliquoting_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -197,7 +236,24 @@ CREATE CONSTRAINT TRIGGER aliquoting_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER aliquoting_procedures_kept AFTER DELETE ON aliquoting_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_aliquoting_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (volume_l), DELETE ON aliquoting_procedures TO app;
+CREATE FUNCTION initialize_aliquoting_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.aliquoting_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_aliquoting_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_aliquoting_procedures_status() FROM PUBLIC;
+CREATE TRIGGER aliquoting_procedures_status_initialize BEFORE INSERT ON aliquoting_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_aliquoting_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, aliquoting_procedure_template_id, volume_l, archived, aliquoting_procedure_template_archived), UPDATE (volume_l), DELETE ON aliquoting_procedures TO app;
 ALTER TABLE aliquoting_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE aliquoting_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY aliquoting_procedures_select ON aliquoting_procedures FOR SELECT TO app
@@ -207,9 +263,9 @@ CREATE POLICY aliquoting_procedures_insert ON aliquoting_procedures FOR INSERT T
 CREATE POLICY aliquoting_procedures_delete ON aliquoting_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY aliquoting_procedures_archived_insert ON aliquoting_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(aliquoting_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT aliquoting_procedure_template_archived);
 CREATE POLICY aliquoting_procedures_archived_delete ON aliquoting_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY aliquoting_procedures_blocked ON aliquoting_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -227,7 +283,7 @@ CREATE POLICY aliquoting_procedures_update ON aliquoting_procedures FOR UPDATE T
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY aliquoting_procedures_archived_update ON aliquoting_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 
 CREATE INDEX ON public.aliquoting_procedure_templates (source_sample_model_id);
 CREATE INDEX ON public.aliquoting_procedure_templates (source_sample_slot_id);

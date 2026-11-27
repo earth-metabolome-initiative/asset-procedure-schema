@@ -3,7 +3,7 @@
 ALTER DEFAULT PRIVILEGES FOR ROLE aps_writer REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 
 -- Registry of APS tables, named by the `table_name_id` column of every root row
--- so a client can resolve the most concrete table holding an ownable.
+-- so a client can resolve the most concrete table holding an ownable `resource`.
 CREATE TABLE table_names (
     -- Name of the APS table.
     id TEXT PRIMARY KEY CHECK (id <> '' AND length(id) <= 63)

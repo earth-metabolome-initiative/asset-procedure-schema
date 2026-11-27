@@ -3,8 +3,8 @@
 -- Only a `draft` changes. Publishing freezes it, and a new version is a new
 -- draft naming the published one as `previous_version_id`.
 CREATE TABLE procedure_templates (
-    -- Identifier of the connetto ownable this template extends.
-    id UUID PRIMARY KEY REFERENCES ownables (id) ON DELETE CASCADE,
+    -- Identifier of the connetto `resource` of kind `'ownable'` this template extends.
+    id UUID PRIMARY KEY REFERENCES resources (id) ON DELETE CASCADE,
     -- connetto organization owning the row.
     organization_id UUID NOT NULL,
     -- connetto project holding the template.
@@ -32,8 +32,13 @@ CREATE TABLE procedure_templates (
     UNIQUE (id, project_id, name, version, organization_id),
     FOREIGN KEY (previous_version_id, project_id, name, previous_version, organization_id)
         REFERENCES procedure_templates (id, project_id, name, version, organization_id),
-    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    previous_version_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (previous_version_id, previous_version_archived) REFERENCES procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_templates (previous_version_id);
 CREATE INDEX ON procedure_templates (state_id);
@@ -79,7 +84,10 @@ CREATE TABLE procedure_template_slots (
         REFERENCES procedure_template_slots (id, procedure_template_id, organization_id),
     FOREIGN KEY (retrieved_from_slot_id, procedure_template_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, organization_id),
-    FOREIGN KEY (organization_id, procedure_template_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (asset_model_id, asset_model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, procedure_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_template_slots (asset_model_id);
 CREATE INDEX ON procedure_template_slots (role_id);
@@ -118,7 +126,10 @@ CREATE TABLE procedure_template_steps (
     UNIQUE (id, parent_template_id, child_template_id, organization_id),
     FOREIGN KEY (repeat_slot_id, parent_template_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, organization_id),
-    FOREIGN KEY (organization_id, parent_template_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    child_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (child_template_id, child_template_archived) REFERENCES procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_template_steps (child_template_id);
 CREATE INDEX ON procedure_template_steps (repeat_slot_id, parent_template_id);
@@ -146,7 +157,8 @@ CREATE TABLE procedure_template_step_edges (
         REFERENCES procedure_template_steps (id, parent_template_id, position, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (successor_step_id, parent_template_id, successor_position, organization_id)
         REFERENCES procedure_template_steps (id, parent_template_id, position, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, parent_template_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_template_step_edges (successor_step_id);
 CREATE INDEX ON procedure_template_step_edges (organization_id, parent_template_id);
@@ -189,7 +201,8 @@ CREATE TABLE procedure_template_slot_bindings (
     FOREIGN KEY (parent_asset_model_id, child_asset_model_id)
         REFERENCES asset_model_ancestors (descendant_model_id, ancestor_model_id),
     FOREIGN KEY (child_role_id, parent_role_id) REFERENCES slot_role_pairs (child_role_id, parent_role_id),
-    FOREIGN KEY (organization_id, parent_template_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_template_slot_bindings (parent_slot_id);
 CREATE UNIQUE INDEX procedure_template_slot_bindings_produced_once ON procedure_template_slot_bindings (parent_slot_id, parent_template_id)
@@ -260,7 +273,8 @@ CREATE TABLE procedure_template_parameters (
     CHECK (default_boolean IS NULL OR value_kind_id = 'boolean'),
     UNIQUE (procedure_template_id, name),
     UNIQUE (id, procedure_template_id, value_kind_id),
-    FOREIGN KEY (organization_id, procedure_template_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, procedure_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_template_parameters (value_kind_id);
 CREATE INDEX ON procedure_template_parameters (quantity_kind_id);
@@ -295,7 +309,8 @@ CREATE TABLE procedure_template_step_parameters (
         REFERENCES procedure_template_steps (id, parent_template_id, child_template_id, organization_id) ON DELETE CASCADE,
     FOREIGN KEY (parameter_id, child_template_id, value_kind_id)
         REFERENCES procedure_template_parameters (id, procedure_template_id, value_kind_id),
-    FOREIGN KEY (organization_id, parent_template_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_template_step_parameters (organization_id, parent_template_id);
 CREATE INDEX ON procedure_template_step_parameters (parameter_id, child_template_id, value_kind_id);
@@ -511,10 +526,34 @@ END;
 $$;
 ALTER FUNCTION guard_procedure_template_member() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure_template_member() FROM PUBLIC;
-CREATE TRIGGER procedure_template_slots_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_template_slots
+CREATE TRIGGER procedure_template_slots_guard AFTER INSERT OR DELETE ON procedure_template_slots
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_member();
-CREATE TRIGGER procedure_template_parameters_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_template_parameters
+CREATE TRIGGER procedure_template_slots_guard_update AFTER UPDATE OF id, procedure_template_id, name, description, asset_model_id, role_id, minimum_count, maximum_count, placed_into_slot_id, retrieved_from_slot_id ON procedure_template_slots
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.procedure_template_id IS DISTINCT FROM NEW.procedure_template_id
+        OR OLD.name IS DISTINCT FROM NEW.name
+        OR OLD.description IS DISTINCT FROM NEW.description
+        OR OLD.asset_model_id IS DISTINCT FROM NEW.asset_model_id
+        OR OLD.role_id IS DISTINCT FROM NEW.role_id
+        OR OLD.minimum_count IS DISTINCT FROM NEW.minimum_count
+        OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count
+        OR OLD.placed_into_slot_id IS DISTINCT FROM NEW.placed_into_slot_id
+        OR OLD.retrieved_from_slot_id IS DISTINCT FROM NEW.retrieved_from_slot_id) EXECUTE FUNCTION guard_procedure_template_member();
+CREATE TRIGGER procedure_template_parameters_guard AFTER INSERT OR DELETE ON procedure_template_parameters
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_member();
+CREATE TRIGGER procedure_template_parameters_guard_update AFTER UPDATE OF id, procedure_template_id, name, description, value_kind_id, quantity_kind_id, required, default_number, minimum_number, maximum_number, default_text, default_boolean ON procedure_template_parameters
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.procedure_template_id IS DISTINCT FROM NEW.procedure_template_id
+        OR OLD.name IS DISTINCT FROM NEW.name
+        OR OLD.description IS DISTINCT FROM NEW.description
+        OR OLD.value_kind_id IS DISTINCT FROM NEW.value_kind_id
+        OR OLD.quantity_kind_id IS DISTINCT FROM NEW.quantity_kind_id
+        OR OLD.required IS DISTINCT FROM NEW.required
+        OR OLD.default_number IS DISTINCT FROM NEW.default_number
+        OR OLD.minimum_number IS DISTINCT FROM NEW.minimum_number
+        OR OLD.maximum_number IS DISTINCT FROM NEW.maximum_number
+        OR OLD.default_text IS DISTINCT FROM NEW.default_text
+        OR OLD.default_boolean IS DISTINCT FROM NEW.default_boolean) EXECUTE FUNCTION guard_procedure_template_member();
 
 -- A step's child must be published when the step is added. Published
 -- templates never change, so no template can become its own ancestor.
@@ -537,8 +576,17 @@ END;
 $$;
 ALTER FUNCTION guard_procedure_template_step() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure_template_step() FROM PUBLIC;
-CREATE TRIGGER procedure_template_steps_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_template_steps
+CREATE TRIGGER procedure_template_steps_guard AFTER INSERT OR DELETE ON procedure_template_steps
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_step();
+CREATE TRIGGER procedure_template_steps_guard_update AFTER UPDATE OF id, parent_template_id, child_template_id, name, description, position, optional, repeat_slot_id ON procedure_template_steps
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.parent_template_id IS DISTINCT FROM NEW.parent_template_id
+        OR OLD.child_template_id IS DISTINCT FROM NEW.child_template_id
+        OR OLD.name IS DISTINCT FROM NEW.name
+        OR OLD.description IS DISTINCT FROM NEW.description
+        OR OLD.position IS DISTINCT FROM NEW.position
+        OR OLD.optional IS DISTINCT FROM NEW.optional
+        OR OLD.repeat_slot_id IS DISTINCT FROM NEW.repeat_slot_id) EXECUTE FUNCTION guard_procedure_template_step();
 
 CREATE FUNCTION guard_procedure_template_step_relation() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
@@ -552,12 +600,37 @@ END;
 $$;
 ALTER FUNCTION guard_procedure_template_step_relation() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure_template_step_relation() FROM PUBLIC;
-CREATE TRIGGER procedure_template_step_edges_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_template_step_edges
+CREATE TRIGGER procedure_template_step_edges_guard AFTER INSERT OR DELETE ON procedure_template_step_edges
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_step_relation();
-CREATE TRIGGER procedure_template_slot_bindings_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_template_slot_bindings
+CREATE TRIGGER procedure_template_step_edges_guard_update AFTER UPDATE OF predecessor_step_id, successor_step_id, parent_template_id, predecessor_position, successor_position ON procedure_template_step_edges
+    FOR EACH ROW WHEN (OLD.predecessor_step_id IS DISTINCT FROM NEW.predecessor_step_id
+        OR OLD.successor_step_id IS DISTINCT FROM NEW.successor_step_id
+        OR OLD.parent_template_id IS DISTINCT FROM NEW.parent_template_id
+        OR OLD.predecessor_position IS DISTINCT FROM NEW.predecessor_position
+        OR OLD.successor_position IS DISTINCT FROM NEW.successor_position) EXECUTE FUNCTION guard_procedure_template_step_relation();
+CREATE TRIGGER procedure_template_slot_bindings_guard AFTER INSERT OR DELETE ON procedure_template_slot_bindings
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_step_relation();
-CREATE TRIGGER procedure_template_step_parameters_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_template_step_parameters
+CREATE TRIGGER procedure_template_slot_bindings_guard_update AFTER UPDATE OF step_id, child_slot_id, parent_template_id, child_template_id, parent_slot_id, child_asset_model_id, parent_asset_model_id, child_role_id, parent_role_id ON procedure_template_slot_bindings
+    FOR EACH ROW WHEN (OLD.step_id IS DISTINCT FROM NEW.step_id
+        OR OLD.child_slot_id IS DISTINCT FROM NEW.child_slot_id
+        OR OLD.parent_template_id IS DISTINCT FROM NEW.parent_template_id
+        OR OLD.child_template_id IS DISTINCT FROM NEW.child_template_id
+        OR OLD.parent_slot_id IS DISTINCT FROM NEW.parent_slot_id
+        OR OLD.child_asset_model_id IS DISTINCT FROM NEW.child_asset_model_id
+        OR OLD.parent_asset_model_id IS DISTINCT FROM NEW.parent_asset_model_id
+        OR OLD.child_role_id IS DISTINCT FROM NEW.child_role_id
+        OR OLD.parent_role_id IS DISTINCT FROM NEW.parent_role_id) EXECUTE FUNCTION guard_procedure_template_step_relation();
+CREATE TRIGGER procedure_template_step_parameters_guard AFTER INSERT OR DELETE ON procedure_template_step_parameters
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_step_relation();
+CREATE TRIGGER procedure_template_step_parameters_guard_update AFTER UPDATE OF step_id, parameter_id, parent_template_id, child_template_id, value_kind_id, number_value, text_value, boolean_value ON procedure_template_step_parameters
+    FOR EACH ROW WHEN (OLD.step_id IS DISTINCT FROM NEW.step_id
+        OR OLD.parameter_id IS DISTINCT FROM NEW.parameter_id
+        OR OLD.parent_template_id IS DISTINCT FROM NEW.parent_template_id
+        OR OLD.child_template_id IS DISTINCT FROM NEW.child_template_id
+        OR OLD.value_kind_id IS DISTINCT FROM NEW.value_kind_id
+        OR OLD.number_value IS DISTINCT FROM NEW.number_value
+        OR OLD.text_value IS DISTINCT FROM NEW.text_value
+        OR OLD.boolean_value IS DISTINCT FROM NEW.boolean_value) EXECUTE FUNCTION guard_procedure_template_step_relation();
 
 -- Lists the templates the caller reads, which are those connetto grants the
 -- caller and, transitively, the templates their steps run, through steps
@@ -594,11 +667,11 @@ CREATE POLICY procedure_templates_update ON procedure_templates FOR UPDATE TO ap
 CREATE POLICY procedure_templates_delete ON procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY procedure_templates_archived_insert ON procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(previous_version_id));
+    WITH CHECK (NOT archived AND NOT previous_version_archived);
 CREATE POLICY procedure_templates_archived_update ON procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY procedure_templates_archived_delete ON procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY procedure_templates_blocked ON procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -619,12 +692,12 @@ CREATE POLICY procedure_template_slots_update ON procedure_template_slots FOR UP
 CREATE POLICY procedure_template_slots_delete ON procedure_template_slots FOR DELETE TO app
     USING (procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_template_slots_archived_insert ON procedure_template_slots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(procedure_template_id) AND NOT authz.is_archived(asset_model_id));
+    WITH CHECK (NOT archived AND NOT asset_model_archived);
 CREATE POLICY procedure_template_slots_archived_update ON procedure_template_slots AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(procedure_template_id))
-    WITH CHECK (NOT authz.is_archived(procedure_template_id) AND NOT authz.is_archived(asset_model_id));
+    USING (NOT archived)
+    WITH CHECK (NOT archived AND NOT asset_model_archived);
 CREATE POLICY procedure_template_slots_archived_delete ON procedure_template_slots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(procedure_template_id));
+    USING (NOT archived);
 CREATE POLICY procedure_template_slots_blocked ON procedure_template_slots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -643,11 +716,11 @@ CREATE POLICY procedure_template_steps_update ON procedure_template_steps FOR UP
 CREATE POLICY procedure_template_steps_delete ON procedure_template_steps FOR DELETE TO app
     USING (parent_template_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_template_steps_archived_insert ON procedure_template_steps AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(parent_template_id) AND NOT authz.is_archived(child_template_id));
+    WITH CHECK (NOT archived AND NOT child_template_archived);
 CREATE POLICY procedure_template_steps_archived_update ON procedure_template_steps AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(parent_template_id)) WITH CHECK (NOT authz.is_archived(parent_template_id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY procedure_template_steps_archived_delete ON procedure_template_steps AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(parent_template_id));
+    USING (NOT archived);
 CREATE POLICY procedure_template_steps_blocked ON procedure_template_steps AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -662,9 +735,9 @@ CREATE POLICY procedure_template_step_edges_insert ON procedure_template_step_ed
 CREATE POLICY procedure_template_step_edges_delete ON procedure_template_step_edges FOR DELETE TO app
     USING (parent_template_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_template_step_edges_archived_insert ON procedure_template_step_edges AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(parent_template_id));
+    WITH CHECK (NOT archived);
 CREATE POLICY procedure_template_step_edges_archived_delete ON procedure_template_step_edges AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(parent_template_id));
+    USING (NOT archived);
 CREATE POLICY procedure_template_step_edges_blocked ON procedure_template_step_edges AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -681,9 +754,9 @@ CREATE POLICY procedure_template_slot_bindings_insert ON procedure_template_slot
 CREATE POLICY procedure_template_slot_bindings_delete ON procedure_template_slot_bindings FOR DELETE TO app
     USING (parent_template_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_template_slot_bindings_archived_insert ON procedure_template_slot_bindings AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(parent_template_id));
+    WITH CHECK (NOT archived);
 CREATE POLICY procedure_template_slot_bindings_archived_delete ON procedure_template_slot_bindings AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(parent_template_id));
+    USING (NOT archived);
 CREATE POLICY procedure_template_slot_bindings_blocked ON procedure_template_slot_bindings AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -702,11 +775,11 @@ CREATE POLICY procedure_template_parameters_update ON procedure_template_paramet
 CREATE POLICY procedure_template_parameters_delete ON procedure_template_parameters FOR DELETE TO app
     USING (procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_template_parameters_archived_insert ON procedure_template_parameters AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(procedure_template_id));
+    WITH CHECK (NOT archived);
 CREATE POLICY procedure_template_parameters_archived_update ON procedure_template_parameters AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(procedure_template_id)) WITH CHECK (NOT authz.is_archived(procedure_template_id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY procedure_template_parameters_archived_delete ON procedure_template_parameters AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(procedure_template_id));
+    USING (NOT archived);
 CREATE POLICY procedure_template_parameters_blocked ON procedure_template_parameters AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -725,11 +798,11 @@ CREATE POLICY procedure_template_step_parameters_update ON procedure_template_st
 CREATE POLICY procedure_template_step_parameters_delete ON procedure_template_step_parameters FOR DELETE TO app
     USING (parent_template_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_template_step_parameters_archived_insert ON procedure_template_step_parameters AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(parent_template_id));
+    WITH CHECK (NOT archived);
 CREATE POLICY procedure_template_step_parameters_archived_update ON procedure_template_step_parameters AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(parent_template_id)) WITH CHECK (NOT authz.is_archived(parent_template_id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY procedure_template_step_parameters_archived_delete ON procedure_template_step_parameters AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(parent_template_id));
+    USING (NOT archived);
 CREATE POLICY procedure_template_step_parameters_blocked ON procedure_template_step_parameters AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

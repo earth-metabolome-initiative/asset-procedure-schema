@@ -152,8 +152,8 @@ UPDATE procedures SET started_at = now() - interval '3 hours' WHERE id = 'f10000
 
 SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f1000000-0000-7000-8000-000000000011', 'c1000000-0000-7000-8000-000000000001', 'in_progress', 'f1000000-0000-7000-8000-000000000010', 'e1000000-0000-7000-8000-000000000010');
 UPDATE procedures SET started_at = now() - interval '3 hours' WHERE id = 'f1000000-0000-7000-8000-000000000011';
-    INSERT INTO procedure_parameter_values (procedure_id, parameter_id, procedure_template_id, status_id, value_kind_id, organization_id, text_value)
-      VALUES ('f1000000-0000-7000-8000-000000000011', '71000000-0000-7000-8000-000000000001', 'c1000000-0000-7000-8000-000000000001', 'in_progress', 'number', '20000000-0000-7000-8000-000000000001', 'heavy'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'new row for relation "procedure_parameter_values" violates check constraint "procedure_parameter_values_check"', 'number parameter rejects a text value');
+    INSERT INTO procedure_parameter_values (procedure_id, parameter_id, procedure_template_id, value_kind_id, organization_id, text_value)
+      VALUES ('f1000000-0000-7000-8000-000000000011', '71000000-0000-7000-8000-000000000001', 'c1000000-0000-7000-8000-000000000001', 'number', '20000000-0000-7000-8000-000000000001', 'heavy'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'new row for relation "procedure_parameter_values" violates check constraint "procedure_parameter_values_check"', 'number parameter rejects a text value');
 
 
 SELECT pg_temp.new_procedure('f1000000-0000-7000-8000-000000000011', 'c1000000-0000-7000-8000-000000000001', 'in_progress', 'f1000000-0000-7000-8000-000000000010', 'e1000000-0000-7000-8000-000000000010');

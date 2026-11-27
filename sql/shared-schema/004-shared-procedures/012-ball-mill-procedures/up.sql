@@ -1,7 +1,7 @@
 -- Migration: 012-ball-mill-procedures
 -- Purpose: Typed ball mill slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- ball_mill_procedure_templates
 -- +-- procedures -- ball_mill_procedures
 -- Slot | Role | Meaning
@@ -53,7 +53,15 @@ CREATE TABLE ball_mill_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (milled_container_slot_id, id, milled_container_model_id, milled_container_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    bead_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    milled_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    milled_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (bead_model_id, bead_model_archived) REFERENCES bead_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (milled_with_model_id, milled_with_model_archived) REFERENCES ball_mill_machine_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (milled_container_model_id, milled_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON ball_mill_procedure_templates (bead_model_id);
 CREATE INDEX ON ball_mill_procedure_templates (milled_container_model_id);
@@ -62,8 +70,26 @@ INSERT INTO table_names (id) VALUES ('ball_mill_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'ball_mill_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'ball_mill_procedure_templates', 'ball_mill_procedure_templates';
-CREATE TRIGGER ball_mill_procedure_templates_guard AFTER INSERT OR UPDATE ON ball_mill_procedure_templates
+CREATE TRIGGER ball_mill_procedure_templates_guard AFTER INSERT ON ball_mill_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER ball_mill_procedure_templates_guard_update AFTER UPDATE OF id, bead_slot_id, bead_model_id, bead_slot_role_id, milled_with_slot_id, milled_with_model_id, milled_with_slot_role_id, milled_container_slot_id, milled_container_model_id, milled_container_slot_role_id, temperature_k, temperature_tolerance_percentage, duration_s, duration_tolerance_percentage, frequency_hz, frequency_hz_tolerance_percentage, bead_count ON ball_mill_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.bead_slot_id IS DISTINCT FROM NEW.bead_slot_id
+        OR OLD.bead_model_id IS DISTINCT FROM NEW.bead_model_id
+        OR OLD.bead_slot_role_id IS DISTINCT FROM NEW.bead_slot_role_id
+        OR OLD.milled_with_slot_id IS DISTINCT FROM NEW.milled_with_slot_id
+        OR OLD.milled_with_model_id IS DISTINCT FROM NEW.milled_with_model_id
+        OR OLD.milled_with_slot_role_id IS DISTINCT FROM NEW.milled_with_slot_role_id
+        OR OLD.milled_container_slot_id IS DISTINCT FROM NEW.milled_container_slot_id
+        OR OLD.milled_container_model_id IS DISTINCT FROM NEW.milled_container_model_id
+        OR OLD.milled_container_slot_role_id IS DISTINCT FROM NEW.milled_container_slot_role_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.temperature_tolerance_percentage IS DISTINCT FROM NEW.temperature_tolerance_percentage
+        OR OLD.duration_s IS DISTINCT FROM NEW.duration_s
+        OR OLD.duration_tolerance_percentage IS DISTINCT FROM NEW.duration_tolerance_percentage
+        OR OLD.frequency_hz IS DISTINCT FROM NEW.frequency_hz
+        OR OLD.frequency_hz_tolerance_percentage IS DISTINCT FROM NEW.frequency_hz_tolerance_percentage
+        OR OLD.bead_count IS DISTINCT FROM NEW.bead_count) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER ball_mill_procedure_templates_delete_guard BEFORE DELETE ON ball_mill_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -105,11 +131,11 @@ CREATE POLICY ball_mill_procedure_templates_update ON ball_mill_procedure_templa
 CREATE POLICY ball_mill_procedure_templates_delete ON ball_mill_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY ball_mill_procedure_templates_archived_insert ON ball_mill_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(bead_model_id) AND NOT authz.is_archived(milled_with_model_id) AND NOT authz.is_archived(milled_container_model_id));
+    WITH CHECK (NOT archived AND NOT bead_model_archived AND NOT milled_with_model_archived AND NOT milled_container_model_archived);
 CREATE POLICY ball_mill_procedure_templates_archived_update ON ball_mill_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY ball_mill_procedure_templates_archived_delete ON ball_mill_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY ball_mill_procedure_templates_blocked ON ball_mill_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -133,7 +159,10 @@ CREATE TABLE ball_mill_procedures (
     FOREIGN KEY (id, ball_mill_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    ball_mill_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (ball_mill_procedure_template_id, ball_mill_procedure_template_archived) REFERENCES ball_mill_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON ball_mill_procedures (ball_mill_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('ball_mill_procedures');
@@ -142,8 +171,14 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'ball_mill_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'ball_mill_procedures', 'ball_mill_procedures';
-CREATE TRIGGER ball_mill_procedures_guard AFTER INSERT OR UPDATE ON ball_mill_procedures
+CREATE TRIGGER ball_mill_procedures_guard AFTER INSERT ON ball_mill_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER ball_mill_procedures_guard_update AFTER UPDATE OF id, ball_mill_procedure_template_id, status_id, temperature_k, frequency_hz ON ball_mill_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.ball_mill_procedure_template_id IS DISTINCT FROM NEW.ball_mill_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.frequency_hz IS DISTINCT FROM NEW.frequency_hz) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER ball_mill_procedures_delete_guard BEFORE DELETE ON ball_mill_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -187,7 +222,24 @@ CREATE CONSTRAINT TRIGGER ball_mill_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER ball_mill_procedures_kept AFTER DELETE ON ball_mill_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_ball_mill_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (temperature_k, frequency_hz), DELETE ON ball_mill_procedures TO app;
+CREATE FUNCTION initialize_ball_mill_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.ball_mill_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_ball_mill_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_ball_mill_procedures_status() FROM PUBLIC;
+CREATE TRIGGER ball_mill_procedures_status_initialize BEFORE INSERT ON ball_mill_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_ball_mill_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, ball_mill_procedure_template_id, temperature_k, frequency_hz, archived, ball_mill_procedure_template_archived), UPDATE (temperature_k, frequency_hz), DELETE ON ball_mill_procedures TO app;
 ALTER TABLE ball_mill_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ball_mill_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY ball_mill_procedures_select ON ball_mill_procedures FOR SELECT TO app
@@ -197,9 +249,9 @@ CREATE POLICY ball_mill_procedures_insert ON ball_mill_procedures FOR INSERT TO 
 CREATE POLICY ball_mill_procedures_delete ON ball_mill_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY ball_mill_procedures_archived_insert ON ball_mill_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(ball_mill_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT ball_mill_procedure_template_archived);
 CREATE POLICY ball_mill_procedures_archived_delete ON ball_mill_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY ball_mill_procedures_blocked ON ball_mill_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -217,4 +269,4 @@ CREATE POLICY ball_mill_procedures_update ON ball_mill_procedures FOR UPDATE TO 
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY ball_mill_procedures_archived_update ON ball_mill_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);

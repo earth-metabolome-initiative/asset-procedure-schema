@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Devices / Phone Devices
 -- Purpose: Phone Devices for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- camera_models
@@ -25,7 +25,8 @@ CREATE TABLE phone_device_models (
     organization_id UUID NOT NULL,
     CONSTRAINT phone_device_models_geopositioning
     FOREIGN KEY (id) REFERENCES geopositioning_device_models (id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('phone_device_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -67,7 +68,8 @@ CREATE TABLE commercial_phone_device_models (
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
     FOREIGN KEY (id) REFERENCES commercial_geopositioning_device_models (id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('commercial_phone_device_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -110,7 +112,9 @@ CREATE TABLE commercial_phone_device_lots (
     organization_id UUID NOT NULL,
     CONSTRAINT commercial_phone_device_lots_geopositioning
     FOREIGN KEY (id) REFERENCES commercial_geopositioning_device_lots (id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('commercial_phone_device_lots');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -158,7 +162,10 @@ CREATE TABLE phone_devices (
     CONSTRAINT phone_devices_geopositioning
     FOREIGN KEY (id) REFERENCES geopositioning_devices (id) ON DELETE CASCADE,
     FOREIGN KEY (id, commercial_phone_device_lot_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_phone_device_lot_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (commercial_phone_device_lot_id, commercial_phone_device_lot_archived) REFERENCES commercial_phone_device_lots (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON phone_devices (commercial_phone_device_lot_id);
 INSERT INTO table_names (id) VALUES ('phone_devices');
@@ -206,9 +213,9 @@ CREATE POLICY phone_device_models_insert ON phone_device_models FOR INSERT TO ap
 CREATE POLICY phone_device_models_delete ON phone_device_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY phone_device_models_archived_insert ON phone_device_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY phone_device_models_archived_delete ON phone_device_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY phone_device_models_blocked ON phone_device_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -223,9 +230,9 @@ CREATE POLICY commercial_phone_device_models_insert ON commercial_phone_device_m
 CREATE POLICY commercial_phone_device_models_delete ON commercial_phone_device_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_phone_device_models_archived_insert ON commercial_phone_device_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY commercial_phone_device_models_archived_delete ON commercial_phone_device_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_phone_device_models_blocked ON commercial_phone_device_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -240,9 +247,9 @@ CREATE POLICY commercial_phone_device_lots_insert ON commercial_phone_device_lot
 CREATE POLICY commercial_phone_device_lots_delete ON commercial_phone_device_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_phone_device_lots_archived_insert ON commercial_phone_device_lots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY commercial_phone_device_lots_archived_delete ON commercial_phone_device_lots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_phone_device_lots_blocked ON commercial_phone_device_lots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -258,9 +265,9 @@ CREATE POLICY phone_devices_insert ON phone_devices FOR INSERT TO app
 CREATE POLICY phone_devices_delete ON phone_devices FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY phone_devices_archived_insert ON phone_devices AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_phone_device_lot_id));
+    WITH CHECK (NOT archived AND NOT commercial_phone_device_lot_archived);
 CREATE POLICY phone_devices_archived_delete ON phone_devices AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY phone_devices_blocked ON phone_devices AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

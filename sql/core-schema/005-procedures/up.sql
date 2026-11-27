@@ -2,8 +2,8 @@
 -- runs as a parent procedure whose children each execute one of its steps,
 -- once, or once per asset of the step's repeat slot.
 CREATE TABLE procedures (
-    -- Identifier of the connetto ownable this procedure extends.
-    id UUID PRIMARY KEY REFERENCES ownables (id) ON DELETE CASCADE,
+    -- Identifier of the connetto `resource` of kind `'ownable'` this procedure extends.
+    id UUID PRIMARY KEY REFERENCES resources (id) ON DELETE CASCADE,
     -- connetto organization owning the row.
     organization_id UUID NOT NULL,
     -- connetto project holding the procedure.
@@ -66,8 +66,17 @@ CREATE TABLE procedures (
         REFERENCES procedures (id, project_id, organization_id) DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (step_id, parent_template_id, procedure_template_id)
         REFERENCES procedure_template_steps (id, parent_template_id, child_template_id),
-    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    parent_procedure_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    UNIQUE (organization_id, id, archived),
+    FOREIGN KEY (procedure_template_id, procedure_template_archived) REFERENCES procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, parent_procedure_id, parent_procedure_archived)
+        REFERENCES procedures (organization_id, id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedures (procedure_template_id);
 CREATE INDEX ON procedures (parent_procedure_id, project_id);
@@ -134,7 +143,12 @@ CREATE TABLE procedure_assets (
     FOREIGN KEY (procedure_id, parent_procedure_id, organization_id) REFERENCES procedures (id, parent_procedure_id, organization_id),
     FOREIGN KEY (parent_procedure_asset_id, parent_procedure_id, asset_model_id, organization_id)
         REFERENCES procedure_assets (id, procedure_id, asset_model_id, organization_id),
-    FOREIGN KEY (organization_id, procedure_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    asset_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (asset_id, asset_archived) REFERENCES assets (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (asset_model_id, asset_model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, procedure_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_assets (asset_id);
 CREATE INDEX ON procedure_assets (slot_id);
@@ -178,7 +192,8 @@ CREATE TABLE procedure_parameter_values (
         DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (parameter_id, procedure_template_id, value_kind_id)
         REFERENCES procedure_template_parameters (id, procedure_template_id, value_kind_id),
-    FOREIGN KEY (organization_id, procedure_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, procedure_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON procedure_parameter_values (parameter_id);
 INSERT INTO table_names (id) VALUES ('procedure_parameter_values');
@@ -658,8 +673,20 @@ END;
 $$;
 ALTER FUNCTION guard_procedure_asset() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure_asset() FROM PUBLIC;
-CREATE TRIGGER procedure_assets_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_assets
+CREATE TRIGGER procedure_assets_guard AFTER INSERT OR DELETE ON procedure_assets
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_asset();
+CREATE TRIGGER procedure_assets_guard_update AFTER UPDATE OF id, procedure_id, procedure_template_id, status_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id, parent_procedure_asset_id, parent_procedure_id ON procedure_assets
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.procedure_id IS DISTINCT FROM NEW.procedure_id
+        OR OLD.procedure_template_id IS DISTINCT FROM NEW.procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.slot_id IS DISTINCT FROM NEW.slot_id
+        OR OLD.slot_asset_model_id IS DISTINCT FROM NEW.slot_asset_model_id
+        OR OLD.slot_role_id IS DISTINCT FROM NEW.slot_role_id
+        OR OLD.asset_model_id IS DISTINCT FROM NEW.asset_model_id
+        OR OLD.asset_id IS DISTINCT FROM NEW.asset_id
+        OR OLD.parent_procedure_asset_id IS DISTINCT FROM NEW.parent_procedure_asset_id
+        OR OLD.parent_procedure_id IS DISTINCT FROM NEW.parent_procedure_id) EXECUTE FUNCTION guard_procedure_asset();
 
 -- One row per binding naming an asset, kept equal to the binding and its
 -- procedure by trusted triggers, so an asset's readers check its lifetime
@@ -870,8 +897,17 @@ END;
 $$;
 ALTER FUNCTION guard_procedure_parameter_value() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure_parameter_value() FROM PUBLIC;
-CREATE TRIGGER procedure_parameter_values_guard AFTER INSERT OR UPDATE OR DELETE ON procedure_parameter_values
+CREATE TRIGGER procedure_parameter_values_guard AFTER INSERT OR DELETE ON procedure_parameter_values
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_parameter_value();
+CREATE TRIGGER procedure_parameter_values_guard_update AFTER UPDATE OF procedure_id, parameter_id, procedure_template_id, status_id, value_kind_id, number_value, text_value, boolean_value ON procedure_parameter_values
+    FOR EACH ROW WHEN (OLD.procedure_id IS DISTINCT FROM NEW.procedure_id
+        OR OLD.parameter_id IS DISTINCT FROM NEW.parameter_id
+        OR OLD.procedure_template_id IS DISTINCT FROM NEW.procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.value_kind_id IS DISTINCT FROM NEW.value_kind_id
+        OR OLD.number_value IS DISTINCT FROM NEW.number_value
+        OR OLD.text_value IS DISTINCT FROM NEW.text_value
+        OR OLD.boolean_value IS DISTINCT FROM NEW.boolean_value) EXECUTE FUNCTION guard_procedure_parameter_value();
 
 -- Lists number parameters recorded outside their admissible range.
 CREATE FUNCTION procedure_parameter_deviations(checked_procedure_id UUID) RETURNS SETOF TEXT
@@ -927,17 +963,34 @@ CREATE POLICY procedures_delete ON procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin')))
         AND (parent_procedure_id IS NULL OR parent_procedure_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));
 CREATE POLICY procedures_archived_insert ON procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(procedure_template_id)
-        AND NOT authz.is_archived(parent_procedure_id));
+    WITH CHECK (NOT archived AND NOT procedure_template_archived
+        AND NOT parent_procedure_archived);
 CREATE POLICY procedures_archived_update ON procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY procedures_archived_delete ON procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY procedures_blocked ON procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
 
-GRANT SELECT, INSERT, UPDATE (asset_id, asset_model_id), DELETE ON procedure_assets TO app;
+CREATE FUNCTION initialize_procedure_assets_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.procedure_id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.procedure_id
+        AND procedure.procedure_template_id = NEW.procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_procedure_assets_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_procedure_assets_status() FROM PUBLIC;
+CREATE TRIGGER procedure_assets_status_initialize BEFORE INSERT ON procedure_assets
+    FOR EACH ROW EXECUTE FUNCTION initialize_procedure_assets_status();
+
+GRANT SELECT, INSERT (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id, parent_procedure_asset_id, parent_procedure_id, archived, asset_archived, asset_model_archived), UPDATE (asset_id, asset_model_id), DELETE ON procedure_assets TO app;
 ALTER TABLE procedure_assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procedure_assets FORCE ROW LEVEL SECURITY;
 CREATE POLICY procedure_assets_select ON procedure_assets FOR SELECT TO app
@@ -959,17 +1012,34 @@ CREATE POLICY procedure_assets_delete ON procedure_assets FOR DELETE TO app
     USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND (asset_id IS NULL OR asset_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));
 CREATE POLICY procedure_assets_archived_insert ON procedure_assets AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(procedure_id) AND NOT authz.is_archived(asset_model_id) AND NOT authz.is_archived(asset_id));
+    WITH CHECK (NOT archived AND NOT asset_model_archived AND NOT asset_archived);
 CREATE POLICY procedure_assets_archived_update ON procedure_assets AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(procedure_id))
-    WITH CHECK (NOT authz.is_archived(procedure_id) AND NOT authz.is_archived(asset_model_id) AND NOT authz.is_archived(asset_id));
+    USING (NOT archived)
+    WITH CHECK (NOT archived AND NOT asset_model_archived AND NOT asset_archived);
 CREATE POLICY procedure_assets_archived_delete ON procedure_assets AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(procedure_id));
+    USING (NOT archived);
 CREATE POLICY procedure_assets_blocked ON procedure_assets AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
 
-GRANT SELECT, INSERT, UPDATE (number_value, text_value, boolean_value), DELETE ON procedure_parameter_values TO app;
+CREATE FUNCTION initialize_procedure_parameter_values_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.procedure_id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.procedure_id
+        AND procedure.procedure_template_id = NEW.procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_procedure_parameter_values_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_procedure_parameter_values_status() FROM PUBLIC;
+CREATE TRIGGER procedure_parameter_values_status_initialize BEFORE INSERT ON procedure_parameter_values
+    FOR EACH ROW EXECUTE FUNCTION initialize_procedure_parameter_values_status();
+
+GRANT SELECT, INSERT (procedure_id, parameter_id, procedure_template_id, value_kind_id, organization_id, number_value, text_value, boolean_value, archived), UPDATE (number_value, text_value, boolean_value), DELETE ON procedure_parameter_values TO app;
 ALTER TABLE procedure_parameter_values ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procedure_parameter_values FORCE ROW LEVEL SECURITY;
 CREATE POLICY procedure_parameter_values_select ON procedure_parameter_values FOR SELECT TO app
@@ -984,11 +1054,11 @@ CREATE POLICY procedure_parameter_values_update ON procedure_parameter_values FO
 CREATE POLICY procedure_parameter_values_delete ON procedure_parameter_values FOR DELETE TO app
     USING (procedure_id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY procedure_parameter_values_archived_insert ON procedure_parameter_values AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(procedure_id));
+    WITH CHECK (NOT archived);
 CREATE POLICY procedure_parameter_values_archived_update ON procedure_parameter_values AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(procedure_id)) WITH CHECK (NOT authz.is_archived(procedure_id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY procedure_parameter_values_archived_delete ON procedure_parameter_values AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(procedure_id));
+    USING (NOT archived);
 CREATE POLICY procedure_parameter_values_blocked ON procedure_parameter_values AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

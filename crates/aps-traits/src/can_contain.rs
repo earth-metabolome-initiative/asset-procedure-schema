@@ -1,5 +1,6 @@
 //! The containment rules of container models.
 
+use aps_authz_resource_kind::ResourceKind;
 use aps_physical_asset_models::*;
 use aps_resources::*;
 use diesel_builders::{BuildableTable, BuilderResult, GetColumn, Insert, TableBuilder};
@@ -58,6 +59,11 @@ pub trait CanContain:
         let builder =
             SetResourceId::id(validated(container_compatibility_rules::table::try_builder())?, id);
         let builder = SetResourceOrganizationId::organization_id(builder, organization);
+        let builder = SetResourceParentId::parent_id(
+            builder,
+            GetColumn::<asset_models::project_id>::get_column(self),
+        );
+        let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
         let builder = SetContainerCompatibilityRuleProjectId::project_id(
             builder,
             GetColumn::<asset_models::project_id>::get_column(self),
@@ -67,7 +73,6 @@ pub trait CanContain:
             .container_model_id(GetColumn::<container_models::id>::get_column(self))
             .contained_asset_model_id(contained.get_column());
         let builder = validated(builder.try_quantity(quantity))?;
-        let builder = SetOwnableOrganizationId::organization_id(builder, organization);
         flatten(
             SetContainerCompatibilityRuleOrganizationId::organization_id(builder, organization)
                 .insert(conn),

@@ -41,7 +41,7 @@ RESET ROLE;
 CREATE FUNCTION pg_temp.store(run UUID, contained UUID, destination UUID, started TIMESTAMPTZ, ended TIMESTAMPTZ) RETURNS VOID LANGUAGE sql AS $$
 SELECT pg_temp.new_procedure(run, '72000000-0000-7000-8000-000000000001', 'in_progress', NULL, NULL, NULL, 'storage_procedures');
 UPDATE public.procedures SET started_at = started WHERE id = run;
-INSERT INTO public.storage_procedures (id, organization_id, storage_procedure_template_id, status_id, temperature_k) VALUES (run, '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000001', 'in_progress', 293.15);
+INSERT INTO public.storage_procedures (id, organization_id, storage_procedure_template_id, temperature_k) VALUES (run, '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000001', 293.15);
 SELECT pg_temp.bind(run, run, '73000000-0000-7000-8000-000000000001', contained);
 SELECT pg_temp.bind(('8' || substring(run::text FROM 2))::uuid, run, '73000000-0000-7000-8000-000000000002', destination);
 UPDATE public.procedures SET status_id = 'completed', ended_at = ended WHERE id = run;
@@ -59,7 +59,7 @@ SELECT throws_ok($$SELECT pg_temp.store('75000000-0000-7000-8000-000000000004', 
 SAVEPOINT retrieval;
 SELECT pg_temp.new_procedure('75000000-0000-7000-8000-000000000005', '72000000-0000-7000-8000-000000000002', 'in_progress', NULL, NULL, NULL, 'retrieval_procedures');
 UPDATE procedures SET started_at = '2026-01-01 04:00+00' WHERE id = '75000000-0000-7000-8000-000000000005';
-INSERT INTO retrieval_procedures (id, organization_id, retrieval_procedure_template_id, status_id) VALUES ('75000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000002', 'in_progress');
+INSERT INTO retrieval_procedures (id, organization_id, retrieval_procedure_template_id) VALUES ('75000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000002');
 SELECT pg_temp.bind('76000000-0000-7000-8000-000000000001', '75000000-0000-7000-8000-000000000005', '73000000-0000-7000-8000-000000000003', '74000000-0000-7000-8000-000000000001');
 SELECT pg_temp.bind('76000000-0000-7000-8000-000000000002', '75000000-0000-7000-8000-000000000005', '73000000-0000-7000-8000-000000000004', '74000000-0000-7000-8000-000000000003');
 SELECT throws_ok($$UPDATE procedures SET status_id = 'completed', ended_at = '2026-01-01 05:00+00' WHERE id = '75000000-0000-7000-8000-000000000005'; SET CONSTRAINTS ALL IMMEDIATE; DO $reject$ BEGIN RAISE EXCEPTION 'unexpected acceptance' USING ERRCODE = 'ZX001'; END; $reject$; $$, '23514', 'retrieved asset is not in its source container', 'retrieval refuses the wrong source');
@@ -79,7 +79,7 @@ SELECT pg_temp.new_slot('73000000-0000-7000-8000-000000000007', '72000000-0000-7
 SELECT lives_ok($$UPDATE procedure_template_slots SET placed_into_slot_id = '73000000-0000-7000-8000-000000000007' WHERE id = '73000000-0000-7000-8000-000000000006'; INSERT INTO storage_procedure_templates (id, organization_id, stored_asset_slot_id, stored_asset_model_id, stored_into_slot_id, stored_into_model_id) VALUES ('72000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001', '73000000-0000-7000-8000-000000000006', '71000000-0000-7000-8000-000000000002', '73000000-0000-7000-8000-000000000007', '71000000-0000-7000-8000-000000000002'); SET CONSTRAINTS ALL IMMEDIATE$$, 'storage template accepts ancestral compatibility on both sides');
 SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.new_procedure('75000000-0000-7000-8000-000000000007', '72000000-0000-7000-8000-000000000001', 'planned', NULL, NULL, NULL, 'storage_procedures');
-INSERT INTO storage_procedures (id, organization_id, storage_procedure_template_id, status_id) VALUES ('75000000-0000-7000-8000-000000000007', '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000001', 'planned');
+INSERT INTO storage_procedures (id, organization_id, storage_procedure_template_id) VALUES ('75000000-0000-7000-8000-000000000007', '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000001');
 SELECT throws_ok($$UPDATE storage_procedures SET temperature_k = 0 WHERE id = '75000000-0000-7000-8000-000000000007'$$, '23514', 'new row for relation "storage_procedures" violates check constraint "storage_procedures_temperature_k_check"', 'storage refuses zero kelvin');
 SELECT lives_ok($$UPDATE storage_procedures SET temperature_k = 0.01 WHERE id = '75000000-0000-7000-8000-000000000007'$$, 'storage accepts positive kelvin');
 
@@ -121,7 +121,7 @@ UPDATE procedure_template_slots SET placed_into_slot_id = '73000000-0000-7000-80
 UPDATE procedure_templates SET state_id = 'published' WHERE id = '72000000-0000-7000-8000-000000000008';
 SELECT pg_temp.new_procedure('75000000-0000-7000-8000-000000000008', '72000000-0000-7000-8000-000000000008', 'in_progress', NULL, NULL, NULL, 'pouring_procedures');
 UPDATE procedures SET started_at = '2026-02-02 00:00+00' WHERE id = '75000000-0000-7000-8000-000000000008';
-INSERT INTO pouring_procedures (id, organization_id, pouring_procedure_template_id, status_id, volume_l) VALUES ('75000000-0000-7000-8000-000000000008', '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000008', 'in_progress', 0.01);
+INSERT INTO pouring_procedures (id, organization_id, pouring_procedure_template_id, volume_l) VALUES ('75000000-0000-7000-8000-000000000008', '20000000-0000-7000-8000-000000000001', '72000000-0000-7000-8000-000000000008', 0.01);
 SELECT pg_temp.bind_model('76000000-0000-7000-8000-000000000010', '75000000-0000-7000-8000-000000000008', '73000000-0000-7000-8000-000000000010', '74000000-0000-7000-8000-000000000004', '71000000-0000-7000-8000-000000000010');
 SELECT pg_temp.bind_model('76000000-0000-7000-8000-000000000011', '75000000-0000-7000-8000-000000000008', '73000000-0000-7000-8000-000000000011', '74000000-0000-7000-8000-000000000005', '71000000-0000-7000-8000-000000000010');
 SELECT pg_temp.bind_model('76000000-0000-7000-8000-000000000012', '75000000-0000-7000-8000-000000000008', '73000000-0000-7000-8000-000000000012', NULL, '71000000-0000-7000-8000-000000000011');
@@ -169,7 +169,7 @@ SELECT lives_ok($statement$UPDATE public.freeze_drying_procedure_templates SET p
 UPDATE public.procedure_templates SET state_id = 'published' WHERE id = '79000000-0000-7000-8000-000000000100';
 SELECT pg_temp.new_procedure('79000000-0000-7000-8000-000000000200', '79000000-0000-7000-8000-000000000100', 'in_progress', NULL, NULL, NULL, 'freeze_drying_procedures');
 UPDATE public.procedures SET started_at = '2026-01-01 00:00:00+00' WHERE id = '79000000-0000-7000-8000-000000000200';
-INSERT INTO public.freeze_drying_procedures (id, organization_id, freeze_drying_procedure_template_id, status_id, temperature_k, pressure_pa) VALUES ('79000000-0000-7000-8000-000000000200', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000100', 'in_progress', 203.15, 100);
+INSERT INTO public.freeze_drying_procedures (id, organization_id, freeze_drying_procedure_template_id, temperature_k, pressure_pa) VALUES ('79000000-0000-7000-8000-000000000200', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000100', 203.15, 100);
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000201', '79000000-0000-7000-8000-000000000200', '79000000-0000-7000-8000-000000000101', NULL, '79000000-0000-7000-8000-000000000002');
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000202', '79000000-0000-7000-8000-000000000200', '79000000-0000-7000-8000-000000000102', NULL, '79000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
@@ -195,7 +195,7 @@ INSERT INTO public.freezing_procedure_templates (id, organization_id, frozen_wit
 UPDATE public.procedure_templates SET state_id = 'published' WHERE id = '79000000-0000-7000-8000-000000000110';
 SELECT pg_temp.new_procedure('79000000-0000-7000-8000-000000000210', '79000000-0000-7000-8000-000000000110', 'in_progress', NULL, NULL, NULL, 'freezing_procedures');
 UPDATE public.procedures SET started_at = '2026-01-01 00:00:00+00' WHERE id = '79000000-0000-7000-8000-000000000210';
-INSERT INTO public.freezing_procedures (id, organization_id, freezing_procedure_template_id, status_id, temperature_k) VALUES ('79000000-0000-7000-8000-000000000210', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000110', 'in_progress', 203.15);
+INSERT INTO public.freezing_procedures (id, organization_id, freezing_procedure_template_id, temperature_k) VALUES ('79000000-0000-7000-8000-000000000210', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000110', 203.15);
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000211', '79000000-0000-7000-8000-000000000210', '79000000-0000-7000-8000-000000000111', NULL, '79000000-0000-7000-8000-000000000003');
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000212', '79000000-0000-7000-8000-000000000210', '79000000-0000-7000-8000-000000000112', NULL, '79000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
@@ -216,7 +216,7 @@ SELECT lives_ok($statement$UPDATE public.centrifuge_procedure_templates SET spee
 UPDATE public.procedure_templates SET state_id = 'published' WHERE id = '79000000-0000-7000-8000-000000000120';
 SELECT pg_temp.new_procedure('79000000-0000-7000-8000-000000000220', '79000000-0000-7000-8000-000000000120', 'in_progress', NULL, NULL, NULL, 'centrifuge_procedures');
 UPDATE public.procedures SET started_at = '2026-01-01 00:00:00+00' WHERE id = '79000000-0000-7000-8000-000000000220';
-INSERT INTO public.centrifuge_procedures (id, organization_id, centrifuge_procedure_template_id, status_id, temperature_k, speed_rpm) VALUES ('79000000-0000-7000-8000-000000000220', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000120', 'in_progress', 293.15, 10000);
+INSERT INTO public.centrifuge_procedures (id, organization_id, centrifuge_procedure_template_id, temperature_k, speed_rpm) VALUES ('79000000-0000-7000-8000-000000000220', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000120', 293.15, 10000);
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000221', '79000000-0000-7000-8000-000000000220', '79000000-0000-7000-8000-000000000121', NULL, '79000000-0000-7000-8000-000000000004');
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000222', '79000000-0000-7000-8000-000000000220', '79000000-0000-7000-8000-000000000122', NULL, '79000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
@@ -248,7 +248,7 @@ SELECT lives_ok($statement$UPDATE public.ball_mill_procedure_templates SET frequ
 UPDATE public.procedure_templates SET state_id = 'published' WHERE id = '79000000-0000-7000-8000-000000000130';
 SELECT pg_temp.new_procedure('79000000-0000-7000-8000-000000000230', '79000000-0000-7000-8000-000000000130', 'in_progress', NULL, NULL, NULL, 'ball_mill_procedures');
 UPDATE public.procedures SET started_at = '2026-01-01 00:00:00+00' WHERE id = '79000000-0000-7000-8000-000000000230';
-INSERT INTO public.ball_mill_procedures (id, organization_id, ball_mill_procedure_template_id, status_id, temperature_k, frequency_hz) VALUES ('79000000-0000-7000-8000-000000000230', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000130', 'in_progress', 293.15, 20);
+INSERT INTO public.ball_mill_procedures (id, organization_id, ball_mill_procedure_template_id, temperature_k, frequency_hz) VALUES ('79000000-0000-7000-8000-000000000230', '20000000-0000-7000-8000-000000000001', '79000000-0000-7000-8000-000000000130', 293.15, 20);
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000231', '79000000-0000-7000-8000-000000000230', '79000000-0000-7000-8000-000000000131', NULL, '79000000-0000-7000-8000-000000000005');
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000232', '79000000-0000-7000-8000-000000000230', '79000000-0000-7000-8000-000000000132', NULL, '79000000-0000-7000-8000-000000000001');
 SELECT pg_temp.bind_model('79000000-0000-7000-8000-000000000233', '79000000-0000-7000-8000-000000000230', '79000000-0000-7000-8000-000000000133', NULL, '79000000-0000-7000-8000-000000000006');
@@ -372,19 +372,19 @@ SET CONSTRAINTS ALL DEFERRED;
 SET ROLE app;
 UPDATE procedure_templates SET state_id = 'published' WHERE id = '78000000-0000-7000-8000-000000000100';
 SELECT pg_temp.new_procedure('78000000-0000-7000-8000-000000000110', '78000000-0000-7000-8000-000000000100', 'planned', NULL, NULL, NULL, 'pouring_procedures');
-SELECT throws_ok($statement$INSERT INTO pouring_procedures (id, organization_id, pouring_procedure_template_id, status_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000110', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000100', 'planned', 0); DO $reject$ BEGIN RAISE EXCEPTION 'accepted invalid change' USING ERRCODE = 'ZX001'; END $reject$;$statement$, '23514', NULL, 'pouring rejects zero measured volume');
+SELECT throws_ok($statement$INSERT INTO pouring_procedures (id, organization_id, pouring_procedure_template_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000110', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000100', 0); DO $reject$ BEGIN RAISE EXCEPTION 'accepted invalid change' USING ERRCODE = 'ZX001'; END $reject$;$statement$, '23514', NULL, 'pouring rejects zero measured volume');
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO pouring_procedures (id, organization_id, pouring_procedure_template_id, status_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000110', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000100', 'planned', 0.01);
+INSERT INTO pouring_procedures (id, organization_id, pouring_procedure_template_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000110', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000100', 0.01);
 UPDATE procedure_templates SET state_id = 'published' WHERE id = '78000000-0000-7000-8000-000000000120';
 SELECT pg_temp.new_procedure('78000000-0000-7000-8000-000000000130', '78000000-0000-7000-8000-000000000120', 'planned', NULL, NULL, NULL, 'aliquoting_procedures');
-SELECT throws_ok($statement$INSERT INTO aliquoting_procedures (id, organization_id, aliquoting_procedure_template_id, status_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000130', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000120', 'planned', 0); DO $reject$ BEGIN RAISE EXCEPTION 'accepted invalid change' USING ERRCODE = 'ZX001'; END $reject$;$statement$, '23514', NULL, 'aliquoting rejects zero measured volume');
+SELECT throws_ok($statement$INSERT INTO aliquoting_procedures (id, organization_id, aliquoting_procedure_template_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000130', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000120', 0); DO $reject$ BEGIN RAISE EXCEPTION 'accepted invalid change' USING ERRCODE = 'ZX001'; END $reject$;$statement$, '23514', NULL, 'aliquoting rejects zero measured volume');
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO aliquoting_procedures (id, organization_id, aliquoting_procedure_template_id, status_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000130', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000120', 'planned', 0.01);
+INSERT INTO aliquoting_procedures (id, organization_id, aliquoting_procedure_template_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000130', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000120', 0.01);
 UPDATE procedure_templates SET state_id = 'published' WHERE id = '78000000-0000-7000-8000-000000000140';
 SELECT pg_temp.new_procedure('78000000-0000-7000-8000-000000000150', '78000000-0000-7000-8000-000000000140', 'planned', NULL, NULL, NULL, 'supernatant_procedures');
-SELECT throws_ok($statement$INSERT INTO supernatant_procedures (id, organization_id, supernatant_procedure_template_id, status_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000150', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000140', 'planned', 0); DO $reject$ BEGIN RAISE EXCEPTION 'accepted invalid change' USING ERRCODE = 'ZX001'; END $reject$;$statement$, '23514', NULL, 'supernatant rejects zero measured volume');
+SELECT throws_ok($statement$INSERT INTO supernatant_procedures (id, organization_id, supernatant_procedure_template_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000150', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000140', 0); DO $reject$ BEGIN RAISE EXCEPTION 'accepted invalid change' USING ERRCODE = 'ZX001'; END $reject$;$statement$, '23514', NULL, 'supernatant rejects zero measured volume');
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO supernatant_procedures (id, organization_id, supernatant_procedure_template_id, status_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000150', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000140', 'planned', 0.01);
+INSERT INTO supernatant_procedures (id, organization_id, supernatant_procedure_template_id, volume_l) VALUES ('78000000-0000-7000-8000-000000000150', '20000000-0000-7000-8000-000000000001', '78000000-0000-7000-8000-000000000140', 0.01);
 SELECT throws_ok($statement$UPDATE procedure_template_slots SET maximum_count = 2 WHERE id = '78000000-0000-7000-8000-000000000163'; SET CONSTRAINTS ALL IMMEDIATE; DO $reject$ BEGIN RAISE EXCEPTION 'accepted invalid change' USING ERRCODE = 'ZX001'; END $reject$;$statement$, '23514', NULL, 'fraction mass requires one fraction');
 SET CONSTRAINTS ALL DEFERRED;
 SELECT pg_temp.new_template('78000000-0000-7000-8000-000000000200', 'slot review weighing', 'weighing_procedure_templates');

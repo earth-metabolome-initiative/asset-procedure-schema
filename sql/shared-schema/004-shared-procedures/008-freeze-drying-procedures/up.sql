@@ -1,7 +1,7 @@
 -- Migration: 008-freeze-drying-procedures
 -- Purpose: Typed freeze drying slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- freeze_drying_procedure_templates
 -- +-- procedures -- freeze_drying_procedures
 -- Slot | Role | Meaning
@@ -42,7 +42,13 @@ CREATE TABLE freeze_drying_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (freeze_dried_container_slot_id, id, freeze_dried_container_model_id, freeze_dried_container_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    freeze_dried_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    freeze_dried_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (freeze_dried_with_model_id, freeze_dried_with_model_archived) REFERENCES freeze_dryer_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (freeze_dried_container_model_id, freeze_dried_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON freeze_drying_procedure_templates (freeze_dried_container_model_id);
 CREATE INDEX ON freeze_drying_procedure_templates (freeze_dried_with_model_id);
@@ -50,8 +56,22 @@ INSERT INTO table_names (id) VALUES ('freeze_drying_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freeze_drying_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'freeze_drying_procedure_templates', 'freeze_drying_procedure_templates';
-CREATE TRIGGER freeze_drying_procedure_templates_guard AFTER INSERT OR UPDATE ON freeze_drying_procedure_templates
+CREATE TRIGGER freeze_drying_procedure_templates_guard AFTER INSERT ON freeze_drying_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER freeze_drying_procedure_templates_guard_update AFTER UPDATE OF id, freeze_dried_with_slot_id, freeze_dried_with_model_id, freeze_dried_with_slot_role_id, freeze_dried_container_slot_id, freeze_dried_container_model_id, freeze_dried_container_slot_role_id, temperature_k, temperature_tolerance_percentage, pressure_pa, pressure_pa_tolerance_percentage, duration_s, duration_tolerance_percentage ON freeze_drying_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.freeze_dried_with_slot_id IS DISTINCT FROM NEW.freeze_dried_with_slot_id
+        OR OLD.freeze_dried_with_model_id IS DISTINCT FROM NEW.freeze_dried_with_model_id
+        OR OLD.freeze_dried_with_slot_role_id IS DISTINCT FROM NEW.freeze_dried_with_slot_role_id
+        OR OLD.freeze_dried_container_slot_id IS DISTINCT FROM NEW.freeze_dried_container_slot_id
+        OR OLD.freeze_dried_container_model_id IS DISTINCT FROM NEW.freeze_dried_container_model_id
+        OR OLD.freeze_dried_container_slot_role_id IS DISTINCT FROM NEW.freeze_dried_container_slot_role_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.temperature_tolerance_percentage IS DISTINCT FROM NEW.temperature_tolerance_percentage
+        OR OLD.pressure_pa IS DISTINCT FROM NEW.pressure_pa
+        OR OLD.pressure_pa_tolerance_percentage IS DISTINCT FROM NEW.pressure_pa_tolerance_percentage
+        OR OLD.duration_s IS DISTINCT FROM NEW.duration_s
+        OR OLD.duration_tolerance_percentage IS DISTINCT FROM NEW.duration_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER freeze_drying_procedure_templates_delete_guard BEFORE DELETE ON freeze_drying_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -93,11 +113,11 @@ CREATE POLICY freeze_drying_procedure_templates_update ON freeze_drying_procedur
 CREATE POLICY freeze_drying_procedure_templates_delete ON freeze_drying_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY freeze_drying_procedure_templates_archived_insert ON freeze_drying_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(freeze_dried_with_model_id) AND NOT authz.is_archived(freeze_dried_container_model_id));
+    WITH CHECK (NOT archived AND NOT freeze_dried_with_model_archived AND NOT freeze_dried_container_model_archived);
 CREATE POLICY freeze_drying_procedure_templates_archived_update ON freeze_drying_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY freeze_drying_procedure_templates_archived_delete ON freeze_drying_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY freeze_drying_procedure_templates_blocked ON freeze_drying_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -121,7 +141,10 @@ CREATE TABLE freeze_drying_procedures (
     FOREIGN KEY (id, freeze_drying_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    freeze_drying_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (freeze_drying_procedure_template_id, freeze_drying_procedure_template_archived) REFERENCES freeze_drying_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON freeze_drying_procedures (freeze_drying_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('freeze_drying_procedures');
@@ -130,8 +153,14 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freeze_drying_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'freeze_drying_procedures', 'freeze_drying_procedures';
-CREATE TRIGGER freeze_drying_procedures_guard AFTER INSERT OR UPDATE ON freeze_drying_procedures
+CREATE TRIGGER freeze_drying_procedures_guard AFTER INSERT ON freeze_drying_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER freeze_drying_procedures_guard_update AFTER UPDATE OF id, freeze_drying_procedure_template_id, status_id, temperature_k, pressure_pa ON freeze_drying_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.freeze_drying_procedure_template_id IS DISTINCT FROM NEW.freeze_drying_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.pressure_pa IS DISTINCT FROM NEW.pressure_pa) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER freeze_drying_procedures_delete_guard BEFORE DELETE ON freeze_drying_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -175,7 +204,24 @@ CREATE CONSTRAINT TRIGGER freeze_drying_procedures_row AFTER INSERT ON procedure
 CREATE CONSTRAINT TRIGGER freeze_drying_procedures_kept AFTER DELETE ON freeze_drying_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_freeze_drying_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (temperature_k, pressure_pa), DELETE ON freeze_drying_procedures TO app;
+CREATE FUNCTION initialize_freeze_drying_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.freeze_drying_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_freeze_drying_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_freeze_drying_procedures_status() FROM PUBLIC;
+CREATE TRIGGER freeze_drying_procedures_status_initialize BEFORE INSERT ON freeze_drying_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_freeze_drying_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, freeze_drying_procedure_template_id, temperature_k, pressure_pa, archived, freeze_drying_procedure_template_archived), UPDATE (temperature_k, pressure_pa), DELETE ON freeze_drying_procedures TO app;
 ALTER TABLE freeze_drying_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE freeze_drying_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY freeze_drying_procedures_select ON freeze_drying_procedures FOR SELECT TO app
@@ -185,9 +231,9 @@ CREATE POLICY freeze_drying_procedures_insert ON freeze_drying_procedures FOR IN
 CREATE POLICY freeze_drying_procedures_delete ON freeze_drying_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY freeze_drying_procedures_archived_insert ON freeze_drying_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(freeze_drying_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT freeze_drying_procedure_template_archived);
 CREATE POLICY freeze_drying_procedures_archived_delete ON freeze_drying_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY freeze_drying_procedures_blocked ON freeze_drying_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -205,4 +251,4 @@ CREATE POLICY freeze_drying_procedures_update ON freeze_drying_procedures FOR UP
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY freeze_drying_procedures_archived_update ON freeze_drying_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);

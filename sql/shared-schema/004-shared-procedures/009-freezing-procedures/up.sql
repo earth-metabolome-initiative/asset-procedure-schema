@@ -1,7 +1,7 @@
 -- Migration: 009-freezing-procedures
 -- Purpose: Typed freezing slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- freezing_procedure_templates
 -- +-- procedures -- freezing_procedures
 -- Slot | Role | Meaning
@@ -38,7 +38,13 @@ CREATE TABLE freezing_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (frozen_container_slot_id, id, frozen_container_model_id, frozen_container_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    frozen_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    frozen_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (frozen_with_model_id, frozen_with_model_archived) REFERENCES freezer_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (frozen_container_model_id, frozen_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON freezing_procedure_templates (frozen_container_model_id);
 CREATE INDEX ON freezing_procedure_templates (frozen_with_model_id);
@@ -46,8 +52,20 @@ INSERT INTO table_names (id) VALUES ('freezing_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freezing_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'freezing_procedure_templates', 'freezing_procedure_templates';
-CREATE TRIGGER freezing_procedure_templates_guard AFTER INSERT OR UPDATE ON freezing_procedure_templates
+CREATE TRIGGER freezing_procedure_templates_guard AFTER INSERT ON freezing_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER freezing_procedure_templates_guard_update AFTER UPDATE OF id, frozen_with_slot_id, frozen_with_model_id, frozen_with_slot_role_id, frozen_container_slot_id, frozen_container_model_id, frozen_container_slot_role_id, temperature_k, temperature_tolerance_percentage, duration_s, duration_tolerance_percentage ON freezing_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.frozen_with_slot_id IS DISTINCT FROM NEW.frozen_with_slot_id
+        OR OLD.frozen_with_model_id IS DISTINCT FROM NEW.frozen_with_model_id
+        OR OLD.frozen_with_slot_role_id IS DISTINCT FROM NEW.frozen_with_slot_role_id
+        OR OLD.frozen_container_slot_id IS DISTINCT FROM NEW.frozen_container_slot_id
+        OR OLD.frozen_container_model_id IS DISTINCT FROM NEW.frozen_container_model_id
+        OR OLD.frozen_container_slot_role_id IS DISTINCT FROM NEW.frozen_container_slot_role_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k
+        OR OLD.temperature_tolerance_percentage IS DISTINCT FROM NEW.temperature_tolerance_percentage
+        OR OLD.duration_s IS DISTINCT FROM NEW.duration_s
+        OR OLD.duration_tolerance_percentage IS DISTINCT FROM NEW.duration_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER freezing_procedure_templates_delete_guard BEFORE DELETE ON freezing_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -89,11 +107,11 @@ CREATE POLICY freezing_procedure_templates_update ON freezing_procedure_template
 CREATE POLICY freezing_procedure_templates_delete ON freezing_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY freezing_procedure_templates_archived_insert ON freezing_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(frozen_with_model_id) AND NOT authz.is_archived(frozen_container_model_id));
+    WITH CHECK (NOT archived AND NOT frozen_with_model_archived AND NOT frozen_container_model_archived);
 CREATE POLICY freezing_procedure_templates_archived_update ON freezing_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY freezing_procedure_templates_archived_delete ON freezing_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY freezing_procedure_templates_blocked ON freezing_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -114,7 +132,10 @@ CREATE TABLE freezing_procedures (
     FOREIGN KEY (id, freezing_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    freezing_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (freezing_procedure_template_id, freezing_procedure_template_archived) REFERENCES freezing_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON freezing_procedures (freezing_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('freezing_procedures');
@@ -123,8 +144,13 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freezing_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'freezing_procedures', 'freezing_procedures';
-CREATE TRIGGER freezing_procedures_guard AFTER INSERT OR UPDATE ON freezing_procedures
+CREATE TRIGGER freezing_procedures_guard AFTER INSERT ON freezing_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER freezing_procedures_guard_update AFTER UPDATE OF id, freezing_procedure_template_id, status_id, temperature_k ON freezing_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.freezing_procedure_template_id IS DISTINCT FROM NEW.freezing_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER freezing_procedures_delete_guard BEFORE DELETE ON freezing_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -168,7 +194,24 @@ CREATE CONSTRAINT TRIGGER freezing_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER freezing_procedures_kept AFTER DELETE ON freezing_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_freezing_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (temperature_k), DELETE ON freezing_procedures TO app;
+CREATE FUNCTION initialize_freezing_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.freezing_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_freezing_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_freezing_procedures_status() FROM PUBLIC;
+CREATE TRIGGER freezing_procedures_status_initialize BEFORE INSERT ON freezing_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_freezing_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, freezing_procedure_template_id, temperature_k, archived, freezing_procedure_template_archived), UPDATE (temperature_k), DELETE ON freezing_procedures TO app;
 ALTER TABLE freezing_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE freezing_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY freezing_procedures_select ON freezing_procedures FOR SELECT TO app
@@ -178,9 +221,9 @@ CREATE POLICY freezing_procedures_insert ON freezing_procedures FOR INSERT TO ap
 CREATE POLICY freezing_procedures_delete ON freezing_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY freezing_procedures_archived_insert ON freezing_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(freezing_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT freezing_procedure_template_archived);
 CREATE POLICY freezing_procedures_archived_delete ON freezing_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY freezing_procedures_blocked ON freezing_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -198,4 +241,4 @@ CREATE POLICY freezing_procedures_update ON freezing_procedures FOR UPDATE TO ap
     USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
     WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
 CREATE POLICY freezing_procedures_archived_update ON freezing_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);

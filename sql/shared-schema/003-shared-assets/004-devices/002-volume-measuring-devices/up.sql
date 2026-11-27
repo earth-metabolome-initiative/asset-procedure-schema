@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Devices / Volume Measuring Devices
 -- Purpose: Volume Measuring Devices for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- volume_measuring_device_models
@@ -19,7 +19,9 @@ CREATE TABLE volume_measuring_device_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('volume_measuring_device_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -64,7 +66,11 @@ CREATE TABLE commercial_volume_measuring_device_models (
     volume_measuring_device_model_id UUID NOT NULL REFERENCES volume_measuring_device_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, volume_measuring_device_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    volume_measuring_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (volume_measuring_device_model_id, volume_measuring_device_model_archived) REFERENCES volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_volume_measuring_device_models (volume_measuring_device_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_volume_measuring_device_models');
@@ -110,7 +116,10 @@ CREATE TABLE commercial_volume_measuring_device_lots (
     -- Commercial volume-measuring model from which this lot derives.
     commercial_volume_measuring_device_model_id UUID NOT NULL REFERENCES commercial_volume_measuring_device_models (id),
     FOREIGN KEY (id, commercial_volume_measuring_device_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_volume_measuring_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (commercial_volume_measuring_device_model_id, commercial_volume_measuring_device_model_archived) REFERENCES commercial_volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_volume_measuring_device_lots (commercial_volume_measuring_device_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_volume_measuring_device_lots');
@@ -157,7 +166,10 @@ CREATE TABLE volume_measuring_devices (
     -- Volume-measuring model instantiated by this physical asset.
     volume_measuring_device_model_id UUID NOT NULL REFERENCES volume_measuring_device_models (id),
     FOREIGN KEY (id, volume_measuring_device_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    volume_measuring_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (volume_measuring_device_model_id, volume_measuring_device_model_archived) REFERENCES volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON volume_measuring_devices (volume_measuring_device_model_id);
 INSERT INTO table_names (id) VALUES ('volume_measuring_devices');
@@ -205,9 +217,9 @@ CREATE POLICY volume_measuring_device_models_insert ON volume_measuring_device_m
 CREATE POLICY volume_measuring_device_models_delete ON volume_measuring_device_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY volume_measuring_device_models_archived_insert ON volume_measuring_device_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY volume_measuring_device_models_archived_delete ON volume_measuring_device_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY volume_measuring_device_models_blocked ON volume_measuring_device_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -223,9 +235,9 @@ CREATE POLICY commercial_volume_measuring_device_models_insert ON commercial_vol
 CREATE POLICY commercial_volume_measuring_device_models_delete ON commercial_volume_measuring_device_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_volume_measuring_device_models_archived_insert ON commercial_volume_measuring_device_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(volume_measuring_device_model_id));
+    WITH CHECK (NOT archived AND NOT volume_measuring_device_model_archived);
 CREATE POLICY commercial_volume_measuring_device_models_archived_delete ON commercial_volume_measuring_device_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_volume_measuring_device_models_blocked ON commercial_volume_measuring_device_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -241,9 +253,9 @@ CREATE POLICY commercial_volume_measuring_device_lots_insert ON commercial_volum
 CREATE POLICY commercial_volume_measuring_device_lots_delete ON commercial_volume_measuring_device_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_volume_measuring_device_lots_archived_insert ON commercial_volume_measuring_device_lots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_volume_measuring_device_model_id));
+    WITH CHECK (NOT archived AND NOT commercial_volume_measuring_device_model_archived);
 CREATE POLICY commercial_volume_measuring_device_lots_archived_delete ON commercial_volume_measuring_device_lots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_volume_measuring_device_lots_blocked ON commercial_volume_measuring_device_lots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -259,9 +271,9 @@ CREATE POLICY volume_measuring_devices_insert ON volume_measuring_devices FOR IN
 CREATE POLICY volume_measuring_devices_delete ON volume_measuring_devices FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY volume_measuring_devices_archived_insert ON volume_measuring_devices AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(volume_measuring_device_model_id));
+    WITH CHECK (NOT archived AND NOT volume_measuring_device_model_archived);
 CREATE POLICY volume_measuring_devices_archived_delete ON volume_measuring_devices AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY volume_measuring_devices_blocked ON volume_measuring_devices AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

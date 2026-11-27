@@ -1,7 +1,7 @@
 -- Migration: 010-fractioning-procedures
 -- Purpose: Typed fractioning slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- fractioning_procedure_templates
 -- +-- procedures -- fractioning_procedures
 -- Slot | Role | Meaning
@@ -64,7 +64,19 @@ CREATE TABLE fractioning_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (fraction_slot_id, id, fragment_placed_into_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    weighed_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    fragment_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    fragment_placed_into_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    fraction_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    source_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (weighed_with_model_id, weighed_with_model_archived) REFERENCES weighing_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (fragment_container_model_id, fragment_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (fragment_placed_into_model_id, fragment_placed_into_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (fraction_model_id, fraction_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (source_sample_model_id, source_sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON fractioning_procedure_templates (fraction_model_id);
 CREATE INDEX ON fractioning_procedure_templates (fragment_container_model_id);
@@ -74,8 +86,27 @@ INSERT INTO table_names (id) VALUES ('fractioning_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'fractioning_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'fractioning_procedure_templates', 'fractioning_procedure_templates';
-CREATE TRIGGER fractioning_procedure_templates_guard AFTER INSERT OR UPDATE ON fractioning_procedure_templates
+CREATE TRIGGER fractioning_procedure_templates_guard AFTER INSERT ON fractioning_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER fractioning_procedure_templates_guard_update AFTER UPDATE OF id, source_sample_slot_id, source_sample_model_id, source_sample_slot_role_id, weighed_with_slot_id, weighed_with_model_id, weighed_with_slot_role_id, fragment_container_slot_id, fragment_container_model_id, fragment_container_slot_role_id, fragment_placed_into_slot_id, fragment_placed_into_model_id, fragment_placed_into_slot_role_id, fraction_slot_id, fraction_model_id, fraction_slot_role_id, mass_kg, tolerance_percentage ON fractioning_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.source_sample_slot_id IS DISTINCT FROM NEW.source_sample_slot_id
+        OR OLD.source_sample_model_id IS DISTINCT FROM NEW.source_sample_model_id
+        OR OLD.source_sample_slot_role_id IS DISTINCT FROM NEW.source_sample_slot_role_id
+        OR OLD.weighed_with_slot_id IS DISTINCT FROM NEW.weighed_with_slot_id
+        OR OLD.weighed_with_model_id IS DISTINCT FROM NEW.weighed_with_model_id
+        OR OLD.weighed_with_slot_role_id IS DISTINCT FROM NEW.weighed_with_slot_role_id
+        OR OLD.fragment_container_slot_id IS DISTINCT FROM NEW.fragment_container_slot_id
+        OR OLD.fragment_container_model_id IS DISTINCT FROM NEW.fragment_container_model_id
+        OR OLD.fragment_container_slot_role_id IS DISTINCT FROM NEW.fragment_container_slot_role_id
+        OR OLD.fragment_placed_into_slot_id IS DISTINCT FROM NEW.fragment_placed_into_slot_id
+        OR OLD.fragment_placed_into_model_id IS DISTINCT FROM NEW.fragment_placed_into_model_id
+        OR OLD.fragment_placed_into_slot_role_id IS DISTINCT FROM NEW.fragment_placed_into_slot_role_id
+        OR OLD.fraction_slot_id IS DISTINCT FROM NEW.fraction_slot_id
+        OR OLD.fraction_model_id IS DISTINCT FROM NEW.fraction_model_id
+        OR OLD.fraction_slot_role_id IS DISTINCT FROM NEW.fraction_slot_role_id
+        OR OLD.mass_kg IS DISTINCT FROM NEW.mass_kg
+        OR OLD.tolerance_percentage IS DISTINCT FROM NEW.tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER fractioning_procedure_templates_delete_guard BEFORE DELETE ON fractioning_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -117,11 +148,11 @@ CREATE POLICY fractioning_procedure_templates_update ON fractioning_procedure_te
 CREATE POLICY fractioning_procedure_templates_delete ON fractioning_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY fractioning_procedure_templates_archived_insert ON fractioning_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(weighed_with_model_id) AND NOT authz.is_archived(fragment_container_model_id) AND NOT authz.is_archived(fragment_placed_into_model_id) AND NOT authz.is_archived(fraction_model_id) AND NOT authz.is_archived(source_sample_model_id));
+    WITH CHECK (NOT archived AND NOT weighed_with_model_archived AND NOT fragment_container_model_archived AND NOT fragment_placed_into_model_archived AND NOT fraction_model_archived AND NOT source_sample_model_archived);
 CREATE POLICY fractioning_procedure_templates_archived_update ON fractioning_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY fractioning_procedure_templates_archived_delete ON fractioning_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY fractioning_procedure_templates_blocked ON fractioning_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -142,7 +173,10 @@ CREATE TABLE fractioning_procedures (
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
     CHECK (status_id <> 'completed' OR mass_kg IS NOT NULL),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    fractioning_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (fractioning_procedure_template_id, fractioning_procedure_template_archived) REFERENCES fractioning_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON fractioning_procedures (fractioning_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('fractioning_procedures');
@@ -151,8 +185,13 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'fractioning_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'fractioning_procedures', 'fractioning_procedures';
-CREATE TRIGGER fractioning_procedures_guard AFTER INSERT OR UPDATE ON fractioning_procedures
+CREATE TRIGGER fractioning_procedures_guard AFTER INSERT ON fractioning_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER fractioning_procedures_guard_update AFTER UPDATE OF id, fractioning_procedure_template_id, status_id, mass_kg ON fractioning_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.fractioning_procedure_template_id IS DISTINCT FROM NEW.fractioning_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.mass_kg IS DISTINCT FROM NEW.mass_kg) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER fractioning_procedures_delete_guard BEFORE DELETE ON fractioning_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -196,7 +235,24 @@ CREATE CONSTRAINT TRIGGER fractioning_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER fractioning_procedures_kept AFTER DELETE ON fractioning_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_fractioning_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (mass_kg), DELETE ON fractioning_procedures TO app;
+CREATE FUNCTION initialize_fractioning_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.fractioning_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_fractioning_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_fractioning_procedures_status() FROM PUBLIC;
+CREATE TRIGGER fractioning_procedures_status_initialize BEFORE INSERT ON fractioning_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_fractioning_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, fractioning_procedure_template_id, mass_kg, archived, fractioning_procedure_template_archived), UPDATE (mass_kg), DELETE ON fractioning_procedures TO app;
 ALTER TABLE fractioning_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fractioning_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY fractioning_procedures_select ON fractioning_procedures FOR SELECT TO app
@@ -209,11 +265,11 @@ CREATE POLICY fractioning_procedures_update ON fractioning_procedures FOR UPDATE
 CREATE POLICY fractioning_procedures_delete ON fractioning_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY fractioning_procedures_archived_insert ON fractioning_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(fractioning_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT fractioning_procedure_template_archived);
 CREATE POLICY fractioning_procedures_archived_update ON fractioning_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY fractioning_procedures_archived_delete ON fractioning_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY fractioning_procedures_blocked ON fractioning_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

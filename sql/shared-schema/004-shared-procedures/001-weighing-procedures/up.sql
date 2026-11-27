@@ -1,7 +1,7 @@
 -- Migration: 001-weighing-procedures
 -- Purpose: Typed weighing slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- weighing_procedure_templates
 -- +-- procedures -- weighing_procedures
 -- Slot | Role | Meaning
@@ -30,7 +30,13 @@ CREATE TABLE weighing_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (weighed_with_slot_id, id, weighed_with_model_id, weighed_with_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    weighed_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    weighed_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (weighed_asset_model_id, weighed_asset_model_archived) REFERENCES physical_asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (weighed_with_model_id, weighed_with_model_archived) REFERENCES weighing_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON weighing_procedure_templates (weighed_asset_model_id);
 CREATE INDEX ON weighing_procedure_templates (weighed_with_model_id);
@@ -38,8 +44,16 @@ INSERT INTO table_names (id) VALUES ('weighing_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'weighing_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'weighing_procedure_templates', 'weighing_procedure_templates';
-CREATE TRIGGER weighing_procedure_templates_guard AFTER INSERT OR UPDATE ON weighing_procedure_templates
+CREATE TRIGGER weighing_procedure_templates_guard AFTER INSERT ON weighing_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER weighing_procedure_templates_guard_update AFTER UPDATE OF id, weighed_asset_slot_id, weighed_asset_model_id, weighed_asset_slot_role_id, weighed_with_slot_id, weighed_with_model_id, weighed_with_slot_role_id ON weighing_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.weighed_asset_slot_id IS DISTINCT FROM NEW.weighed_asset_slot_id
+        OR OLD.weighed_asset_model_id IS DISTINCT FROM NEW.weighed_asset_model_id
+        OR OLD.weighed_asset_slot_role_id IS DISTINCT FROM NEW.weighed_asset_slot_role_id
+        OR OLD.weighed_with_slot_id IS DISTINCT FROM NEW.weighed_with_slot_id
+        OR OLD.weighed_with_model_id IS DISTINCT FROM NEW.weighed_with_model_id
+        OR OLD.weighed_with_slot_role_id IS DISTINCT FROM NEW.weighed_with_slot_role_id) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER weighing_procedure_templates_delete_guard BEFORE DELETE ON weighing_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -78,9 +92,9 @@ CREATE POLICY weighing_procedure_templates_insert ON weighing_procedure_template
 CREATE POLICY weighing_procedure_templates_delete ON weighing_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY weighing_procedure_templates_archived_insert ON weighing_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(weighed_asset_model_id) AND NOT authz.is_archived(weighed_with_model_id));
+    WITH CHECK (NOT archived AND NOT weighed_asset_model_archived AND NOT weighed_with_model_archived);
 CREATE POLICY weighing_procedure_templates_archived_delete ON weighing_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY weighing_procedure_templates_blocked ON weighing_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -101,7 +115,10 @@ CREATE TABLE weighing_procedures (
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
     CHECK (status_id <> 'completed' OR mass_kg IS NOT NULL),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    weighing_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (weighing_procedure_template_id, weighing_procedure_template_archived) REFERENCES weighing_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON weighing_procedures (weighing_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('weighing_procedures');
@@ -110,8 +127,13 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'weighing_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'weighing_procedures', 'weighing_procedures';
-CREATE TRIGGER weighing_procedures_guard AFTER INSERT OR UPDATE ON weighing_procedures
+CREATE TRIGGER weighing_procedures_guard AFTER INSERT ON weighing_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER weighing_procedures_guard_update AFTER UPDATE OF id, weighing_procedure_template_id, status_id, mass_kg ON weighing_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.weighing_procedure_template_id IS DISTINCT FROM NEW.weighing_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.mass_kg IS DISTINCT FROM NEW.mass_kg) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER weighing_procedures_delete_guard BEFORE DELETE ON weighing_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -155,7 +177,24 @@ CREATE CONSTRAINT TRIGGER weighing_procedures_row AFTER INSERT ON procedures
 CREATE CONSTRAINT TRIGGER weighing_procedures_kept AFTER DELETE ON weighing_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_weighing_procedures_row();
 
-GRANT SELECT, INSERT, UPDATE (mass_kg), DELETE ON weighing_procedures TO app;
+CREATE FUNCTION initialize_weighing_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.weighing_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_weighing_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_weighing_procedures_status() FROM PUBLIC;
+CREATE TRIGGER weighing_procedures_status_initialize BEFORE INSERT ON weighing_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_weighing_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, weighing_procedure_template_id, mass_kg, archived, weighing_procedure_template_archived), UPDATE (mass_kg), DELETE ON weighing_procedures TO app;
 ALTER TABLE weighing_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE weighing_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY weighing_procedures_select ON weighing_procedures FOR SELECT TO app
@@ -168,11 +207,11 @@ CREATE POLICY weighing_procedures_update ON weighing_procedures FOR UPDATE TO ap
 CREATE POLICY weighing_procedures_delete ON weighing_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY weighing_procedures_archived_insert ON weighing_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(weighing_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT weighing_procedure_template_archived);
 CREATE POLICY weighing_procedures_archived_update ON weighing_procedures AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY weighing_procedures_archived_delete ON weighing_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY weighing_procedures_blocked ON weighing_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

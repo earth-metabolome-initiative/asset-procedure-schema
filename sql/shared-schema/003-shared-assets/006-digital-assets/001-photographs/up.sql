@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Digital Assets / Photographs
 -- Purpose: Photographs for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- assets
 --           +-- digital_assets
 --               +-- photographs
@@ -16,7 +16,9 @@ CREATE TABLE photograph_models (
     -- Image media type pinned to the digital model.
     mime_type TEXT NOT NULL CHECK (mime_type LIKE 'image/%'),
     FOREIGN KEY (id, mime_type, organization_id) REFERENCES digital_asset_models (id, mime_type, organization_id) ON UPDATE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('photograph_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -60,7 +62,10 @@ CREATE TABLE photographs (
     -- Image model instantiated by this photograph.
     photograph_model_id UUID NOT NULL REFERENCES photograph_models (id),
     FOREIGN KEY (id, photograph_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    photograph_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (photograph_model_id, photograph_model_archived) REFERENCES photograph_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON photographs (photograph_model_id);
 INSERT INTO table_names (id) VALUES ('photographs');
@@ -109,9 +114,9 @@ CREATE POLICY photographs_insert ON photographs FOR INSERT TO app
 CREATE POLICY photographs_delete ON photographs FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY photographs_archived_insert ON photographs AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(photograph_model_id));
+    WITH CHECK (NOT archived AND NOT photograph_model_archived);
 CREATE POLICY photographs_archived_delete ON photographs AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY photographs_blocked ON photographs AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -126,9 +131,9 @@ CREATE POLICY photograph_models_insert ON photograph_models FOR INSERT TO app
 CREATE POLICY photograph_models_delete ON photograph_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY photograph_models_archived_insert ON photograph_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY photograph_models_archived_delete ON photograph_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY photograph_models_blocked ON photograph_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

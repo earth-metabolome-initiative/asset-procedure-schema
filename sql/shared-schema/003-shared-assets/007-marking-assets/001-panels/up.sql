@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Marking Assets / Panels
 -- Purpose: Panels for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- panel_models
@@ -16,7 +16,9 @@ CREATE TABLE panel_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('panel_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -60,7 +62,10 @@ CREATE TABLE panels (
     -- Panel model instantiated by this physical asset.
     panel_model_id UUID NOT NULL REFERENCES panel_models (id),
     FOREIGN KEY (id, panel_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    panel_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (panel_model_id, panel_model_archived) REFERENCES panel_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON panels (panel_model_id);
 INSERT INTO table_names (id) VALUES ('panels');
@@ -108,9 +113,9 @@ CREATE POLICY panel_models_insert ON panel_models FOR INSERT TO app
 CREATE POLICY panel_models_delete ON panel_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY panel_models_archived_insert ON panel_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY panel_models_archived_delete ON panel_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY panel_models_blocked ON panel_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -126,9 +131,9 @@ CREATE POLICY panels_insert ON panels FOR INSERT TO app
 CREATE POLICY panels_delete ON panels FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY panels_archived_insert ON panels AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(panel_model_id));
+    WITH CHECK (NOT archived AND NOT panel_model_archived);
 CREATE POLICY panels_archived_delete ON panels AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY panels_blocked ON panels AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

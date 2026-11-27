@@ -16,8 +16,6 @@ use crate::shape::{self, SqlType};
 const ASSETS_TABLE_NAME: &str = "assets";
 /// Root of every table with a row in `resources`.
 const RESOURCES_TABLE_NAME: &str = "resources";
-/// Table holding the creator of every owned row.
-const OWNABLES_TABLE_NAME: &str = "ownables";
 /// Root of the procedure tables.
 const PROCEDURES_TABLE_NAME: &str = "procedures";
 
@@ -121,9 +119,9 @@ fn procedure_setters(table_name: &str) -> TokenStream {
     quote! {
         .set_column::<crate::resources::id>(columns.id)
         .set_column::<crate::resources::organization_id>(columns.organization_id)
-        .set_column::<crate::ownables::organization_id>(columns.organization_id)
-        .set_column::<crate::ownables::project_id>(columns.project_id)
-        .set_column::<crate::ownables::created_by_id>(columns.created_by_id)
+        .set_column::<crate::resources::parent_id>(Some(columns.project_id))
+        .set_column::<crate::resources::parent_kind>(Some(::aps_authz_resource_kind::ResourceKind::Project))
+        .set_column::<crate::resources::created_by_id>(Some(columns.created_by_id))
         .set_column::<crate::procedures::organization_id>(columns.organization_id)
         .set_column::<crate::procedures::project_id>(columns.project_id)
         .set_column::<crate::procedures::table_name_id>(#table_name.to_owned())
@@ -188,8 +186,14 @@ fn asset_table<'db>(
                 }
                 "organization_id" => quote! { .set_column::<#path>(columns.organization_id) },
                 "project_id" => quote! { .set_column::<#path>(columns.project_id) },
-                "created_by_id" if level_name == OWNABLES_TABLE_NAME => {
-                    quote! { .set_column::<#path>(columns.created_by_id) }
+                "parent_id" if level_name == RESOURCES_TABLE_NAME => {
+                    quote! { .set_column::<#path>(Some(columns.project_id)) }
+                }
+                "parent_kind" if level_name == RESOURCES_TABLE_NAME => {
+                    quote! { .set_column::<#path>(Some(::aps_authz_resource_kind::ResourceKind::Project)) }
+                }
+                "created_by_id" if level_name == RESOURCES_TABLE_NAME => {
+                    quote! { .set_column::<#path>(Some(columns.created_by_id)) }
                 }
                 "table_name_id" if level_name == ASSETS_TABLE_NAME => {
                     quote! { .set_column::<#path>(#table_name.to_owned()) }
@@ -244,10 +248,9 @@ fn procedure_copy_setters(
                 continue;
             };
             let value = match referenced.column_name() {
-                "id" => continue,
+                "id" | "status_id" => continue,
                 "organization_id" => quote! { columns.organization_id },
                 "procedure_template_id" => quote! { columns.procedure_template_id },
-                "status_id" => quote! { columns.status_id.clone() },
                 other => {
                     panic!(
                         "`{}` copies `procedures.{other}`, which `ProcedureColumns` does not hold",
@@ -510,7 +513,7 @@ pub fn typed_rows(
         /// tables a runner knows only by `table_name_id`.
         pub trait TypedRows {
             /// Inserts a procedure of the typed procedure table `table_name_id`
-            /// with its `resources`, `ownables` and `procedures` rows.
+            /// with its `resources` and `procedures` rows.
             ///
             /// # Errors
             ///
@@ -626,4 +629,64 @@ pub fn typed_rows(
             }
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use sql_traits::prelude::TargetName;
+    use sqlparser::dialect::GenericDialect;
+
+    use super::*;
+
+    #[test]
+    fn procedure_setters_write_resource_ownership() {
+        let setters = procedure_setters("weighing_procedures").to_string();
+        for setter in [
+            quote! { .set_column::<crate::resources::parent_id>(Some(columns.project_id)) },
+            quote! { .set_column::<crate::resources::parent_kind>(Some(::aps_authz_resource_kind::ResourceKind::Project)) },
+            quote! { .set_column::<crate::resources::created_by_id>(Some(columns.created_by_id)) },
+            quote! { .set_column::<crate::procedures::status_id>(columns.status_id.clone()) },
+        ] {
+            assert!(setters.contains(&setter.to_string()), "missing {setter}");
+        }
+        assert!(!setters.contains("ownables"));
+    }
+
+    #[test]
+    fn procedure_copy_setters_omit_server_written_status() {
+        let database = ParserDB::parse::<GenericDialect>(
+            "CREATE TABLE procedures (id INT PRIMARY KEY, organization_id INT, procedure_template_id INT, status_id TEXT, UNIQUE(id, procedure_template_id, status_id, organization_id));
+             CREATE TABLE typed (id INT PRIMARY KEY REFERENCES procedures(id), organization_id INT, template_id INT, status_id TEXT, FOREIGN KEY(id, template_id, status_id, organization_id) REFERENCES procedures(id, procedure_template_id, status_id, organization_id));",
+        ).unwrap();
+        let table = database
+            .table_by_target(TargetName::new("typed", false), IdentifierCase::AsWritten)
+            .unwrap()
+            .unwrap();
+        let setters = procedure_copy_setters(table, &database).unwrap();
+        let setters = quote! { #(#setters)* }.to_string();
+        assert!(!setters.contains("status_id"));
+        assert!(setters.contains("organization_id"));
+        assert!(setters.contains("template_id"));
+    }
+
+    #[test]
+    fn asset_setters_write_resource_ownership() {
+        let database = ParserDB::parse::<GenericDialect>(
+            "CREATE TABLE resources (id INT PRIMARY KEY, organization_id INT, parent_id INT, parent_kind TEXT, created_by_id INT);
+             CREATE TABLE assets (id INT PRIMARY KEY REFERENCES resources(id), organization_id INT, project_id INT);",
+        ).unwrap();
+        let table = database
+            .table_by_target(TargetName::new("assets", false), IdentifierCase::AsWritten)
+            .unwrap()
+            .unwrap();
+        let setters = asset_table(table, &[], &database).unwrap().setters;
+        let setters = quote! { #(#setters)* }.to_string();
+        for setter in [
+            quote! { .set_column::<crate::resources::parent_id>(Some(columns.project_id)) },
+            quote! { .set_column::<crate::resources::parent_kind>(Some(::aps_authz_resource_kind::ResourceKind::Project)) },
+            quote! { .set_column::<crate::resources::created_by_id>(Some(columns.created_by_id)) },
+        ] {
+            assert!(setters.contains(&setter.to_string()), "missing {setter}");
+        }
+    }
 }

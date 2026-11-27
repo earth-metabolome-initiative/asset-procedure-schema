@@ -17,3 +17,4 @@ All notable changes to this project will be documented in this file.
 * A compatibility rule or volumetric container model is frozen once a template or run relies on it.
 * Whoever reads a model reads its ancestors and their rules, and whoever reads a template reads the child templates its steps run.
 * The compatibility rules of an organization neither admit a holder slot nor count a placement of a caller it blocks.
+* APS rows follow their `resources` project parent and archive state through cascading keys, and write policies reject archived rows and references.

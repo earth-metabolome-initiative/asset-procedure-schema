@@ -189,6 +189,32 @@ fn model_names() {
 }
 
 #[test]
+fn model_archive_companions() {
+    for root in ["procedure_templates", "procedures"] {
+        for target in ["asset_models", "physical_asset_models"] {
+            for (model_column, archive_column, violation) in [
+                ("weighed_model_id", "weighed_model_archived", false),
+                ("weighed_id", "weighed_model_archived", true),
+                ("weighed_model_archived", "weighed_archived", true),
+            ] {
+                let schema = format!(
+                    "{ROOTS} CREATE TABLE asset_models (id UUID PRIMARY KEY, archived BOOLEAN NOT NULL, UNIQUE (id, archived)); CREATE TABLE physical_asset_models (id UUID PRIMARY KEY REFERENCES asset_models(id), archived BOOLEAN NOT NULL, UNIQUE (id, archived)); CREATE TABLE weighing_{root} (id UUID PRIMARY KEY REFERENCES {root}(id), {model_column} UUID, {archive_column} BOOLEAN NOT NULL, FOREIGN KEY ({archive_column}, {model_column}) REFERENCES {target}(archived, id));"
+                );
+                let database = ParserDB::parse::<PostgreSqlDialect>(&schema).unwrap();
+                let mut constrainer = GenericConstrainer::default();
+                constrainer.register_column_rule(Box::new(AssetModelColumnNaming::default()));
+                if violation {
+                    let error = constrainer.validate_schema(&database).unwrap_err().to_string();
+                    assert!(error.contains("must end with _model_id"), "{error}");
+                } else {
+                    constrainer.validate_schema(&database).unwrap();
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn tenancy() {
     let schema = "CREATE TABLE asset_models (id UUID PRIMARY KEY, organization_id UUID); ALTER TABLE asset_models ENABLE ROW LEVEL SECURITY; ALTER TABLE asset_models FORCE ROW LEVEL SECURITY; CREATE POLICY asset_models_blocked ON asset_models AS RESTRICTIVE FOR ALL TO app USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations())))) WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));";
     check(OrganizationTenancy::default(), schema, None);

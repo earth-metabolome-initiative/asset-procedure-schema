@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Devices / Weighing Devices
 -- Purpose: Weighing Devices for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- weighing_device_models
@@ -19,7 +19,9 @@ CREATE TABLE weighing_device_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('weighing_device_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -64,7 +66,11 @@ CREATE TABLE commercial_weighing_device_models (
     weighing_device_model_id UUID NOT NULL REFERENCES weighing_device_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, weighing_device_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    weighing_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (weighing_device_model_id, weighing_device_model_archived) REFERENCES weighing_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_weighing_device_models (weighing_device_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_weighing_device_models');
@@ -110,7 +116,10 @@ CREATE TABLE commercial_weighing_device_lots (
     -- Commercial weighing-device model from which this lot derives.
     commercial_weighing_device_model_id UUID NOT NULL REFERENCES commercial_weighing_device_models (id),
     FOREIGN KEY (id, commercial_weighing_device_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_weighing_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (commercial_weighing_device_model_id, commercial_weighing_device_model_archived) REFERENCES commercial_weighing_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_weighing_device_lots (commercial_weighing_device_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_weighing_device_lots');
@@ -157,7 +166,10 @@ CREATE TABLE weighing_devices (
     -- Weighing-device model instantiated by this physical asset.
     weighing_device_model_id UUID NOT NULL REFERENCES weighing_device_models (id),
     FOREIGN KEY (id, weighing_device_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    weighing_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (weighing_device_model_id, weighing_device_model_archived) REFERENCES weighing_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON weighing_devices (weighing_device_model_id);
 INSERT INTO table_names (id) VALUES ('weighing_devices');
@@ -205,9 +217,9 @@ CREATE POLICY weighing_device_models_insert ON weighing_device_models FOR INSERT
 CREATE POLICY weighing_device_models_delete ON weighing_device_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY weighing_device_models_archived_insert ON weighing_device_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY weighing_device_models_archived_delete ON weighing_device_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY weighing_device_models_blocked ON weighing_device_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -223,9 +235,9 @@ CREATE POLICY commercial_weighing_device_models_insert ON commercial_weighing_de
 CREATE POLICY commercial_weighing_device_models_delete ON commercial_weighing_device_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_weighing_device_models_archived_insert ON commercial_weighing_device_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(weighing_device_model_id));
+    WITH CHECK (NOT archived AND NOT weighing_device_model_archived);
 CREATE POLICY commercial_weighing_device_models_archived_delete ON commercial_weighing_device_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_weighing_device_models_blocked ON commercial_weighing_device_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -241,9 +253,9 @@ CREATE POLICY commercial_weighing_device_lots_insert ON commercial_weighing_devi
 CREATE POLICY commercial_weighing_device_lots_delete ON commercial_weighing_device_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_weighing_device_lots_archived_insert ON commercial_weighing_device_lots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_weighing_device_model_id));
+    WITH CHECK (NOT archived AND NOT commercial_weighing_device_model_archived);
 CREATE POLICY commercial_weighing_device_lots_archived_delete ON commercial_weighing_device_lots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_weighing_device_lots_blocked ON commercial_weighing_device_lots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -259,9 +271,9 @@ CREATE POLICY weighing_devices_insert ON weighing_devices FOR INSERT TO app
 CREATE POLICY weighing_devices_delete ON weighing_devices FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY weighing_devices_archived_insert ON weighing_devices AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(weighing_device_model_id));
+    WITH CHECK (NOT archived AND NOT weighing_device_model_archived);
 CREATE POLICY weighing_devices_archived_delete ON weighing_devices AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY weighing_devices_blocked ON weighing_devices AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

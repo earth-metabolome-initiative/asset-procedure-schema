@@ -1,7 +1,7 @@
 -- Migration: Shared Assets / Supplies / Personal Protective Equipment
 -- Purpose: Personal Protective Equipment for project inventories.
 -- APS placement
---   ownables
+--   `resources` of kind `'ownable'`
 --       +-- asset_models
 --           +-- physical_asset_models
 --               +-- personal_protective_equipment_models
@@ -19,7 +19,9 @@ CREATE TABLE personal_protective_equipment_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('personal_protective_equipment_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -64,7 +66,11 @@ CREATE TABLE commercial_personal_protective_equipment_models (
     personal_protective_equipment_model_id UUID NOT NULL REFERENCES personal_protective_equipment_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, personal_protective_equipment_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    personal_protective_equipment_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (personal_protective_equipment_model_id, personal_protective_equipment_model_archived) REFERENCES personal_protective_equipment_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_personal_protective_equipment_models (personal_protective_equipment_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_personal_protective_equipment_models');
@@ -110,7 +116,10 @@ CREATE TABLE commercial_personal_protective_equipment_lots (
     -- Commercial PPE model from which this lot derives.
     commercial_personal_protective_equipment_model_id UUID NOT NULL REFERENCES commercial_personal_protective_equipment_models (id),
     FOREIGN KEY (id, commercial_personal_protective_equipment_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    commercial_personal_protective_equipment_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (commercial_personal_protective_equipment_model_id, commercial_personal_protective_equipment_model_archived) REFERENCES commercial_personal_protective_equipment_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON commercial_personal_protective_equipment_lots (commercial_personal_protective_equipment_model_id);
 INSERT INTO table_names (id) VALUES ('commercial_personal_protective_equipment_lots');
@@ -157,7 +166,10 @@ CREATE TABLE personal_protective_equipments (
     -- PPE model instantiated by this physical asset.
     personal_protective_equipment_model_id UUID NOT NULL REFERENCES personal_protective_equipment_models (id),
     FOREIGN KEY (id, personal_protective_equipment_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    personal_protective_equipment_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (personal_protective_equipment_model_id, personal_protective_equipment_model_archived) REFERENCES personal_protective_equipment_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON personal_protective_equipments (personal_protective_equipment_model_id);
 INSERT INTO table_names (id) VALUES ('personal_protective_equipments');
@@ -205,9 +217,9 @@ CREATE POLICY personal_protective_equipment_models_insert ON personal_protective
 CREATE POLICY personal_protective_equipment_models_delete ON personal_protective_equipment_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY personal_protective_equipment_models_archived_insert ON personal_protective_equipment_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY personal_protective_equipment_models_archived_delete ON personal_protective_equipment_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY personal_protective_equipment_models_blocked ON personal_protective_equipment_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -223,9 +235,9 @@ CREATE POLICY commercial_personal_protective_equipment_models_insert ON commerci
 CREATE POLICY commercial_personal_protective_equipment_models_delete ON commercial_personal_protective_equipment_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_personal_protective_equipment_models_archived_insert ON commercial_personal_protective_equipment_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(personal_protective_equipment_model_id));
+    WITH CHECK (NOT archived AND NOT personal_protective_equipment_model_archived);
 CREATE POLICY commercial_personal_protective_equipment_models_archived_delete ON commercial_personal_protective_equipment_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_personal_protective_equipment_models_blocked ON commercial_personal_protective_equipment_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -241,9 +253,9 @@ CREATE POLICY commercial_personal_protective_equipment_lots_insert ON commercial
 CREATE POLICY commercial_personal_protective_equipment_lots_delete ON commercial_personal_protective_equipment_lots FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY commercial_personal_protective_equipment_lots_archived_insert ON commercial_personal_protective_equipment_lots AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(commercial_personal_protective_equipment_model_id));
+    WITH CHECK (NOT archived AND NOT commercial_personal_protective_equipment_model_archived);
 CREATE POLICY commercial_personal_protective_equipment_lots_archived_delete ON commercial_personal_protective_equipment_lots AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY commercial_personal_protective_equipment_lots_blocked ON commercial_personal_protective_equipment_lots AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -259,9 +271,9 @@ CREATE POLICY personal_protective_equipments_insert ON personal_protective_equip
 CREATE POLICY personal_protective_equipments_delete ON personal_protective_equipments FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY personal_protective_equipments_archived_insert ON personal_protective_equipments AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(personal_protective_equipment_model_id));
+    WITH CHECK (NOT archived AND NOT personal_protective_equipment_model_archived);
 CREATE POLICY personal_protective_equipments_archived_delete ON personal_protective_equipments AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY personal_protective_equipments_blocked ON personal_protective_equipments AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

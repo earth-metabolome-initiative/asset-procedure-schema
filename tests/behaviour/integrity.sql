@@ -2,7 +2,7 @@
 SET search_path = public, test_tools;
 BEGIN;
 \ir ../fixture.sql
-SELECT plan(22);
+SELECT plan(24);
 
 -- A second organization, founded by the second user, holding a model and an asset of its own.
 RESET ROLE;
@@ -12,23 +12,16 @@ INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-0
 INSERT INTO resources (id, kind, organization_id)
   VALUES ('20000000-0000-7000-8000-000000000002', 'organization', '20000000-0000-7000-8000-000000000002');
 INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000002', authz.caller_id(), 'active');
-INSERT INTO grants (organization_id, resource_id, grantee_id, grantee_kind, role)
-  VALUES ('20000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000002', authz.caller_id(), 'user', 'admin');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'project',
     '20000000-0000-7000-8000-000000000002', 'organization');
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('50000000-0000-7000-8000-000000000002', 'project', '20000000-0000-7000-8000-000000000002');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-  VALUES ('a7000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id()),
-    ('b7000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id());
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('a7000000-0000-7000-8000-000000000090', 'ownable', '20000000-0000-7000-8000-000000000002'),
-    ('b7000000-0000-7000-8000-000000000090', 'ownable', '20000000-0000-7000-8000-000000000002');
+INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+  VALUES ('a7000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id(), 'ownable', 'project'),
+    ('b7000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', authz.caller_id(), 'ownable', 'project');
 INSERT INTO asset_models (id, organization_id, project_id, table_name_id, name)
   VALUES ('a7000000-0000-7000-8000-000000000090', '20000000-0000-7000-8000-000000000002', '50000000-0000-7000-8000-000000000002', 'asset_models', 'their tube');
 INSERT INTO asset_model_ancestors (descendant_model_id, ancestor_model_id, organization_id, parent_model_id)
@@ -43,11 +36,9 @@ SELECT pg_temp.act('10000000-0000-7000-8000-000000000001');
 SET ROLE app;
 
 -- A second project of the first organization.
-INSERT INTO resource_parents (organization_id, id, resource_kind, parent_id, parent_kind)
+INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
   VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000003', 'project',
     '20000000-0000-7000-8000-000000000001', 'organization');
-INSERT INTO resources (id, kind, organization_id)
-  VALUES ('50000000-0000-7000-8000-000000000003', 'project', '20000000-0000-7000-8000-000000000001');
 SET CONSTRAINTS ALL IMMEDIATE;
 SET CONSTRAINTS ALL DEFERRED;
 
@@ -147,10 +138,22 @@ SELECT throws_ok($statement$SELECT pg_temp.new_model('a7000000-0000-7000-8000-00
 
 SELECT throws_ok($statement$UPDATE resources SET archived_at = now() WHERE id = 'a7000000-0000-7000-8000-000000000001';
     SELECT pg_temp.new_asset('b7000000-0000-7000-8000-000000000045', 'archived model', 'a7000000-0000-7000-8000-000000000001')$statement$,
-  '42501', NULL, 'an asset cannot instantiate an archived model');
+  '23503', NULL, 'an asset cannot instantiate an archived model');
+
+SELECT throws_ok($statement$SELECT pg_temp.create_ownable('b7000000-0000-7000-8000-000000000091');
+    UPDATE resources SET archived_at = now() WHERE id = '50000000-0000-7000-8000-000000000001';
+    INSERT INTO brands (id, organization_id, project_id, table_name_id, name)
+      VALUES ('b7000000-0000-7000-8000-000000000091', '20000000-0000-7000-8000-000000000001',
+        '50000000-0000-7000-8000-000000000001', 'brands', 'archived project write')$statement$,
+  '23503', NULL, 'a brand below an archived project cannot be inserted');
+SELECT throws_ok($statement$SELECT pg_temp.new_template('c7000000-0000-7000-8000-000000000090', 'archive reference');
+    UPDATE resources SET archived_at = now() WHERE id = 'a7000000-0000-7000-8000-000000000002';
+    SELECT pg_temp.new_slot('d7000000-0000-7000-8000-000000000090', 'c7000000-0000-7000-8000-000000000090',
+      'archived model', 'a7000000-0000-7000-8000-000000000002', 'input', 0, 1)$statement$,
+  '23503', NULL, 'a slot cannot reference an archived model');
 
 SELECT throws_ok($statement$SELECT pg_temp.create_ownable('c7000000-0000-7000-8000-000000000050');
-    UPDATE ownables SET project_id = '50000000-0000-7000-8000-000000000003' WHERE id = 'c7000000-0000-7000-8000-000000000050';
+    UPDATE resource_moves SET parent_id = '50000000-0000-7000-8000-000000000003' WHERE id = 'c7000000-0000-7000-8000-000000000050';
     INSERT INTO procedure_templates (id, organization_id, project_id, table_name_id, name)
       VALUES ('c7000000-0000-7000-8000-000000000050', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000003', 'procedure_templates', 'label');
     SELECT pg_temp.new_slot('d7000000-0000-7000-8000-000000000050', 'c7000000-0000-7000-8000-000000000050', 'tube', 'a7000000-0000-7000-8000-000000000001', 'input', 0, 1);

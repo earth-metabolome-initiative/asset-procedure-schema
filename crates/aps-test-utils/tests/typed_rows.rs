@@ -1,9 +1,8 @@
 //! A runner writes and reads the rows of typed tables it knows only by
 //! `table_name_id`, on the SQLite replica.
 
-use aps::{
-    TypedRows, asset_models, containers, ownables, procedures, resources, storage_procedures,
-};
+use aps::{TypedRows, asset_models, containers, procedures, resources, storage_procedures};
+use aps_authz_resource_kind::ResourceKind;
 use aps_test_utils::{Replica, Tenant};
 use aps_traits::CanContain;
 use diesel::{
@@ -63,9 +62,8 @@ fn template(
     let (id, fridge_slot, vial_slot) = (blob(id), blob(fridge_slot), blob(vial_slot));
     let (fridge, vial) = (blob(fridge), blob(vial));
     conn.batch_execute(&format!(
-        "INSERT INTO ownables (id, organization_id, project_id, created_by_id)
-            VALUES ({id}, {organization}, {project}, {user});
-        INSERT INTO resources (id, kind, organization_id) VALUES ({id}, 'ownable', {organization});
+        "INSERT INTO resources (id, kind, organization_id, parent_id, parent_kind, created_by_id)
+            VALUES ({id}, 'ownable', {organization}, {project}, 'project', {user});
         INSERT INTO procedure_templates (id, organization_id, project_id, table_name_id, name)
             VALUES ({id}, {organization}, {project}, '{table}', '{name}');
         INSERT INTO procedure_template_slots
@@ -197,9 +195,9 @@ fn insert_root(columns: &ProcedureColumns, conn: &mut SqliteConnection) -> Query
         .map_err(rolled_back)?
         .set_column::<resources::id>(columns.id)
         .set_column::<resources::organization_id>(columns.organization_id)
-        .set_column::<ownables::organization_id>(columns.organization_id)
-        .set_column::<ownables::project_id>(columns.project_id)
-        .set_column::<ownables::created_by_id>(columns.created_by_id)
+        .set_column::<resources::parent_id>(Some(columns.project_id))
+        .set_column::<resources::parent_kind>(Some(ResourceKind::Project))
+        .set_column::<resources::created_by_id>(Some(columns.created_by_id))
         .set_column::<procedures::organization_id>(columns.organization_id)
         .set_column::<procedures::project_id>(columns.project_id)
         .set_column::<procedures::table_name_id>("procedures".to_owned())
@@ -231,15 +229,14 @@ fn bind_models(
 ) -> QueryResult<()> {
     let (organization, procedure, template) =
         (blob(run.organization_id), blob(run.id), blob(storage.template));
-    let status = &run.status_id;
     for (slot, model) in [(storage.fridge_slot, storage.fridge), (storage.vial_slot, storage.vial)]
     {
         let (id, slot, model) = (blob(Uuid::new_v4()), blob(slot), blob(model));
         conn.batch_execute(&format!(
             "INSERT INTO procedure_assets
-                (id, organization_id, procedure_id, procedure_template_id, status_id, slot_id, slot_asset_model_id,
+                (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id,
                 slot_role_id, asset_model_id)
-                VALUES ({id}, {organization}, {procedure}, {template}, '{status}', {slot}, {model}, 'input', {model});"
+                VALUES ({id}, {organization}, {procedure}, {template}, {slot}, {model}, 'input', {model});"
         ))?;
     }
     Ok(())

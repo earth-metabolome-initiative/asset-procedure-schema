@@ -1,7 +1,7 @@
 -- Migration: 003-capping-procedures
 -- Purpose: Typed container sealing slots and execution records.
 -- APS placement
--- ownables
+-- `resources` of kind `'ownable'`
 -- +-- procedure_templates -- container_sealing_procedure_templates
 -- +-- procedures -- container_sealing_procedures
 -- Slot | Role | Meaning
@@ -30,7 +30,13 @@ CREATE TABLE container_sealing_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (sealed_with_slot_id, id, sealed_with_model_id, sealed_with_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    sealable_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    sealed_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (sealable_container_model_id, sealable_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (sealed_with_model_id, sealed_with_model_archived) REFERENCES container_sealer_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON container_sealing_procedure_templates (sealable_container_model_id);
 CREATE INDEX ON container_sealing_procedure_templates (sealed_with_model_id);
@@ -38,8 +44,16 @@ INSERT INTO table_names (id) VALUES ('container_sealing_procedure_templates');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'container_sealing_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
     UNION SELECT 'container_sealing_procedure_templates', 'container_sealing_procedure_templates';
-CREATE TRIGGER container_sealing_procedure_templates_guard AFTER INSERT OR UPDATE ON container_sealing_procedure_templates
+CREATE TRIGGER container_sealing_procedure_templates_guard AFTER INSERT ON container_sealing_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER container_sealing_procedure_templates_guard_update AFTER UPDATE OF id, sealable_container_slot_id, sealable_container_model_id, sealable_container_slot_role_id, sealed_with_slot_id, sealed_with_model_id, sealed_with_slot_role_id ON container_sealing_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.sealable_container_slot_id IS DISTINCT FROM NEW.sealable_container_slot_id
+        OR OLD.sealable_container_model_id IS DISTINCT FROM NEW.sealable_container_model_id
+        OR OLD.sealable_container_slot_role_id IS DISTINCT FROM NEW.sealable_container_slot_role_id
+        OR OLD.sealed_with_slot_id IS DISTINCT FROM NEW.sealed_with_slot_id
+        OR OLD.sealed_with_model_id IS DISTINCT FROM NEW.sealed_with_model_id
+        OR OLD.sealed_with_slot_role_id IS DISTINCT FROM NEW.sealed_with_slot_role_id) EXECUTE FUNCTION guard_procedure_template_subtype();
 CREATE TRIGGER container_sealing_procedure_templates_delete_guard BEFORE DELETE ON container_sealing_procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
 
@@ -78,9 +92,9 @@ CREATE POLICY container_sealing_procedure_templates_insert ON container_sealing_
 CREATE POLICY container_sealing_procedure_templates_delete ON container_sealing_procedure_templates FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY container_sealing_procedure_templates_archived_insert ON container_sealing_procedure_templates AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(sealable_container_model_id) AND NOT authz.is_archived(sealed_with_model_id));
+    WITH CHECK (NOT archived AND NOT sealable_container_model_archived AND NOT sealed_with_model_archived);
 CREATE POLICY container_sealing_procedure_templates_archived_delete ON container_sealing_procedure_templates AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY container_sealing_procedure_templates_blocked ON container_sealing_procedure_templates AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -98,7 +112,10 @@ CREATE TABLE container_sealing_procedures (
     FOREIGN KEY (id, container_sealing_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    container_sealing_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (container_sealing_procedure_template_id, container_sealing_procedure_template_archived) REFERENCES container_sealing_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON container_sealing_procedures (container_sealing_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('container_sealing_procedures');
@@ -107,8 +124,12 @@ INSERT INTO table_name_instances (id, instance_table_name_id)
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'container_sealing_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'container_sealing_procedures', 'container_sealing_procedures';
-CREATE TRIGGER container_sealing_procedures_guard AFTER INSERT OR UPDATE ON container_sealing_procedures
+CREATE TRIGGER container_sealing_procedures_guard AFTER INSERT ON container_sealing_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER container_sealing_procedures_guard_update AFTER UPDATE OF id, container_sealing_procedure_template_id, status_id ON container_sealing_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.container_sealing_procedure_template_id IS DISTINCT FROM NEW.container_sealing_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION guard_procedure_subtype();
 CREATE TRIGGER container_sealing_procedures_delete_guard BEFORE DELETE ON container_sealing_procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
 
@@ -152,7 +173,24 @@ CREATE CONSTRAINT TRIGGER container_sealing_procedures_row AFTER INSERT ON proce
 CREATE CONSTRAINT TRIGGER container_sealing_procedures_kept AFTER DELETE ON container_sealing_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_container_sealing_procedures_row();
 
-GRANT SELECT, INSERT, DELETE ON container_sealing_procedures TO app;
+CREATE FUNCTION initialize_container_sealing_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    PERFORM public.lock_procedure(NEW.id);
+    SELECT procedure.status_id INTO NEW.status_id
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.container_sealing_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_container_sealing_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_container_sealing_procedures_status() FROM PUBLIC;
+CREATE TRIGGER container_sealing_procedures_status_initialize BEFORE INSERT ON container_sealing_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_container_sealing_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, container_sealing_procedure_template_id, archived, container_sealing_procedure_template_archived), DELETE ON container_sealing_procedures TO app;
 ALTER TABLE container_sealing_procedures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE container_sealing_procedures FORCE ROW LEVEL SECURITY;
 CREATE POLICY container_sealing_procedures_select ON container_sealing_procedures FOR SELECT TO app
@@ -162,9 +200,9 @@ CREATE POLICY container_sealing_procedures_insert ON container_sealing_procedure
 CREATE POLICY container_sealing_procedures_delete ON container_sealing_procedures FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY container_sealing_procedures_archived_insert ON container_sealing_procedures AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(container_sealing_procedure_template_id));
+    WITH CHECK (NOT archived AND NOT container_sealing_procedure_template_archived);
 CREATE POLICY container_sealing_procedures_archived_delete ON container_sealing_procedures AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY container_sealing_procedures_blocked ON container_sealing_procedures AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));

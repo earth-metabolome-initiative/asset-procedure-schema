@@ -1,9 +1,9 @@
 -- Asset models describe kinds of things (a tube model, a balance model, a
 -- plant species), assets are the tracked things themselves. Both are connetto
--- ownables living in one project, whose name is unique within that project.
+-- `resources` of kind `'ownable'` living in one project, whose name is unique within that project.
 CREATE TABLE asset_models (
-    -- Identifier of the connetto ownable this model extends.
-    id UUID PRIMARY KEY REFERENCES ownables (id) ON DELETE CASCADE,
+    -- Identifier of the connetto `resource` of kind `'ownable'` this model extends.
+    id UUID PRIMARY KEY REFERENCES resources (id) ON DELETE CASCADE,
     -- connetto organization owning the row.
     organization_id UUID NOT NULL,
     -- connetto project holding the model.
@@ -21,8 +21,13 @@ CREATE TABLE asset_models (
     UNIQUE (id, project_id),
     UNIQUE (id, parent_model_id),
     UNIQUE (id, parent_model_id, organization_id),
-    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    parent_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (parent_model_id, parent_model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON asset_models (parent_model_id);
 CREATE INDEX ON asset_models (table_name_id);
@@ -46,7 +51,8 @@ CREATE TABLE asset_model_ancestors (
     parent_model_id UUID,
     PRIMARY KEY (descendant_model_id, ancestor_model_id),
     CHECK ((parent_model_id IS NULL) = (descendant_model_id = ancestor_model_id)),
-    FOREIGN KEY (organization_id, descendant_model_id) REFERENCES resources (organization_id, id) ON DELETE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, descendant_model_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (descendant_model_id, parent_model_id, organization_id)
         REFERENCES asset_models (id, parent_model_id, organization_id) ON DELETE CASCADE,
     FOREIGN KEY (parent_model_id, ancestor_model_id)
@@ -143,7 +149,9 @@ CREATE TABLE physical_asset_models (
     id UUID PRIMARY KEY REFERENCES asset_models (id) ON DELETE CASCADE,
     -- connetto organization owning the row.
     organization_id UUID NOT NULL,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('physical_asset_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -186,7 +194,8 @@ CREATE TABLE digital_asset_models (
     -- Media type of the files this model describes.
     mime_type TEXT NOT NULL CHECK (mime_type <> '' AND length(mime_type) <= 255),
     UNIQUE (id, mime_type, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 INSERT INTO table_names (id) VALUES ('digital_asset_models');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
@@ -222,8 +231,8 @@ CREATE CONSTRAINT TRIGGER digital_asset_models_kept AFTER DELETE ON digital_asse
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_digital_asset_models_row();
 
 CREATE TABLE assets (
-    -- Identifier of the connetto ownable this asset extends.
-    id UUID PRIMARY KEY REFERENCES ownables (id) ON DELETE CASCADE,
+    -- Identifier of the connetto `resource` of kind `'ownable'` this asset extends.
+    id UUID PRIMARY KEY REFERENCES resources (id) ON DELETE CASCADE,
     -- connetto organization owning the row.
     organization_id UUID NOT NULL,
     -- connetto project holding the asset.
@@ -240,8 +249,13 @@ CREATE TABLE assets (
     UNIQUE (project_id, name),
     UNIQUE (id, model_id),
     UNIQUE (id, model_id, organization_id),
-    FOREIGN KEY (id, project_id) REFERENCES ownables (id, project_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (model_id, model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON assets (model_id);
 CREATE INDEX ON assets (table_name_id);
@@ -310,7 +324,8 @@ CREATE TABLE physical_assets (
     -- Model of the asset, which must be a physical asset model.
     physical_asset_model_id UUID NOT NULL REFERENCES physical_asset_models (id),
     FOREIGN KEY (id, physical_asset_model_id, organization_id) REFERENCES assets (id, model_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON physical_assets (physical_asset_model_id);
 INSERT INTO table_names (id) VALUES ('physical_assets');
@@ -355,7 +370,8 @@ CREATE TABLE digital_assets (
     -- Model of the asset, which must be a digital asset model.
     digital_asset_model_id UUID NOT NULL REFERENCES digital_asset_models (id),
     FOREIGN KEY (id, digital_asset_model_id, organization_id) REFERENCES assets (id, model_id, organization_id),
-    FOREIGN KEY (organization_id, id) REFERENCES resources (organization_id, id) ON DELETE CASCADE
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE INDEX ON digital_assets (digital_asset_model_id);
 INSERT INTO table_names (id) VALUES ('digital_assets');
@@ -406,11 +422,11 @@ CREATE POLICY asset_models_update ON asset_models FOR UPDATE TO app
 CREATE POLICY asset_models_delete ON asset_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY asset_models_archived_insert ON asset_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(parent_model_id));
+    WITH CHECK (NOT archived AND NOT parent_model_archived);
 CREATE POLICY asset_models_archived_update ON asset_models AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY asset_models_archived_delete ON asset_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY asset_models_blocked ON asset_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -422,7 +438,7 @@ CREATE POLICY asset_model_ancestors_insert ON asset_model_ancestors FOR INSERT T
     WITH CHECK (descendant_model_id = ANY (ARRAY(SELECT authz.resources_with('writer')))
         AND (parent_model_id IS NULL OR parent_model_id = ANY (ARRAY(SELECT authz.resources_with('reader')))));
 CREATE POLICY asset_model_ancestors_archived_insert ON asset_model_ancestors AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(descendant_model_id));
+    WITH CHECK (NOT archived);
 CREATE POLICY asset_model_ancestors_blocked ON asset_model_ancestors AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -437,9 +453,9 @@ CREATE POLICY physical_asset_models_insert ON physical_asset_models FOR INSERT T
 CREATE POLICY physical_asset_models_delete ON physical_asset_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY physical_asset_models_archived_insert ON physical_asset_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY physical_asset_models_archived_delete ON physical_asset_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY physical_asset_models_blocked ON physical_asset_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -457,11 +473,11 @@ CREATE POLICY digital_asset_models_update ON digital_asset_models FOR UPDATE TO 
 CREATE POLICY digital_asset_models_delete ON digital_asset_models FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY digital_asset_models_archived_insert ON digital_asset_models AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY digital_asset_models_archived_update ON digital_asset_models AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY digital_asset_models_archived_delete ON digital_asset_models AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY digital_asset_models_blocked ON digital_asset_models AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -483,11 +499,11 @@ CREATE POLICY assets_update ON assets FOR UPDATE TO app
 CREATE POLICY assets_delete ON assets FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY assets_archived_insert ON assets AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id) AND NOT authz.is_archived(model_id));
+    WITH CHECK (NOT archived AND NOT model_archived);
 CREATE POLICY assets_archived_update ON assets AS RESTRICTIVE FOR UPDATE TO app
-    USING (NOT authz.is_archived(id)) WITH CHECK (NOT authz.is_archived(id));
+    USING (NOT archived) WITH CHECK (NOT archived);
 CREATE POLICY assets_archived_delete ON assets AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY assets_blocked ON assets AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -503,9 +519,9 @@ CREATE POLICY physical_assets_insert ON physical_assets FOR INSERT TO app
 CREATE POLICY physical_assets_delete ON physical_assets FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY physical_assets_archived_insert ON physical_assets AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY physical_assets_archived_delete ON physical_assets AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY physical_assets_blocked ON physical_assets AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
@@ -521,9 +537,9 @@ CREATE POLICY digital_assets_insert ON digital_assets FOR INSERT TO app
 CREATE POLICY digital_assets_delete ON digital_assets FOR DELETE TO app
     USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
 CREATE POLICY digital_assets_archived_insert ON digital_assets AS RESTRICTIVE FOR INSERT TO app
-    WITH CHECK (NOT authz.is_archived(id));
+    WITH CHECK (NOT archived);
 CREATE POLICY digital_assets_archived_delete ON digital_assets AS RESTRICTIVE FOR DELETE TO app
-    USING (NOT authz.is_archived(id));
+    USING (NOT archived);
 CREATE POLICY digital_assets_blocked ON digital_assets AS RESTRICTIVE FOR ALL TO app
     USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
     WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
