@@ -3,13 +3,13 @@
 
 use std::collections::BTreeMap;
 
-use aps_asset_model_ancestors::procedure_template_slot_bindings;
-use aps_procedure_templates::{
-    ProcedureTemplate, ProcedureTemplateSlot, procedure_template_slots,
-    procedure_template_step_edges, procedure_template_steps, procedure_templates,
-};
 use aps_procedures::{
     ProcedureTemplateParameter, procedure_template_parameters, procedure_template_step_parameters,
+};
+use aps_resources::{
+    ProcedureTemplate, ProcedureTemplateSlot, procedure_template_slot_bindings,
+    procedure_template_slots, procedure_template_step_edges, procedure_template_steps,
+    procedure_templates,
 };
 use diesel_builders::{GetColumnExt, LoadFirst, LoadMany};
 use rosetta_uuid::Uuid;

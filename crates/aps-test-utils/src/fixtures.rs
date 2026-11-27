@@ -3,12 +3,10 @@
 
 use std::fmt::Debug;
 
-use aps_asset_model_ancestors::*;
 use aps_authz_membership_state::MembershipState;
 use aps_authz_resource_kind::ResourceKind;
-use aps_grantees::*;
+use aps_organizations::*;
 use aps_physical_asset_models::*;
-use aps_procedure_templates::*;
 use aps_resources::*;
 use diesel_builders::{BuildableTable, Insert, LoadMany, NestedModel, TableBuilder};
 use rosetta_uuid::Uuid;
@@ -41,8 +39,14 @@ impl Tenant {
     {
         let tenant =
             Self { user: Uuid::new_v4(), organization: Uuid::new_v4(), project: Uuid::new_v4() };
-        SetGranteeId::id(users::table::builder(), tenant.user).insert(conn).expect("user");
-        SetGranteeId::id(organizations::table::builder(), tenant.organization)
+        users::table::try_builder()
+            .expect("user defaults")
+            .id(tenant.user)
+            .insert(conn)
+            .expect("user");
+        organizations::table::try_builder()
+            .expect("organization defaults")
+            .id(tenant.organization)
             .created_by_id(tenant.user)
             .insert(conn)
             .expect("organization");
@@ -132,7 +136,9 @@ impl Tenant {
         (asset_model_ancestors::descendant_model_id,): LoadMany<C>,
     {
         let id = Uuid::new_v4();
-        let builder = SetResourceId::id(asset_models::table::builder(), id);
+        let builder = asset_models::table::try_builder().expect("asset model defaults");
+        let builder = SetResourceId::id(builder, id);
+        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
@@ -165,7 +171,10 @@ impl Tenant {
         (asset_model_ancestors::descendant_model_id,): LoadMany<C>,
     {
         let id = Uuid::new_v4();
-        let builder = SetResourceId::id(physical_asset_models::table::builder(), id);
+        let builder =
+            physical_asset_models::table::try_builder().expect("physical asset model defaults");
+        let builder = SetResourceId::id(builder, id);
+        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
@@ -199,7 +208,9 @@ impl Tenant {
         (asset_model_ancestors::descendant_model_id,): LoadMany<C>,
     {
         let id = Uuid::new_v4();
-        let builder = SetResourceId::id(container_models::table::builder(), id);
+        let builder = container_models::table::try_builder().expect("container model defaults");
+        let builder = SetResourceId::id(builder, id);
+        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
@@ -235,6 +246,7 @@ impl Tenant {
         let builder =
             procedure_templates::table::try_builder().expect("procedure template defaults");
         let builder = SetResourceId::id(builder, id);
+        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);

@@ -21,23 +21,16 @@ pub mod commercial_freeze_dryer_lots_model {
     /// Catalog of lot-specific commercial freeze dryer models.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
-        aps_freeze_dryer_models::freeze_dryer_models,
+        aps_procedures::freeze_dryer_models,
         aps_commercial_products::commercial_product_lots
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(
         belongs_to(aps_commercial_products::CommercialProductLot, foreign_key = id)
     )]
-    #[diesel(
-        belongs_to(
-            aps_commercial_freeze_dryer_models::CommercialFreezeDryerModel,
-            foreign_key = commercial_freeze_dryer_model_id
-        )
-    )]
-    #[diesel(belongs_to(aps_freeze_dryer_models::FreezeDryerModel, foreign_key = id))]
+    #[diesel(belongs_to(aps_procedures::FreezeDryerModel, foreign_key = id))]
     #[table_model(
         foreign_key((id), (::aps_commercial_products::commercial_product_lots::id))
     )]
@@ -47,13 +40,16 @@ pub mod commercial_freeze_dryer_lots_model {
             (::aps_commercial_freeze_dryer_models::commercial_freeze_dryer_models::id)
         )
     )]
+    #[table_model(foreign_key((id), (::aps_procedures::freeze_dryer_models::id)))]
     #[table_model(
-        foreign_key((id), (::aps_freeze_dryer_models::freeze_dryer_models::id))
+        foreign_key(
+            (commercial_freeze_dryer_model_id, commercial_freeze_dryer_model_archived),
+            (
+                ::aps_commercial_freeze_dryer_models::commercial_freeze_dryer_models::id,
+                ::aps_commercial_freeze_dryer_models::commercial_freeze_dryer_models::archived
+            )
+        )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
     #[diesel(table_name = commercial_freeze_dryer_lots)]
     pub struct CommercialFreezeDryerLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -62,7 +58,7 @@ pub mod commercial_freeze_dryer_lots_model {
         id: ::rosetta_uuid::Uuid,
         /// Organization containing this resource.
         #[same_as(aps_commercial_products::commercial_product_lots::organization_id)]
-        #[same_as(aps_freeze_dryer_models::freeze_dryer_models::organization_id)]
+        #[same_as(aps_procedures::freeze_dryer_models::organization_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
@@ -71,7 +67,22 @@ pub mod commercial_freeze_dryer_lots_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         commercial_freeze_dryer_model_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_commercial_products::commercial_product_lots::archived)]
+        #[same_as(aps_procedures::freeze_dryer_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by
+        /// `commercial_freeze_dryer_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        commercial_freeze_dryer_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        commercial_freeze_dryer_lots::id,
+        commercial_freeze_dryer_lots::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for CommercialFreezeDryerLot {
         fn get_column_ref(
             &self,
@@ -90,17 +101,9 @@ pub mod commercial_freeze_dryer_lots_model {
             &self.id
         }
     }
-    impl ::diesel_builders::GetColumn<aps_freeze_dryer_models::freeze_dryer_models::id>
+    impl ::diesel_builders::GetColumn<aps_procedures::freeze_dryer_models::id>
         for CommercialFreezeDryerLot
     {
-        fn get_column_ref(
-            &self,
-        ) -> &<commercial_freeze_dryer_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CommercialFreezeDryerLot {
         fn get_column_ref(
             &self,
         ) -> &<commercial_freeze_dryer_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
@@ -163,11 +166,7 @@ pub mod commercial_freeze_dryer_lots_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_freeze_dryer_lots,
-        ::aps_freeze_dryer_models::freeze_dryer_models
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        commercial_freeze_dryer_lots,
-        ::aps_resources::ownables
+        ::aps_procedures::freeze_dryer_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_freeze_dryer_lots,
@@ -200,30 +199,29 @@ pub mod commercial_freeze_dryer_models_model {
     /// Catalog of commercial freeze dryer models.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
         aps_commercial_products::commercial_products,
-        aps_freeze_dryer_models::freeze_dryer_models
+        aps_procedures::freeze_dryer_models
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_commercial_products::CommercialProduct, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_procedures::freeze_dryer_models::id)))]
     #[table_model(
-        foreign_key((id), (::aps_freeze_dryer_models::freeze_dryer_models::id))
-    )]
-    #[table_model(
-        foreign_key(
-            (freeze_dryer_model_id),
-            (::aps_freeze_dryer_models::freeze_dryer_models::id)
-        )
+        foreign_key((freeze_dryer_model_id), (::aps_procedures::freeze_dryer_models::id))
     )]
     #[table_model(
         foreign_key((id), (::aps_commercial_products::commercial_products::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (freeze_dryer_model_id, freeze_dryer_model_archived),
+            (
+                ::aps_procedures::freeze_dryer_models::id,
+                ::aps_procedures::freeze_dryer_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = commercial_freeze_dryer_models)]
     pub struct CommercialFreezeDryerModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -232,7 +230,7 @@ pub mod commercial_freeze_dryer_models_model {
         id: ::rosetta_uuid::Uuid,
         /// Organization containing this resource.
         #[same_as(aps_commercial_products::commercial_products::organization_id)]
-        #[same_as(aps_freeze_dryer_models::freeze_dryer_models::organization_id)]
+        #[same_as(aps_procedures::freeze_dryer_models::organization_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
@@ -241,7 +239,21 @@ pub mod commercial_freeze_dryer_models_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         freeze_dryer_model_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_commercial_products::commercial_products::archived)]
+        #[same_as(aps_procedures::freeze_dryer_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `freeze_dryer_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        freeze_dryer_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        commercial_freeze_dryer_models::id,
+        commercial_freeze_dryer_models::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for CommercialFreezeDryerModel {
         fn get_column_ref(
             &self,
@@ -260,17 +272,9 @@ pub mod commercial_freeze_dryer_models_model {
             &self.id
         }
     }
-    impl ::diesel_builders::GetColumn<aps_freeze_dryer_models::freeze_dryer_models::id>
+    impl ::diesel_builders::GetColumn<aps_procedures::freeze_dryer_models::id>
         for CommercialFreezeDryerModel
     {
-        fn get_column_ref(
-            &self,
-        ) -> &<commercial_freeze_dryer_models::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CommercialFreezeDryerModel {
         fn get_column_ref(
             &self,
         ) -> &<commercial_freeze_dryer_models::id as ::diesel_builders::ColumnTyped>::ColumnType
@@ -329,11 +333,7 @@ pub mod commercial_freeze_dryer_models_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_freeze_dryer_models,
-        ::aps_freeze_dryer_models::freeze_dryer_models
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        commercial_freeze_dryer_models,
-        ::aps_resources::ownables
+        ::aps_procedures::freeze_dryer_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_freeze_dryer_models,
@@ -366,18 +366,11 @@ pub mod freeze_dryers_model {
     /// Physical freeze dryers tracked in APS inventory.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_assets::assets,
         aps_assets::physical_assets
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_assets::PhysicalAsset, foreign_key = id))]
-    #[diesel(
-        belongs_to(
-            aps_commercial_freeze_dryer_models::CommercialFreezeDryerLot,
-            foreign_key = commercial_freeze_dryer_lot_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_assets::physical_assets::id)))]
     #[table_model(
         foreign_key(
@@ -385,10 +378,15 @@ pub mod freeze_dryers_model {
             (::aps_commercial_freeze_dryer_models::commercial_freeze_dryer_lots::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (commercial_freeze_dryer_lot_id, commercial_freeze_dryer_lot_archived),
+            (
+                ::aps_commercial_freeze_dryer_models::commercial_freeze_dryer_lots::id,
+                ::aps_commercial_freeze_dryer_models::commercial_freeze_dryer_lots::archived
+            )
+        )
+    )]
     #[diesel(table_name = freeze_dryers)]
     pub struct FreezeDryer {
         /// Stable asset identifier inherited from physical_assets.
@@ -405,15 +403,17 @@ pub mod freeze_dryers_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         commercial_freeze_dryer_lot_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_assets::physical_assets::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `commercial_freeze_dryer_lot_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        commercial_freeze_dryer_lot_archived: bool,
     }
     impl ::diesel_builders::GetColumn<aps_assets::assets::id> for FreezeDryer {
-        fn get_column_ref(
-            &self,
-        ) -> &<freeze_dryers::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for FreezeDryer {
         fn get_column_ref(
             &self,
         ) -> &<freeze_dryers::id as ::diesel_builders::ColumnTyped>::ColumnType {
@@ -439,7 +439,6 @@ pub mod freeze_dryers_model {
         freeze_dryers,
         ::aps_commercial_freeze_dryer_models::commercial_freeze_dryer_lots
     );
-    ::diesel::allow_tables_to_appear_in_same_query!(freeze_dryers, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(freeze_dryers, ::aps_assets::physical_assets);
     ::diesel::allow_tables_to_appear_in_same_query!(freeze_dryers, ::aps_resources::resources);
 }

@@ -1,7 +1,6 @@
 //! The order of the steps of a procedure template and the slots they bind.
 
-use aps_asset_model_ancestors::*;
-use aps_procedure_templates::*;
+use aps_resources::*;
 use diesel_builders::{BuildableTable, BuilderResult, Insert, TableBuilder, prelude::*};
 use validation_errors::ValidationError;
 

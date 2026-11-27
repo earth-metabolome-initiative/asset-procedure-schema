@@ -1,7 +1,7 @@
 //! A visitor over the templates, slots and steps of a procedure template
 //! graph, each template visited once per step path reaching it.
 
-use aps_procedure_templates::ProcedureTemplateSlot;
+use aps_resources::ProcedureTemplateSlot;
 
 use crate::{ProcedureTemplateGraph, StepNode, TemplateNode};
 

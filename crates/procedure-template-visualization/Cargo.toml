@@ -4,8 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
-aps-procedure_templates.workspace = true
-aps-asset_model_ancestors.workspace = true
+aps-resources.workspace = true
 aps-traits.workspace = true
 diesel-builders.workspace = true
 mermaid-builder = "0.1.2"

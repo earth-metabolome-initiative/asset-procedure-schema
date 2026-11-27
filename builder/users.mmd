@@ -1,0 +1,14 @@
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: users
+---
+flowchart TB
+  v0@{shape: rounded, label: "platform_operators"}
+  style v0 rx: 3px, ry: 3px 
+  v1@{shape: rounded, label: "users"}
+  style v1 rx: 3px, ry: 3px 
+  v0 ---> v1

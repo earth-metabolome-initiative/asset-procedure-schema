@@ -1,7 +1,6 @@
 //! The slots and steps a procedure template declares.
 
-use aps_procedure_templates::*;
-use aps_resources::asset_models;
+use aps_resources::{asset_models, *};
 use diesel::{
     Connection, QueryDsl, RunQueryDsl,
     dsl::{Eq, Find, Update},
@@ -39,7 +38,7 @@ pub trait ProcedureTemplateNode:
     /// # Example
     ///
     /// ```rust
-    /// use aps_procedure_templates::*;
+    /// use aps_resources::*;
     /// use aps_test_utils::{Replica, Tenant};
     /// use aps_traits::{ProcedureTemplateNode, SlotRole};
     ///
@@ -91,7 +90,7 @@ pub trait ProcedureTemplateNode:
     /// # Example
     ///
     /// ```rust
-    /// use aps_procedure_templates::*;
+    /// use aps_resources::*;
     /// use aps_test_utils::{Replica, Tenant};
     /// use aps_traits::{ProcedureTemplateNode, SlotRole};
     ///

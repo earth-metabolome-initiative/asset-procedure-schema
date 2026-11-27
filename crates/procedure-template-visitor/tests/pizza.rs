@@ -3,9 +3,9 @@
 
 use core::convert::Infallible;
 
-use aps_asset_model_ancestors::procedure_assets;
-use aps_procedure_templates::{procedure_template_slots, procedure_templates};
+use aps_assets::procedure_assets;
 use aps_procedures::{disposal_procedures, procedures};
+use aps_resources::{procedure_template_slots, procedure_templates};
 use aps_test_utils::{Pizza, Replica, Tenant};
 use aps_traits::validation::validated;
 use diesel::{

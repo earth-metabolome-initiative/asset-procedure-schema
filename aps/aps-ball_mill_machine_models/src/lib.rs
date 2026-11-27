@@ -21,7 +21,6 @@ pub mod ball_mill_machine_models_model {
     /// Catalog of ball mill machine model definitions.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models
     ))]
@@ -32,10 +31,6 @@ pub mod ball_mill_machine_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
     #[diesel(table_name = ball_mill_machine_models)]
     pub struct BallMillMachineModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -47,15 +42,17 @@ pub mod ball_mill_machine_models_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        ball_mill_machine_models::id,
+        ball_mill_machine_models::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for BallMillMachineModel {
-        fn get_column_ref(
-            &self,
-        ) -> &<ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for BallMillMachineModel {
         fn get_column_ref(
             &self,
         ) -> &<ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
@@ -115,10 +112,6 @@ pub mod ball_mill_machine_models_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         ball_mill_machine_models,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        ball_mill_machine_models,
         ::aps_physical_asset_models::physical_asset_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -148,18 +141,11 @@ pub mod ball_mill_machines_model {
     /// Physical ball mill machines tracked in APS inventory.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_assets::assets,
         aps_assets::physical_assets
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_assets::PhysicalAsset, foreign_key = id))]
-    #[diesel(
-        belongs_to(
-            aps_ball_mill_machine_models::CommercialBallMillMachineLot,
-            foreign_key = commercial_ball_mill_machine_lot_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_assets::physical_assets::id)))]
     #[table_model(
         foreign_key(
@@ -167,10 +153,18 @@ pub mod ball_mill_machines_model {
             (::aps_ball_mill_machine_models::commercial_ball_mill_machine_lots::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (
+                commercial_ball_mill_machine_lot_id,
+                commercial_ball_mill_machine_lot_archived
+            ),
+            (
+                ::aps_ball_mill_machine_models::commercial_ball_mill_machine_lots::id,
+                ::aps_ball_mill_machine_models::commercial_ball_mill_machine_lots::archived
+            )
+        )
+    )]
     #[diesel(table_name = ball_mill_machines)]
     pub struct BallMillMachine {
         /// Stable asset identifier inherited from `physical_assets`.
@@ -187,15 +181,18 @@ pub mod ball_mill_machines_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         commercial_ball_mill_machine_lot_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_assets::physical_assets::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by
+        /// `commercial_ball_mill_machine_lot_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        commercial_ball_mill_machine_lot_archived: bool,
     }
     impl ::diesel_builders::GetColumn<aps_assets::assets::id> for BallMillMachine {
-        fn get_column_ref(
-            &self,
-        ) -> &<ball_mill_machines::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for BallMillMachine {
         fn get_column_ref(
             &self,
         ) -> &<ball_mill_machines::id as ::diesel_builders::ColumnTyped>::ColumnType {
@@ -221,7 +218,6 @@ pub mod ball_mill_machines_model {
         ball_mill_machines,
         ::aps_ball_mill_machine_models::commercial_ball_mill_machine_lots
     );
-    ::diesel::allow_tables_to_appear_in_same_query!(ball_mill_machines, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(
         ball_mill_machines,
         ::aps_assets::physical_assets
@@ -244,31 +240,10 @@ pub mod ball_mill_procedure_templates_model {
         ::diesel_builders::prelude::TableModel,
     )]
     /// Typed slots and parameters for ball mill.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedure_templates::procedure_templates
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_resources::procedure_templates))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_procedure_templates::ProcedureTemplate, foreign_key = id))]
-    #[diesel(
-        belongs_to(aps_ball_mill_machine_models::BeadModel, foreign_key = bead_model_id)
-    )]
-    #[diesel(
-        belongs_to(
-            aps_ball_mill_machine_models::BallMillMachineModel,
-            foreign_key = milled_with_model_id
-        )
-    )]
-    #[diesel(
-        belongs_to(
-            aps_physical_asset_models::VolumetricContainerModel,
-            foreign_key = milled_container_model_id
-        )
-    )]
-    #[table_model(
-        foreign_key((id), (::aps_procedure_templates::procedure_templates::id))
-    )]
+    #[diesel(belongs_to(aps_resources::ProcedureTemplate, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_resources::procedure_templates::id)))]
     #[table_model(
         foreign_key((bead_model_id), (::aps_ball_mill_machine_models::bead_models::id))
     )]
@@ -288,11 +263,11 @@ pub mod ball_mill_procedure_templates_model {
         foreign_key(
             (bead_slot_id, id, bead_model_id, bead_slot_role_id, organization_id),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
@@ -306,11 +281,11 @@ pub mod ball_mill_procedure_templates_model {
                 organization_id
             ),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
@@ -324,44 +299,67 @@ pub mod ball_mill_procedure_templates_model {
                 organization_id
             ),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (bead_model_id, bead_model_archived),
+            (
+                ::aps_ball_mill_machine_models::bead_models::id,
+                ::aps_ball_mill_machine_models::bead_models::archived
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (milled_with_model_id, milled_with_model_archived),
+            (
+                ::aps_ball_mill_machine_models::ball_mill_machine_models::id,
+                ::aps_ball_mill_machine_models::ball_mill_machine_models::archived
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (milled_container_model_id, milled_container_model_archived),
+            (
+                ::aps_physical_asset_models::volumetric_container_models::id,
+                ::aps_physical_asset_models::volumetric_container_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = ball_mill_procedure_templates)]
     pub struct BallMillProcedureTemplate {
         /// Identity shared with the parent template.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::procedure_template_id,
+            aps_resources::procedure_template_slots::procedure_template_id,
             (bead_slot_id, milled_with_slot_id, milled_container_slot_id)
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
         /// Organization containing the parent resource.
-        #[same_as(aps_procedure_templates::procedure_templates::organization_id)]
+        #[same_as(aps_resources::procedure_templates::organization_id)]
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::organization_id,
+            aps_resources::procedure_template_slots::organization_id,
             (bead_slot_id, milled_with_slot_id, milled_container_slot_id)
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
         /// Slot declaring the `bead` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         bead_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `bead` slot.
-        #[same_as(aps_procedure_templates::procedure_template_slots::asset_model_id, bead_slot_id)]
+        #[same_as(aps_resources::procedure_template_slots::asset_model_id, bead_slot_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         bead_model_id: ::rosetta_uuid::Uuid,
@@ -369,15 +367,12 @@ pub mod ball_mill_procedure_templates_model {
         #[table_model(generated)]
         bead_slot_role_id: String,
         /// Slot declaring the `milled_with` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         milled_with_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `milled_with` slot.
-        #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
-            milled_with_slot_id
-        )]
+        #[same_as(aps_resources::procedure_template_slots::asset_model_id, milled_with_slot_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         milled_with_model_id: ::rosetta_uuid::Uuid,
@@ -385,13 +380,13 @@ pub mod ball_mill_procedure_templates_model {
         #[table_model(generated)]
         milled_with_slot_role_id: String,
         /// Slot declaring the `milled_container` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         milled_container_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `milled_container` slot.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
+            aps_resources::procedure_template_slots::asset_model_id,
             milled_container_slot_id
         )]
         #[infallible]
@@ -421,7 +416,28 @@ pub mod ball_mill_procedure_templates_model {
         /// Number of grinding beads.
         #[table_model(default = 3i16)]
         bead_count: i16,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_resources::procedure_templates::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `bead_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        bead_model_archived: bool,
+        /// Archive state of the row named by `milled_with_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        milled_with_model_archived: bool,
+        /// Archive state of the row named by `milled_container_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        milled_container_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        ball_mill_procedure_templates::id,
+        ball_mill_procedure_templates::archived
+    );
     impl ::diesel_builders::ValidateColumn<ball_mill_procedure_templates::temperature_k>
         for <ball_mill_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
     {
@@ -615,15 +631,7 @@ pub mod ball_mill_procedure_templates_model {
             Ok(())
         }
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for BallMillProcedureTemplate {
-        fn get_column_ref(
-            &self,
-        ) -> &<ball_mill_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    impl ::diesel_builders::GetColumn<aps_resources::procedure_templates::id>
         for BallMillProcedureTemplate
     {
         fn get_column_ref(
@@ -736,15 +744,11 @@ pub mod ball_mill_procedure_templates_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         ball_mill_procedure_templates,
-        ::aps_resources::ownables
+        ::aps_resources::procedure_template_slots
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         ball_mill_procedure_templates,
-        ::aps_procedure_templates::procedure_template_slots
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        ball_mill_procedure_templates,
-        ::aps_procedure_templates::procedure_templates
+        ::aps_resources::procedure_templates
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         ball_mill_procedure_templates,
@@ -767,23 +771,12 @@ pub mod ball_mill_procedures_model {
         ::diesel::Queryable,
         ::diesel::Selectable,
         ::diesel::Identifiable,
-        ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
     /// Recorded execution of a ball mill template.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedures::procedures
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(
-            aps_ball_mill_machine_models::BallMillProcedureTemplate,
-            foreign_key = ball_mill_procedure_template_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
     #[table_model(
         foreign_key(
@@ -791,10 +784,15 @@ pub mod ball_mill_procedures_model {
             (::aps_ball_mill_machine_models::ball_mill_procedure_templates::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (ball_mill_procedure_template_id, ball_mill_procedure_template_archived),
+            (
+                ::aps_ball_mill_machine_models::ball_mill_procedure_templates::id,
+                ::aps_ball_mill_machine_models::ball_mill_procedure_templates::archived
+            )
+        )
+    )]
     #[diesel(table_name = ball_mill_procedures)]
     pub struct BallMillProcedure {
         /// Identity shared with the parent procedure.
@@ -813,12 +811,22 @@ pub mod ball_mill_procedures_model {
         ball_mill_procedure_template_id: ::rosetta_uuid::Uuid,
         /// Execution status copied from the parent procedure.
         #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
         #[infallible]
         status_id: String,
         /// Measured temperature k.
         temperature_k: Option<f64>,
         /// Measured frequency hz.
         frequency_hz: Option<f64>,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `ball_mill_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        ball_mill_procedure_template_archived: bool,
     }
     impl ::diesel_builders::ValidateColumn<ball_mill_procedures::temperature_k>
         for <ball_mill_procedures::table as ::diesel_builders::TableExt>::NewValues
@@ -917,13 +925,6 @@ pub mod ball_mill_procedures_model {
             Ok(())
         }
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for BallMillProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<ball_mill_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
     impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for BallMillProcedure {
         fn get_column_ref(
             &self,
@@ -970,10 +971,6 @@ pub mod ball_mill_procedures_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         ball_mill_procedures,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        ball_mill_procedures,
         ::aps_procedures::procedures
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -1000,7 +997,6 @@ pub mod bead_models_model {
     /// Catalog of bead models with diameter metadata.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models
     ))]
@@ -1011,10 +1007,6 @@ pub mod bead_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
     #[diesel(table_name = bead_models)]
     pub struct BeadModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -1028,7 +1020,13 @@ pub mod bead_models_model {
         organization_id: ::rosetta_uuid::Uuid,
         /// Bead diameter in meters.
         diameter_m: f64,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(bead_models::id, bead_models::archived);
     impl ::diesel_builders::ValidateColumn<bead_models::diameter_m>
         for <bead_models::table as ::diesel_builders::TableExt>::NewValues
     {
@@ -1054,13 +1052,6 @@ pub mod bead_models_model {
         }
     }
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for BeadModel {
-        fn get_column_ref(
-            &self,
-        ) -> &<bead_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for BeadModel {
         fn get_column_ref(
             &self,
         ) -> &<bead_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
@@ -1107,7 +1098,6 @@ pub mod bead_models_model {
             ],
         };
     ::diesel::allow_tables_to_appear_in_same_query!(bead_models, ::aps_resources::asset_models);
-    ::diesel::allow_tables_to_appear_in_same_query!(bead_models, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(
         bead_models,
         ::aps_physical_asset_models::physical_asset_models
@@ -1136,7 +1126,6 @@ pub mod commercial_ball_mill_machine_lots_model {
     /// Catalog of lot-specific commercial ball mill machine models.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
         aps_ball_mill_machine_models::ball_mill_machine_models,
@@ -1145,12 +1134,6 @@ pub mod commercial_ball_mill_machine_lots_model {
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(
         belongs_to(aps_commercial_products::CommercialProductLot, foreign_key = id)
-    )]
-    #[diesel(
-        belongs_to(
-            aps_ball_mill_machine_models::CommercialBallMillMachineModel,
-            foreign_key = commercial_ball_mill_machine_model_id
-        )
     )]
     #[diesel(
         belongs_to(aps_ball_mill_machine_models::BallMillMachineModel, foreign_key = id)
@@ -1167,10 +1150,18 @@ pub mod commercial_ball_mill_machine_lots_model {
     #[table_model(
         foreign_key((id), (::aps_ball_mill_machine_models::ball_mill_machine_models::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (
+                commercial_ball_mill_machine_model_id,
+                commercial_ball_mill_machine_model_archived
+            ),
+            (
+                ::aps_ball_mill_machine_models::commercial_ball_mill_machine_models::id,
+                ::aps_ball_mill_machine_models::commercial_ball_mill_machine_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = commercial_ball_mill_machine_lots)]
     pub struct CommercialBallMillMachineLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -1188,7 +1179,22 @@ pub mod commercial_ball_mill_machine_lots_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         commercial_ball_mill_machine_model_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_ball_mill_machine_models::ball_mill_machine_models::archived)]
+        #[same_as(aps_commercial_products::commercial_product_lots::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by
+        /// `commercial_ball_mill_machine_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        commercial_ball_mill_machine_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        commercial_ball_mill_machine_lots::id,
+        commercial_ball_mill_machine_lots::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id>
         for CommercialBallMillMachineLot
     {
@@ -1212,14 +1218,6 @@ pub mod commercial_ball_mill_machine_lots_model {
     impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_product_lots::id>
         for CommercialBallMillMachineLot
     {
-        fn get_column_ref(
-            &self,
-        ) -> &<commercial_ball_mill_machine_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CommercialBallMillMachineLot {
         fn get_column_ref(
             &self,
         ) -> &<commercial_ball_mill_machine_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
@@ -1287,10 +1285,6 @@ pub mod commercial_ball_mill_machine_lots_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_ball_mill_machine_lots,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        commercial_ball_mill_machine_lots,
         ::aps_physical_asset_models::physical_asset_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -1320,7 +1314,6 @@ pub mod commercial_ball_mill_machine_models_model {
     /// Catalog of commercial ball mill machine models.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
         aps_commercial_products::commercial_products,
@@ -1340,10 +1333,15 @@ pub mod commercial_ball_mill_machine_models_model {
     #[table_model(
         foreign_key((id), (::aps_commercial_products::commercial_products::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (ball_mill_machine_model_id, ball_mill_machine_model_archived),
+            (
+                ::aps_ball_mill_machine_models::ball_mill_machine_models::id,
+                ::aps_ball_mill_machine_models::ball_mill_machine_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = commercial_ball_mill_machine_models)]
     pub struct CommercialBallMillMachineModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -1361,7 +1359,21 @@ pub mod commercial_ball_mill_machine_models_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         ball_mill_machine_model_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_ball_mill_machine_models::ball_mill_machine_models::archived)]
+        #[same_as(aps_commercial_products::commercial_products::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `ball_mill_machine_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        ball_mill_machine_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        commercial_ball_mill_machine_models::id,
+        commercial_ball_mill_machine_models::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id>
         for CommercialBallMillMachineModel
     {
@@ -1385,14 +1397,6 @@ pub mod commercial_ball_mill_machine_models_model {
     impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
         for CommercialBallMillMachineModel
     {
-        fn get_column_ref(
-            &self,
-        ) -> &<commercial_ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CommercialBallMillMachineModel {
         fn get_column_ref(
             &self,
         ) -> &<commercial_ball_mill_machine_models::id as ::diesel_builders::ColumnTyped>::ColumnType
@@ -1453,10 +1457,6 @@ pub mod commercial_ball_mill_machine_models_model {
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_ball_mill_machine_models,
         ::aps_commercial_products::commercial_products
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        commercial_ball_mill_machine_models,
-        ::aps_resources::ownables
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_ball_mill_machine_models,

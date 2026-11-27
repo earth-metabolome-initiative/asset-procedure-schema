@@ -143,7 +143,13 @@ fn generate_sink_toml_typed_rows(
     move |_db| Ok(Some(TomlDependency::new(name).workspace(true)?))
 }
 
-/// Validates the schema and generates the `aps/` workspace crates.
+/// Validates the schema and generates the `aps/` workspace crates, which
+/// follow the schema even while findings remain.
+///
+/// # Errors
+///
+/// Returns an error after generation when SQLippy reports a finding or
+/// rls2fga a divergence.
 pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut tracker = TimeTracker::new("APS Generation");
 
@@ -161,14 +167,9 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     for note in &divergences {
         eprintln!("rls2fga [{}] {}: {note}\n", note.severity(), note.subject());
     }
-    if !findings.is_empty() || !divergences.is_empty() {
-        return Err(format!(
-            "{} SQLippy findings, {} rls2fga divergences",
-            findings.len(),
-            divergences.len()
-        )
-        .into());
-    }
+    let verdict = (!findings.is_empty() || !divergences.is_empty()).then(|| {
+        format!("{} SQLippy findings, {} rls2fga divergences", findings.len(), divergences.len())
+    });
     tracker.add_completed_task(validation_task);
     let db = schema.database;
 
@@ -286,5 +287,8 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     // We print the report
     tracker.write(Path::new("TIME_REQUIREMENTS.md")).unwrap();
 
-    Ok(())
+    match verdict {
+        Some(verdict) => Err(verdict.into()),
+        None => Ok(()),
+    }
 }

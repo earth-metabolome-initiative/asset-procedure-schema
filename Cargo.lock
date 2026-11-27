@@ -45,68 +45,28 @@ dependencies = [
 name = "aps"
 version = "0.1.0"
 dependencies = [
- "aps-aliquoting_procedure_templates",
- "aps-asset_model_ancestors",
  "aps-assets",
  "aps-audit_events",
+ "aps-authz-resource_kind",
  "aps-ball_mill_machine_models",
  "aps-centrifuge_models",
  "aps-commercial_freeze_dryer_models",
  "aps-commercial_freezer_models",
  "aps-commercial_products",
- "aps-fractioning_procedure_templates",
- "aps-freeze_dryer_models",
- "aps-freezer_models",
- "aps-grantees",
- "aps-packaging_models",
+ "aps-geopositioning_devices",
+ "aps-organizations",
  "aps-photograph_procedure_templates",
  "aps-physical_asset_models",
  "aps-platform_audit_events",
- "aps-pouring_procedure_templates",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
- "aps-supernatant_procedure_templates",
+ "aps-sample_models",
+ "aps-weighing_device_models",
  "diesel",
  "diesel-builders",
  "procedure-like",
  "rosetta-uuid",
  "sqlitegis",
-]
-
-[[package]]
-name = "aps-aliquoting_procedure_templates"
-version = "0.1.0"
-dependencies = [
- "aps-assets",
- "aps-authz-resource_kind",
- "aps-physical_asset_models",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-resources",
- "diesel",
- "diesel-builders",
- "procedure-like",
- "rosetta-uuid",
- "serde",
- "validation-errors",
-]
-
-[[package]]
-name = "aps-asset_model_ancestors"
-version = "0.1.0"
-dependencies = [
- "aps-assets",
- "aps-authz-resource_kind",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-resources",
- "diesel",
- "diesel-builders",
- "procedure-like",
- "rosetta-uuid",
- "serde",
- "validation-errors",
 ]
 
 [[package]]
@@ -120,6 +80,7 @@ dependencies = [
  "diesel",
  "diesel-builders",
  "procedure-like",
+ "rosetta-utc",
  "rosetta-uuid",
  "serde",
  "validation-errors",
@@ -192,10 +153,8 @@ name = "aps-ball_mill_machine_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
- "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
  "diesel",
@@ -211,10 +170,8 @@ name = "aps-centrifuge_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
- "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
  "diesel",
@@ -230,10 +187,9 @@ name = "aps-commercial_freeze_dryer_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
- "aps-authz-resource_kind",
  "aps-commercial_products",
- "aps-freeze_dryer_models",
  "aps-physical_asset_models",
+ "aps-procedures",
  "aps-resources",
  "diesel",
  "diesel-builders",
@@ -248,10 +204,9 @@ name = "aps-commercial_freezer_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
- "aps-authz-resource_kind",
  "aps-commercial_products",
- "aps-freezer_models",
  "aps-physical_asset_models",
+ "aps-procedures",
  "aps-resources",
  "diesel",
  "diesel-builders",
@@ -267,12 +222,11 @@ version = "0.1.0"
 dependencies = [
  "aps-assets",
  "aps-authz-resource_kind",
- "aps-freeze_dryer_models",
- "aps-freezer_models",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
+ "aps-sample_models",
+ "aps-weighing_device_models",
  "diesel",
  "diesel-builders",
  "procedure-like",
@@ -283,135 +237,60 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-dag-grantees"
-version = "0.1.0"
-dependencies = [
- "aps-aliquoting_procedure_templates",
- "aps-asset_model_ancestors",
- "aps-assets",
- "aps-ball_mill_machine_models",
- "aps-centrifuge_models",
- "aps-commercial_freeze_dryer_models",
- "aps-commercial_freezer_models",
- "aps-commercial_products",
- "aps-fractioning_procedure_templates",
- "aps-freeze_dryer_models",
- "aps-freezer_models",
- "aps-grantees",
- "aps-packaging_models",
- "aps-photograph_procedure_templates",
- "aps-physical_asset_models",
- "aps-pouring_procedure_templates",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-resources",
- "aps-supernatant_procedure_templates",
-]
-
-[[package]]
 name = "aps-dag-resources"
 version = "0.1.0"
 dependencies = [
- "aps-aliquoting_procedure_templates",
- "aps-asset_model_ancestors",
  "aps-assets",
  "aps-ball_mill_machine_models",
  "aps-centrifuge_models",
  "aps-commercial_freeze_dryer_models",
  "aps-commercial_freezer_models",
  "aps-commercial_products",
- "aps-fractioning_procedure_templates",
- "aps-freeze_dryer_models",
- "aps-freezer_models",
- "aps-packaging_models",
+ "aps-geopositioning_devices",
  "aps-photograph_procedure_templates",
  "aps-physical_asset_models",
- "aps-pouring_procedure_templates",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
- "aps-supernatant_procedure_templates",
+ "aps-sample_models",
+ "aps-weighing_device_models",
 ]
 
 [[package]]
-name = "aps-dag-table_names"
+name = "aps-dag-users"
 version = "0.1.0"
 dependencies = [
- "aps-aliquoting_procedure_templates",
- "aps-asset_model_ancestors",
  "aps-assets",
  "aps-ball_mill_machine_models",
  "aps-centrifuge_models",
  "aps-commercial_freeze_dryer_models",
  "aps-commercial_freezer_models",
  "aps-commercial_products",
- "aps-fractioning_procedure_templates",
- "aps-freeze_dryer_models",
- "aps-freezer_models",
- "aps-packaging_models",
+ "aps-geopositioning_devices",
+ "aps-organizations",
  "aps-photograph_procedure_templates",
  "aps-physical_asset_models",
- "aps-pouring_procedure_templates",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
- "aps-supernatant_procedure_templates",
+ "aps-sample_models",
+ "aps-weighing_device_models",
 ]
 
 [[package]]
-name = "aps-fractioning_procedure_templates"
+name = "aps-geopositioning_devices"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
- "aps-authz-resource_kind",
- "aps-physical_asset_models",
- "aps-procedure_templates",
- "aps-procedures",
+ "aps-commercial_products",
  "aps-resources",
  "diesel",
  "diesel-builders",
- "procedure-like",
  "rosetta-uuid",
  "serde",
  "validation-errors",
 ]
 
 [[package]]
-name = "aps-freeze_dryer_models"
-version = "0.1.0"
-dependencies = [
- "aps-authz-resource_kind",
- "aps-physical_asset_models",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-resources",
- "diesel",
- "diesel-builders",
- "procedure-like",
- "rosetta-uuid",
- "serde",
- "validation-errors",
-]
-
-[[package]]
-name = "aps-freezer_models"
-version = "0.1.0"
-dependencies = [
- "aps-authz-resource_kind",
- "aps-physical_asset_models",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-resources",
- "diesel",
- "diesel-builders",
- "procedure-like",
- "rosetta-uuid",
- "serde",
- "validation-errors",
-]
-
-[[package]]
-name = "aps-grantees"
+name = "aps-organizations"
 version = "0.1.0"
 dependencies = [
  "aps-authz-grantee_kind",
@@ -428,31 +307,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-packaging_models"
-version = "0.1.0"
-dependencies = [
- "aps-assets",
- "aps-authz-resource_kind",
- "aps-physical_asset_models",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-resources",
- "diesel",
- "diesel-builders",
- "procedure-like",
- "rosetta-uuid",
- "serde",
- "validation-errors",
-]
-
-[[package]]
 name = "aps-photograph_procedure_templates"
 version = "0.1.0"
 dependencies = [
- "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
  "diesel",
@@ -468,7 +327,6 @@ name = "aps-physical_asset_models"
 version = "0.1.0"
 dependencies = [
  "aps-authz-resource_kind",
- "aps-procedure_templates",
  "aps-resources",
  "diesel",
  "diesel-builders",
@@ -493,44 +351,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-pouring_procedure_templates"
-version = "0.1.0"
-dependencies = [
- "aps-assets",
- "aps-authz-resource_kind",
- "aps-physical_asset_models",
- "aps-procedure_templates",
- "aps-procedures",
- "aps-resources",
- "diesel",
- "diesel-builders",
- "procedure-like",
- "rosetta-uuid",
- "serde",
- "validation-errors",
-]
-
-[[package]]
-name = "aps-procedure_templates"
-version = "0.1.0"
-dependencies = [
- "aps-authz-resource_kind",
- "aps-resources",
- "diesel",
- "diesel-builders",
- "rosetta-uuid",
- "serde",
- "validation-errors",
-]
-
-[[package]]
 name = "aps-procedures"
 version = "0.1.0"
 dependencies = [
  "aps-authz-resource_kind",
- "aps-grantees",
+ "aps-organizations",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-resources",
  "diesel",
  "diesel-builders",
@@ -548,7 +374,7 @@ dependencies = [
  "aps-authz-grantee_kind",
  "aps-authz-resource_kind",
  "aps-authz-role",
- "aps-grantees",
+ "aps-organizations",
  "diesel",
  "diesel-builders",
  "procedure-like",
@@ -559,13 +385,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-supernatant_procedure_templates"
+name = "aps-sample_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
- "aps-authz-resource_kind",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
  "diesel",
@@ -581,14 +405,12 @@ name = "aps-test-utils"
 version = "0.1.0"
 dependencies = [
  "aps",
- "aps-asset_model_ancestors",
  "aps-authz-grantee_kind",
  "aps-authz-membership_state",
  "aps-authz-resource_kind",
  "aps-authz-role",
- "aps-grantees",
+ "aps-organizations",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-resources",
  "aps-traits",
  "diesel",
@@ -608,15 +430,30 @@ dependencies = [
 name = "aps-traits"
 version = "0.1.0"
 dependencies = [
- "aps-asset_model_ancestors",
  "aps-authz-resource_kind",
  "aps-physical_asset_models",
- "aps-procedure_templates",
  "aps-resources",
  "aps-test-utils",
  "diesel",
  "diesel-builders",
  "rosetta-uuid",
+ "validation-errors",
+]
+
+[[package]]
+name = "aps-weighing_device_models"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-physical_asset_models",
+ "aps-procedures",
+ "aps-resources",
+ "aps-sample_models",
+ "diesel",
+ "diesel-builders",
+ "procedure-like",
+ "rosetta-uuid",
+ "serde",
  "validation-errors",
 ]
 
@@ -1766,10 +1603,8 @@ dependencies = [
 name = "procedure-template-visitor"
 version = "0.1.0"
 dependencies = [
- "aps-asset_model_ancestors",
  "aps-assets",
  "aps-authz-resource_kind",
- "aps-procedure_templates",
  "aps-procedures",
  "aps-resources",
  "aps-test-utils",
@@ -1787,8 +1622,7 @@ dependencies = [
 name = "procedure-template-visualization"
 version = "0.1.0"
 dependencies = [
- "aps-asset_model_ancestors",
- "aps-procedure_templates",
+ "aps-resources",
  "aps-test-utils",
  "aps-traits",
  "diesel-builders",

@@ -5,9 +5,7 @@ edition.workspace = true
 
 [dependencies]
 aps-physical_asset_models.workspace = true
-aps-procedure_templates.workspace = true
 aps-resources.workspace = true
-aps-asset_model_ancestors.workspace = true
 aps-authz-resource_kind.workspace = true
 diesel.workspace = true
 diesel-builders.workspace = true

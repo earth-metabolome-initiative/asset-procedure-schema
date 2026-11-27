@@ -1,8 +1,8 @@
 //! The parameters a template declares and the values its parent's steps fix
 //! for them, as the template graph loads them.
 
-use aps_procedure_templates::{procedure_template_steps, procedure_templates};
 use aps_procedures::{procedure_template_parameters, procedure_template_step_parameters};
+use aps_resources::{procedure_template_steps, procedure_templates};
 use aps_test_utils::{Replica, Tenant};
 use aps_traits::{ProcedureTemplateNode, ProcedureTemplateStepNode, SlotRole};
 use diesel::{QueryResult, SqliteConnection, connection::SimpleConnection};

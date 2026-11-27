@@ -21,7 +21,6 @@ pub mod container_sealer_models_model {
     /// Catalog of models whose primary role is sealing container openings.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models
     ))]
@@ -32,10 +31,6 @@ pub mod container_sealer_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
     #[diesel(table_name = container_sealer_models)]
     pub struct ContainerSealerModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -47,15 +42,17 @@ pub mod container_sealer_models_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        container_sealer_models::id,
+        container_sealer_models::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for ContainerSealerModel {
-        fn get_column_ref(
-            &self,
-        ) -> &<container_sealer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for ContainerSealerModel {
         fn get_column_ref(
             &self,
         ) -> &<container_sealer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
@@ -107,10 +104,6 @@ pub mod container_sealer_models_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         container_sealer_models,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        container_sealer_models,
         ::aps_physical_asset_models::physical_asset_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -137,28 +130,10 @@ pub mod container_sealing_procedure_templates_model {
         ::diesel_builders::prelude::TableModel,
     )]
     /// Typed slots and parameters for container sealing.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedure_templates::procedure_templates
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_resources::procedure_templates))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_procedure_templates::ProcedureTemplate, foreign_key = id))]
-    #[diesel(
-        belongs_to(
-            aps_physical_asset_models::VolumetricContainerModel,
-            foreign_key = sealable_container_model_id
-        )
-    )]
-    #[diesel(
-        belongs_to(
-            aps_procedures::ContainerSealerModel,
-            foreign_key = sealed_with_model_id
-        )
-    )]
-    #[table_model(
-        foreign_key((id), (::aps_procedure_templates::procedure_templates::id))
-    )]
+    #[diesel(belongs_to(aps_resources::ProcedureTemplate, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_resources::procedure_templates::id)))]
     #[table_model(
         foreign_key(
             (sealable_container_model_id),
@@ -181,11 +156,11 @@ pub mod container_sealing_procedure_templates_model {
                 organization_id
             ),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
@@ -199,45 +174,59 @@ pub mod container_sealing_procedure_templates_model {
                 organization_id
             ),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (sealable_container_model_id, sealable_container_model_archived),
+            (
+                ::aps_physical_asset_models::volumetric_container_models::id,
+                ::aps_physical_asset_models::volumetric_container_models::archived
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (sealed_with_model_id, sealed_with_model_archived),
+            (
+                ::aps_procedures::container_sealer_models::id,
+                ::aps_procedures::container_sealer_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = container_sealing_procedure_templates)]
     pub struct ContainerSealingProcedureTemplate {
         /// Identity shared with the parent template.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::procedure_template_id,
+            aps_resources::procedure_template_slots::procedure_template_id,
             (sealable_container_slot_id, sealed_with_slot_id)
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
         /// Organization containing the parent resource.
-        #[same_as(aps_procedure_templates::procedure_templates::organization_id)]
+        #[same_as(aps_resources::procedure_templates::organization_id)]
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::organization_id,
+            aps_resources::procedure_template_slots::organization_id,
             (sealable_container_slot_id, sealed_with_slot_id)
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
         /// Slot declaring the `sealable_container` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         sealable_container_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `sealable_container` slot.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
+            aps_resources::procedure_template_slots::asset_model_id,
             sealable_container_slot_id
         )]
         #[infallible]
@@ -247,32 +236,37 @@ pub mod container_sealing_procedure_templates_model {
         #[table_model(generated)]
         sealable_container_slot_role_id: String,
         /// Slot declaring the `sealed_with` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         sealed_with_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `sealed_with` slot.
-        #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
-            sealed_with_slot_id
-        )]
+        #[same_as(aps_resources::procedure_template_slots::asset_model_id, sealed_with_slot_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         sealed_with_model_id: ::rosetta_uuid::Uuid,
         /// Required role of the `sealed_with` slot.
         #[table_model(generated)]
         sealed_with_slot_role_id: String,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_resources::procedure_templates::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `sealable_container_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        sealable_container_model_archived: bool,
+        /// Archive state of the row named by `sealed_with_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        sealed_with_model_archived: bool,
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id>
-        for ContainerSealingProcedureTemplate
-    {
-        fn get_column_ref(
-            &self,
-        ) -> &<container_sealing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType{
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    ::diesel_builders::prelude::unique_index!(
+        container_sealing_procedure_templates::id,
+        container_sealing_procedure_templates::archived
+    );
+    impl ::diesel_builders::GetColumn<aps_resources::procedure_templates::id>
         for ContainerSealingProcedureTemplate
     {
         fn get_column_ref(
@@ -323,15 +317,11 @@ pub mod container_sealing_procedure_templates_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         container_sealing_procedure_templates,
-        ::aps_resources::ownables
+        ::aps_resources::procedure_template_slots
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         container_sealing_procedure_templates,
-        ::aps_procedure_templates::procedure_template_slots
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        container_sealing_procedure_templates,
-        ::aps_procedure_templates::procedure_templates
+        ::aps_resources::procedure_templates
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         container_sealing_procedure_templates,
@@ -357,22 +347,11 @@ pub mod container_sealing_procedures_model {
         ::diesel::Queryable,
         ::diesel::Selectable,
         ::diesel::Identifiable,
-        ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
     /// Recorded execution of a container sealing template.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedures::procedures
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(
-            aps_procedures::ContainerSealingProcedureTemplate,
-            foreign_key = container_sealing_procedure_template_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
     #[table_model(
         foreign_key(
@@ -380,10 +359,18 @@ pub mod container_sealing_procedures_model {
             (::aps_procedures::container_sealing_procedure_templates::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (
+                container_sealing_procedure_template_id,
+                container_sealing_procedure_template_archived
+            ),
+            (
+                ::aps_procedures::container_sealing_procedure_templates::id,
+                ::aps_procedures::container_sealing_procedure_templates::archived
+            )
+        )
+    )]
     #[diesel(table_name = container_sealing_procedures)]
     pub struct ContainerSealingProcedure {
         /// Identity shared with the parent procedure.
@@ -402,16 +389,19 @@ pub mod container_sealing_procedures_model {
         container_sealing_procedure_template_id: ::rosetta_uuid::Uuid,
         /// Execution status copied from the parent procedure.
         #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
         #[infallible]
         status_id: String,
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for ContainerSealingProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<container_sealing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by
+        /// `container_sealing_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        container_sealing_procedure_template_archived: bool,
     }
     impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for ContainerSealingProcedure {
         fn get_column_ref(
@@ -445,10 +435,6 @@ pub mod container_sealing_procedures_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         container_sealing_procedures,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        container_sealing_procedures,
         ::aps_procedures::procedures
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -475,22 +461,10 @@ pub mod disposal_procedure_templates_model {
         ::diesel_builders::prelude::TableModel,
     )]
     /// Typed slots and parameters for disposal.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedure_templates::procedure_templates
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_resources::procedure_templates))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_procedure_templates::ProcedureTemplate, foreign_key = id))]
-    #[diesel(
-        belongs_to(
-            aps_physical_asset_models::PhysicalAssetModel,
-            foreign_key = disposed_asset_model_id
-        )
-    )]
-    #[table_model(
-        foreign_key((id), (::aps_procedure_templates::procedure_templates::id))
-    )]
+    #[diesel(belongs_to(aps_resources::ProcedureTemplate, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_resources::procedure_templates::id)))]
     #[table_model(
         foreign_key(
             (disposed_asset_model_id),
@@ -507,63 +481,70 @@ pub mod disposal_procedure_templates_model {
                 organization_id
             ),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (disposed_asset_model_id, disposed_asset_model_archived),
+            (
+                ::aps_physical_asset_models::physical_asset_models::id,
+                ::aps_physical_asset_models::physical_asset_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = disposal_procedure_templates)]
     pub struct DisposalProcedureTemplate {
         /// Identity shared with the parent template.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::procedure_template_id,
+            aps_resources::procedure_template_slots::procedure_template_id,
             disposed_asset_slot_id
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
         /// Organization containing the parent resource.
-        #[same_as(aps_procedure_templates::procedure_templates::organization_id)]
+        #[same_as(aps_resources::procedure_templates::organization_id)]
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::organization_id,
+            aps_resources::procedure_template_slots::organization_id,
             disposed_asset_slot_id
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
         /// Slot declaring the `disposed_asset` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         disposed_asset_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `disposed_asset` slot.
-        #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
-            disposed_asset_slot_id
-        )]
+        #[same_as(aps_resources::procedure_template_slots::asset_model_id, disposed_asset_slot_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         disposed_asset_model_id: ::rosetta_uuid::Uuid,
         /// Required role of the `disposed_asset` slot.
         #[table_model(generated)]
         disposed_asset_slot_role_id: String,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_resources::procedure_templates::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `disposed_asset_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        disposed_asset_model_archived: bool,
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for DisposalProcedureTemplate {
-        fn get_column_ref(
-            &self,
-        ) -> &<disposal_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    ::diesel_builders::prelude::unique_index!(
+        disposal_procedure_templates::id,
+        disposal_procedure_templates::archived
+    );
+    impl ::diesel_builders::GetColumn<aps_resources::procedure_templates::id>
         for DisposalProcedureTemplate
     {
         fn get_column_ref(
@@ -598,19 +579,15 @@ pub mod disposal_procedure_templates_model {
         };
     ::diesel::allow_tables_to_appear_in_same_query!(
         disposal_procedure_templates,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        disposal_procedure_templates,
         ::aps_physical_asset_models::physical_asset_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         disposal_procedure_templates,
-        ::aps_procedure_templates::procedure_template_slots
+        ::aps_resources::procedure_template_slots
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         disposal_procedure_templates,
-        ::aps_procedure_templates::procedure_templates
+        ::aps_resources::procedure_templates
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         disposal_procedure_templates,
@@ -632,22 +609,11 @@ pub mod disposal_procedures_model {
         ::diesel::Queryable,
         ::diesel::Selectable,
         ::diesel::Identifiable,
-        ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
     /// Recorded execution of a disposal template.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedures::procedures
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(
-            aps_procedures::DisposalProcedureTemplate,
-            foreign_key = disposal_procedure_template_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
     #[table_model(
         foreign_key(
@@ -655,10 +621,15 @@ pub mod disposal_procedures_model {
             (::aps_procedures::disposal_procedure_templates::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (disposal_procedure_template_id, disposal_procedure_template_archived),
+            (
+                ::aps_procedures::disposal_procedure_templates::id,
+                ::aps_procedures::disposal_procedure_templates::archived
+            )
+        )
+    )]
     #[diesel(table_name = disposal_procedures)]
     pub struct DisposalProcedure {
         /// Identity shared with the parent procedure.
@@ -677,15 +648,18 @@ pub mod disposal_procedures_model {
         disposal_procedure_template_id: ::rosetta_uuid::Uuid,
         /// Execution status copied from the parent procedure.
         #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
         #[infallible]
         status_id: String,
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for DisposalProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<disposal_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `disposal_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        disposal_procedure_template_archived: bool,
     }
     impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for DisposalProcedure {
         fn get_column_ref(
@@ -715,7 +689,6 @@ pub mod disposal_procedures_model {
         disposal_procedures,
         ::aps_procedures::disposal_procedure_templates
     );
-    ::diesel::allow_tables_to_appear_in_same_query!(disposal_procedures, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(
         disposal_procedures,
         ::aps_procedures::procedures
@@ -726,6 +699,1441 @@ pub mod disposal_procedures_model {
     );
 }
 pub use disposal_procedures_model::*;
+pub mod freeze_dryer_models_model {
+    #[derive(
+        Copy,
+        Clone,
+        Debug,
+        Hash,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel::Associations,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Catalog of freeze dryer model definitions.
+    #[table_model(ancestors(
+        aps_resources::resources,
+        aps_resources::asset_models,
+        aps_physical_asset_models::physical_asset_models
+    ))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[diesel(
+        belongs_to(aps_physical_asset_models::PhysicalAssetModel, foreign_key = id)
+    )]
+    #[table_model(
+        foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
+    )]
+    #[diesel(table_name = freeze_dryer_models)]
+    pub struct FreezeDryerModel {
+        /// Stable model identifier inherited from physical_asset_models.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::organization_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+    }
+    ::diesel_builders::prelude::unique_index!(
+        freeze_dryer_models::id,
+        freeze_dryer_models::archived
+    );
+    impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for FreezeDryerModel {
+        fn get_column_ref(
+            &self,
+        ) -> &<freeze_dryer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+        for FreezeDryerModel
+    {
+        fn get_column_ref(
+            &self,
+        ) -> &<freeze_dryer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for FreezeDryerModel {
+        fn get_column_ref(
+            &self,
+        ) -> &<freeze_dryer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    /// Shape of `freeze_dryer_models` the procedure runner renders.
+    pub const FREEZE_DRYER_MODELS_SHAPE: procedure_like::shape::AssetModelShape =
+        procedure_like::shape::AssetModelShape {
+            table_name: "freeze_dryer_models",
+            asset_table_name: "physical_assets",
+            model_column: "physical_asset_model_id",
+            required: &[
+                procedure_like::shape::ColumnShape {
+                    name: "organization_id",
+                    label: "connetto organization owning the row.",
+                    sql_type: procedure_like::shape::SqlType::Uuid,
+                    unit: None,
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "physical_asset_model_id",
+                    label: "Model of the asset, which must be a physical asset model.",
+                    sql_type: procedure_like::shape::SqlType::Uuid,
+                    unit: None,
+                    required: true,
+                },
+            ],
+        };
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_dryer_models,
+        ::aps_resources::asset_models
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_dryer_models,
+        ::aps_physical_asset_models::physical_asset_models
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_dryer_models,
+        ::aps_resources::resources
+    );
+}
+pub use freeze_dryer_models_model::*;
+pub mod freeze_drying_procedure_templates_model {
+    #[derive(
+        Clone,
+        Debug,
+        PartialOrd,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel::Associations,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Typed slots and parameters for freeze drying.
+    #[table_model(ancestors(aps_resources::resources, aps_resources::procedure_templates))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[diesel(belongs_to(aps_resources::ProcedureTemplate, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_resources::procedure_templates::id)))]
+    #[table_model(
+        foreign_key(
+            (freeze_dried_with_model_id),
+            (::aps_procedures::freeze_dryer_models::id)
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (freeze_dried_container_model_id),
+            (::aps_physical_asset_models::volumetric_container_models::id)
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (
+                freeze_dried_with_slot_id,
+                id,
+                freeze_dried_with_model_id,
+                freeze_dried_with_slot_role_id,
+                organization_id
+            ),
+            (
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (
+                freeze_dried_container_slot_id,
+                id,
+                freeze_dried_container_model_id,
+                freeze_dried_container_slot_role_id,
+                organization_id
+            ),
+            (
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (freeze_dried_with_model_id, freeze_dried_with_model_archived),
+            (
+                ::aps_procedures::freeze_dryer_models::id,
+                ::aps_procedures::freeze_dryer_models::archived
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (freeze_dried_container_model_id, freeze_dried_container_model_archived),
+            (
+                ::aps_physical_asset_models::volumetric_container_models::id,
+                ::aps_physical_asset_models::volumetric_container_models::archived
+            )
+        )
+    )]
+    #[diesel(table_name = freeze_drying_procedure_templates)]
+    pub struct FreezeDryingProcedureTemplate {
+        /// Identity shared with the parent template.
+        #[same_as(
+            aps_resources::procedure_template_slots::procedure_template_id,
+            (freeze_dried_with_slot_id, freeze_dried_container_slot_id)
+        )]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing the parent resource.
+        #[same_as(aps_resources::procedure_templates::organization_id)]
+        #[same_as(
+            aps_resources::procedure_template_slots::organization_id,
+            (freeze_dried_with_slot_id, freeze_dried_container_slot_id)
+        )]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Slot declaring the `freeze_dried_with` assets.
+        #[mandatory(aps_resources::procedure_template_slots)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        freeze_dried_with_slot_id: ::rosetta_uuid::Uuid,
+        /// Admissible model for the `freeze_dried_with` slot.
+        #[same_as(
+            aps_resources::procedure_template_slots::asset_model_id,
+            freeze_dried_with_slot_id
+        )]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        freeze_dried_with_model_id: ::rosetta_uuid::Uuid,
+        /// Required role of the `freeze_dried_with` slot.
+        #[table_model(generated)]
+        freeze_dried_with_slot_role_id: String,
+        /// Slot declaring the `freeze_dried_container` assets.
+        #[mandatory(aps_resources::procedure_template_slots)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        freeze_dried_container_slot_id: ::rosetta_uuid::Uuid,
+        /// Admissible model for the `freeze_dried_container` slot.
+        #[same_as(
+            aps_resources::procedure_template_slots::asset_model_id,
+            freeze_dried_container_slot_id
+        )]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        freeze_dried_container_model_id: ::rosetta_uuid::Uuid,
+        /// Required role of the `freeze_dried_container` slot.
+        #[table_model(generated)]
+        freeze_dried_container_slot_role_id: String,
+        /// Target temperature in kelvin.
+        #[table_model(default = 203.15f64)]
+        temperature_k: f64,
+        /// Allowed temperature deviation as a percentage of the target.
+        #[table_model(default = 5f64)]
+        temperature_tolerance_percentage: f64,
+        /// Target pressure in pascals.
+        #[table_model(default = 4f64)]
+        pressure_pa: f64,
+        /// Allowed pressure deviation as a percentage of the target.
+        #[table_model(default = 5f64)]
+        pressure_pa_tolerance_percentage: f64,
+        /// Treatment duration in seconds.
+        #[table_model(default = 259200f64)]
+        duration_s: f64,
+        /// Allowed duration deviation as a percentage of the target.
+        #[table_model(default = 5f64)]
+        duration_tolerance_percentage: f64,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_resources::procedure_templates::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `freeze_dried_with_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        freeze_dried_with_model_archived: bool,
+        /// Archive state of the row named by `freeze_dried_container_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        freeze_dried_container_model_archived: bool,
+    }
+    ::diesel_builders::prelude::unique_index!(
+        freeze_drying_procedure_templates::id,
+        freeze_drying_procedure_templates::archived
+    );
+    impl ::diesel_builders::ValidateColumn<freeze_drying_procedure_templates::temperature_k>
+        for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(temperature_k: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if temperature_k <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::temperature_k::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if temperature_k.partial_cmp(&f64::INFINITY).is_none_or(::core::cmp::Ordering::is_ge) {
+                return Err(
+                    ::validation_errors::ValidationError::check_violated(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        &[crate::freeze_drying_procedure_templates::temperature_k::NAME],
+                        "temperature_k < 'Infinity'::DOUBLE PRECISION",
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl
+        ::diesel_builders::ValidateColumn<
+            freeze_drying_procedure_templates::temperature_tolerance_percentage,
+        > for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(temperature_tolerance_percentage: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if temperature_tolerance_percentage <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::temperature_tolerance_percentage::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if temperature_tolerance_percentage > &100f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::temperature_tolerance_percentage::NAME,
+                        100f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::ValidateColumn<freeze_drying_procedure_templates::pressure_pa>
+        for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(pressure_pa: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if pressure_pa < &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::greater_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::pressure_pa::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if pressure_pa > &500f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::pressure_pa::NAME,
+                        500f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl
+        ::diesel_builders::ValidateColumn<
+            freeze_drying_procedure_templates::pressure_pa_tolerance_percentage,
+        > for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(pressure_pa_tolerance_percentage: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if pressure_pa_tolerance_percentage <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::pressure_pa_tolerance_percentage::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if pressure_pa_tolerance_percentage > &100f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::pressure_pa_tolerance_percentage::NAME,
+                        100f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::ValidateColumn<freeze_drying_procedure_templates::duration_s>
+        for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(duration_s: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if duration_s < &7200f64 {
+                return Err(
+                    ::validation_errors::ValidationError::greater_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::duration_s::NAME,
+                        7200f64,
+                    ),
+                );
+            }
+            if duration_s > &604800f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::duration_s::NAME,
+                        604800f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl
+        ::diesel_builders::ValidateColumn<
+            freeze_drying_procedure_templates::duration_tolerance_percentage,
+        > for <freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(duration_tolerance_percentage: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if duration_tolerance_percentage <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::duration_tolerance_percentage::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if duration_tolerance_percentage > &100f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freeze_drying_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedure_templates::duration_tolerance_percentage::NAME,
+                        100f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::procedure_templates::id>
+        for FreezeDryingProcedureTemplate
+    {
+        fn get_column_ref(
+            &self,
+        ) -> &<freeze_drying_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+        {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for FreezeDryingProcedureTemplate {
+        fn get_column_ref(
+            &self,
+        ) -> &<freeze_drying_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+        {
+            &self.id
+        }
+    }
+    /// Shape of `freeze_drying_procedure_templates` the procedure runner
+    /// renders.
+    pub const FREEZE_DRYING_PROCEDURE_TEMPLATES_SHAPE: procedure_like::shape::TemplateShape =
+        procedure_like::shape::TemplateShape {
+            table_name: "freeze_drying_procedure_templates",
+            setpoints: &[
+                procedure_like::shape::ColumnShape {
+                    name: "temperature_k",
+                    label: "Target temperature in kelvin.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Kelvin),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "temperature_tolerance_percentage",
+                    label: "Allowed temperature deviation as a percentage of the target.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Percentage),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "pressure_pa",
+                    label: "Target pressure in pascals.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Pascal),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "pressure_pa_tolerance_percentage",
+                    label: "Allowed pressure deviation as a percentage of the target.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Percentage),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "duration_s",
+                    label: "Treatment duration in seconds.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Second),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "duration_tolerance_percentage",
+                    label: "Allowed duration deviation as a percentage of the target.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Percentage),
+                    required: true,
+                },
+            ],
+            slots: &[
+                procedure_like::shape::SlotShape {
+                    name: "freeze_dried_with",
+                    role: procedure_like::shape::SlotRole::Instrument,
+                    model_table_name: "freeze_dryer_models",
+                    slot_column: "freeze_dried_with_slot_id",
+                    model_column: "freeze_dried_with_model_id",
+                    placed_into: None,
+                    retrieved_from: None,
+                },
+                procedure_like::shape::SlotShape {
+                    name: "freeze_dried_container",
+                    role: procedure_like::shape::SlotRole::Input,
+                    model_table_name: "volumetric_container_models",
+                    slot_column: "freeze_dried_container_slot_id",
+                    model_column: "freeze_dried_container_model_id",
+                    placed_into: None,
+                    retrieved_from: None,
+                },
+            ],
+        };
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedure_templates,
+        ::aps_procedures::freeze_dryer_models
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedure_templates,
+        ::aps_resources::procedure_template_slots
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedure_templates,
+        ::aps_resources::procedure_templates
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedure_templates,
+        ::aps_resources::resources
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedure_templates,
+        ::aps_physical_asset_models::volumetric_container_models
+    );
+}
+pub use freeze_drying_procedure_templates_model::*;
+pub mod freeze_drying_procedures_model {
+    #[derive(
+        Clone,
+        Debug,
+        PartialOrd,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Recorded execution of a freeze drying template.
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[table_model(record_error = ::validation_errors::ValidationError)]
+    #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
+    #[table_model(
+        foreign_key(
+            (freeze_drying_procedure_template_id),
+            (::aps_procedures::freeze_drying_procedure_templates::id)
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (
+                freeze_drying_procedure_template_id,
+                freeze_drying_procedure_template_archived
+            ),
+            (
+                ::aps_procedures::freeze_drying_procedure_templates::id,
+                ::aps_procedures::freeze_drying_procedure_templates::archived
+            )
+        )
+    )]
+    #[diesel(table_name = freeze_drying_procedures)]
+    pub struct FreezeDryingProcedure {
+        /// Identity shared with the parent procedure.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing the parent resource.
+        #[same_as(aps_procedures::procedures::organization_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Typed template executed by this procedure.
+        #[same_as(aps_procedures::procedures::procedure_template_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        freeze_drying_procedure_template_id: ::rosetta_uuid::Uuid,
+        /// Execution status copied from the parent procedure.
+        #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
+        #[infallible]
+        status_id: String,
+        /// Measured temperature k.
+        temperature_k: Option<f64>,
+        /// Measured pressure pa.
+        pressure_pa: Option<f64>,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by
+        /// `freeze_drying_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        freeze_drying_procedure_template_archived: bool,
+    }
+    impl ::diesel_builders::ValidateColumn<freeze_drying_procedures::temperature_k>
+        for <freeze_drying_procedures::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(temperature_k: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if temperature_k <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freeze_drying_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedures::temperature_k::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if temperature_k.partial_cmp(&f64::INFINITY).is_none_or(::core::cmp::Ordering::is_ge) {
+                return Err(
+                    ::validation_errors::ValidationError::check_violated(
+                        <crate::freeze_drying_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        &[crate::freeze_drying_procedures::temperature_k::NAME],
+                        "temperature_k < 'Infinity'::DOUBLE PRECISION",
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::ValidateColumn<freeze_drying_procedures::pressure_pa>
+        for <freeze_drying_procedures::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(pressure_pa: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if pressure_pa < &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::greater_than_value(
+                        <crate::freeze_drying_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freeze_drying_procedures::pressure_pa::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if pressure_pa.partial_cmp(&f64::INFINITY).is_none_or(::core::cmp::Ordering::is_ge) {
+                return Err(
+                    ::validation_errors::ValidationError::check_violated(
+                        <crate::freeze_drying_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        &[crate::freeze_drying_procedures::pressure_pa::NAME],
+                        "pressure_pa < 'Infinity'::DOUBLE PRECISION",
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::ValidateRecord<freeze_drying_procedures::table>
+        for <freeze_drying_procedures::table as ::diesel_builders::TableExt>::NewValues
+    {
+        #[inline]
+        fn validate_record(&self) -> Result<(), ::validation_errors::ValidationError> {
+            use diesel::Column;
+            if let (Some(status_id), Some(temperature_k)) = (
+                <Self as diesel_builders::MayGetColumn<
+                    freeze_drying_procedures::status_id,
+                >>::may_get_column_ref(self),
+                <Self as diesel_builders::MayGetColumn<
+                    freeze_drying_procedures::temperature_k,
+                >>::may_get_column_ref(self),
+            ) && !((status_id.as_str() != "completed") || (*temperature_k).is_some())
+            {
+                return Err(
+                    ::validation_errors::ValidationError::check_violated(
+                        <crate::freeze_drying_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        &[
+                            crate::freeze_drying_procedures::status_id::NAME,
+                            crate::freeze_drying_procedures::temperature_k::NAME,
+                        ],
+                        "status_id <> 'completed' OR temperature_k IS NOT NULL",
+                    ),
+                );
+            }
+            if let (Some(status_id), Some(pressure_pa)) = (
+                <Self as diesel_builders::MayGetColumn<
+                    freeze_drying_procedures::status_id,
+                >>::may_get_column_ref(self),
+                <Self as diesel_builders::MayGetColumn<
+                    freeze_drying_procedures::pressure_pa,
+                >>::may_get_column_ref(self),
+            ) && !((status_id.as_str() != "completed") || (*pressure_pa).is_some())
+            {
+                return Err(
+                    ::validation_errors::ValidationError::check_violated(
+                        <crate::freeze_drying_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        &[
+                            crate::freeze_drying_procedures::status_id::NAME,
+                            crate::freeze_drying_procedures::pressure_pa::NAME,
+                        ],
+                        "status_id <> 'completed' OR pressure_pa IS NOT NULL",
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for FreezeDryingProcedure {
+        fn get_column_ref(
+            &self,
+        ) -> &<freeze_drying_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for FreezeDryingProcedure {
+        fn get_column_ref(
+            &self,
+        ) -> &<freeze_drying_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl procedure_like::ProcedureTableLike for freeze_drying_procedures::table {
+        type ProcedureTemplateTable = aps_procedures::freeze_drying_procedure_templates::table;
+    }
+    /// Shape of `freeze_drying_procedures` the procedure runner renders.
+    pub const FREEZE_DRYING_PROCEDURES_SHAPE: procedure_like::shape::ProcedureShape =
+        procedure_like::shape::ProcedureShape {
+            table_name: "freeze_drying_procedures",
+            template_table_name: "freeze_drying_procedure_templates",
+            measurements: &[
+                procedure_like::shape::ColumnShape {
+                    name: "temperature_k",
+                    label: "Measured temperature k.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Kelvin),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "pressure_pa",
+                    label: "Measured pressure pa.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Pascal),
+                    required: true,
+                },
+            ],
+        };
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedures,
+        ::aps_procedures::freeze_drying_procedure_templates
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedures,
+        ::aps_procedures::procedures
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freeze_drying_procedures,
+        ::aps_resources::resources
+    );
+}
+pub use freeze_drying_procedures_model::*;
+pub mod freezer_models_model {
+    #[derive(
+        Copy,
+        Clone,
+        Debug,
+        Hash,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel::Associations,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Catalog of freezer model definitions.
+    #[table_model(ancestors(
+        aps_resources::resources,
+        aps_resources::asset_models,
+        aps_physical_asset_models::physical_asset_models
+    ))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[diesel(
+        belongs_to(aps_physical_asset_models::PhysicalAssetModel, foreign_key = id)
+    )]
+    #[table_model(
+        foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
+    )]
+    #[diesel(table_name = freezer_models)]
+    pub struct FreezerModel {
+        /// Stable model identifier inherited from physical_asset_models.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::organization_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+    }
+    ::diesel_builders::prelude::unique_index!(freezer_models::id, freezer_models::archived);
+    impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for FreezerModel {
+        fn get_column_ref(
+            &self,
+        ) -> &<freezer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
+        for FreezerModel
+    {
+        fn get_column_ref(
+            &self,
+        ) -> &<freezer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for FreezerModel {
+        fn get_column_ref(
+            &self,
+        ) -> &<freezer_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    /// Shape of `freezer_models` the procedure runner renders.
+    pub const FREEZER_MODELS_SHAPE: procedure_like::shape::AssetModelShape =
+        procedure_like::shape::AssetModelShape {
+            table_name: "freezer_models",
+            asset_table_name: "physical_assets",
+            model_column: "physical_asset_model_id",
+            required: &[
+                procedure_like::shape::ColumnShape {
+                    name: "organization_id",
+                    label: "connetto organization owning the row.",
+                    sql_type: procedure_like::shape::SqlType::Uuid,
+                    unit: None,
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "physical_asset_model_id",
+                    label: "Model of the asset, which must be a physical asset model.",
+                    sql_type: procedure_like::shape::SqlType::Uuid,
+                    unit: None,
+                    required: true,
+                },
+            ],
+        };
+    ::diesel::allow_tables_to_appear_in_same_query!(freezer_models, ::aps_resources::asset_models);
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezer_models,
+        ::aps_physical_asset_models::physical_asset_models
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(freezer_models, ::aps_resources::resources);
+}
+pub use freezer_models_model::*;
+pub mod freezing_procedure_templates_model {
+    #[derive(
+        Clone,
+        Debug,
+        PartialOrd,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel::Associations,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Typed slots and parameters for freezing.
+    #[table_model(ancestors(aps_resources::resources, aps_resources::procedure_templates))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[diesel(belongs_to(aps_resources::ProcedureTemplate, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_resources::procedure_templates::id)))]
+    #[table_model(
+        foreign_key((frozen_with_model_id), (::aps_procedures::freezer_models::id))
+    )]
+    #[table_model(
+        foreign_key(
+            (frozen_container_model_id),
+            (::aps_physical_asset_models::volumetric_container_models::id)
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (
+                frozen_with_slot_id,
+                id,
+                frozen_with_model_id,
+                frozen_with_slot_role_id,
+                organization_id
+            ),
+            (
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (
+                frozen_container_slot_id,
+                id,
+                frozen_container_model_id,
+                frozen_container_slot_role_id,
+                organization_id
+            ),
+            (
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (frozen_with_model_id, frozen_with_model_archived),
+            (
+                ::aps_procedures::freezer_models::id,
+                ::aps_procedures::freezer_models::archived
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (frozen_container_model_id, frozen_container_model_archived),
+            (
+                ::aps_physical_asset_models::volumetric_container_models::id,
+                ::aps_physical_asset_models::volumetric_container_models::archived
+            )
+        )
+    )]
+    #[diesel(table_name = freezing_procedure_templates)]
+    pub struct FreezingProcedureTemplate {
+        /// Identity shared with the parent template.
+        #[same_as(
+            aps_resources::procedure_template_slots::procedure_template_id,
+            (frozen_with_slot_id, frozen_container_slot_id)
+        )]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing the parent resource.
+        #[same_as(aps_resources::procedure_templates::organization_id)]
+        #[same_as(
+            aps_resources::procedure_template_slots::organization_id,
+            (frozen_with_slot_id, frozen_container_slot_id)
+        )]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Slot declaring the `frozen_with` assets.
+        #[mandatory(aps_resources::procedure_template_slots)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        frozen_with_slot_id: ::rosetta_uuid::Uuid,
+        /// Admissible model for the `frozen_with` slot.
+        #[same_as(aps_resources::procedure_template_slots::asset_model_id, frozen_with_slot_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        frozen_with_model_id: ::rosetta_uuid::Uuid,
+        /// Required role of the `frozen_with` slot.
+        #[table_model(generated)]
+        frozen_with_slot_role_id: String,
+        /// Slot declaring the `frozen_container` assets.
+        #[mandatory(aps_resources::procedure_template_slots)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        frozen_container_slot_id: ::rosetta_uuid::Uuid,
+        /// Admissible model for the `frozen_container` slot.
+        #[same_as(
+            aps_resources::procedure_template_slots::asset_model_id,
+            frozen_container_slot_id
+        )]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        frozen_container_model_id: ::rosetta_uuid::Uuid,
+        /// Required role of the `frozen_container` slot.
+        #[table_model(generated)]
+        frozen_container_slot_role_id: String,
+        /// Target temperature in kelvin.
+        #[table_model(default = 203.15f64)]
+        temperature_k: f64,
+        /// Allowed temperature deviation as a percentage of the target.
+        #[table_model(default = 5f64)]
+        temperature_tolerance_percentage: f64,
+        /// Treatment duration in seconds.
+        #[table_model(default = 43200f64)]
+        duration_s: f64,
+        /// Allowed duration deviation as a percentage of the target.
+        #[table_model(default = 5f64)]
+        duration_tolerance_percentage: f64,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_resources::procedure_templates::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `frozen_with_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        frozen_with_model_archived: bool,
+        /// Archive state of the row named by `frozen_container_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        frozen_container_model_archived: bool,
+    }
+    ::diesel_builders::prelude::unique_index!(
+        freezing_procedure_templates::id,
+        freezing_procedure_templates::archived
+    );
+    impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::temperature_k>
+        for <freezing_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(temperature_k: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if temperature_k <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freezing_procedure_templates::temperature_k::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if temperature_k.partial_cmp(&f64::INFINITY).is_none_or(::core::cmp::Ordering::is_ge) {
+                return Err(
+                    ::validation_errors::ValidationError::check_violated(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        &[crate::freezing_procedure_templates::temperature_k::NAME],
+                        "temperature_k < 'Infinity'::DOUBLE PRECISION",
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl
+        ::diesel_builders::ValidateColumn<
+            freezing_procedure_templates::temperature_tolerance_percentage,
+        > for <freezing_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(temperature_tolerance_percentage: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if temperature_tolerance_percentage <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freezing_procedure_templates::temperature_tolerance_percentage::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if temperature_tolerance_percentage > &100f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freezing_procedure_templates::temperature_tolerance_percentage::NAME,
+                        100f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::ValidateColumn<freezing_procedure_templates::duration_s>
+        for <freezing_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(duration_s: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if duration_s <= &1800f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freezing_procedure_templates::duration_s::NAME,
+                        1800f64,
+                    ),
+                );
+            }
+            if duration_s > &604800f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freezing_procedure_templates::duration_s::NAME,
+                        604800f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl
+        ::diesel_builders::ValidateColumn<
+            freezing_procedure_templates::duration_tolerance_percentage,
+        > for <freezing_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(duration_tolerance_percentage: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if duration_tolerance_percentage <= &0f64 {
+                return Err(
+                    ::validation_errors::ValidationError::strictly_greater_than_value(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freezing_procedure_templates::duration_tolerance_percentage::NAME,
+                        0f64,
+                    ),
+                );
+            }
+            if duration_tolerance_percentage > &100f64 {
+                return Err(
+                    ::validation_errors::ValidationError::smaller_than_value(
+                        <crate::freezing_procedure_templates::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        crate::freezing_procedure_templates::duration_tolerance_percentage::NAME,
+                        100f64,
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::procedure_templates::id>
+        for FreezingProcedureTemplate
+    {
+        fn get_column_ref(
+            &self,
+        ) -> &<freezing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+        {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for FreezingProcedureTemplate {
+        fn get_column_ref(
+            &self,
+        ) -> &<freezing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
+        {
+            &self.id
+        }
+    }
+    /// Shape of `freezing_procedure_templates` the procedure runner renders.
+    pub const FREEZING_PROCEDURE_TEMPLATES_SHAPE: procedure_like::shape::TemplateShape =
+        procedure_like::shape::TemplateShape {
+            table_name: "freezing_procedure_templates",
+            setpoints: &[
+                procedure_like::shape::ColumnShape {
+                    name: "temperature_k",
+                    label: "Target temperature in kelvin.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Kelvin),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "temperature_tolerance_percentage",
+                    label: "Allowed temperature deviation as a percentage of the target.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Percentage),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "duration_s",
+                    label: "Treatment duration in seconds.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Second),
+                    required: true,
+                },
+                procedure_like::shape::ColumnShape {
+                    name: "duration_tolerance_percentage",
+                    label: "Allowed duration deviation as a percentage of the target.",
+                    sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                    unit: Some(procedure_like::shape::Unit::Percentage),
+                    required: true,
+                },
+            ],
+            slots: &[
+                procedure_like::shape::SlotShape {
+                    name: "frozen_with",
+                    role: procedure_like::shape::SlotRole::Instrument,
+                    model_table_name: "freezer_models",
+                    slot_column: "frozen_with_slot_id",
+                    model_column: "frozen_with_model_id",
+                    placed_into: None,
+                    retrieved_from: None,
+                },
+                procedure_like::shape::SlotShape {
+                    name: "frozen_container",
+                    role: procedure_like::shape::SlotRole::Input,
+                    model_table_name: "volumetric_container_models",
+                    slot_column: "frozen_container_slot_id",
+                    model_column: "frozen_container_model_id",
+                    placed_into: None,
+                    retrieved_from: None,
+                },
+            ],
+        };
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedure_templates,
+        ::aps_procedures::freezer_models
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedure_templates,
+        ::aps_resources::procedure_template_slots
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedure_templates,
+        ::aps_resources::procedure_templates
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedure_templates,
+        ::aps_resources::resources
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedure_templates,
+        ::aps_physical_asset_models::volumetric_container_models
+    );
+}
+pub use freezing_procedure_templates_model::*;
+pub mod freezing_procedures_model {
+    #[derive(
+        Clone,
+        Debug,
+        PartialOrd,
+        PartialEq,
+        ::serde::Serialize,
+        ::serde::Deserialize,
+        ::diesel::Queryable,
+        ::diesel::Selectable,
+        ::diesel::Identifiable,
+        ::diesel_builders::prelude::TableModel,
+    )]
+    /// Recorded execution of a freezing template.
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
+    #[table_model(error = ::validation_errors::ValidationError)]
+    #[table_model(record_error = ::validation_errors::ValidationError)]
+    #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
+    #[table_model(
+        foreign_key(
+            (freezing_procedure_template_id),
+            (::aps_procedures::freezing_procedure_templates::id)
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (freezing_procedure_template_id, freezing_procedure_template_archived),
+            (
+                ::aps_procedures::freezing_procedure_templates::id,
+                ::aps_procedures::freezing_procedure_templates::archived
+            )
+        )
+    )]
+    #[diesel(table_name = freezing_procedures)]
+    pub struct FreezingProcedure {
+        /// Identity shared with the parent procedure.
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        id: ::rosetta_uuid::Uuid,
+        /// Organization containing the parent resource.
+        #[same_as(aps_procedures::procedures::organization_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        organization_id: ::rosetta_uuid::Uuid,
+        /// Typed template executed by this procedure.
+        #[same_as(aps_procedures::procedures::procedure_template_id)]
+        #[infallible]
+        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
+        freezing_procedure_template_id: ::rosetta_uuid::Uuid,
+        /// Execution status copied from the parent procedure.
+        #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
+        #[infallible]
+        status_id: String,
+        /// Measured temperature k.
+        temperature_k: Option<f64>,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `freezing_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        freezing_procedure_template_archived: bool,
+    }
+    impl ::diesel_builders::ValidateColumn<freezing_procedures::temperature_k>
+        for <freezing_procedures::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(temperature_k: &f64) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if temperature_k <= &0f64 {
+                return Err(::validation_errors::ValidationError::strictly_greater_than_value(
+                    <crate::freezing_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    crate::freezing_procedures::temperature_k::NAME,
+                    0f64,
+                ));
+            }
+            if temperature_k.partial_cmp(&f64::INFINITY).is_none_or(::core::cmp::Ordering::is_ge) {
+                return Err(::validation_errors::ValidationError::check_violated(
+                    <crate::freezing_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    &[crate::freezing_procedures::temperature_k::NAME],
+                    "temperature_k < 'Infinity'::DOUBLE PRECISION",
+                ));
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::ValidateRecord<freezing_procedures::table>
+        for <freezing_procedures::table as ::diesel_builders::TableExt>::NewValues
+    {
+        #[inline]
+        fn validate_record(&self) -> Result<(), ::validation_errors::ValidationError> {
+            use diesel::Column;
+            if let (Some(status_id), Some(temperature_k)) = (
+                <Self as diesel_builders::MayGetColumn<
+                    freezing_procedures::status_id,
+                >>::may_get_column_ref(self),
+                <Self as diesel_builders::MayGetColumn<
+                    freezing_procedures::temperature_k,
+                >>::may_get_column_ref(self),
+            ) && !((status_id.as_str() != "completed") || (*temperature_k).is_some())
+            {
+                return Err(
+                    ::validation_errors::ValidationError::check_violated(
+                        <crate::freezing_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                        &[
+                            crate::freezing_procedures::status_id::NAME,
+                            crate::freezing_procedures::temperature_k::NAME,
+                        ],
+                        "status_id <> 'completed' OR temperature_k IS NOT NULL",
+                    ),
+                );
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for FreezingProcedure {
+        fn get_column_ref(
+            &self,
+        ) -> &<freezing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for FreezingProcedure {
+        fn get_column_ref(
+            &self,
+        ) -> &<freezing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    impl procedure_like::ProcedureTableLike for freezing_procedures::table {
+        type ProcedureTemplateTable = aps_procedures::freezing_procedure_templates::table;
+    }
+    /// Shape of `freezing_procedures` the procedure runner renders.
+    pub const FREEZING_PROCEDURES_SHAPE: procedure_like::shape::ProcedureShape =
+        procedure_like::shape::ProcedureShape {
+            table_name: "freezing_procedures",
+            template_table_name: "freezing_procedure_templates",
+            measurements: &[procedure_like::shape::ColumnShape {
+                name: "temperature_k",
+                label: "Measured temperature k.",
+                sql_type: procedure_like::shape::SqlType::DoublePrecision,
+                unit: Some(procedure_like::shape::Unit::Kelvin),
+                required: true,
+            }],
+        };
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedures,
+        ::aps_procedures::freezing_procedure_templates
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedures,
+        ::aps_procedures::procedures
+    );
+    ::diesel::allow_tables_to_appear_in_same_query!(
+        freezing_procedures,
+        ::aps_resources::resources
+    );
+}
+pub use freezing_procedures_model::*;
 pub mod parameter_value_kinds_model {
     #[derive(
         Clone,
@@ -820,8 +2228,12 @@ pub mod procedure_parameter_values_model {
     )]
     #[table_model(
         foreign_key(
-            (organization_id, procedure_id),
-            (::aps_resources::resources::organization_id, ::aps_resources::resources::id)
+            (organization_id, procedure_id, archived),
+            (
+                ::aps_resources::resources::organization_id,
+                ::aps_resources::resources::id,
+                ::aps_resources::resources::archived
+            )
         )
     )]
     #[diesel(table_name = procedure_parameter_values)]
@@ -839,6 +2251,7 @@ pub mod procedure_parameter_values_model {
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         procedure_template_id: ::rosetta_uuid::Uuid,
         /// Status of the procedure, kept equal by the cascade.
+        #[table_model(default = "planned")]
         #[infallible]
         status_id: String,
         /// Kind of the parameter's value.
@@ -855,6 +2268,10 @@ pub mod procedure_parameter_values_model {
         /// Value of a boolean parameter.
         #[infallible]
         boolean_value: Option<bool>,
+        /// Archive state inherited from this resource.
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
     }
     impl ::diesel_builders::ValidateColumn<procedure_parameter_values::number_value>
         for <procedure_parameter_values::table as ::diesel_builders::TableExt>::NewValues
@@ -1068,20 +2485,14 @@ pub mod procedure_template_parameters_model {
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
     #[diesel(
-        belongs_to(
-            aps_procedure_templates::ProcedureTemplate,
-            foreign_key = procedure_template_id
-        )
+        belongs_to(aps_resources::ProcedureTemplate, foreign_key = procedure_template_id)
     )]
     #[diesel(
         belongs_to(aps_procedures::ParameterValueKind, foreign_key = value_kind_id)
     )]
     #[diesel(belongs_to(aps_procedures::QuantityKind, foreign_key = quantity_kind_id))]
     #[table_model(
-        foreign_key(
-            (procedure_template_id),
-            (::aps_procedure_templates::procedure_templates::id)
-        )
+        foreign_key((procedure_template_id), (::aps_resources::procedure_templates::id))
     )]
     #[table_model(
         foreign_key((value_kind_id), (::aps_procedures::parameter_value_kinds::id))
@@ -1091,8 +2502,12 @@ pub mod procedure_template_parameters_model {
     )]
     #[table_model(
         foreign_key(
-            (organization_id, procedure_template_id),
-            (::aps_resources::resources::organization_id, ::aps_resources::resources::id)
+            (organization_id, procedure_template_id, archived),
+            (
+                ::aps_resources::resources::organization_id,
+                ::aps_resources::resources::id,
+                ::aps_resources::resources::archived
+            )
         )
     )]
     #[diesel(table_name = procedure_template_parameters)]
@@ -1134,6 +2549,10 @@ pub mod procedure_template_parameters_model {
         /// Default of a boolean parameter.
         #[infallible]
         default_boolean: Option<bool>,
+        /// Archive state inherited from this resource.
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
     }
     ::diesel_builders::prelude::unique_index!(
         procedure_template_parameters::procedure_template_id,
@@ -1496,7 +2915,7 @@ pub mod procedure_template_parameters_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         procedure_template_parameters,
-        ::aps_procedure_templates::procedure_templates
+        ::aps_resources::procedure_templates
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         procedure_template_parameters,
@@ -1530,10 +2949,10 @@ pub mod procedure_template_step_parameters_model {
         foreign_key(
             (step_id, parent_template_id, child_template_id, organization_id),
             (
-                ::aps_procedure_templates::procedure_template_steps::id,
-                ::aps_procedure_templates::procedure_template_steps::parent_template_id,
-                ::aps_procedure_templates::procedure_template_steps::child_template_id,
-                ::aps_procedure_templates::procedure_template_steps::organization_id
+                ::aps_resources::procedure_template_steps::id,
+                ::aps_resources::procedure_template_steps::parent_template_id,
+                ::aps_resources::procedure_template_steps::child_template_id,
+                ::aps_resources::procedure_template_steps::organization_id
             )
         )
     )]
@@ -1549,8 +2968,12 @@ pub mod procedure_template_step_parameters_model {
     )]
     #[table_model(
         foreign_key(
-            (organization_id, parent_template_id),
-            (::aps_resources::resources::organization_id, ::aps_resources::resources::id)
+            (organization_id, parent_template_id, archived),
+            (
+                ::aps_resources::resources::organization_id,
+                ::aps_resources::resources::id,
+                ::aps_resources::resources::archived
+            )
         )
     )]
     #[diesel(table_name = procedure_template_step_parameters)]
@@ -1585,6 +3008,10 @@ pub mod procedure_template_step_parameters_model {
         /// Value of a boolean parameter.
         #[infallible]
         boolean_value: Option<bool>,
+        /// Archive state inherited from this resource.
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
     }
     impl ::diesel_builders::ValidateColumn<procedure_template_step_parameters::number_value>
         for <procedure_template_step_parameters::table as ::diesel_builders::TableExt>::NewValues
@@ -1717,7 +3144,7 @@ pub mod procedure_template_step_parameters_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         procedure_template_step_parameters,
-        ::aps_procedure_templates::procedure_template_steps
+        ::aps_resources::procedure_template_steps
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         procedure_template_step_parameters,
@@ -1745,28 +3172,19 @@ pub mod procedures_model {
     /// A procedure is one execution of a published template. A composite
     /// template runs as a parent procedure whose children each execute one of
     /// its steps, once, or once per asset of the step's repeat slot.
-    #[table_model(ancestors(aps_resources::resources, aps_resources::ownables))]
+    #[table_model(ancestors(aps_resources::resources))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_resources::TableName, foreign_key = table_name_id))]
-    #[diesel(
-        belongs_to(
-            aps_procedure_templates::ProcedureTemplate,
-            foreign_key = procedure_template_id
-        )
-    )]
     #[diesel(belongs_to(aps_procedures::ProcedureStatus, foreign_key = status_id))]
-    #[diesel(belongs_to(aps_grantees::User, foreign_key = performed_by_id))]
-    #[table_model(foreign_key((id), (::aps_resources::ownables::id)))]
+    #[diesel(belongs_to(aps_organizations::User, foreign_key = performed_by_id))]
+    #[table_model(foreign_key((id), (::aps_resources::resources::id)))]
     #[table_model(foreign_key((table_name_id), (::aps_resources::table_names::id)))]
     #[table_model(
-        foreign_key(
-            (procedure_template_id),
-            (::aps_procedure_templates::procedure_templates::id)
-        )
+        foreign_key((procedure_template_id), (::aps_resources::procedure_templates::id))
     )]
     #[table_model(foreign_key((status_id), (::aps_procedures::procedure_statuses::id)))]
-    #[table_model(foreign_key((performed_by_id), (::aps_grantees::users::id)))]
+    #[table_model(foreign_key((performed_by_id), (::aps_organizations::users::id)))]
     #[table_model(
         foreign_key(
             (parent_procedure_id, parent_template_id, organization_id),
@@ -1793,29 +3211,41 @@ pub mod procedures_model {
         foreign_key(
             (step_id, parent_template_id, procedure_template_id),
             (
-                ::aps_procedure_templates::procedure_template_steps::id,
-                ::aps_procedure_templates::procedure_template_steps::parent_template_id,
-                ::aps_procedure_templates::procedure_template_steps::child_template_id
+                ::aps_resources::procedure_template_steps::id,
+                ::aps_resources::procedure_template_steps::parent_template_id,
+                ::aps_resources::procedure_template_steps::child_template_id
             )
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (procedure_template_id, procedure_template_archived),
+            (
+                ::aps_resources::procedure_templates::id,
+                ::aps_resources::procedure_templates::archived
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (organization_id, parent_procedure_id, parent_procedure_archived),
+            (procedures::organization_id, procedures::id, procedures::archived)
+        )
+    )]
     #[diesel(table_name = procedures)]
     pub struct Procedure {
-        /// Identifier of the connetto ownable this procedure extends.
+        /// Identifier of the connetto `resource` of kind `'ownable'` this
+        /// procedure extends.
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
         /// connetto organization owning the row.
-        #[same_as(aps_resources::ownables::organization_id)]
+        #[same_as(aps_resources::resources::organization_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
         /// connetto project holding the procedure.
-        #[same_as(aps_resources::ownables::project_id)]
+        #[same_as(aps_resources::resources::parent_id)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         project_id: ::rosetta_uuid::Uuid,
@@ -1874,6 +3304,24 @@ pub mod procedures_model {
         performed_by_id: Option<::rosetta_uuid::Uuid>,
         /// Free-text note, editable in every status.
         note: Option<String>,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_resources::resources::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Resource kind fixed to `'ownable'`.
+        #[same_as(aps_resources::resources::kind)]
+        #[table_model(default = ::aps_authz_resource_kind::ResourceKind::Ownable)]
+        #[diesel(sql_type = ::aps_authz_resource_kind::sql_types::ResourceKind)]
+        kind: ::aps_authz_resource_kind::ResourceKind,
+        /// Archive state of the row named by `procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        procedure_template_archived: bool,
+        /// Archive state of the row named by `parent_procedure_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        parent_procedure_archived: bool,
     }
     ::diesel_builders::prelude::unique_index!(
         procedures::id,
@@ -1900,6 +3348,12 @@ pub mod procedures_model {
         procedures::id,
         procedures::project_id,
         procedures::organization_id
+    );
+    ::diesel_builders::prelude::unique_index!(procedures::id, procedures::archived);
+    ::diesel_builders::prelude::unique_index!(
+        procedures::organization_id,
+        procedures::id,
+        procedures::archived
     );
     impl ::diesel_builders::ValidateColumn<procedures::started_at>
         for <procedures::table as ::diesel_builders::TableExt>::NewValues
@@ -1961,6 +3415,25 @@ pub mod procedures_model {
                     <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
                     crate::procedures::note::NAME,
                     65536usize,
+                ));
+            }
+            Ok(())
+        }
+    }
+    impl ::diesel_builders::ValidateColumn<procedures::kind>
+        for <procedures::table as ::diesel_builders::TableExt>::NewValues
+    {
+        type Error = ::validation_errors::ValidationError;
+        #[inline]
+        fn validate_column(
+            kind: &::aps_authz_resource_kind::ResourceKind,
+        ) -> Result<(), Self::Error> {
+            use diesel::Column;
+            if *kind != ::aps_authz_resource_kind::ResourceKind::Ownable {
+                return Err(::validation_errors::ValidationError::check_violated(
+                    <crate::procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
+                    &[crate::procedures::kind::NAME],
+                    "kind = 'ownable'",
                 ));
             }
             Ok(())
@@ -2229,13 +3702,6 @@ pub mod procedures_model {
             Ok(())
         }
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for Procedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
     impl ::diesel_builders::GetColumn<aps_resources::resources::id> for Procedure {
         fn get_column_ref(
             &self,
@@ -2244,24 +3710,23 @@ pub mod procedures_model {
         }
     }
     impl procedure_like::ProcedureTableLike for procedures::table {
-        type ProcedureTemplateTable = aps_procedure_templates::procedure_templates::table;
+        type ProcedureTemplateTable = aps_resources::procedure_templates::table;
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(
         procedures,
         ::aps_procedures::procedure_statuses
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         procedures,
-        ::aps_procedure_templates::procedure_template_steps
+        ::aps_resources::procedure_template_steps
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         procedures,
-        ::aps_procedure_templates::procedure_templates
+        ::aps_resources::procedure_templates
     );
     ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_resources::resources);
     ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_resources::table_names);
-    ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_grantees::users);
+    ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_organizations::users);
 }
 pub use procedures_model::*;
 pub mod quantity_kinds_model {
@@ -2377,22 +3842,11 @@ pub mod retrieval_procedures_model {
         ::diesel::Queryable,
         ::diesel::Selectable,
         ::diesel::Identifiable,
-        ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
     /// Recorded execution of a retrieval template.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedures::procedures
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(
-            aps_physical_asset_models::RetrievalProcedureTemplate,
-            foreign_key = retrieval_procedure_template_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
     #[table_model(
         foreign_key(
@@ -2400,10 +3854,15 @@ pub mod retrieval_procedures_model {
             (::aps_physical_asset_models::retrieval_procedure_templates::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (retrieval_procedure_template_id, retrieval_procedure_template_archived),
+            (
+                ::aps_physical_asset_models::retrieval_procedure_templates::id,
+                ::aps_physical_asset_models::retrieval_procedure_templates::archived
+            )
+        )
+    )]
     #[diesel(table_name = retrieval_procedures)]
     pub struct RetrievalProcedure {
         /// Identity shared with the parent procedure.
@@ -2422,15 +3881,18 @@ pub mod retrieval_procedures_model {
         retrieval_procedure_template_id: ::rosetta_uuid::Uuid,
         /// Execution status copied from the parent procedure.
         #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
         #[infallible]
         status_id: String,
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for RetrievalProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<retrieval_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `retrieval_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        retrieval_procedure_template_archived: bool,
     }
     impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for RetrievalProcedure {
         fn get_column_ref(
@@ -2459,10 +3921,6 @@ pub mod retrieval_procedures_model {
         };
     ::diesel::allow_tables_to_appear_in_same_query!(
         retrieval_procedures,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        retrieval_procedures,
         ::aps_procedures::procedures
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -2486,23 +3944,12 @@ pub mod storage_procedures_model {
         ::diesel::Queryable,
         ::diesel::Selectable,
         ::diesel::Identifiable,
-        ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
     /// Recorded execution of a storage template.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedures::procedures
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(
-            aps_physical_asset_models::StorageProcedureTemplate,
-            foreign_key = storage_procedure_template_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
     #[table_model(
         foreign_key(
@@ -2510,10 +3957,15 @@ pub mod storage_procedures_model {
             (::aps_physical_asset_models::storage_procedure_templates::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (storage_procedure_template_id, storage_procedure_template_archived),
+            (
+                ::aps_physical_asset_models::storage_procedure_templates::id,
+                ::aps_physical_asset_models::storage_procedure_templates::archived
+            )
+        )
+    )]
     #[diesel(table_name = storage_procedures)]
     pub struct StorageProcedure {
         /// Identity shared with the parent procedure.
@@ -2532,10 +3984,20 @@ pub mod storage_procedures_model {
         storage_procedure_template_id: ::rosetta_uuid::Uuid,
         /// Execution status copied from the parent procedure.
         #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
         #[infallible]
         status_id: String,
         /// Measured temperature k.
         temperature_k: Option<f64>,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `storage_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        storage_procedure_template_archived: bool,
     }
     impl ::diesel_builders::ValidateColumn<storage_procedures::temperature_k>
         for <storage_procedures::table as ::diesel_builders::TableExt>::NewValues
@@ -2590,13 +4052,6 @@ pub mod storage_procedures_model {
             Ok(())
         }
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for StorageProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<storage_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
     impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for StorageProcedure {
         fn get_column_ref(
             &self,
@@ -2627,7 +4082,6 @@ pub mod storage_procedures_model {
                 required: true,
             }],
         };
-    ::diesel::allow_tables_to_appear_in_same_query!(storage_procedures, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(
         storage_procedures,
         ::aps_procedures::procedures
@@ -2639,511 +4093,3 @@ pub mod storage_procedures_model {
     );
 }
 pub use storage_procedures_model::*;
-pub mod weighing_device_models_model {
-    #[derive(
-        Copy,
-        Clone,
-        Debug,
-        Hash,
-        Ord,
-        PartialOrd,
-        Eq,
-        PartialEq,
-        ::serde::Serialize,
-        ::serde::Deserialize,
-        ::diesel::Queryable,
-        ::diesel::Selectable,
-        ::diesel::Identifiable,
-        ::diesel::Associations,
-        ::diesel_builders::prelude::TableModel,
-    )]
-    /// Catalog of weighing-device model definitions.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_resources::asset_models,
-        aps_physical_asset_models::physical_asset_models
-    ))]
-    #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(aps_physical_asset_models::PhysicalAssetModel, foreign_key = id)
-    )]
-    #[table_model(
-        foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
-    )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
-    #[diesel(table_name = weighing_device_models)]
-    pub struct WeighingDeviceModel {
-        /// Stable model identifier inherited from `physical_asset_models`.
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        id: ::rosetta_uuid::Uuid,
-        /// Organization containing this resource.
-        #[same_as(aps_physical_asset_models::physical_asset_models::organization_id)]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        organization_id: ::rosetta_uuid::Uuid,
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for WeighingDeviceModel {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_device_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for WeighingDeviceModel {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_device_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_physical_asset_models::physical_asset_models::id>
-        for WeighingDeviceModel
-    {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_device_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for WeighingDeviceModel {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_device_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    /// Shape of `weighing_device_models` the procedure runner renders.
-    pub const WEIGHING_DEVICE_MODELS_SHAPE: procedure_like::shape::AssetModelShape =
-        procedure_like::shape::AssetModelShape {
-            table_name: "weighing_device_models",
-            asset_table_name: "weighing_devices",
-            model_column: "weighing_device_model_id",
-            required: &[
-                procedure_like::shape::ColumnShape {
-                    name: "organization_id",
-                    label: "Organization containing this resource.",
-                    sql_type: procedure_like::shape::SqlType::Uuid,
-                    unit: None,
-                    required: true,
-                },
-                procedure_like::shape::ColumnShape {
-                    name: "weighing_device_model_id",
-                    label: "Weighing-device model instantiated by this physical asset.",
-                    sql_type: procedure_like::shape::SqlType::Uuid,
-                    unit: None,
-                    required: true,
-                },
-            ],
-        };
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_device_models,
-        ::aps_resources::asset_models
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_device_models,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_device_models,
-        ::aps_physical_asset_models::physical_asset_models
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_device_models,
-        ::aps_resources::resources
-    );
-}
-pub use weighing_device_models_model::*;
-pub mod weighing_procedure_templates_model {
-    #[derive(
-        Clone,
-        Debug,
-        Hash,
-        Ord,
-        PartialOrd,
-        Eq,
-        PartialEq,
-        ::serde::Serialize,
-        ::serde::Deserialize,
-        ::diesel::Queryable,
-        ::diesel::Selectable,
-        ::diesel::Identifiable,
-        ::diesel::Associations,
-        ::diesel_builders::prelude::TableModel,
-    )]
-    /// Typed slots and parameters for weighing.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedure_templates::procedure_templates
-    ))]
-    #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_procedure_templates::ProcedureTemplate, foreign_key = id))]
-    #[diesel(
-        belongs_to(
-            aps_physical_asset_models::PhysicalAssetModel,
-            foreign_key = weighed_asset_model_id
-        )
-    )]
-    #[diesel(
-        belongs_to(
-            aps_procedures::WeighingDeviceModel,
-            foreign_key = weighed_with_model_id
-        )
-    )]
-    #[table_model(
-        foreign_key((id), (::aps_procedure_templates::procedure_templates::id))
-    )]
-    #[table_model(
-        foreign_key(
-            (weighed_asset_model_id),
-            (::aps_physical_asset_models::physical_asset_models::id)
-        )
-    )]
-    #[table_model(
-        foreign_key(
-            (weighed_with_model_id),
-            (::aps_procedures::weighing_device_models::id)
-        )
-    )]
-    #[table_model(
-        foreign_key(
-            (
-                weighed_asset_slot_id,
-                id,
-                weighed_asset_model_id,
-                weighed_asset_slot_role_id,
-                organization_id
-            ),
-            (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
-            )
-        )
-    )]
-    #[table_model(
-        foreign_key(
-            (
-                weighed_with_slot_id,
-                id,
-                weighed_with_model_id,
-                weighed_with_slot_role_id,
-                organization_id
-            ),
-            (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
-            )
-        )
-    )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
-    #[diesel(table_name = weighing_procedure_templates)]
-    pub struct WeighingProcedureTemplate {
-        /// Identity shared with the parent template.
-        #[same_as(
-            aps_procedure_templates::procedure_template_slots::procedure_template_id,
-            (weighed_asset_slot_id, weighed_with_slot_id)
-        )]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        id: ::rosetta_uuid::Uuid,
-        /// Organization containing the parent resource.
-        #[same_as(aps_procedure_templates::procedure_templates::organization_id)]
-        #[same_as(
-            aps_procedure_templates::procedure_template_slots::organization_id,
-            (weighed_asset_slot_id, weighed_with_slot_id)
-        )]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        organization_id: ::rosetta_uuid::Uuid,
-        /// Slot declaring the `weighed_asset` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        weighed_asset_slot_id: ::rosetta_uuid::Uuid,
-        /// Admissible model for the `weighed_asset` slot.
-        #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
-            weighed_asset_slot_id
-        )]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        weighed_asset_model_id: ::rosetta_uuid::Uuid,
-        /// Required role of the `weighed_asset` slot.
-        #[table_model(generated)]
-        weighed_asset_slot_role_id: String,
-        /// Slot declaring the `weighed_with` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        weighed_with_slot_id: ::rosetta_uuid::Uuid,
-        /// Admissible model for the `weighed_with` slot.
-        #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
-            weighed_with_slot_id
-        )]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        weighed_with_model_id: ::rosetta_uuid::Uuid,
-        /// Required role of the `weighed_with` slot.
-        #[table_model(generated)]
-        weighed_with_slot_role_id: String,
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for WeighingProcedureTemplate {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
-        for WeighingProcedureTemplate
-    {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for WeighingProcedureTemplate {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    /// Shape of `weighing_procedure_templates` the procedure runner renders.
-    pub const WEIGHING_PROCEDURE_TEMPLATES_SHAPE: procedure_like::shape::TemplateShape =
-        procedure_like::shape::TemplateShape {
-            table_name: "weighing_procedure_templates",
-            setpoints: &[],
-            slots: &[
-                procedure_like::shape::SlotShape {
-                    name: "weighed_asset",
-                    role: procedure_like::shape::SlotRole::Input,
-                    model_table_name: "physical_asset_models",
-                    slot_column: "weighed_asset_slot_id",
-                    model_column: "weighed_asset_model_id",
-                    placed_into: None,
-                    retrieved_from: None,
-                },
-                procedure_like::shape::SlotShape {
-                    name: "weighed_with",
-                    role: procedure_like::shape::SlotRole::Instrument,
-                    model_table_name: "weighing_device_models",
-                    slot_column: "weighed_with_slot_id",
-                    model_column: "weighed_with_model_id",
-                    placed_into: None,
-                    retrieved_from: None,
-                },
-            ],
-        };
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedure_templates,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedure_templates,
-        ::aps_physical_asset_models::physical_asset_models
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedure_templates,
-        ::aps_procedure_templates::procedure_template_slots
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedure_templates,
-        ::aps_procedure_templates::procedure_templates
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedure_templates,
-        ::aps_resources::resources
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedure_templates,
-        ::aps_procedures::weighing_device_models
-    );
-}
-pub use weighing_procedure_templates_model::*;
-pub mod weighing_procedures_model {
-    #[derive(
-        Clone,
-        Debug,
-        PartialOrd,
-        PartialEq,
-        ::serde::Serialize,
-        ::serde::Deserialize,
-        ::diesel::Queryable,
-        ::diesel::Selectable,
-        ::diesel::Identifiable,
-        ::diesel::Associations,
-        ::diesel_builders::prelude::TableModel,
-    )]
-    /// Recorded execution of a weighing template.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedures::procedures
-    ))]
-    #[table_model(error = ::validation_errors::ValidationError)]
-    #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(
-            aps_procedures::WeighingProcedureTemplate,
-            foreign_key = weighing_procedure_template_id
-        )
-    )]
-    #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
-    #[table_model(
-        foreign_key(
-            (weighing_procedure_template_id),
-            (::aps_procedures::weighing_procedure_templates::id)
-        )
-    )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
-    #[diesel(table_name = weighing_procedures)]
-    pub struct WeighingProcedure {
-        /// Identity shared with the parent procedure.
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        id: ::rosetta_uuid::Uuid,
-        /// Organization containing the parent resource.
-        #[same_as(aps_procedures::procedures::organization_id)]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        organization_id: ::rosetta_uuid::Uuid,
-        /// Typed template executed by this procedure.
-        #[same_as(aps_procedures::procedures::procedure_template_id)]
-        #[infallible]
-        #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
-        weighing_procedure_template_id: ::rosetta_uuid::Uuid,
-        /// Execution status copied from the parent procedure.
-        #[same_as(aps_procedures::procedures::status_id)]
-        #[infallible]
-        status_id: String,
-        /// Mass in kilograms.
-        mass_kg: Option<f64>,
-    }
-    impl ::diesel_builders::ValidateColumn<weighing_procedures::mass_kg>
-        for <weighing_procedures::table as ::diesel_builders::TableExt>::NewValues
-    {
-        type Error = ::validation_errors::ValidationError;
-        #[inline]
-        fn validate_column(mass_kg: &f64) -> Result<(), Self::Error> {
-            use diesel::Column;
-            if mass_kg <= &0f64 {
-                return Err(::validation_errors::ValidationError::strictly_greater_than_value(
-                    <crate::weighing_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    crate::weighing_procedures::mass_kg::NAME,
-                    0f64,
-                ));
-            }
-            if mass_kg.partial_cmp(&f64::INFINITY).is_none_or(::core::cmp::Ordering::is_ge) {
-                return Err(::validation_errors::ValidationError::check_violated(
-                    <crate::weighing_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                    &[crate::weighing_procedures::mass_kg::NAME],
-                    "mass_kg < 'Infinity'::DOUBLE PRECISION",
-                ));
-            }
-            Ok(())
-        }
-    }
-    impl ::diesel_builders::ValidateRecord<weighing_procedures::table>
-        for <weighing_procedures::table as ::diesel_builders::TableExt>::NewValues
-    {
-        #[inline]
-        fn validate_record(&self) -> Result<(), ::validation_errors::ValidationError> {
-            use diesel::Column;
-            if let (Some(status_id), Some(mass_kg)) = (
-                <Self as diesel_builders::MayGetColumn<
-                    weighing_procedures::status_id,
-                >>::may_get_column_ref(self),
-                <Self as diesel_builders::MayGetColumn<
-                    weighing_procedures::mass_kg,
-                >>::may_get_column_ref(self),
-            ) && !((status_id.as_str() != "completed") || (*mass_kg).is_some())
-            {
-                return Err(
-                    ::validation_errors::ValidationError::check_violated(
-                        <crate::weighing_procedures::table as ::diesel_builders::TableExt>::TABLE_NAME,
-                        &[
-                            crate::weighing_procedures::status_id::NAME,
-                            crate::weighing_procedures::mass_kg::NAME,
-                        ],
-                        "status_id <> 'completed' OR mass_kg IS NOT NULL",
-                    ),
-                );
-            }
-            Ok(())
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for WeighingProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for WeighingProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::resources::id> for WeighingProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<weighing_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl procedure_like::ProcedureTableLike for weighing_procedures::table {
-        type ProcedureTemplateTable = aps_procedures::weighing_procedure_templates::table;
-    }
-    /// Shape of `weighing_procedures` the procedure runner renders.
-    pub const WEIGHING_PROCEDURES_SHAPE: procedure_like::shape::ProcedureShape =
-        procedure_like::shape::ProcedureShape {
-            table_name: "weighing_procedures",
-            template_table_name: "weighing_procedure_templates",
-            measurements: &[procedure_like::shape::ColumnShape {
-                name: "mass_kg",
-                label: "Mass in kilograms.",
-                sql_type: procedure_like::shape::SqlType::DoublePrecision,
-                unit: Some(procedure_like::shape::Unit::Kilogram),
-                required: true,
-            }],
-        };
-    ::diesel::allow_tables_to_appear_in_same_query!(weighing_procedures, ::aps_resources::ownables);
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedures,
-        ::aps_procedures::procedures
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedures,
-        ::aps_resources::resources
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        weighing_procedures,
-        ::aps_procedures::weighing_procedure_templates
-    );
-}
-pub use weighing_procedures_model::*;

@@ -1,10 +1,9 @@
 //! The slots a procedure binds itself, those no step binding fills.
 
 use aps_assets::assets;
-use aps_procedure_templates::{
-    ProcedureTemplateSlot, procedure_template_slots, procedure_templates,
+use aps_resources::{
+    ProcedureTemplateSlot, asset_models, procedure_template_slots, procedure_templates,
 };
-use aps_resources::asset_models;
 use diesel_builders::{GetColumn, GetColumnExt};
 use rosetta_uuid::Uuid;
 

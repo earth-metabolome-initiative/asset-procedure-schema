@@ -7,76 +7,109 @@ title: Workspace Dependencies
 ---
 erDiagram
   direction TB
+  v2["app installations"]
   v3["apps"]
   v4["asset model ancestors"]
-  v7["audit events"]
-  v72["grantees DAG"]
-  v73["grants"]
-  v76["installation permissions"]
-  v77["invitations"]
-  v82["memberships"]
-  v83["organization blocks"]
-  v91["parameter value kinds"]
-  v104["platform audit events"]
-  v108["procedure assets"]
-  v109["procedure parameter values"]
-  v110["procedure statuses"]
-  v111["procedure template parameters"]
-  v112["procedure template slot bindings"]
-  v113["procedure template slots"]
-  v114["procedure template states"]
-  v115["procedure template step edges"]
-  v116["procedure template step parameters"]
-  v117["procedure template steps"]
-  v120["quantity kinds"]
-  v121["resource parents"]
-  v122["resources DAG"]
-  v130["slot role pairs"]
-  v131["slot roles"]
-  v136["table name admitted parents"]
-  v137["table name ancestors"]
-  v139["table names DAG"]
-  v140["team members"]
-  v141["team parents"]
-  v122 ||--|| v113 : "depends on"
-  v72 ||--|| v3 : "depends on"
-  v4 ||--|| v122 : "depends on"
-  v122 ||--|| v139 : "depends on"
-  v73 ||--|| v72 : "depends on"
-  v73 ||--|| v122 : "depends on"
-  v76 ||--|| v72 : "depends on"
-  v77 ||--|| v72 : "depends on"
-  v82 ||--|| v77 : "depends on"
-  v82 ||--|| v72 : "depends on"
-  v83 ||--|| v72 : "depends on"
-  v122 ||--|| v72 : "depends on"
-  v108 ||--|| v4 : "depends on"
-  v108 ||--|| v122 : "depends on"
-  v108 ||--|| v113 : "depends on"
-  v109 ||--|| v111 : "depends on"
-  v109 ||--|| v122 : "depends on"
-  v111 ||--|| v91 : "depends on"
-  v111 ||--|| v122 : "depends on"
-  v111 ||--|| v120 : "depends on"
-  v112 ||--|| v4 : "depends on"
-  v112 ||--|| v113 : "depends on"
-  v112 ||--|| v117 : "depends on"
-  v112 ||--|| v122 : "depends on"
-  v112 ||--|| v130 : "depends on"
-  v113 ||--|| v131 : "depends on"
-  v115 ||--|| v117 : "depends on"
-  v115 ||--|| v122 : "depends on"
-  v116 ||--|| v111 : "depends on"
-  v116 ||--|| v117 : "depends on"
-  v116 ||--|| v122 : "depends on"
-  v117 ||--|| v113 : "depends on"
+  v6["asset move kinds"]
+  v7["asset moves"]
+  v8["asset uses"]
+  v10["audit events"]
+  v53["container occupancy"]
+  v76["grantees"]
+  v77["grants"]
+  v80["installation permissions"]
+  v81["invitations"]
+  v86["memberships"]
+  v87["move exits"]
+  v88["namespaces"]
+  v89["organization blocks"]
+  v90["organizations"]
+  v96["parameter value kinds"]
+  v109["platform audit events"]
+  v113["procedure assets"]
+  v114["procedure parameter values"]
+  v115["procedure statuses"]
+  v116["procedure template parameters"]
+  v117["procedure template slot bindings"]
+  v118["procedure template slots"]
+  v119["procedure template states"]
+  v120["procedure template step edges"]
+  v121["procedure template step parameters"]
+  v122["procedure template steps"]
+  v125["quantity kinds"]
+  v126["resources DAG"]
+  v133["share links"]
+  v134["slot role pairs"]
+  v135["slot roles"]
+  v140["table name admitted parents"]
+  v141["table name ancestors"]
+  v142["table names"]
+  v143["team members"]
+  v144["teams"]
+  v145["users DAG"]
+  v126 ||--|| v118 : "depends on"
+  v2 ||--|| v3 : "depends on"
+  v2 ||--|| v76 : "depends on"
+  v2 ||--|| v90 : "depends on"
+  v3 ||--|| v90 : "depends on"
+  v4 ||--|| v126 : "depends on"
+  v126 ||--|| v142 : "depends on"
+  v7 ||--|| v6 : "depends on"
+  v7 ||--|| v126 : "depends on"
+  v7 ||--|| v113 : "depends on"
+  v7 ||--|| v115 : "depends on"
+  v8 ||--|| v126 : "depends on"
+  v8 ||--|| v113 : "depends on"
+  v53 ||--|| v126 : "depends on"
+  v53 ||--|| v113 : "depends on"
+  v77 ||--|| v76 : "depends on"
+  v77 ||--|| v126 : "depends on"
+  v80 ||--|| v2 : "depends on"
+  v81 ||--|| v90 : "depends on"
+  v81 ||--|| v145 : "depends on"
+  v86 ||--|| v81 : "depends on"
+  v86 ||--|| v90 : "depends on"
+  v86 ||--|| v145 : "depends on"
+  v87 ||--|| v126 : "depends on"
+  v87 ||--|| v113 : "depends on"
+  v88 ||--|| v145 : "depends on"
+  v89 ||--|| v76 : "depends on"
+  v89 ||--|| v90 : "depends on"
+  v90 ||--|| v76 : "depends on"
+  v90 ||--|| v145 : "depends on"
+  v113 ||--|| v4 : "depends on"
+  v113 ||--|| v126 : "depends on"
+  v113 ||--|| v118 : "depends on"
+  v114 ||--|| v116 : "depends on"
+  v114 ||--|| v126 : "depends on"
+  v116 ||--|| v96 : "depends on"
+  v116 ||--|| v126 : "depends on"
+  v116 ||--|| v125 : "depends on"
+  v117 ||--|| v4 : "depends on"
+  v117 ||--|| v118 : "depends on"
   v117 ||--|| v122 : "depends on"
-  v122 ||--|| v114 : "depends on"
-  v122 ||--|| v110 : "depends on"
+  v117 ||--|| v126 : "depends on"
+  v117 ||--|| v134 : "depends on"
+  v118 ||--|| v135 : "depends on"
+  v120 ||--|| v122 : "depends on"
+  v120 ||--|| v126 : "depends on"
+  v121 ||--|| v116 : "depends on"
   v121 ||--|| v122 : "depends on"
-  v130 ||--|| v131 : "depends on"
-  v136 ||--|| v139 : "depends on"
-  v137 ||--|| v139 : "depends on"
-  v140 ||--|| v82 : "depends on"
-  v140 ||--|| v72 : "depends on"
-  v141 ||--|| v72 : "depends on"
+  v121 ||--|| v126 : "depends on"
+  v122 ||--|| v118 : "depends on"
+  v122 ||--|| v126 : "depends on"
+  v126 ||--|| v119 : "depends on"
+  v126 ||--|| v115 : "depends on"
+  v126 ||--|| v145 : "depends on"
+  v126 ||--|| v90 : "depends on"
+  v133 ||--|| v76 : "depends on"
+  v133 ||--|| v90 : "depends on"
+  v133 ||--|| v145 : "depends on"
+  v134 ||--|| v135 : "depends on"
+  v140 ||--|| v142 : "depends on"
+  v141 ||--|| v142 : "depends on"
+  v143 ||--|| v86 : "depends on"
+  v143 ||--|| v144 : "depends on"
+  v144 ||--|| v76 : "depends on"
+  v144 ||--|| v90 : "depends on"
+  v145 ||--|| v76 : "depends on"

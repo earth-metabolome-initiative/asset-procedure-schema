@@ -21,7 +21,6 @@ pub mod centrifuge_models_model {
     /// Catalog of centrifuge model definitions.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models
     ))]
@@ -32,10 +31,6 @@ pub mod centrifuge_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
     #[diesel(table_name = centrifuge_models)]
     pub struct CentrifugeModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -47,15 +42,14 @@ pub mod centrifuge_models_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_physical_asset_models::physical_asset_models::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(centrifuge_models::id, centrifuge_models::archived);
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for CentrifugeModel {
-        fn get_column_ref(
-            &self,
-        ) -> &<centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CentrifugeModel {
         fn get_column_ref(
             &self,
         ) -> &<centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType {
@@ -113,7 +107,6 @@ pub mod centrifuge_models_model {
         centrifuge_models,
         ::aps_commercial_products::commercial_products
     );
-    ::diesel::allow_tables_to_appear_in_same_query!(centrifuge_models, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(
         centrifuge_models,
         ::aps_physical_asset_models::physical_asset_models
@@ -136,28 +129,10 @@ pub mod centrifuge_procedure_templates_model {
         ::diesel_builders::prelude::TableModel,
     )]
     /// Typed slots and parameters for centrifuge.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedure_templates::procedure_templates
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_resources::procedure_templates))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_procedure_templates::ProcedureTemplate, foreign_key = id))]
-    #[diesel(
-        belongs_to(
-            aps_centrifuge_models::CentrifugeModel,
-            foreign_key = centrifuged_with_model_id
-        )
-    )]
-    #[diesel(
-        belongs_to(
-            aps_physical_asset_models::VolumetricContainerModel,
-            foreign_key = centrifuged_container_model_id
-        )
-    )]
-    #[table_model(
-        foreign_key((id), (::aps_procedure_templates::procedure_templates::id))
-    )]
+    #[diesel(belongs_to(aps_resources::ProcedureTemplate, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_resources::procedure_templates::id)))]
     #[table_model(
         foreign_key(
             (centrifuged_with_model_id),
@@ -180,11 +155,11 @@ pub mod centrifuge_procedure_templates_model {
                 organization_id
             ),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
@@ -198,45 +173,59 @@ pub mod centrifuge_procedure_templates_model {
                 organization_id
             ),
             (
-                ::aps_procedure_templates::procedure_template_slots::id,
-                ::aps_procedure_templates::procedure_template_slots::procedure_template_id,
-                ::aps_procedure_templates::procedure_template_slots::asset_model_id,
-                ::aps_procedure_templates::procedure_template_slots::role_id,
-                ::aps_procedure_templates::procedure_template_slots::organization_id
+                ::aps_resources::procedure_template_slots::id,
+                ::aps_resources::procedure_template_slots::procedure_template_id,
+                ::aps_resources::procedure_template_slots::asset_model_id,
+                ::aps_resources::procedure_template_slots::role_id,
+                ::aps_resources::procedure_template_slots::organization_id
             )
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (centrifuged_with_model_id, centrifuged_with_model_archived),
+            (
+                ::aps_centrifuge_models::centrifuge_models::id,
+                ::aps_centrifuge_models::centrifuge_models::archived
+            )
+        )
+    )]
+    #[table_model(
+        foreign_key(
+            (centrifuged_container_model_id, centrifuged_container_model_archived),
+            (
+                ::aps_physical_asset_models::volumetric_container_models::id,
+                ::aps_physical_asset_models::volumetric_container_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = centrifuge_procedure_templates)]
     pub struct CentrifugeProcedureTemplate {
         /// Identity shared with the parent template.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::procedure_template_id,
+            aps_resources::procedure_template_slots::procedure_template_id,
             (centrifuged_with_slot_id, centrifuged_container_slot_id)
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
         /// Organization containing the parent resource.
-        #[same_as(aps_procedure_templates::procedure_templates::organization_id)]
+        #[same_as(aps_resources::procedure_templates::organization_id)]
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::organization_id,
+            aps_resources::procedure_template_slots::organization_id,
             (centrifuged_with_slot_id, centrifuged_container_slot_id)
         )]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         organization_id: ::rosetta_uuid::Uuid,
         /// Slot declaring the `centrifuged_with` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         centrifuged_with_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `centrifuged_with` slot.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
+            aps_resources::procedure_template_slots::asset_model_id,
             centrifuged_with_slot_id
         )]
         #[infallible]
@@ -246,13 +235,13 @@ pub mod centrifuge_procedure_templates_model {
         #[table_model(generated)]
         centrifuged_with_slot_role_id: String,
         /// Slot declaring the `centrifuged_container` assets.
-        #[mandatory(aps_procedure_templates::procedure_template_slots)]
+        #[mandatory(aps_resources::procedure_template_slots)]
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         centrifuged_container_slot_id: ::rosetta_uuid::Uuid,
         /// Admissible model for the `centrifuged_container` slot.
         #[same_as(
-            aps_procedure_templates::procedure_template_slots::asset_model_id,
+            aps_resources::procedure_template_slots::asset_model_id,
             centrifuged_container_slot_id
         )]
         #[infallible]
@@ -279,7 +268,24 @@ pub mod centrifuge_procedure_templates_model {
         /// Allowed speed deviation as a percentage of the target.
         #[table_model(default = 5f64)]
         speed_rpm_tolerance_percentage: f64,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_resources::procedure_templates::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `centrifuged_with_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        centrifuged_with_model_archived: bool,
+        /// Archive state of the row named by `centrifuged_container_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        centrifuged_container_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        centrifuge_procedure_templates::id,
+        centrifuge_procedure_templates::archived
+    );
     impl ::diesel_builders::ValidateColumn<centrifuge_procedure_templates::temperature_k>
         for <centrifuge_procedure_templates::table as ::diesel_builders::TableExt>::NewValues
     {
@@ -454,15 +460,7 @@ pub mod centrifuge_procedure_templates_model {
             Ok(())
         }
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CentrifugeProcedureTemplate {
-        fn get_column_ref(
-            &self,
-        ) -> &<centrifuge_procedure_templates::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_procedure_templates::procedure_templates::id>
+    impl ::diesel_builders::GetColumn<aps_resources::procedure_templates::id>
         for CentrifugeProcedureTemplate
     {
         fn get_column_ref(
@@ -555,15 +553,11 @@ pub mod centrifuge_procedure_templates_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         centrifuge_procedure_templates,
-        ::aps_resources::ownables
+        ::aps_resources::procedure_template_slots
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         centrifuge_procedure_templates,
-        ::aps_procedure_templates::procedure_template_slots
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        centrifuge_procedure_templates,
-        ::aps_procedure_templates::procedure_templates
+        ::aps_resources::procedure_templates
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         centrifuge_procedure_templates,
@@ -586,23 +580,12 @@ pub mod centrifuge_procedures_model {
         ::diesel::Queryable,
         ::diesel::Selectable,
         ::diesel::Identifiable,
-        ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
     /// Recorded execution of a centrifuge template.
-    #[table_model(ancestors(
-        aps_resources::resources,
-        aps_resources::ownables,
-        aps_procedures::procedures
-    ))]
+    #[table_model(ancestors(aps_resources::resources, aps_procedures::procedures))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(
-        belongs_to(
-            aps_centrifuge_models::CentrifugeProcedureTemplate,
-            foreign_key = centrifuge_procedure_template_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_procedures::procedures::id)))]
     #[table_model(
         foreign_key(
@@ -610,10 +593,15 @@ pub mod centrifuge_procedures_model {
             (::aps_centrifuge_models::centrifuge_procedure_templates::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (centrifuge_procedure_template_id, centrifuge_procedure_template_archived),
+            (
+                ::aps_centrifuge_models::centrifuge_procedure_templates::id,
+                ::aps_centrifuge_models::centrifuge_procedure_templates::archived
+            )
+        )
+    )]
     #[diesel(table_name = centrifuge_procedures)]
     pub struct CentrifugeProcedure {
         /// Identity shared with the parent procedure.
@@ -632,12 +620,23 @@ pub mod centrifuge_procedures_model {
         centrifuge_procedure_template_id: ::rosetta_uuid::Uuid,
         /// Execution status copied from the parent procedure.
         #[same_as(aps_procedures::procedures::status_id)]
+        #[table_model(default = "planned")]
         #[infallible]
         status_id: String,
         /// Measured temperature k.
         temperature_k: Option<f64>,
         /// Measured speed rpm.
         speed_rpm: Option<f64>,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_procedures::procedures::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by
+        /// `centrifuge_procedure_template_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        centrifuge_procedure_template_archived: bool,
     }
     impl ::diesel_builders::ValidateColumn<centrifuge_procedures::temperature_k>
         for <centrifuge_procedures::table as ::diesel_builders::TableExt>::NewValues
@@ -744,13 +743,6 @@ pub mod centrifuge_procedures_model {
             Ok(())
         }
     }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CentrifugeProcedure {
-        fn get_column_ref(
-            &self,
-        ) -> &<centrifuge_procedures::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
     impl ::diesel_builders::GetColumn<aps_procedures::procedures::id> for CentrifugeProcedure {
         fn get_column_ref(
             &self,
@@ -796,10 +788,6 @@ pub mod centrifuge_procedures_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         centrifuge_procedures,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        centrifuge_procedures,
         ::aps_procedures::procedures
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -829,18 +817,11 @@ pub mod centrifuges_model {
     /// Physical centrifuges tracked in APS inventory.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_assets::assets,
         aps_assets::physical_assets
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_assets::PhysicalAsset, foreign_key = id))]
-    #[diesel(
-        belongs_to(
-            aps_centrifuge_models::CommercialCentrifugeLot,
-            foreign_key = commercial_centrifuge_lot_id
-        )
-    )]
     #[table_model(foreign_key((id), (::aps_assets::physical_assets::id)))]
     #[table_model(
         foreign_key(
@@ -848,10 +829,15 @@ pub mod centrifuges_model {
             (::aps_centrifuge_models::commercial_centrifuge_lots::id)
         )
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (commercial_centrifuge_lot_id, commercial_centrifuge_lot_archived),
+            (
+                ::aps_centrifuge_models::commercial_centrifuge_lots::id,
+                ::aps_centrifuge_models::commercial_centrifuge_lots::archived
+            )
+        )
+    )]
     #[diesel(table_name = centrifuges)]
     pub struct Centrifuge {
         /// Stable asset identifier inherited from physical_assets.
@@ -868,15 +854,17 @@ pub mod centrifuges_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         commercial_centrifuge_lot_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_assets::physical_assets::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `commercial_centrifuge_lot_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        commercial_centrifuge_lot_archived: bool,
     }
     impl ::diesel_builders::GetColumn<aps_assets::assets::id> for Centrifuge {
-        fn get_column_ref(
-            &self,
-        ) -> &<centrifuges::id as ::diesel_builders::ColumnTyped>::ColumnType {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for Centrifuge {
         fn get_column_ref(
             &self,
         ) -> &<centrifuges::id as ::diesel_builders::ColumnTyped>::ColumnType {
@@ -902,7 +890,6 @@ pub mod centrifuges_model {
         centrifuges,
         ::aps_centrifuge_models::commercial_centrifuge_lots
     );
-    ::diesel::allow_tables_to_appear_in_same_query!(centrifuges, ::aps_resources::ownables);
     ::diesel::allow_tables_to_appear_in_same_query!(centrifuges, ::aps_assets::physical_assets);
     ::diesel::allow_tables_to_appear_in_same_query!(centrifuges, ::aps_resources::resources);
 }
@@ -928,7 +915,6 @@ pub mod commercial_centrifuge_lots_model {
     /// Catalog of lot-specific commercial centrifuge models.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
         aps_centrifuge_models::centrifuge_models,
@@ -937,12 +923,6 @@ pub mod commercial_centrifuge_lots_model {
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(
         belongs_to(aps_commercial_products::CommercialProductLot, foreign_key = id)
-    )]
-    #[diesel(
-        belongs_to(
-            aps_centrifuge_models::CommercialCentrifugeModel,
-            foreign_key = commercial_centrifuge_model_id
-        )
     )]
     #[diesel(belongs_to(aps_centrifuge_models::CentrifugeModel, foreign_key = id))]
     #[table_model(
@@ -955,10 +935,15 @@ pub mod commercial_centrifuge_lots_model {
         )
     )]
     #[table_model(foreign_key((id), (::aps_centrifuge_models::centrifuge_models::id)))]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (commercial_centrifuge_model_id, commercial_centrifuge_model_archived),
+            (
+                ::aps_centrifuge_models::commercial_centrifuge_models::id,
+                ::aps_centrifuge_models::commercial_centrifuge_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = commercial_centrifuge_lots)]
     pub struct CommercialCentrifugeLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -976,7 +961,21 @@ pub mod commercial_centrifuge_lots_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         commercial_centrifuge_model_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_centrifuge_models::centrifuge_models::archived)]
+        #[same_as(aps_commercial_products::commercial_product_lots::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `commercial_centrifuge_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        commercial_centrifuge_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        commercial_centrifuge_lots::id,
+        commercial_centrifuge_lots::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for CommercialCentrifugeLot {
         fn get_column_ref(
             &self,
@@ -998,14 +997,6 @@ pub mod commercial_centrifuge_lots_model {
     impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_product_lots::id>
         for CommercialCentrifugeLot
     {
-        fn get_column_ref(
-            &self,
-        ) -> &<commercial_centrifuge_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CommercialCentrifugeLot {
         fn get_column_ref(
             &self,
         ) -> &<commercial_centrifuge_lots::id as ::diesel_builders::ColumnTyped>::ColumnType
@@ -1072,10 +1063,6 @@ pub mod commercial_centrifuge_lots_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_centrifuge_lots,
-        ::aps_resources::ownables
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        commercial_centrifuge_lots,
         ::aps_physical_asset_models::physical_asset_models
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
@@ -1105,7 +1092,6 @@ pub mod commercial_centrifuge_models_model {
     /// Catalog of commercial centrifuge models.
     #[table_model(ancestors(
         aps_resources::resources,
-        aps_resources::ownables,
         aps_resources::asset_models,
         aps_physical_asset_models::physical_asset_models,
         aps_commercial_products::commercial_products,
@@ -1123,10 +1109,15 @@ pub mod commercial_centrifuge_models_model {
     #[table_model(
         foreign_key((id), (::aps_commercial_products::commercial_products::id))
     )]
-    #[table_model(default(
-        aps_resources::resources::kind,
-        ::aps_authz_resource_kind::ResourceKind::Ownable
-    ))]
+    #[table_model(
+        foreign_key(
+            (centrifuge_model_id, centrifuge_model_archived),
+            (
+                ::aps_centrifuge_models::centrifuge_models::id,
+                ::aps_centrifuge_models::centrifuge_models::archived
+            )
+        )
+    )]
     #[diesel(table_name = commercial_centrifuge_models)]
     pub struct CommercialCentrifugeModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -1144,7 +1135,21 @@ pub mod commercial_centrifuge_models_model {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         centrifuge_model_id: ::rosetta_uuid::Uuid,
+        /// Archive state inherited from this resource.
+        #[same_as(aps_centrifuge_models::centrifuge_models::archived)]
+        #[same_as(aps_commercial_products::commercial_products::archived)]
+        #[table_model(default = false)]
+        #[infallible]
+        archived: bool,
+        /// Archive state of the row named by `centrifuge_model_id`.
+        #[table_model(default = false)]
+        #[infallible]
+        centrifuge_model_archived: bool,
     }
+    ::diesel_builders::prelude::unique_index!(
+        commercial_centrifuge_models::id,
+        commercial_centrifuge_models::archived
+    );
     impl ::diesel_builders::GetColumn<aps_resources::asset_models::id> for CommercialCentrifugeModel {
         fn get_column_ref(
             &self,
@@ -1166,14 +1171,6 @@ pub mod commercial_centrifuge_models_model {
     impl ::diesel_builders::GetColumn<aps_commercial_products::commercial_products::id>
         for CommercialCentrifugeModel
     {
-        fn get_column_ref(
-            &self,
-        ) -> &<commercial_centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType
-        {
-            &self.id
-        }
-    }
-    impl ::diesel_builders::GetColumn<aps_resources::ownables::id> for CommercialCentrifugeModel {
         fn get_column_ref(
             &self,
         ) -> &<commercial_centrifuge_models::id as ::diesel_builders::ColumnTyped>::ColumnType
@@ -1233,10 +1230,6 @@ pub mod commercial_centrifuge_models_model {
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_centrifuge_models,
         ::aps_commercial_products::commercial_products
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        commercial_centrifuge_models,
-        ::aps_resources::ownables
     );
     ::diesel::allow_tables_to_appear_in_same_query!(
         commercial_centrifuge_models,

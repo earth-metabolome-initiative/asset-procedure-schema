@@ -3,7 +3,7 @@
 
 use core::fmt::Write;
 
-use aps_procedure_templates::{
+use aps_resources::{
     ProcedureTemplateSlot, procedure_template_slots, procedure_template_steps, procedure_templates,
 };
 use diesel_builders::GetColumnExt;

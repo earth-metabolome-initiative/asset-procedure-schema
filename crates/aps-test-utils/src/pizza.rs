@@ -3,13 +3,11 @@
 
 use std::fmt::Debug;
 
-use aps_asset_model_ancestors::{asset_model_ancestors, procedure_template_slot_bindings};
 use aps_physical_asset_models::physical_asset_models;
-use aps_procedure_templates::{
-    procedure_template_slots, procedure_template_step_edges, procedure_template_steps,
-    procedure_templates,
+use aps_resources::{
+    asset_model_ancestors, procedure_template_slot_bindings, procedure_template_slots,
+    procedure_template_step_edges, procedure_template_steps, procedure_templates, resources,
 };
-use aps_resources::resources;
 use aps_traits::{
     IntoValidationError, ProcedureTemplateNode, ProcedureTemplateStepNode, Publish, SlotRole,
 };

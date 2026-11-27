@@ -9,28 +9,22 @@ members = [
   "crates/procedure-template-visitor",
   "crates/procedure-template-visualization",
   "crates/procedure-like",
-  "aps/aps-aliquoting_procedure_templates",
-  "aps/aps-grantees",
-  "aps/aps-asset_model_ancestors",
+  "aps/aps-sample_models",
+  "aps/aps-organizations",
   "aps/aps-resources",
   "aps/aps-assets",
   "aps/aps-audit_events",
   "aps/aps-ball_mill_machine_models",
   "aps/aps-commercial_products",
+  "aps/aps-geopositioning_devices",
   "aps/aps-centrifuge_models",
   "aps/aps-commercial_freeze_dryer_models",
   "aps/aps-commercial_freezer_models",
   "aps/aps-physical_asset_models",
   "aps/aps-procedures",
-  "aps/aps-fractioning_procedure_templates",
-  "aps/aps-freeze_dryer_models",
-  "aps/aps-freezer_models",
-  "aps/aps-packaging_models",
+  "aps/aps-weighing_device_models",
   "aps/aps-photograph_procedure_templates",
   "aps/aps-platform_audit_events",
-  "aps/aps-pouring_procedure_templates",
-  "aps/aps-procedure_templates",
-  "aps/aps-supernatant_procedure_templates",
   "aps/aps-authz-audit_operation",
   "aps/aps-authz-grantee_kind",
   "aps/aps-authz-membership_state",
@@ -38,9 +32,8 @@ members = [
   "aps/aps-authz-role",
   "aps/aps-authz-team_role",
   "aps/aps",
-  "aps/aps-dag-grantees",
   "aps/aps-dag-resources",
-  "aps/aps-dag-table_names",
+  "aps/aps-dag-users",
 ]
 
 [workspace.package]
@@ -55,28 +48,22 @@ aps-test-utils = { path = "crates/aps-test-utils" }
 procedure-template-visitor = { path = "crates/procedure-template-visitor" }
 procedure-template-visualization = { path = "crates/procedure-template-visualization" }
 procedure-like = { path = "crates/procedure-like" }
-aps-aliquoting_procedure_templates = { version = "=0.1.0", path = "aps/aps-aliquoting_procedure_templates" }
-aps-grantees = { version = "=0.1.0", path = "aps/aps-grantees" }
-aps-asset_model_ancestors = { version = "=0.1.0", path = "aps/aps-asset_model_ancestors" }
+aps-sample_models = { version = "=0.1.0", path = "aps/aps-sample_models" }
+aps-organizations = { version = "=0.1.0", path = "aps/aps-organizations" }
 aps-resources = { version = "=0.1.0", path = "aps/aps-resources" }
 aps-assets = { version = "=0.1.0", path = "aps/aps-assets" }
 aps-audit_events = { version = "=0.1.0", path = "aps/aps-audit_events" }
 aps-ball_mill_machine_models = { version = "=0.1.0", path = "aps/aps-ball_mill_machine_models" }
 aps-commercial_products = { version = "=0.1.0", path = "aps/aps-commercial_products" }
+aps-geopositioning_devices = { version = "=0.1.0", path = "aps/aps-geopositioning_devices" }
 aps-centrifuge_models = { version = "=0.1.0", path = "aps/aps-centrifuge_models" }
 aps-commercial_freeze_dryer_models = { version = "=0.1.0", path = "aps/aps-commercial_freeze_dryer_models" }
 aps-commercial_freezer_models = { version = "=0.1.0", path = "aps/aps-commercial_freezer_models" }
 aps-physical_asset_models = { version = "=0.1.0", path = "aps/aps-physical_asset_models" }
 aps-procedures = { version = "=0.1.0", path = "aps/aps-procedures" }
-aps-fractioning_procedure_templates = { version = "=0.1.0", path = "aps/aps-fractioning_procedure_templates" }
-aps-freeze_dryer_models = { version = "=0.1.0", path = "aps/aps-freeze_dryer_models" }
-aps-freezer_models = { version = "=0.1.0", path = "aps/aps-freezer_models" }
-aps-packaging_models = { version = "=0.1.0", path = "aps/aps-packaging_models" }
+aps-weighing_device_models = { version = "=0.1.0", path = "aps/aps-weighing_device_models" }
 aps-photograph_procedure_templates = { version = "=0.1.0", path = "aps/aps-photograph_procedure_templates" }
 aps-platform_audit_events = { version = "=0.1.0", path = "aps/aps-platform_audit_events" }
-aps-pouring_procedure_templates = { version = "=0.1.0", path = "aps/aps-pouring_procedure_templates" }
-aps-procedure_templates = { version = "=0.1.0", path = "aps/aps-procedure_templates" }
-aps-supernatant_procedure_templates = { version = "=0.1.0", path = "aps/aps-supernatant_procedure_templates" }
 aps-authz-audit_operation = { version = "=0.1.0", path = "aps/aps-authz-audit_operation", features = [
   "sqlite",
 ] }
@@ -111,7 +98,7 @@ diesel = { version = "2.4.0", features = ["serde_json", "32-column-tables"] }
 diesel-builders = { version = "0.2.1", features = [
   "postgres",
   "sqlite",
-  "size-64",
+  "size-128",
 ] }
 rosetta-uuid = { version = "0.2.0", features = [
   "diesel",

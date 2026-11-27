@@ -1,8 +1,9 @@
 //! The slot whose procedure rows a step's slot inherits, found by following
 //! the slot bindings of the steps upwards.
 
-use aps_asset_model_ancestors::procedure_template_slot_bindings;
-use aps_procedure_templates::{ProcedureTemplateSlot, procedure_template_slots};
+use aps_resources::{
+    ProcedureTemplateSlot, procedure_template_slot_bindings, procedure_template_slots,
+};
 use diesel_builders::GetColumnExt;
 
 use crate::{ProcedureTemplateGraph, StepNode};

@@ -7,9 +7,9 @@
 use core::convert::Infallible;
 use std::{collections::BTreeMap, rc::Rc};
 
-use aps_asset_model_ancestors::procedure_template_slot_bindings;
-use aps_procedure_templates::{
-    ProcedureTemplateSlot, procedure_template_slots, procedure_template_steps, procedure_templates,
+use aps_resources::{
+    ProcedureTemplateSlot, procedure_template_slot_bindings, procedure_template_slots,
+    procedure_template_steps, procedure_templates,
 };
 use aps_traits::SlotRole;
 use diesel_builders::GetColumnExt;
