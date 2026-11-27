@@ -161,6 +161,10 @@ pub mod asset_models_model {
             (asset_models::id, asset_models::archived)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = asset_models)]
     pub struct AssetModel {
         /// Identifier of the connetto `resource` of kind `'ownable'` this model
@@ -340,6 +344,10 @@ pub mod digital_asset_models_model {
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_resources::AssetModel, foreign_key = id))]
     #[table_model(foreign_key((id), (::aps_resources::asset_models::id)))]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = digital_asset_models)]
     pub struct DigitalAssetModel {
         /// Identifier of the asset model this row specialises.
@@ -467,7 +475,7 @@ pub mod grants_model {
     #[table_model(
         foreign_key(
             (grantee_id, grantee_kind),
-            (::aps_organizations::grantees::id, ::aps_organizations::grantees::kind)
+            (::aps_grantees::grantees::id, ::aps_grantees::grantees::kind)
         )
     )]
     #[diesel(table_name = grants)]
@@ -519,7 +527,7 @@ pub mod grants_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(grants, ::aps_organizations::grantees);
+    ::diesel::allow_tables_to_appear_in_same_query!(grants, ::aps_grantees::grantees);
     ::diesel::allow_tables_to_appear_in_same_query!(grants, ::aps_resources::resources);
 }
 pub use grants_model::*;
@@ -547,6 +555,10 @@ pub mod photograph_models_model {
     ))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(foreign_key((id), (::aps_resources::digital_asset_models::id)))]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = photograph_models)]
     pub struct PhotographModel {
         /// Model inherited from the digital model catalog.
@@ -1598,6 +1610,10 @@ pub mod procedure_templates_model {
             (procedure_templates::id, procedure_templates::archived)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = procedure_templates)]
     pub struct ProcedureTemplate {
         /// Identifier of the connetto `resource` of kind `'ownable'` this
@@ -1892,12 +1908,10 @@ pub mod resources_model {
     )]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
-    #[diesel(belongs_to(aps_organizations::User, foreign_key = created_by_id))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
-    #[table_model(foreign_key((created_by_id), (::aps_organizations::users::id)))]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
+    #[diesel(belongs_to(aps_grantees::User, foreign_key = created_by_id))]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
+    #[table_model(foreign_key((created_by_id), (::aps_grantees::users::id)))]
     #[table_model(
         foreign_key(
             (organization_id, parent_id, parent_kind, parent_archived),
@@ -2153,8 +2167,8 @@ pub mod resources_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(resources, ::aps_organizations::organizations);
-    ::diesel::allow_tables_to_appear_in_same_query!(resources, ::aps_organizations::users);
+    ::diesel::allow_tables_to_appear_in_same_query!(resources, ::aps_grantees::organizations);
+    ::diesel::allow_tables_to_appear_in_same_query!(resources, ::aps_grantees::users);
 }
 pub use resources_model::*;
 pub mod slot_role_pairs_model {

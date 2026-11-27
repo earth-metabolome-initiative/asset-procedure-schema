@@ -14,7 +14,7 @@ aps-authz-resource_kind.workspace = true
 aps-authz-grantee_kind.workspace = true
 aps-authz-role.workspace = true
 rosetta-utc.workspace = true
-aps-organizations.workspace = true
+aps-grantees.workspace = true
 procedure-like = { path = "../../crates/procedure-like" }
 
 [lints]

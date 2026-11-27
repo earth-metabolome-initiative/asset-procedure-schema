@@ -1,0 +1,35 @@
+---
+config:
+  theme: default
+  look: classic
+  flowchart:
+    defaultRenderer: "elk"
+title: grantees
+---
+flowchart TB
+  v0@{shape: rounded, label: "app_installations"}
+  style v0 rx: 3px, ry: 3px 
+  v1@{shape: rounded, label: "organizations"}
+  style v1 rx: 3px, ry: 3px 
+  v2@{shape: rounded, label: "platform_operators"}
+  style v2 rx: 3px, ry: 3px 
+  v3@{shape: rounded, label: "share_links"}
+  style v3 rx: 3px, ry: 3px 
+  v4@{shape: rounded, label: "teams"}
+  style v4 rx: 3px, ry: 3px 
+  v5@{shape: rounded, label: "users"}
+  style v5 rx: 3px, ry: 3px 
+  v6@{shape: rounded, label: "grantees"}
+  style v6 rx: 3px, ry: 3px 
+  v0 ---> v6
+  v0 ---> v1
+  v1 ---> v6
+  v1 ---> v5
+  v2 ---> v5
+  v3 ---> v6
+  v3 ---> v1
+  v3 ---> v5
+  v4 ---> v6
+  v4 ---> v1
+  v4 ---> v4
+  v5 ---> v6

@@ -50,6 +50,10 @@ pub mod commercial_freezer_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_freezer_lots)]
     pub struct CommercialFreezerLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -214,6 +218,10 @@ pub mod commercial_freezer_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_freezer_models)]
     pub struct CommercialFreezerModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -377,6 +385,10 @@ pub mod freezers_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = freezers)]
     pub struct Freezer {
         /// Stable asset identifier inherited from physical_assets.

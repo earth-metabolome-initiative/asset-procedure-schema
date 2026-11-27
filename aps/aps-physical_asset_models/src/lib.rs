@@ -74,6 +74,10 @@ pub mod container_compatibility_rules_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = container_compatibility_rules)]
     pub struct ContainerCompatibilityRule {
         /// Stable rule identifier inherited from its `resources` row of kind
@@ -280,6 +284,10 @@ pub mod container_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = container_models)]
     pub struct ContainerModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -377,6 +385,10 @@ pub mod physical_asset_models_model {
     #[table_model(error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_resources::AssetModel, foreign_key = id))]
     #[table_model(foreign_key((id), (::aps_resources::asset_models::id)))]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = physical_asset_models)]
     pub struct PhysicalAssetModel {
         /// Identifier of the asset model this row specialises.
@@ -545,6 +557,10 @@ pub mod retrieval_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = retrieval_procedure_templates)]
     pub struct RetrievalProcedureTemplate {
         /// Identity shared with the parent template.
@@ -803,6 +819,10 @@ pub mod storage_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = storage_procedure_templates)]
     pub struct StorageProcedureTemplate {
         /// Identity shared with the parent template.
@@ -1042,6 +1062,10 @@ pub mod volumetric_container_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::container_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = volumetric_container_models)]
     pub struct VolumetricContainerModel {
         /// Stable model identifier inherited from `container_models`.
@@ -1206,6 +1230,10 @@ pub mod weighed_container_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::container_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = weighed_container_models)]
     pub struct WeighedContainerModel {
         /// Stable model identifier inherited from `container_models`.
@@ -1366,6 +1394,10 @@ pub mod weighed_volumetric_container_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::volumetric_container_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = weighed_volumetric_container_models)]
     pub struct WeighedVolumetricContainerModel {
         /// Model shared by the weighed and volumetric subtypes.

@@ -55,7 +55,7 @@ pub use aps_commercial_products::{
 pub use aps_geopositioning_devices::{
     self, Camera, GeopositioningDevice, PhoneDevice, cameras, geopositioning_devices, phone_devices,
 };
-pub use aps_organizations::{
+pub use aps_grantees::{
     self, App, AppInstallation, Grantee, InstallationPermission, Invitation, Membership, Namespace,
     Organization, OrganizationBlock, PlatformOperator, ShareLink, Team, TeamMember, User,
     app_installations, apps, grantees, installation_permissions, invitations, memberships,

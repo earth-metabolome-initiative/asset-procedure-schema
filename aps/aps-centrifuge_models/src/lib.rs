@@ -31,6 +31,10 @@ pub mod centrifuge_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = centrifuge_models)]
     pub struct CentrifugeModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -199,6 +203,10 @@ pub mod centrifuge_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = centrifuge_procedure_templates)]
     pub struct CentrifugeProcedureTemplate {
         /// Identity shared with the parent template.
@@ -602,6 +610,10 @@ pub mod centrifuge_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = centrifuge_procedures)]
     pub struct CentrifugeProcedure {
         /// Identity shared with the parent procedure.
@@ -838,6 +850,10 @@ pub mod centrifuges_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = centrifuges)]
     pub struct Centrifuge {
         /// Stable asset identifier inherited from physical_assets.
@@ -944,6 +960,10 @@ pub mod commercial_centrifuge_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_centrifuge_lots)]
     pub struct CommercialCentrifugeLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -1118,6 +1138,10 @@ pub mod commercial_centrifuge_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_centrifuge_models)]
     pub struct CommercialCentrifugeModel {
         /// Stable commercial model identifier shared with parent model tables.

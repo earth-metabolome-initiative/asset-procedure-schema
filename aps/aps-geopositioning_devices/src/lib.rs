@@ -42,6 +42,10 @@ pub mod cameras_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = cameras)]
     pub struct Camera {
         /// Stable asset identifier inherited from physical_assets.
@@ -141,6 +145,10 @@ pub mod geopositioning_devices_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = geopositioning_devices)]
     pub struct GeopositioningDevice {
         /// Stable asset identifier inherited from physical_assets.
@@ -256,6 +264,10 @@ pub mod phone_devices_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = phone_devices)]
     pub struct PhoneDevice {
         /// Stable device identifier shared with parent camera/geopositioning

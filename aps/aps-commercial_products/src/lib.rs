@@ -23,6 +23,10 @@ pub mod brands_model {
     #[diesel(belongs_to(aps_resources::TableName, foreign_key = table_name_id))]
     #[table_model(foreign_key((id), (::aps_resources::resources::id)))]
     #[table_model(foreign_key((table_name_id), (::aps_resources::table_names::id)))]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = brands)]
     pub struct Brand {
         /// Resource identity.
@@ -155,6 +159,10 @@ pub mod camera_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = camera_models)]
     pub struct CameraModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -297,6 +305,10 @@ pub mod commercial_camera_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_camera_lots)]
     pub struct CommercialCameraLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -471,6 +483,10 @@ pub mod commercial_camera_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_camera_models)]
     pub struct CommercialCameraModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -654,6 +670,10 @@ pub mod commercial_geopositioning_device_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_geopositioning_device_lots)]
     pub struct CommercialGeopositioningDeviceLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -831,6 +851,10 @@ pub mod commercial_geopositioning_device_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_geopositioning_device_models)]
     pub struct CommercialGeopositioningDeviceModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -1005,6 +1029,10 @@ pub mod commercial_marker_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_marker_lots)]
     pub struct CommercialMarkerLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -1167,6 +1195,10 @@ pub mod commercial_marker_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_marker_models)]
     pub struct CommercialMarkerModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -1342,6 +1374,10 @@ pub mod commercial_mass_spectrometer_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_mass_spectrometer_lots)]
     pub struct CommercialMassSpectrometerLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -1522,6 +1558,10 @@ pub mod commercial_mass_spectrometer_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_mass_spectrometer_models)]
     pub struct CommercialMassSpectrometerModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -1715,6 +1755,10 @@ pub mod commercial_personal_protective_equipment_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_personal_protective_equipment_lots)]
     pub struct CommercialPersonalProtectiveEquipmentLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -1896,6 +1940,10 @@ pub mod commercial_personal_protective_equipment_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_personal_protective_equipment_models)]
     pub struct CommercialPersonalProtectiveEquipmentModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -2070,6 +2118,10 @@ pub mod commercial_phone_device_lots_model {
             (::aps_commercial_products::commercial_geopositioning_device_lots::id)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_phone_device_lots)]
     pub struct CommercialPhoneDeviceLot {
         /// Stable lot identifier shared with both commercial parent lot tables.
@@ -2278,6 +2330,10 @@ pub mod commercial_phone_device_models_model {
             (::aps_commercial_products::commercial_geopositioning_device_models::id)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_phone_device_models)]
     pub struct CommercialPhoneDeviceModel {
         /// Stable commercial model identifier shared with both commercial
@@ -2487,6 +2543,10 @@ pub mod commercial_pipette_tip_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_pipette_tip_lots)]
     pub struct CommercialPipetteTipLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -2659,6 +2719,10 @@ pub mod commercial_pipette_tip_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_pipette_tip_models)]
     pub struct CommercialPipetteTipModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -2827,6 +2891,10 @@ pub mod commercial_product_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_product_lots)]
     pub struct CommercialProductLot {
         /// Stable lot-model identifier inherited from `physical_asset_models`.
@@ -3051,6 +3119,10 @@ pub mod commercial_products_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_products)]
     pub struct CommercialProduct {
         /// Stable model identifier inherited from `asset_models`.
@@ -3206,6 +3278,10 @@ pub mod commercial_volume_measuring_device_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_volume_measuring_device_lots)]
     pub struct CommercialVolumeMeasuringDeviceLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -3379,6 +3455,10 @@ pub mod commercial_volume_measuring_device_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_volume_measuring_device_models)]
     pub struct CommercialVolumeMeasuringDeviceModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -3560,6 +3640,10 @@ pub mod commercial_weighing_device_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_weighing_device_lots)]
     pub struct CommercialWeighingDeviceLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -3733,6 +3817,10 @@ pub mod commercial_weighing_device_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_weighing_device_models)]
     pub struct CommercialWeighingDeviceModel {
         /// Stable commercial model identifier shared with parent model tables.
@@ -3890,6 +3978,10 @@ pub mod geopositioning_device_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = geopositioning_device_models)]
     pub struct GeopositioningDeviceModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -4062,6 +4154,10 @@ pub mod geopositioning_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = geopositioning_procedure_templates)]
     pub struct GeopositioningProcedureTemplate {
         /// Identity shared with the parent template.
@@ -4235,6 +4331,10 @@ pub mod geopositioning_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = geopositioning_procedures)]
     pub struct GeopositioningProcedure {
         /// Identity shared with the parent procedure.
@@ -4378,6 +4478,10 @@ pub mod marker_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = marker_models)]
     pub struct MarkerModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -4489,6 +4593,10 @@ pub mod markers_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = markers)]
     pub struct Marker {
         /// Stable asset identifier inherited from physical_assets.
@@ -4570,6 +4678,10 @@ pub mod mass_spectrometer_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = mass_spectrometer_models)]
     pub struct MassSpectrometerModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -4696,6 +4808,10 @@ pub mod mass_spectrometers_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = mass_spectrometers)]
     pub struct MassSpectrometer {
         /// Stable asset identifier inherited from physical_assets.
@@ -4787,6 +4903,10 @@ pub mod personal_protective_equipment_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = personal_protective_equipment_models)]
     pub struct PersonalProtectiveEquipmentModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -4921,6 +5041,10 @@ pub mod personal_protective_equipments_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = personal_protective_equipments)]
     pub struct PersonalProtectiveEquipment {
         /// Stable asset identifier inherited from physical_assets.
@@ -5027,6 +5151,10 @@ pub mod phone_device_models_model {
     #[table_model(
         foreign_key((id), (::aps_commercial_products::geopositioning_device_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = phone_device_models)]
     pub struct PhoneDeviceModel {
         /// Stable model identifier shared with parent camera/geopositioning
@@ -5162,6 +5290,10 @@ pub mod pipette_tip_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = pipette_tip_models)]
     pub struct PipetteTipModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -5279,6 +5411,10 @@ pub mod pipette_tips_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = pipette_tips)]
     pub struct PipetteTip {
         /// Stable asset identifier inherited from physical_assets.

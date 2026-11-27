@@ -4,7 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
-pg2sqlite = { git = "https://github.com/connetto-rs/pg2sqlite", rev = "80b749887fed201a9ed4004759d5bf3b33fea5a5", default-features = false, features = [
+pg2sqlite = { git = "https://github.com/connetto-rs/pg2sqlite", rev = "804b3fee875cee409e7bc07c12612f88d9ebf908", default-features = false, features = [
   "std",
   "diesel",
   "sqlitegis",
@@ -20,7 +20,7 @@ diesel = { workspace = true, features = [
   "sqlite",
   "returning_clauses_for_sqlite_3_35",
 ] }
-aps-organizations.workspace = true
+aps-grantees.workspace = true
 aps-resources.workspace = true
 aps-physical_asset_models.workspace = true
 aps-authz-grantee_kind.workspace = true

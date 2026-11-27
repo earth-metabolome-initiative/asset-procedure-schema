@@ -190,6 +190,10 @@ pub mod fractioning_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = fractioning_procedure_templates)]
     pub struct FractioningProcedureTemplate {
         /// Identity shared with the parent template.
@@ -554,6 +558,10 @@ pub mod fractioning_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = fractioning_procedures)]
     pub struct FractioningProcedure {
         /// Identity shared with the parent procedure.
@@ -721,6 +729,10 @@ pub mod weighing_device_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = weighing_device_models)]
     pub struct WeighingDeviceModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -844,6 +856,10 @@ pub mod weighing_devices_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = weighing_devices)]
     pub struct WeighingDevice {
         /// Stable asset identifier inherited from `physical_assets`.
@@ -991,6 +1007,10 @@ pub mod weighing_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = weighing_procedure_templates)]
     pub struct WeighingProcedureTemplate {
         /// Identity shared with the parent template.
@@ -1153,6 +1173,10 @@ pub mod weighing_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = weighing_procedures)]
     pub struct WeighingProcedure {
         /// Identity shared with the parent procedure.

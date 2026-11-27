@@ -10,7 +10,7 @@ members = [
   "crates/procedure-template-visualization",
   "crates/procedure-like",
   "aps/aps-sample_models",
-  "aps/aps-organizations",
+  "aps/aps-grantees",
   "aps/aps-resources",
   "aps/aps-assets",
   "aps/aps-audit_events",
@@ -32,8 +32,8 @@ members = [
   "aps/aps-authz-role",
   "aps/aps-authz-team_role",
   "aps/aps",
+  "aps/aps-dag-grantees",
   "aps/aps-dag-resources",
-  "aps/aps-dag-users",
 ]
 
 [workspace.package]
@@ -49,7 +49,7 @@ procedure-template-visitor = { path = "crates/procedure-template-visitor" }
 procedure-template-visualization = { path = "crates/procedure-template-visualization" }
 procedure-like = { path = "crates/procedure-like" }
 aps-sample_models = { version = "=0.1.0", path = "aps/aps-sample_models" }
-aps-organizations = { version = "=0.1.0", path = "aps/aps-organizations" }
+aps-grantees = { version = "=0.1.0", path = "aps/aps-grantees" }
 aps-resources = { version = "=0.1.0", path = "aps/aps-resources" }
 aps-assets = { version = "=0.1.0", path = "aps/aps-assets" }
 aps-audit_events = { version = "=0.1.0", path = "aps/aps-audit_events" }
@@ -83,7 +83,7 @@ aps-authz-team_role = { version = "=0.1.0", path = "aps/aps-authz-team_role", fe
   "sqlite",
 ] }
 sqlparser = { version = "0.64", git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
-sql-values = { version = "0.6", git = "https://github.com/connetto-rs/sql-values", branch = "main" }
+sql-values = { version = "0.7", git = "https://github.com/connetto-rs/sql-values", branch = "main" }
 rosetta-utc = { version = "0.3.0", features = [
   "diesel",
   "serde",

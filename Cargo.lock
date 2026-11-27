@@ -54,7 +54,7 @@ dependencies = [
  "aps-commercial_freezer_models",
  "aps-commercial_products",
  "aps-geopositioning_devices",
- "aps-organizations",
+ "aps-grantees",
  "aps-photograph_procedure_templates",
  "aps-physical_asset_models",
  "aps-platform_audit_events",
@@ -153,6 +153,7 @@ name = "aps-ball_mill_machine_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
  "aps-procedures",
@@ -170,6 +171,7 @@ name = "aps-centrifuge_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
  "aps-procedures",
@@ -187,6 +189,7 @@ name = "aps-commercial_freeze_dryer_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
  "aps-procedures",
@@ -204,6 +207,7 @@ name = "aps-commercial_freezer_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
  "aps-procedures",
@@ -237,6 +241,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "aps-dag-grantees"
+version = "0.1.0"
+dependencies = [
+ "aps-assets",
+ "aps-ball_mill_machine_models",
+ "aps-centrifuge_models",
+ "aps-commercial_freeze_dryer_models",
+ "aps-commercial_freezer_models",
+ "aps-commercial_products",
+ "aps-geopositioning_devices",
+ "aps-grantees",
+ "aps-photograph_procedure_templates",
+ "aps-physical_asset_models",
+ "aps-procedures",
+ "aps-resources",
+ "aps-sample_models",
+ "aps-weighing_device_models",
+]
+
+[[package]]
 name = "aps-dag-resources"
 version = "0.1.0"
 dependencies = [
@@ -256,30 +280,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-dag-users"
-version = "0.1.0"
-dependencies = [
- "aps-assets",
- "aps-ball_mill_machine_models",
- "aps-centrifuge_models",
- "aps-commercial_freeze_dryer_models",
- "aps-commercial_freezer_models",
- "aps-commercial_products",
- "aps-geopositioning_devices",
- "aps-organizations",
- "aps-photograph_procedure_templates",
- "aps-physical_asset_models",
- "aps-procedures",
- "aps-resources",
- "aps-sample_models",
- "aps-weighing_device_models",
-]
-
-[[package]]
 name = "aps-geopositioning_devices"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-resources",
  "diesel",
@@ -290,7 +295,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "aps-organizations"
+name = "aps-grantees"
 version = "0.1.0"
 dependencies = [
  "aps-authz-grantee_kind",
@@ -310,6 +315,7 @@ dependencies = [
 name = "aps-photograph_procedure_templates"
 version = "0.1.0"
 dependencies = [
+ "aps-authz-resource_kind",
  "aps-commercial_products",
  "aps-physical_asset_models",
  "aps-procedures",
@@ -355,7 +361,7 @@ name = "aps-procedures"
 version = "0.1.0"
 dependencies = [
  "aps-authz-resource_kind",
- "aps-organizations",
+ "aps-grantees",
  "aps-physical_asset_models",
  "aps-resources",
  "diesel",
@@ -374,7 +380,7 @@ dependencies = [
  "aps-authz-grantee_kind",
  "aps-authz-resource_kind",
  "aps-authz-role",
- "aps-organizations",
+ "aps-grantees",
  "diesel",
  "diesel-builders",
  "procedure-like",
@@ -389,6 +395,7 @@ name = "aps-sample_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-authz-resource_kind",
  "aps-physical_asset_models",
  "aps-procedures",
  "aps-resources",
@@ -409,7 +416,7 @@ dependencies = [
  "aps-authz-membership_state",
  "aps-authz-resource_kind",
  "aps-authz-role",
- "aps-organizations",
+ "aps-grantees",
  "aps-physical_asset_models",
  "aps-resources",
  "aps-traits",
@@ -445,6 +452,7 @@ name = "aps-weighing_device_models"
 version = "0.1.0"
 dependencies = [
  "aps-assets",
+ "aps-authz-resource_kind",
  "aps-physical_asset_models",
  "aps-procedures",
  "aps-resources",
@@ -1475,7 +1483,7 @@ checksum = "4ec91767ecc0a0bbe558ce8c9da33c068066c57ecc8bb8477ef8c1ad3ef77c27"
 [[package]]
 name = "pg2sqlite"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=80b749887fed201a9ed4004759d5bf3b33fea5a5#80b749887fed201a9ed4004759d5bf3b33fea5a5"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=804b3fee875cee409e7bc07c12612f88d9ebf908#804b3fee875cee409e7bc07c12612f88d9ebf908"
 dependencies = [
  "diesel",
  "libsqlite3-sys",
@@ -1494,7 +1502,7 @@ dependencies = [
 [[package]]
 name = "pg2sqlite-runtime"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/pg2sqlite?rev=80b749887fed201a9ed4004759d5bf3b33fea5a5#80b749887fed201a9ed4004759d5bf3b33fea5a5"
+source = "git+https://github.com/connetto-rs/pg2sqlite?rev=804b3fee875cee409e7bc07c12612f88d9ebf908#804b3fee875cee409e7bc07c12612f88d9ebf908"
 dependencies = [
  "diesel",
  "diesel-dynamic-schema",
@@ -1759,7 +1767,7 @@ checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 [[package]]
 name = "rls2fga"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/rls2fga?branch=main#3f818d8a23590c8b9c0e113b7ee2b83b1ecbf812"
+source = "git+https://github.com/connetto-rs/rls2fga?branch=main#d6ee12f580f28ca0a14e43742bf31173664c8489"
 dependencies = [
  "rls2fga-types",
  "serde",
@@ -1773,7 +1781,7 @@ dependencies = [
 [[package]]
 name = "rls2fga-types"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/rls2fga?branch=main#3f818d8a23590c8b9c0e113b7ee2b83b1ecbf812"
+source = "git+https://github.com/connetto-rs/rls2fga?branch=main#d6ee12f580f28ca0a14e43742bf31173664c8489"
 dependencies = [
  "serde",
  "sql-values",
@@ -2059,7 +2067,7 @@ dependencies = [
 [[package]]
 name = "sql-traits"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/sql-traits?branch=main#ceca22573c0af4eb20a47adba908b44518c2201f"
+source = "git+https://github.com/connetto-rs/sql-traits?branch=main#023c4f40512825d93c0645959ece25e5ee3cfb28"
 dependencies = [
  "geometric-traits",
  "once_cell",
@@ -2080,8 +2088,8 @@ dependencies = [
 
 [[package]]
 name = "sql-values"
-version = "0.6.0"
-source = "git+https://github.com/connetto-rs/sql-values?branch=main#bee0f26da9575f1f0ab38550e3188cb25590058e"
+version = "0.7.0"
+source = "git+https://github.com/connetto-rs/sql-values?branch=main#04922306756c67f531fba5963aeb68c5a028569e"
 dependencies = [
  "jiff 0.2.46",
  "thiserror 2.0.21",
@@ -2099,7 +2107,7 @@ dependencies = [
 [[package]]
 name = "sqlippy"
 version = "0.1.0"
-source = "git+https://github.com/connetto-rs/SQLippy?branch=main#435fedc7082e755de76c64721f7941cb48f1e00d"
+source = "git+https://github.com/connetto-rs/SQLippy?branch=main#7240e1668d7914209a2eca893b9713523cd1ded2"
 dependencies = [
  "heck",
  "inflection-rs",
@@ -2143,7 +2151,7 @@ dependencies = [
 [[package]]
 name = "sqlparser"
 version = "0.64.0"
-source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#323a60ea7bcd2e593cfea2f68fc851bf873f687e"
+source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#b3bc3df6fdba4600de281ab72fb9a7e4a0a1f0da"
 dependencies = [
  "log",
  "recursive",
@@ -2198,7 +2206,7 @@ dependencies = [
 [[package]]
 name = "sqlparser_derive"
 version = "0.7.0"
-source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#323a60ea7bcd2e593cfea2f68fc851bf873f687e"
+source = "git+https://github.com/apache/datafusion-sqlparser-rs?branch=main#b3bc3df6fdba4600de281ab72fb9a7e4a0a1f0da"
 dependencies = [
  "proc-macro2",
  "quote",

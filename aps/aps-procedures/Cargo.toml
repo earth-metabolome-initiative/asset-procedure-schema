@@ -9,12 +9,12 @@ serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
 validation-errors.workspace = true
-rosetta-uuid.workspace = true
 aps-authz-resource_kind.workspace = true
+rosetta-uuid.workspace = true
 rosetta-utc.workspace = true
 aps-resources.workspace = true
 aps-physical_asset_models.workspace = true
-aps-organizations.workspace = true
+aps-grantees.workspace = true
 procedure-like = { path = "../../crates/procedure-like" }
 
 [lints]

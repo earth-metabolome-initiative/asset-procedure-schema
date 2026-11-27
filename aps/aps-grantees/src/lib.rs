@@ -1,5 +1,5 @@
 #![allow(ambiguous_glob_reexports, reason = "TableModel trait names can collide across tables")]
-extern crate self as aps_organizations;
+extern crate self as aps_grantees;
 pub mod app_installations_model {
     #[derive(
         Copy,
@@ -18,24 +18,22 @@ pub mod app_installations_model {
         ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
+    #[table_model(ancestors(aps_grantees::grantees))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::App, foreign_key = app_id))]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
-    #[table_model(foreign_key((app_id), (::aps_organizations::apps::id)))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
-    #[table_model(
-        foreign_key(
-            (id, kind),
-            (::aps_organizations::grantees::id, ::aps_organizations::grantees::kind)
-        )
-    )]
+    #[diesel(belongs_to(aps_grantees::App, foreign_key = app_id))]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
+    #[table_model(foreign_key((app_id), (::aps_grantees::apps::id)))]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
+    #[table_model(default(
+        aps_grantees::grantees::kind,
+        ::aps_authz_grantee_kind::GranteeKind::Installation
+    ))]
     #[diesel(table_name = app_installations)]
     pub struct AppInstallation {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
+        #[same_as(aps_grantees::grantees::kind)]
         #[table_model(default = ::aps_authz_grantee_kind::GranteeKind::Installation)]
         #[diesel(sql_type = ::aps_authz_grantee_kind::sql_types::GranteeKind)]
         kind: ::aps_authz_grantee_kind::GranteeKind,
@@ -69,14 +67,18 @@ pub mod app_installations_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(app_installations, ::aps_organizations::apps);
+    impl ::diesel_builders::GetColumn<aps_grantees::grantees::id> for AppInstallation {
+        fn get_column_ref(
+            &self,
+        ) -> &<app_installations::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    ::diesel::allow_tables_to_appear_in_same_query!(app_installations, ::aps_grantees::apps);
+    ::diesel::allow_tables_to_appear_in_same_query!(app_installations, ::aps_grantees::grantees);
     ::diesel::allow_tables_to_appear_in_same_query!(
         app_installations,
-        ::aps_organizations::grantees
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        app_installations,
-        ::aps_organizations::organizations
+        ::aps_grantees::organizations
     );
 }
 pub use app_installations_model::*;
@@ -98,10 +100,8 @@ pub mod apps_model {
         ::diesel_builders::prelude::TableModel,
     )]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
     #[diesel(table_name = apps)]
     pub struct App {
         #[infallible]
@@ -135,7 +135,7 @@ pub mod apps_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(apps, ::aps_organizations::organizations);
+    ::diesel::allow_tables_to_appear_in_same_query!(apps, ::aps_grantees::organizations);
 }
 pub use apps_model::*;
 pub mod grantees_model {
@@ -187,8 +187,8 @@ pub mod installation_permissions_model {
         foreign_key(
             (organization_id, installation_id),
             (
-                ::aps_organizations::app_installations::organization_id,
-                ::aps_organizations::app_installations::id
+                ::aps_grantees::app_installations::organization_id,
+                ::aps_grantees::app_installations::id
             )
         )
     )]
@@ -205,7 +205,7 @@ pub mod installation_permissions_model {
     }
     ::diesel::allow_tables_to_appear_in_same_query!(
         installation_permissions,
-        ::aps_organizations::app_installations
+        ::aps_grantees::app_installations
     );
 }
 pub use installation_permissions_model::*;
@@ -227,12 +227,10 @@ pub mod invitations_model {
         ::diesel_builders::prelude::TableModel,
     )]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
-    #[table_model(foreign_key((invited_by_id), (::aps_organizations::users::id)))]
-    #[table_model(foreign_key((accepted_by_id), (::aps_organizations::users::id)))]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
+    #[table_model(foreign_key((invited_by_id), (::aps_grantees::users::id)))]
+    #[table_model(foreign_key((accepted_by_id), (::aps_grantees::users::id)))]
     #[diesel(table_name = invitations)]
     pub struct Invitation {
         #[infallible]
@@ -307,11 +305,8 @@ pub mod invitations_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        invitations,
-        ::aps_organizations::organizations
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(invitations, ::aps_organizations::users);
+    ::diesel::allow_tables_to_appear_in_same_query!(invitations, ::aps_grantees::organizations);
+    ::diesel::allow_tables_to_appear_in_same_query!(invitations, ::aps_grantees::users);
 }
 pub use invitations_model::*;
 pub mod memberships_model {
@@ -332,19 +327,17 @@ pub mod memberships_model {
         ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
-    #[diesel(belongs_to(aps_organizations::User, foreign_key = user_id))]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
+    #[diesel(belongs_to(aps_grantees::User, foreign_key = user_id))]
     #[diesel(primary_key(organization_id, user_id))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
-    #[table_model(foreign_key((user_id), (::aps_organizations::users::id)))]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
+    #[table_model(foreign_key((user_id), (::aps_grantees::users::id)))]
     #[table_model(
         foreign_key(
             (organization_id, invitation_id),
             (
-                ::aps_organizations::invitations::organization_id,
-                ::aps_organizations::invitations::id
+                ::aps_grantees::invitations::organization_id,
+                ::aps_grantees::invitations::id
             )
         )
     )]
@@ -360,12 +353,9 @@ pub mod memberships_model {
         invitation_id: Option<::rosetta_uuid::Uuid>,
     }
     ::diesel_builders::prelude::unique_index!(memberships::invitation_id);
-    ::diesel::allow_tables_to_appear_in_same_query!(memberships, ::aps_organizations::invitations);
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        memberships,
-        ::aps_organizations::organizations
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(memberships, ::aps_organizations::users);
+    ::diesel::allow_tables_to_appear_in_same_query!(memberships, ::aps_grantees::invitations);
+    ::diesel::allow_tables_to_appear_in_same_query!(memberships, ::aps_grantees::organizations);
+    ::diesel::allow_tables_to_appear_in_same_query!(memberships, ::aps_grantees::users);
 }
 pub use memberships_model::*;
 pub mod namespaces_model {
@@ -388,8 +378,8 @@ pub mod namespaces_model {
     )]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::User, foreign_key = user_id))]
-    #[table_model(foreign_key((user_id), (::aps_organizations::users::id)))]
+    #[diesel(belongs_to(aps_grantees::User, foreign_key = user_id))]
+    #[table_model(foreign_key((user_id), (::aps_grantees::users::id)))]
     #[diesel(table_name = namespaces)]
     pub struct Namespace {
         #[table_model(default = ::rosetta_uuid::Uuid::new_v4())]
@@ -427,7 +417,7 @@ pub mod namespaces_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(namespaces, ::aps_organizations::users);
+    ::diesel::allow_tables_to_appear_in_same_query!(namespaces, ::aps_grantees::users);
 }
 pub use namespaces_model::*;
 pub mod organization_blocks_model {
@@ -449,15 +439,13 @@ pub mod organization_blocks_model {
         ::diesel_builders::prelude::TableModel,
     )]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
     #[diesel(primary_key(organization_id, principal_id))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
     #[table_model(
         foreign_key(
             (principal_id, principal_kind),
-            (::aps_organizations::grantees::id, ::aps_organizations::grantees::kind)
+            (::aps_grantees::grantees::id, ::aps_grantees::grantees::kind)
         )
     )]
     #[diesel(table_name = organization_blocks)]
@@ -495,13 +483,10 @@ pub mod organization_blocks_model {
             Ok(())
         }
     }
+    ::diesel::allow_tables_to_appear_in_same_query!(organization_blocks, ::aps_grantees::grantees);
     ::diesel::allow_tables_to_appear_in_same_query!(
         organization_blocks,
-        ::aps_organizations::grantees
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        organization_blocks,
-        ::aps_organizations::organizations
+        ::aps_grantees::organizations
     );
 }
 pub use organization_blocks_model::*;
@@ -523,20 +508,20 @@ pub mod organizations_model {
         ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
+    #[table_model(ancestors(aps_grantees::grantees))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::User, foreign_key = created_by_id))]
-    #[table_model(foreign_key((created_by_id), (::aps_organizations::users::id)))]
-    #[table_model(
-        foreign_key(
-            (id, kind),
-            (::aps_organizations::grantees::id, ::aps_organizations::grantees::kind)
-        )
-    )]
+    #[diesel(belongs_to(aps_grantees::User, foreign_key = created_by_id))]
+    #[table_model(foreign_key((created_by_id), (::aps_grantees::users::id)))]
+    #[table_model(default(
+        aps_grantees::grantees::kind,
+        ::aps_authz_grantee_kind::GranteeKind::Organization
+    ))]
     #[diesel(table_name = organizations)]
     pub struct Organization {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
+        #[same_as(aps_grantees::grantees::kind)]
         #[table_model(default = ::aps_authz_grantee_kind::GranteeKind::Organization)]
         #[diesel(sql_type = ::aps_authz_grantee_kind::sql_types::GranteeKind)]
         kind: ::aps_authz_grantee_kind::GranteeKind,
@@ -568,8 +553,15 @@ pub mod organizations_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(organizations, ::aps_organizations::grantees);
-    ::diesel::allow_tables_to_appear_in_same_query!(organizations, ::aps_organizations::users);
+    impl ::diesel_builders::GetColumn<aps_grantees::grantees::id> for Organization {
+        fn get_column_ref(
+            &self,
+        ) -> &<organizations::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    ::diesel::allow_tables_to_appear_in_same_query!(organizations, ::aps_grantees::grantees);
+    ::diesel::allow_tables_to_appear_in_same_query!(organizations, ::aps_grantees::users);
 }
 pub use organizations_model::*;
 pub mod platform_operators_model {
@@ -590,24 +582,36 @@ pub mod platform_operators_model {
         ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
-    #[table_model(ancestors(aps_organizations::users))]
+    #[table_model(ancestors(aps_grantees::grantees, aps_grantees::users))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::User, foreign_key = id))]
-    #[table_model(foreign_key((id), (::aps_organizations::users::id)))]
+    #[diesel(belongs_to(aps_grantees::User, foreign_key = id))]
+    #[table_model(foreign_key((id), (::aps_grantees::users::id)))]
+    #[table_model(default(
+        aps_grantees::grantees::kind,
+        ::aps_authz_grantee_kind::GranteeKind::User
+    ))]
     #[diesel(table_name = platform_operators)]
     pub struct PlatformOperator {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
     }
-    impl ::diesel_builders::GetColumn<aps_organizations::users::id> for PlatformOperator {
+    impl ::diesel_builders::GetColumn<aps_grantees::grantees::id> for PlatformOperator {
         fn get_column_ref(
             &self,
         ) -> &<platform_operators::id as ::diesel_builders::ColumnTyped>::ColumnType {
             &self.id
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(platform_operators, ::aps_organizations::users);
+    impl ::diesel_builders::GetColumn<aps_grantees::users::id> for PlatformOperator {
+        fn get_column_ref(
+            &self,
+        ) -> &<platform_operators::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    ::diesel::allow_tables_to_appear_in_same_query!(platform_operators, ::aps_grantees::grantees);
+    ::diesel::allow_tables_to_appear_in_same_query!(platform_operators, ::aps_grantees::users);
 }
 pub use platform_operators_model::*;
 pub mod share_links_model {
@@ -627,24 +631,22 @@ pub mod share_links_model {
         ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
+    #[table_model(ancestors(aps_grantees::grantees))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
-    #[diesel(belongs_to(aps_organizations::User, foreign_key = created_by_id))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
-    #[table_model(foreign_key((created_by_id), (::aps_organizations::users::id)))]
-    #[table_model(
-        foreign_key(
-            (id, kind),
-            (::aps_organizations::grantees::id, ::aps_organizations::grantees::kind)
-        )
-    )]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
+    #[diesel(belongs_to(aps_grantees::User, foreign_key = created_by_id))]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
+    #[table_model(foreign_key((created_by_id), (::aps_grantees::users::id)))]
+    #[table_model(default(
+        aps_grantees::grantees::kind,
+        ::aps_authz_grantee_kind::GranteeKind::Link
+    ))]
     #[diesel(table_name = share_links)]
     pub struct ShareLink {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
+        #[same_as(aps_grantees::grantees::kind)]
         #[table_model(default = ::aps_authz_grantee_kind::GranteeKind::Link)]
         #[diesel(sql_type = ::aps_authz_grantee_kind::sql_types::GranteeKind)]
         kind: ::aps_authz_grantee_kind::GranteeKind,
@@ -699,12 +701,16 @@ pub mod share_links_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(share_links, ::aps_organizations::grantees);
-    ::diesel::allow_tables_to_appear_in_same_query!(
-        share_links,
-        ::aps_organizations::organizations
-    );
-    ::diesel::allow_tables_to_appear_in_same_query!(share_links, ::aps_organizations::users);
+    impl ::diesel_builders::GetColumn<aps_grantees::grantees::id> for ShareLink {
+        fn get_column_ref(
+            &self,
+        ) -> &<share_links::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    ::diesel::allow_tables_to_appear_in_same_query!(share_links, ::aps_grantees::grantees);
+    ::diesel::allow_tables_to_appear_in_same_query!(share_links, ::aps_grantees::organizations);
+    ::diesel::allow_tables_to_appear_in_same_query!(share_links, ::aps_grantees::users);
 }
 pub use share_links_model::*;
 pub mod team_members_model {
@@ -728,15 +734,15 @@ pub mod team_members_model {
     #[table_model(
         foreign_key(
             (organization_id, team_id),
-            (::aps_organizations::teams::organization_id, ::aps_organizations::teams::id)
+            (::aps_grantees::teams::organization_id, ::aps_grantees::teams::id)
         )
     )]
     #[table_model(
         foreign_key(
             (organization_id, user_id),
             (
-                ::aps_organizations::memberships::organization_id,
-                ::aps_organizations::memberships::user_id
+                ::aps_grantees::memberships::organization_id,
+                ::aps_grantees::memberships::user_id
             )
         )
     )]
@@ -751,8 +757,8 @@ pub mod team_members_model {
         #[diesel(sql_type = ::aps_authz_team_role::sql_types::TeamRole)]
         team_role: ::aps_authz_team_role::TeamRole,
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(team_members, ::aps_organizations::memberships);
-    ::diesel::allow_tables_to_appear_in_same_query!(team_members, ::aps_organizations::teams);
+    ::diesel::allow_tables_to_appear_in_same_query!(team_members, ::aps_grantees::memberships);
+    ::diesel::allow_tables_to_appear_in_same_query!(team_members, ::aps_grantees::teams);
 }
 pub use team_members_model::*;
 pub mod teams_model {
@@ -773,26 +779,24 @@ pub mod teams_model {
         ::diesel::Associations,
         ::diesel_builders::prelude::TableModel,
     )]
+    #[table_model(ancestors(aps_grantees::grantees))]
     #[table_model(error = ::validation_errors::ValidationError)]
     #[table_model(record_error = ::validation_errors::ValidationError)]
-    #[diesel(belongs_to(aps_organizations::Organization, foreign_key = organization_id))]
-    #[table_model(
-        foreign_key((organization_id), (::aps_organizations::organizations::id))
-    )]
-    #[table_model(
-        foreign_key(
-            (id, kind),
-            (::aps_organizations::grantees::id, ::aps_organizations::grantees::kind)
-        )
-    )]
+    #[diesel(belongs_to(aps_grantees::Organization, foreign_key = organization_id))]
+    #[table_model(foreign_key((organization_id), (::aps_grantees::organizations::id)))]
     #[table_model(
         foreign_key((organization_id, parent_id), (teams::organization_id, teams::id))
     )]
+    #[table_model(default(
+        aps_grantees::grantees::kind,
+        ::aps_authz_grantee_kind::GranteeKind::Team
+    ))]
     #[diesel(table_name = teams)]
     pub struct Team {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
+        #[same_as(aps_grantees::grantees::kind)]
         #[table_model(default = ::aps_authz_grantee_kind::GranteeKind::Team)]
         #[diesel(sql_type = ::aps_authz_grantee_kind::sql_types::GranteeKind)]
         kind: ::aps_authz_grantee_kind::GranteeKind,
@@ -843,8 +847,13 @@ pub mod teams_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(teams, ::aps_organizations::grantees);
-    ::diesel::allow_tables_to_appear_in_same_query!(teams, ::aps_organizations::organizations);
+    impl ::diesel_builders::GetColumn<aps_grantees::grantees::id> for Team {
+        fn get_column_ref(&self) -> &<teams::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    ::diesel::allow_tables_to_appear_in_same_query!(teams, ::aps_grantees::grantees);
+    ::diesel::allow_tables_to_appear_in_same_query!(teams, ::aps_grantees::organizations);
 }
 pub use teams_model::*;
 pub mod users_model {
@@ -864,18 +873,18 @@ pub mod users_model {
         ::diesel::Identifiable,
         ::diesel_builders::prelude::TableModel,
     )]
+    #[table_model(ancestors(aps_grantees::grantees))]
     #[table_model(error = ::validation_errors::ValidationError)]
-    #[table_model(
-        foreign_key(
-            (id, kind),
-            (::aps_organizations::grantees::id, ::aps_organizations::grantees::kind)
-        )
-    )]
+    #[table_model(default(
+        aps_grantees::grantees::kind,
+        ::aps_authz_grantee_kind::GranteeKind::User
+    ))]
     #[diesel(table_name = users)]
     pub struct User {
         #[infallible]
         #[diesel(sql_type = ::rosetta_uuid::diesel_impls::Uuid)]
         id: ::rosetta_uuid::Uuid,
+        #[same_as(aps_grantees::grantees::kind)]
         #[table_model(default = ::aps_authz_grantee_kind::GranteeKind::User)]
         #[diesel(sql_type = ::aps_authz_grantee_kind::sql_types::GranteeKind)]
         kind: ::aps_authz_grantee_kind::GranteeKind,
@@ -899,6 +908,11 @@ pub mod users_model {
             Ok(())
         }
     }
-    ::diesel::allow_tables_to_appear_in_same_query!(users, ::aps_organizations::grantees);
+    impl ::diesel_builders::GetColumn<aps_grantees::grantees::id> for User {
+        fn get_column_ref(&self) -> &<users::id as ::diesel_builders::ColumnTyped>::ColumnType {
+            &self.id
+        }
+    }
+    ::diesel::allow_tables_to_appear_in_same_query!(users, ::aps_grantees::grantees);
 }
 pub use users_model::*;

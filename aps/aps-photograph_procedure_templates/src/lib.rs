@@ -118,6 +118,10 @@ pub mod photograph_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = photograph_procedure_templates)]
     pub struct PhotographProcedureTemplate {
         /// Identity shared with the parent template.
@@ -318,6 +322,10 @@ pub mod photograph_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = photograph_procedures)]
     pub struct PhotographProcedure {
         /// Identity shared with the parent procedure.

@@ -53,12 +53,12 @@ pub use aps_commercial_products::{
 pub use aps_geopositioning_devices::{
     self, Camera, GeopositioningDevice, PhoneDevice, cameras, geopositioning_devices, phone_devices,
 };
-pub use aps_organizations::{
-    self, App, AppInstallation, InstallationPermission, Invitation, Membership, Namespace,
+pub use aps_grantees::{
+    self, App, AppInstallation, Grantee, InstallationPermission, Invitation, Membership, Namespace,
     Organization, OrganizationBlock, PlatformOperator, ShareLink, Team, TeamMember, User,
-    app_installations, apps, installation_permissions, invitations, memberships, namespaces,
-    organization_blocks, organizations, platform_operators, share_links, team_members, teams,
-    users,
+    app_installations, apps, grantees, installation_permissions, invitations, memberships,
+    namespaces, organization_blocks, organizations, platform_operators, share_links, team_members,
+    teams, users,
 };
 pub use aps_photograph_procedure_templates::{
     self, PhotographProcedure, PhotographProcedureTemplate, photograph_procedure_templates,

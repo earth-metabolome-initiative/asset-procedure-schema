@@ -270,6 +270,10 @@ pub mod assets_model {
             (::aps_resources::asset_models::id, ::aps_resources::asset_models::archived)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = assets)]
     pub struct Asset {
         /// Identifier of the connetto `resource` of kind `'ownable'` this asset
@@ -524,6 +528,10 @@ pub mod containers_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = containers)]
     pub struct Container {
         /// Stable asset identifier inherited from `physical_assets`.
@@ -613,6 +621,10 @@ pub mod digital_assets_model {
             (::aps_resources::digital_asset_models::id)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = digital_assets)]
     pub struct DigitalAsset {
         /// Identifier of the asset this row specialises.
@@ -759,6 +771,10 @@ pub mod panel_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = panel_models)]
     pub struct PanelModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -865,6 +881,10 @@ pub mod panels_model {
             (::aps_assets::panel_models::id, ::aps_assets::panel_models::archived)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = panels)]
     pub struct Panel {
         /// Stable asset identifier inherited from physical_assets.
@@ -951,6 +971,10 @@ pub mod photographs_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = photographs)]
     pub struct Photograph {
         /// Stable asset identifier inherited from `digital_assets`.
@@ -1040,6 +1064,10 @@ pub mod physical_assets_model {
             (::aps_physical_asset_models::physical_asset_models::id)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = physical_assets)]
     pub struct PhysicalAsset {
         /// Identifier of the asset this row specialises.
@@ -1369,6 +1397,10 @@ pub mod volumetric_containers_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = volumetric_containers)]
     pub struct VolumetricContainer {
         /// Stable asset identifier inherited from `containers`.

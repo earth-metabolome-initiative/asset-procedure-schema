@@ -31,6 +31,10 @@ pub mod container_sealer_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = container_sealer_models)]
     pub struct ContainerSealerModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -200,6 +204,10 @@ pub mod container_sealing_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = container_sealing_procedure_templates)]
     pub struct ContainerSealingProcedureTemplate {
         /// Identity shared with the parent template.
@@ -371,6 +379,10 @@ pub mod container_sealing_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = container_sealing_procedures)]
     pub struct ContainerSealingProcedure {
         /// Identity shared with the parent procedure.
@@ -498,6 +510,10 @@ pub mod disposal_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = disposal_procedure_templates)]
     pub struct DisposalProcedureTemplate {
         /// Identity shared with the parent template.
@@ -630,6 +646,10 @@ pub mod disposal_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = disposal_procedures)]
     pub struct DisposalProcedure {
         /// Identity shared with the parent procedure.
@@ -730,6 +750,10 @@ pub mod freeze_dryer_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = freeze_dryer_models)]
     pub struct FreezeDryerModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -896,6 +920,10 @@ pub mod freeze_drying_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = freeze_drying_procedure_templates)]
     pub struct FreezeDryingProcedureTemplate {
         /// Identity shared with the parent template.
@@ -1303,6 +1331,10 @@ pub mod freeze_drying_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = freeze_drying_procedures)]
     pub struct FreezeDryingProcedure {
         /// Identity shared with the parent procedure.
@@ -1528,6 +1560,10 @@ pub mod freezer_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = freezer_models)]
     pub struct FreezerModel {
         /// Stable model identifier inherited from physical_asset_models.
@@ -1682,6 +1718,10 @@ pub mod freezing_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = freezing_procedure_templates)]
     pub struct FreezingProcedureTemplate {
         /// Identity shared with the parent template.
@@ -2004,6 +2044,10 @@ pub mod freezing_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = freezing_procedures)]
     pub struct FreezingProcedure {
         /// Identity shared with the parent procedure.
@@ -3177,14 +3221,14 @@ pub mod procedures_model {
     #[table_model(record_error = ::validation_errors::ValidationError)]
     #[diesel(belongs_to(aps_resources::TableName, foreign_key = table_name_id))]
     #[diesel(belongs_to(aps_procedures::ProcedureStatus, foreign_key = status_id))]
-    #[diesel(belongs_to(aps_organizations::User, foreign_key = performed_by_id))]
+    #[diesel(belongs_to(aps_grantees::User, foreign_key = performed_by_id))]
     #[table_model(foreign_key((id), (::aps_resources::resources::id)))]
     #[table_model(foreign_key((table_name_id), (::aps_resources::table_names::id)))]
     #[table_model(
         foreign_key((procedure_template_id), (::aps_resources::procedure_templates::id))
     )]
     #[table_model(foreign_key((status_id), (::aps_procedures::procedure_statuses::id)))]
-    #[table_model(foreign_key((performed_by_id), (::aps_organizations::users::id)))]
+    #[table_model(foreign_key((performed_by_id), (::aps_grantees::users::id)))]
     #[table_model(
         foreign_key(
             (parent_procedure_id, parent_template_id, organization_id),
@@ -3232,6 +3276,10 @@ pub mod procedures_model {
             (procedures::organization_id, procedures::id, procedures::archived)
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = procedures)]
     pub struct Procedure {
         /// Identifier of the connetto `resource` of kind `'ownable'` this
@@ -3726,7 +3774,7 @@ pub mod procedures_model {
     );
     ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_resources::resources);
     ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_resources::table_names);
-    ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_organizations::users);
+    ::diesel::allow_tables_to_appear_in_same_query!(procedures, ::aps_grantees::users);
 }
 pub use procedures_model::*;
 pub mod quantity_kinds_model {
@@ -3863,6 +3911,10 @@ pub mod retrieval_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = retrieval_procedures)]
     pub struct RetrievalProcedure {
         /// Identity shared with the parent procedure.
@@ -3966,6 +4018,10 @@ pub mod storage_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = storage_procedures)]
     pub struct StorageProcedure {
         /// Identity shared with the parent procedure.

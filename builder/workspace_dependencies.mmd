@@ -7,7 +7,6 @@ title: Workspace Dependencies
 ---
 erDiagram
   direction TB
-  v2["app installations"]
   v3["apps"]
   v4["asset model ancestors"]
   v6["asset move kinds"]
@@ -15,7 +14,7 @@ erDiagram
   v8["asset uses"]
   v10["audit events"]
   v53["container occupancy"]
-  v76["grantees"]
+  v76["grantees DAG"]
   v77["grants"]
   v80["installation permissions"]
   v81["invitations"]
@@ -23,7 +22,6 @@ erDiagram
   v87["move exits"]
   v88["namespaces"]
   v89["organization blocks"]
-  v90["organizations"]
   v96["parameter value kinds"]
   v109["platform audit events"]
   v113["procedure assets"]
@@ -38,20 +36,14 @@ erDiagram
   v122["procedure template steps"]
   v125["quantity kinds"]
   v126["resources DAG"]
-  v133["share links"]
   v134["slot role pairs"]
   v135["slot roles"]
   v140["table name admitted parents"]
   v141["table name ancestors"]
   v142["table names"]
   v143["team members"]
-  v144["teams"]
-  v145["users DAG"]
   v126 ||--|| v118 : "depends on"
-  v2 ||--|| v3 : "depends on"
-  v2 ||--|| v76 : "depends on"
-  v2 ||--|| v90 : "depends on"
-  v3 ||--|| v90 : "depends on"
+  v76 ||--|| v3 : "depends on"
   v4 ||--|| v126 : "depends on"
   v126 ||--|| v142 : "depends on"
   v7 ||--|| v6 : "depends on"
@@ -64,19 +56,14 @@ erDiagram
   v53 ||--|| v113 : "depends on"
   v77 ||--|| v76 : "depends on"
   v77 ||--|| v126 : "depends on"
-  v80 ||--|| v2 : "depends on"
-  v81 ||--|| v90 : "depends on"
-  v81 ||--|| v145 : "depends on"
+  v80 ||--|| v76 : "depends on"
+  v81 ||--|| v76 : "depends on"
   v86 ||--|| v81 : "depends on"
-  v86 ||--|| v90 : "depends on"
-  v86 ||--|| v145 : "depends on"
+  v86 ||--|| v76 : "depends on"
   v87 ||--|| v126 : "depends on"
   v87 ||--|| v113 : "depends on"
-  v88 ||--|| v145 : "depends on"
+  v88 ||--|| v76 : "depends on"
   v89 ||--|| v76 : "depends on"
-  v89 ||--|| v90 : "depends on"
-  v90 ||--|| v76 : "depends on"
-  v90 ||--|| v145 : "depends on"
   v113 ||--|| v4 : "depends on"
   v113 ||--|| v126 : "depends on"
   v113 ||--|| v118 : "depends on"
@@ -100,16 +87,9 @@ erDiagram
   v122 ||--|| v126 : "depends on"
   v126 ||--|| v119 : "depends on"
   v126 ||--|| v115 : "depends on"
-  v126 ||--|| v145 : "depends on"
-  v126 ||--|| v90 : "depends on"
-  v133 ||--|| v76 : "depends on"
-  v133 ||--|| v90 : "depends on"
-  v133 ||--|| v145 : "depends on"
+  v126 ||--|| v76 : "depends on"
   v134 ||--|| v135 : "depends on"
   v140 ||--|| v142 : "depends on"
   v141 ||--|| v142 : "depends on"
   v143 ||--|| v86 : "depends on"
-  v143 ||--|| v144 : "depends on"
-  v144 ||--|| v76 : "depends on"
-  v144 ||--|| v90 : "depends on"
-  v145 ||--|| v76 : "depends on"
+  v143 ||--|| v76 : "depends on"

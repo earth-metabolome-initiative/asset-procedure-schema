@@ -187,7 +187,7 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
             .external_crate(
                 ExternalCrate::new("sql-values")
                     .expect("sql-values is a valid crate name")
-                    .version("0.6")?
+                    .version("0.7")?
                     .git("https://github.com/connetto-rs/sql-values", "main")?
                     .into(),
             )

@@ -5,7 +5,7 @@ use std::fmt::Debug;
 
 use aps_authz_membership_state::MembershipState;
 use aps_authz_resource_kind::ResourceKind;
-use aps_organizations::*;
+use aps_grantees::*;
 use aps_physical_asset_models::*;
 use aps_resources::*;
 use diesel_builders::{BuildableTable, Insert, LoadMany, NestedModel, TableBuilder};
@@ -39,17 +39,16 @@ impl Tenant {
     {
         let tenant =
             Self { user: Uuid::new_v4(), organization: Uuid::new_v4(), project: Uuid::new_v4() };
-        users::table::try_builder()
-            .expect("user defaults")
-            .id(tenant.user)
+        SetGranteeId::id(users::table::try_builder().expect("user defaults"), tenant.user)
             .insert(conn)
             .expect("user");
-        organizations::table::try_builder()
-            .expect("organization defaults")
-            .id(tenant.organization)
-            .created_by_id(tenant.user)
-            .insert(conn)
-            .expect("organization");
+        SetGranteeId::id(
+            organizations::table::try_builder().expect("organization defaults"),
+            tenant.organization,
+        )
+        .created_by_id(tenant.user)
+        .insert(conn)
+        .expect("organization");
         resources::table::builder()
             .id(tenant.organization)
             .kind(ResourceKind::Organization)
@@ -138,7 +137,6 @@ impl Tenant {
         let id = Uuid::new_v4();
         let builder = asset_models::table::try_builder().expect("asset model defaults");
         let builder = SetResourceId::id(builder, id);
-        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
@@ -174,7 +172,6 @@ impl Tenant {
         let builder =
             physical_asset_models::table::try_builder().expect("physical asset model defaults");
         let builder = SetResourceId::id(builder, id);
-        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
@@ -210,7 +207,6 @@ impl Tenant {
         let id = Uuid::new_v4();
         let builder = container_models::table::try_builder().expect("container model defaults");
         let builder = SetResourceId::id(builder, id);
-        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);
@@ -246,7 +242,6 @@ impl Tenant {
         let builder =
             procedure_templates::table::try_builder().expect("procedure template defaults");
         let builder = SetResourceId::id(builder, id);
-        let builder = SetResourceKind::kind(builder, ResourceKind::Ownable);
         let builder = SetResourceOrganizationId::organization_id(builder, self.organization);
         let builder = SetResourceParentId::parent_id(builder, self.project);
         let builder = SetResourceParentKind::parent_kind(builder, ResourceKind::Project);

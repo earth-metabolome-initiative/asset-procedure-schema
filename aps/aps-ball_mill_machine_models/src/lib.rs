@@ -31,6 +31,10 @@ pub mod ball_mill_machine_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = ball_mill_machine_models)]
     pub struct BallMillMachineModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -165,6 +169,10 @@ pub mod ball_mill_machines_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = ball_mill_machines)]
     pub struct BallMillMachine {
         /// Stable asset identifier inherited from `physical_assets`.
@@ -334,6 +342,10 @@ pub mod ball_mill_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = ball_mill_procedure_templates)]
     pub struct BallMillProcedureTemplate {
         /// Identity shared with the parent template.
@@ -793,6 +805,10 @@ pub mod ball_mill_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = ball_mill_procedures)]
     pub struct BallMillProcedure {
         /// Identity shared with the parent procedure.
@@ -1007,6 +1023,10 @@ pub mod bead_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = bead_models)]
     pub struct BeadModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -1162,6 +1182,10 @@ pub mod commercial_ball_mill_machine_lots_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_ball_mill_machine_lots)]
     pub struct CommercialBallMillMachineLot {
         /// Stable lot-model identifier shared with parent lot/model tables.
@@ -1342,6 +1366,10 @@ pub mod commercial_ball_mill_machine_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = commercial_ball_mill_machine_models)]
     pub struct CommercialBallMillMachineModel {
         /// Stable commercial model identifier shared with parent model tables.

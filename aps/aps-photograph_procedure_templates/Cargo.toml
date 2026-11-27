@@ -9,6 +9,7 @@ serde.workspace = true
 diesel-builders.workspace = true
 diesel.workspace = true
 validation-errors.workspace = true
+aps-authz-resource_kind.workspace = true
 rosetta-uuid.workspace = true
 aps-commercial_products.workspace = true
 aps-resources.workspace = true

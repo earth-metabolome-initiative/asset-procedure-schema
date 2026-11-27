@@ -190,6 +190,10 @@ pub mod aliquoting_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = aliquoting_procedure_templates)]
     pub struct AliquotingProcedureTemplate {
         /// Identity shared with the parent template.
@@ -551,6 +555,10 @@ pub mod aliquoting_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = aliquoting_procedures)]
     pub struct AliquotingProcedure {
         /// Identity shared with the parent procedure.
@@ -789,6 +797,10 @@ pub mod harvesting_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = harvesting_procedure_templates)]
     pub struct HarvestingProcedureTemplate {
         /// Identity shared with the parent template.
@@ -965,6 +977,10 @@ pub mod harvesting_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = harvesting_procedures)]
     pub struct HarvestingProcedure {
         /// Identity shared with the parent procedure.
@@ -1066,6 +1082,10 @@ pub mod packaging_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = packaging_models)]
     pub struct PackagingModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -1220,6 +1240,10 @@ pub mod packaging_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = packaging_procedure_templates)]
     pub struct PackagingProcedureTemplate {
         /// Identity shared with the parent template.
@@ -1384,6 +1408,10 @@ pub mod packaging_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = packaging_procedures)]
     pub struct PackagingProcedure {
         /// Identity shared with the parent procedure.
@@ -1643,6 +1671,10 @@ pub mod pouring_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = pouring_procedure_templates)]
     pub struct PouringProcedureTemplate {
         /// Identity shared with the parent template.
@@ -2007,6 +2039,10 @@ pub mod pouring_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = pouring_procedures)]
     pub struct PouringProcedure {
         /// Identity shared with the parent procedure.
@@ -2180,6 +2216,10 @@ pub mod sample_models_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = sample_models)]
     pub struct SampleModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -2307,6 +2347,10 @@ pub mod sample_source_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = sample_source_models)]
     pub struct SampleSourceModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -2430,6 +2474,10 @@ pub mod sample_sources_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = sample_sources)]
     pub struct SampleSource {
         /// Stable asset identifier inherited from `physical_assets`.
@@ -2546,6 +2594,10 @@ pub mod samples_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = samples)]
     pub struct Sample {
         /// Stable asset identifier inherited from `physical_assets`.
@@ -2795,6 +2847,10 @@ pub mod supernatant_procedure_templates_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = supernatant_procedure_templates)]
     pub struct SupernatantProcedureTemplate {
         /// Identity shared with the parent template.
@@ -3169,6 +3225,10 @@ pub mod supernatant_procedures_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = supernatant_procedures)]
     pub struct SupernatantProcedure {
         /// Identity shared with the parent procedure.
@@ -3335,6 +3395,10 @@ pub mod volume_measuring_device_models_model {
     #[table_model(
         foreign_key((id), (::aps_physical_asset_models::physical_asset_models::id))
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = volume_measuring_device_models)]
     pub struct VolumeMeasuringDeviceModel {
         /// Stable model identifier inherited from `physical_asset_models`.
@@ -3461,6 +3525,10 @@ pub mod volume_measuring_devices_model {
             )
         )
     )]
+    #[table_model(default(
+        aps_resources::resources::kind,
+        ::aps_authz_resource_kind::ResourceKind::Ownable
+    ))]
     #[diesel(table_name = volume_measuring_devices)]
     pub struct VolumeMeasuringDevice {
         /// Stable asset identifier inherited from `physical_assets`.
