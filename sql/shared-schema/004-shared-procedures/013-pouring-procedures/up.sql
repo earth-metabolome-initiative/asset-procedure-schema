@@ -1,158 +1,340 @@
-CREATE TABLE pouring_procedure_templates (
-	-- Identifier of the pouring procedure_id template, which is also a foreign key to the general procedure_id template.
-	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	-- The device model used to measure the liquid volume.
-	measured_with_model_id UUID NOT NULL REFERENCES volume_measuring_device_models(id),
-	-- The associated procedure_id asset model for the measuring device.
-	procedure_template_measured_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	-- The source container from which the liquid is poured.
-	poured_from_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	-- The associated procedure_id asset model for the source container. It may be associated
-	-- to any type of other procedure_id templates (e.g., fractioning, packaging, etc.).
-	procedure_template_poured_from_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The volumetric container into which the liquid is poured.
-	poured_into_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	-- The associated procedure_id asset model for the destination container. It is always associated
-	-- to the same procedure_id template of this pouring procedure_id template.
-	procedure_template_poured_into_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	-- Volume in liters. The amount of liquid that is poured into the container.
-	volume REAL NOT NULL CHECK (volume > 0.0),
-	-- The measuring device must match the procedure_id template of the procedure.
-	FOREIGN KEY (
-		procedure_template_measured_with_model_id,
-		measured_with_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		procedure_template_poured_into_model_id,
-		poured_into_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		procedure_template_poured_from_model_id,
-		poured_from_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_measured_with_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_poured_into_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_poured_from_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_measured_with_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_measured_with_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_poured_from_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_poured_from_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_poured_into_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_poured_into_model_id
-	)
-);
-INSERT INTO table_names (id) VALUES ('pouring_procedure_templates') ON CONFLICT DO NOTHING;
-CREATE OR REPLACE FUNCTION pouring_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_measured_with_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_poured_from_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_poured_into_model_id) ON CONFLICT DO NOTHING;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Migration: 013-pouring-procedures
+-- Purpose: Typed pouring slots and execution records.
+-- APS placement
+-- `resources` of kind `'ownable'`
+-- +-- procedure_templates -- pouring_procedure_templates
+-- +-- procedures -- pouring_procedures
+-- Slot | Role | Meaning
+-- `measured_with` | `instrument` | The device measures the transferred volume.
+-- `poured_from` | `input` | The source container survives transfer.
+-- `poured_into` | `input` | The destination container survives transfer.
+-- `poured_sample` | `produced` | The procedure creates the sample.
+-- `source_sample` | `input` | The sample supplies the transferred material.
 
-CREATE TRIGGER pouring_procedure_templates_rptam_insert_trigger
-AFTER INSERT ON pouring_procedure_templates
-FOR EACH ROW EXECUTE FUNCTION pouring_procedure_templates_rptam_insert_fn();
-CREATE TABLE pouring_procedures (
-	-- The extended `procedure`.
-	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
-	-- The procedure_id template of the extended `procedure`.
-	pouring_procedure_template_id UUID NOT NULL REFERENCES pouring_procedure_templates(id),
-	-- The container from which the liquid is poured.
-	poured_from_id UUID NOT NULL REFERENCES volumetric_containers(id),
-	-- The model of the container from which the liquid is poured.
-	poured_from_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	-- The procedure_id template asset model associated to the `poured_from`.
-	procedure_template_poured_from_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `poured_from`.
-	procedure_poured_from_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The actual measuring device (if known) used to measure the liquid volume.
-	measured_with_id UUID REFERENCES volume_measuring_devices(id),
-	-- The model of the measuring device.
-	measured_with_model_id UUID REFERENCES volume_measuring_device_models(id),
-	-- The procedure_id template asset model associated to the `measured_with_model`.
-	procedure_template_measured_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `measured_with`.
-	procedure_measured_with_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The container into which the liquid is poured.
-	poured_into_id UUID NOT NULL REFERENCES volumetric_containers(id),
-	-- The model of the container into which the liquid is poured.
-	poured_into_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	-- The procedure_id template asset model associated to the `poured_into`.
-	procedure_template_poured_into_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `poured_into`.
-	procedure_poured_into_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- We enforce that the extended `procedure` has indeed the same `procedure_template`, making
-	-- sure that the procedure_id is a packaging procedure.
-	FOREIGN KEY (id, pouring_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
-	-- The `procedure_template_measured_with_model` must be the same as in the `pouring_procedure_templates`.
-	FOREIGN KEY (
-		pouring_procedure_template_id,
-		procedure_template_measured_with_model_id
-	) REFERENCES pouring_procedure_templates(
-		id,
-		procedure_template_measured_with_model_id
-	),
-	-- The `procedure_template_poured_from_model` must be the same as in the `pouring_procedure_templates`.
-	FOREIGN KEY (
-		pouring_procedure_template_id,
-		procedure_template_poured_from_model_id
-	) REFERENCES pouring_procedure_templates(
-		id,
-		procedure_template_poured_from_model_id
-	),
-	-- The `procedure_template_poured_into_model` must be the same as in the `pouring_procedure_templates`.
-	FOREIGN KEY (
-		pouring_procedure_template_id,
-		procedure_template_poured_into_model_id
-	) REFERENCES pouring_procedure_templates(
-		id,
-		procedure_template_poured_into_model_id
-	),
-	-- We check that the `procedure_poured_from` is associated to the `poured_from`.
-	FOREIGN KEY (procedure_poured_from_id, poured_from_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	FOREIGN KEY (poured_from_id, poured_from_model_id) REFERENCES assets(id, model_id),
-	-- We check that the `procedure_poured_into` is associated to the `poured_into`.
-	FOREIGN KEY (procedure_poured_into_id, poured_into_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	FOREIGN KEY (poured_into_id, poured_into_model_id) REFERENCES assets(id, model_id),
-	-- We check that the `procedure_poured_from` is indeed associated to the `procedure_template_poured_from_model`.
-	FOREIGN KEY (
-		procedure_poured_from_id,
-		procedure_template_poured_from_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_measured_with` is indeed associated to the `procedure_template_measured_with_model`.
-	FOREIGN KEY (
-		procedure_measured_with_id,
-		procedure_template_measured_with_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_poured_into` is indeed associated to the `procedure_template_poured_into_model`.
-	FOREIGN KEY (
-		procedure_poured_into_id,
-		procedure_template_poured_into_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_measured_with` is associated to the `measured_with` asset (if any).
-	FOREIGN KEY (procedure_measured_with_id, measured_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	FOREIGN KEY (measured_with_id, measured_with_model_id) REFERENCES assets(id, model_id)
+-- Typed slots and parameters for pouring.
+CREATE TABLE pouring_procedure_templates (
+    -- Identity shared with the parent template.
+    id UUID PRIMARY KEY REFERENCES procedure_templates (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Slot declaring the source sample.
+    source_sample_slot_id UUID NOT NULL,
+    -- Admissible model for the source sample.
+    source_sample_model_id UUID NOT NULL REFERENCES sample_models (id),
+    -- Required role of the source sample.
+    source_sample_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    -- Slot declaring the `measured_with` assets.
+    measured_with_slot_id UUID NOT NULL,
+    -- Admissible model for the `measured_with` slot.
+    measured_with_model_id UUID NOT NULL REFERENCES volume_measuring_device_models (id),
+    -- Required role of the `measured_with` slot.
+    measured_with_slot_role_id TEXT GENERATED ALWAYS AS ('instrument') STORED NOT NULL,
+    -- Slot declaring the `poured_from` assets.
+    poured_from_slot_id UUID NOT NULL,
+    -- Admissible model for the `poured_from` slot.
+    poured_from_model_id UUID NOT NULL REFERENCES volumetric_container_models (id),
+    -- Required role of the `poured_from` slot.
+    poured_from_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    -- Slot declaring the `poured_into` assets.
+    poured_into_slot_id UUID NOT NULL,
+    -- Admissible model for the `poured_into` slot.
+    poured_into_model_id UUID NOT NULL REFERENCES volumetric_container_models (id),
+    -- Required role of the `poured_into` slot.
+    poured_into_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    -- Slot declaring the produced `poured_sample` sample.
+    poured_sample_slot_id UUID NOT NULL,
+    -- Admissible model for the `poured_sample` sample.
+    poured_sample_model_id UUID NOT NULL REFERENCES sample_models (id),
+    -- Required role of the `poured_sample` slot.
+    poured_sample_slot_role_id TEXT GENERATED ALWAYS AS ('produced') STORED NOT NULL,
+    -- Volume in liters.
+    volume_l DOUBLE PRECISION NOT NULL CHECK (volume_l > 0.0 AND volume_l < 'Infinity'::double precision),
+    -- Allowed volume deviation as a percentage of the target.
+    volume_l_tolerance_percentage DOUBLE PRECISION NOT NULL DEFAULT 5.0
+        CHECK (volume_l_tolerance_percentage > 0.0 AND volume_l_tolerance_percentage <= 100.0),
+    CHECK (poured_from_slot_id <> poured_into_slot_id),
+    FOREIGN KEY (source_sample_slot_id, id, source_sample_model_id, source_sample_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (measured_with_slot_id, id, measured_with_model_id, measured_with_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (poured_from_slot_id, id, poured_from_model_id, poured_from_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (poured_into_slot_id, id, poured_into_model_id, poured_into_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (poured_sample_slot_id, id, poured_sample_model_id, poured_sample_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (poured_sample_slot_id, id, poured_into_slot_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
+    -- Archive state inherited from this resource.
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `measured_with_model_id`.
+    measured_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `poured_from_model_id`.
+    poured_from_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `poured_into_model_id`.
+    poured_into_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `poured_sample_model_id`.
+    poured_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `source_sample_model_id`.
+    source_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (measured_with_model_id, measured_with_model_archived) REFERENCES volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (poured_from_model_id, poured_from_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (poured_into_model_id, poured_into_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (poured_sample_model_id, poured_sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (source_sample_model_id, source_sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
-INSERT INTO table_names (id) VALUES ('pouring_procedures') ON CONFLICT DO NOTHING;
+CREATE INDEX ON pouring_procedure_templates (measured_with_model_id);
+CREATE INDEX ON pouring_procedure_templates (poured_from_model_id);
+CREATE INDEX ON pouring_procedure_templates (poured_into_model_id);
+CREATE INDEX ON pouring_procedure_templates (poured_sample_model_id);
+INSERT INTO table_names (id) VALUES ('pouring_procedure_templates');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'pouring_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
+    UNION SELECT 'pouring_procedure_templates', 'pouring_procedure_templates';
+CREATE TRIGGER pouring_procedure_templates_guard AFTER INSERT ON pouring_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER pouring_procedure_templates_guard_update AFTER UPDATE OF id, source_sample_slot_id, source_sample_model_id, source_sample_slot_role_id, measured_with_slot_id, measured_with_model_id, measured_with_slot_role_id, poured_from_slot_id, poured_from_model_id, poured_from_slot_role_id, poured_into_slot_id, poured_into_model_id, poured_into_slot_role_id, poured_sample_slot_id, poured_sample_model_id, poured_sample_slot_role_id, volume_l, volume_l_tolerance_percentage ON pouring_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.source_sample_slot_id IS DISTINCT FROM NEW.source_sample_slot_id
+        OR OLD.source_sample_model_id IS DISTINCT FROM NEW.source_sample_model_id
+        OR OLD.source_sample_slot_role_id IS DISTINCT FROM NEW.source_sample_slot_role_id
+        OR OLD.measured_with_slot_id IS DISTINCT FROM NEW.measured_with_slot_id
+        OR OLD.measured_with_model_id IS DISTINCT FROM NEW.measured_with_model_id
+        OR OLD.measured_with_slot_role_id IS DISTINCT FROM NEW.measured_with_slot_role_id
+        OR OLD.poured_from_slot_id IS DISTINCT FROM NEW.poured_from_slot_id
+        OR OLD.poured_from_model_id IS DISTINCT FROM NEW.poured_from_model_id
+        OR OLD.poured_from_slot_role_id IS DISTINCT FROM NEW.poured_from_slot_role_id
+        OR OLD.poured_into_slot_id IS DISTINCT FROM NEW.poured_into_slot_id
+        OR OLD.poured_into_model_id IS DISTINCT FROM NEW.poured_into_model_id
+        OR OLD.poured_into_slot_role_id IS DISTINCT FROM NEW.poured_into_slot_role_id
+        OR OLD.poured_sample_slot_id IS DISTINCT FROM NEW.poured_sample_slot_id
+        OR OLD.poured_sample_model_id IS DISTINCT FROM NEW.poured_sample_model_id
+        OR OLD.poured_sample_slot_role_id IS DISTINCT FROM NEW.poured_sample_slot_role_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l
+        OR OLD.volume_l_tolerance_percentage IS DISTINCT FROM NEW.volume_l_tolerance_percentage) EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER pouring_procedure_templates_delete_guard BEFORE DELETE ON pouring_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+
+CREATE FUNCTION require_pouring_procedure_templates_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedure_templates root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'pouring_procedure_templates'
+    ) AND NOT EXISTS (SELECT 1 FROM public.pouring_procedure_templates row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'pouring_procedure_templates'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_pouring_procedure_templates_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_pouring_procedure_templates_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER pouring_procedure_templates_row AFTER INSERT ON procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'pouring_procedure_templates')
+    EXECUTE FUNCTION require_pouring_procedure_templates_row();
+CREATE CONSTRAINT TRIGGER pouring_procedure_templates_kept AFTER DELETE ON pouring_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_pouring_procedure_templates_row();
+
+REVOKE ALL ON pouring_procedure_templates FROM PUBLIC, app, identity_writer;
+GRANT SELECT, INSERT, UPDATE (volume_l, volume_l_tolerance_percentage), DELETE ON pouring_procedure_templates TO app;
+ALTER TABLE pouring_procedure_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pouring_procedure_templates FORCE ROW LEVEL SECURITY;
+CREATE POLICY pouring_procedure_templates_select ON pouring_procedure_templates FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY pouring_procedure_templates_insert ON pouring_procedure_templates FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND measured_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND poured_from_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND poured_into_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND poured_sample_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND source_sample_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY pouring_procedure_templates_update ON pouring_procedure_templates FOR UPDATE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND poured_into_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))))
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+CREATE POLICY pouring_procedure_templates_delete ON pouring_procedure_templates FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY pouring_procedure_templates_archived_insert ON pouring_procedure_templates AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT archived AND NOT measured_with_model_archived AND NOT poured_from_model_archived AND NOT poured_into_model_archived AND NOT poured_sample_model_archived AND NOT source_sample_model_archived);
+CREATE POLICY pouring_procedure_templates_archived_update ON pouring_procedure_templates AS RESTRICTIVE FOR UPDATE TO app
+    USING (NOT archived) WITH CHECK (NOT archived);
+CREATE POLICY pouring_procedure_templates_archived_delete ON pouring_procedure_templates AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT archived);
+CREATE POLICY pouring_procedure_templates_blocked ON pouring_procedure_templates AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Recorded execution of a pouring template.
+CREATE TABLE pouring_procedures (
+    -- Identity shared with the parent procedure.
+    id UUID PRIMARY KEY REFERENCES procedures (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Typed template executed by this procedure.
+    pouring_procedure_template_id UUID NOT NULL REFERENCES pouring_procedure_templates (id),
+    -- Execution status copied from the parent procedure.
+    status_id TEXT NOT NULL DEFAULT 'planned',
+    -- Measured volume l.
+    volume_l DOUBLE PRECISION CHECK (volume_l > 0.0 AND volume_l < 'Infinity'::double precision),
+    CHECK (status_id <> 'completed' OR volume_l IS NOT NULL),
+    FOREIGN KEY (id, pouring_procedure_template_id, status_id, organization_id)
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `pouring_procedure_template_id`.
+    pouring_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (pouring_procedure_template_id, pouring_procedure_template_archived) REFERENCES pouring_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE INDEX ON pouring_procedures (pouring_procedure_template_id);
+INSERT INTO table_names (id) VALUES ('pouring_procedures');
+UPDATE table_names SET instance_table_name_id = 'pouring_procedures'
+    WHERE id = 'pouring_procedure_templates';
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'pouring_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
+    UNION SELECT 'pouring_procedures', 'pouring_procedures';
+CREATE TRIGGER pouring_procedures_guard AFTER INSERT ON pouring_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER pouring_procedures_guard_update AFTER UPDATE OF id, pouring_procedure_template_id, status_id, volume_l ON pouring_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.pouring_procedure_template_id IS DISTINCT FROM NEW.pouring_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id
+        OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER pouring_procedures_delete_guard BEFORE DELETE ON pouring_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `pouring_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_pouring_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.pouring_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+REVOKE ALL ON pouring_procedures FROM PUBLIC, app, identity_writer;
+GRANT UPDATE (status_id) ON pouring_procedures TO aps_writer;
+ALTER FUNCTION copy_pouring_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_pouring_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_pouring_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_pouring_procedures_status();
+
+CREATE FUNCTION require_pouring_procedures_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedures root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'pouring_procedures'
+    ) AND NOT EXISTS (SELECT 1 FROM public.pouring_procedures row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'pouring_procedures'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_pouring_procedures_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_pouring_procedures_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER pouring_procedures_row AFTER INSERT ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'pouring_procedures')
+    EXECUTE FUNCTION require_pouring_procedures_row();
+CREATE CONSTRAINT TRIGGER pouring_procedures_kept AFTER DELETE ON pouring_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_pouring_procedures_row();
+
+CREATE FUNCTION initialize_pouring_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
+BEGIN
+    SELECT procedure.status_id INTO parent_status
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.pouring_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_pouring_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_pouring_procedures_status() FROM PUBLIC;
+CREATE TRIGGER pouring_procedures_status_initialize BEFORE INSERT ON pouring_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_pouring_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, pouring_procedure_template_id, volume_l, archived, pouring_procedure_template_archived), UPDATE (volume_l), DELETE ON pouring_procedures TO app;
+ALTER TABLE pouring_procedures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pouring_procedures FORCE ROW LEVEL SECURITY;
+CREATE POLICY pouring_procedures_select ON pouring_procedures FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY pouring_procedures_insert ON pouring_procedures FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND pouring_procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY pouring_procedures_delete ON pouring_procedures FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY pouring_procedures_archived_insert ON pouring_procedures AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT archived AND NOT pouring_procedure_template_archived);
+CREATE POLICY pouring_procedures_archived_delete ON pouring_procedures AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT archived);
+CREATE POLICY pouring_procedures_blocked ON pouring_procedures AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER pouring_procedure_templates_audit AFTER INSERT OR DELETE ON pouring_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER pouring_procedure_templates_update_audit AFTER UPDATE ON pouring_procedure_templates
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER pouring_procedures_audit AFTER INSERT OR DELETE ON pouring_procedures
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER pouring_procedures_update_audit AFTER UPDATE ON pouring_procedures
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE POLICY pouring_procedures_update ON pouring_procedures FOR UPDATE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('writer'))))
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))));
+CREATE POLICY pouring_procedures_archived_update ON pouring_procedures AS RESTRICTIVE FOR UPDATE TO app
+    USING (NOT archived) WITH CHECK (NOT archived);
+
+CREATE INDEX ON public.pouring_procedure_templates (source_sample_model_id);
+CREATE INDEX ON public.pouring_procedure_templates (source_sample_slot_id);
+
+-- Checks the typed slot contract after definition edits.
+CREATE FUNCTION public.check_pouring_slots() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    poured_into_slot UUID;
+BEGIN
+    SELECT template.poured_into_slot_id INTO poured_into_slot
+    FROM public.pouring_procedure_templates template
+    WHERE template.id = NEW.id;
+    PERFORM public.require_single_typed_slot(poured_into_slot);
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_pouring_slots() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_pouring_slots() FROM PUBLIC;
+
+-- Checks the pouring slot contract after cardinality edits.
+CREATE FUNCTION public.check_pouring_slot_cardinality() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    poured_into_slot UUID;
+BEGIN
+    SELECT template.poured_into_slot_id INTO poured_into_slot
+    FROM public.pouring_procedure_templates template
+    WHERE template.id = NEW.procedure_template_id AND template.poured_into_slot_id = NEW.id;
+    PERFORM public.require_single_typed_slot(poured_into_slot);
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION public.check_pouring_slot_cardinality() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION public.check_pouring_slot_cardinality() FROM PUBLIC;
+GRANT SELECT ON public.pouring_procedure_templates TO aps_writer;
+CREATE CONSTRAINT TRIGGER pouring_template_slots AFTER INSERT OR UPDATE OF id, source_sample_slot_id, source_sample_model_id, source_sample_slot_role_id, measured_with_slot_id, measured_with_model_id, measured_with_slot_role_id, poured_from_slot_id, poured_from_model_id, poured_from_slot_role_id, poured_into_slot_id, poured_into_model_id, poured_into_slot_role_id, poured_sample_slot_id, poured_sample_model_id, poured_sample_slot_role_id, volume_l, volume_l_tolerance_percentage ON public.pouring_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_pouring_slots();
+CREATE CONSTRAINT TRIGGER pouring_slot_cardinality AFTER UPDATE OF minimum_count, maximum_count ON public.procedure_template_slots
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
+    WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
+    EXECUTE FUNCTION public.check_pouring_slot_cardinality();

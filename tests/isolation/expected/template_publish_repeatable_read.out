@@ -1,0 +1,7 @@
+Parsed test spec with 1 sessions
+
+starting permutation: begin_repeatable publish finish
+step begin_repeatable: BEGIN ISOLATION LEVEL REPEATABLE READ;
+step publish: UPDATE procedure_templates SET state_id = 'published' WHERE id = 'c0000000-0000-7000-8000-000000000001';
+ERROR:  row-lock checks require read committed or serializable
+step finish: ROLLBACK;

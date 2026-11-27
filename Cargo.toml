@@ -9,140 +9,31 @@ members = [
   "crates/procedure-template-visitor",
   "crates/procedure-template-visualization",
   "crates/procedure-like",
-  "crates/pg-docker-migrations",
-  "aps/aps-aliquoting_procedure_templates",
-  "aps/aps-aliquoting_procedures",
-  "aps/aps-asset_compatibility_rules",
-  "aps/aps-asset_model_ancestors",
-  "aps/aps-asset_models",
-  "aps/aps-assets",
-  "aps/aps-ball_mill_machine_models",
-  "aps/aps-ball_mill_machines",
-  "aps/aps-ball_mill_procedure_templates",
-  "aps/aps-ball_mill_procedures",
-  "aps/aps-bead_models",
-  "aps/aps-brands",
-  "aps/aps-camera_models",
-  "aps/aps-cameras",
-  "aps/aps-centrifuge_models",
-  "aps/aps-centrifuge_procedure_templates",
-  "aps/aps-centrifuge_procedures",
-  "aps/aps-centrifuges",
-  "aps/aps-commercial_ball_mill_machine_lots",
-  "aps/aps-commercial_ball_mill_machine_models",
-  "aps/aps-commercial_camera_lots",
-  "aps/aps-commercial_camera_models",
-  "aps/aps-commercial_centrifuge_lots",
-  "aps/aps-commercial_centrifuge_models",
-  "aps/aps-commercial_freeze_dryer_lots",
-  "aps/aps-commercial_freeze_dryer_models",
-  "aps/aps-commercial_freezer_lots",
-  "aps/aps-commercial_freezer_models",
-  "aps/aps-commercial_geopositioning_device_lots",
-  "aps/aps-commercial_geopositioning_device_models",
-  "aps/aps-commercial_marker_lots",
-  "aps/aps-commercial_marker_models",
-  "aps/aps-commercial_mass_spectrometer_lots",
-  "aps/aps-commercial_mass_spectrometer_models",
-  "aps/aps-commercial_personal_protective_equipment_lots",
-  "aps/aps-commercial_personal_protective_equipment_models",
-  "aps/aps-commercial_phone_device_lots",
-  "aps/aps-commercial_phone_device_models",
-  "aps/aps-commercial_pipette_tip_lots",
-  "aps/aps-commercial_pipette_tip_models",
-  "aps/aps-commercial_product_lots",
-  "aps/aps-commercial_products",
-  "aps/aps-commercial_volume_measuring_device_lots",
-  "aps/aps-commercial_volume_measuring_device_models",
-  "aps/aps-commercial_weighing_device_lots",
-  "aps/aps-commercial_weighing_device_models",
-  "aps/aps-container_compatibility_rules",
-  "aps/aps-container_models",
-  "aps/aps-container_sealer_models",
-  "aps/aps-container_sealing_procedure_templates",
-  "aps/aps-container_sealing_procedures",
-  "aps/aps-containers",
-  "aps/aps-digital_asset_models",
-  "aps/aps-digital_assets",
-  "aps/aps-disposal_procedure_templates",
-  "aps/aps-disposal_procedures",
-  "aps/aps-entities",
-  "aps/aps-fractioning_procedure_templates",
-  "aps/aps-fractioning_procedures",
-  "aps/aps-freeze_dryer_models",
-  "aps/aps-freeze_dryers",
-  "aps/aps-freeze_drying_procedure_templates",
-  "aps/aps-freeze_drying_procedures",
-  "aps/aps-freezer_models",
-  "aps/aps-freezers",
-  "aps/aps-freezing_procedure_templates",
-  "aps/aps-freezing_procedures",
-  "aps/aps-geopositioning_device_models",
-  "aps/aps-geopositioning_devices",
-  "aps/aps-geopositioning_procedure_templates",
-  "aps/aps-geopositioning_procedures",
-  "aps/aps-harvesting_procedure_templates",
-  "aps/aps-harvesting_procedures",
-  "aps/aps-marker_models",
-  "aps/aps-markers",
-  "aps/aps-mass_spectrometer_models",
-  "aps/aps-mass_spectrometers",
-  "aps/aps-namespaced_ownables",
-  "aps/aps-namespaces",
-  "aps/aps-next_procedure_templates",
-  "aps/aps-ownables",
-  "aps/aps-owner_grants",
-  "aps/aps-owners",
-  "aps/aps-packaging_models",
-  "aps/aps-packaging_procedure_templates",
-  "aps/aps-packaging_procedures",
-  "aps/aps-panel_models",
-  "aps/aps-panels",
-  "aps/aps-parent_procedure_templates",
-  "aps/aps-personal_protective_equipment_models",
-  "aps/aps-personal_protective_equipments",
-  "aps/aps-phone_device_models",
-  "aps/aps-phone_devices",
-  "aps/aps-photograph_procedure_templates",
-  "aps/aps-photograph_procedures",
-  "aps/aps-photographs",
-  "aps/aps-physical_asset_models",
-  "aps/aps-physical_assets",
-  "aps/aps-pipette_tip_models",
-  "aps/aps-pipette_tips",
-  "aps/aps-pouring_procedure_templates",
-  "aps/aps-pouring_procedures",
-  "aps/aps-privacy_dependencies",
-  "aps/aps-procedure_asset_models",
-  "aps/aps-procedure_template_asset_models",
-  "aps/aps-procedure_templates",
-  "aps/aps-procedures",
-  "aps/aps-reused_procedure_template_asset_models",
-  "aps/aps-roles",
   "aps/aps-sample_models",
-  "aps/aps-sample_source_models",
-  "aps/aps-sample_sources",
-  "aps/aps-samples",
-  "aps/aps-storage_procedure_templates",
-  "aps/aps-storage_procedures",
-  "aps/aps-supernatant_procedure_templates",
-  "aps/aps-supernatant_procedures",
-  "aps/aps-table_names",
-  "aps/aps-team_members",
-  "aps/aps-teams",
-  "aps/aps-tombstones",
-  "aps/aps-users",
-  "aps/aps-volume_measuring_device_models",
-  "aps/aps-volume_measuring_devices",
-  "aps/aps-volumetric_container_models",
-  "aps/aps-volumetric_containers",
-  "aps/aps-weighed_container_models",
+  "aps/aps-grantees",
+  "aps/aps-resources",
+  "aps/aps-assets",
+  "aps/aps-audit_events",
+  "aps/aps-ball_mill_machine_models",
+  "aps/aps-commercial_products",
+  "aps/aps-geopositioning_devices",
+  "aps/aps-centrifuge_models",
+  "aps/aps-commercial_freeze_dryer_models",
+  "aps/aps-commercial_freezer_models",
+  "aps/aps-physical_asset_models",
+  "aps/aps-procedures",
   "aps/aps-weighing_device_models",
-  "aps/aps-weighing_devices",
-  "aps/aps-weighing_procedure_templates",
-  "aps/aps-weighing_procedures",
+  "aps/aps-photograph_procedure_templates",
+  "aps/aps-platform_audit_events",
+  "aps/aps-authz-audit_operation",
+  "aps/aps-authz-grantee_kind",
+  "aps/aps-authz-membership_state",
+  "aps/aps-authz-resource_kind",
+  "aps/aps-authz-role",
+  "aps/aps-authz-team_role",
   "aps/aps",
-  "aps/aps-dag-entities",
+  "aps/aps-dag-grantees",
+  "aps/aps-dag-resources",
 ]
 
 [workspace.package]
@@ -157,166 +48,72 @@ aps-test-utils = { path = "crates/aps-test-utils" }
 procedure-template-visitor = { path = "crates/procedure-template-visitor" }
 procedure-template-visualization = { path = "crates/procedure-template-visualization" }
 procedure-like = { path = "crates/procedure-like" }
-pg-docker-migrations = { path = "crates/pg-docker-migrations" }
-aps-aliquoting_procedure_templates = { path = "aps/aps-aliquoting_procedure_templates" }
-aps-aliquoting_procedures = { path = "aps/aps-aliquoting_procedures" }
-aps-asset_compatibility_rules = { path = "aps/aps-asset_compatibility_rules" }
-aps-asset_model_ancestors = { path = "aps/aps-asset_model_ancestors" }
-aps-asset_models = { path = "aps/aps-asset_models" }
-aps-assets = { path = "aps/aps-assets" }
-aps-ball_mill_machine_models = { path = "aps/aps-ball_mill_machine_models" }
-aps-ball_mill_machines = { path = "aps/aps-ball_mill_machines" }
-aps-ball_mill_procedure_templates = { path = "aps/aps-ball_mill_procedure_templates" }
-aps-ball_mill_procedures = { path = "aps/aps-ball_mill_procedures" }
-aps-bead_models = { path = "aps/aps-bead_models" }
-aps-brands = { path = "aps/aps-brands" }
-aps-camera_models = { path = "aps/aps-camera_models" }
-aps-cameras = { path = "aps/aps-cameras" }
-aps-centrifuge_models = { path = "aps/aps-centrifuge_models" }
-aps-centrifuge_procedure_templates = { path = "aps/aps-centrifuge_procedure_templates" }
-aps-centrifuge_procedures = { path = "aps/aps-centrifuge_procedures" }
-aps-centrifuges = { path = "aps/aps-centrifuges" }
-aps-commercial_ball_mill_machine_lots = { path = "aps/aps-commercial_ball_mill_machine_lots" }
-aps-commercial_ball_mill_machine_models = { path = "aps/aps-commercial_ball_mill_machine_models" }
-aps-commercial_camera_lots = { path = "aps/aps-commercial_camera_lots" }
-aps-commercial_camera_models = { path = "aps/aps-commercial_camera_models" }
-aps-commercial_centrifuge_lots = { path = "aps/aps-commercial_centrifuge_lots" }
-aps-commercial_centrifuge_models = { path = "aps/aps-commercial_centrifuge_models" }
-aps-commercial_freeze_dryer_lots = { path = "aps/aps-commercial_freeze_dryer_lots" }
-aps-commercial_freeze_dryer_models = { path = "aps/aps-commercial_freeze_dryer_models" }
-aps-commercial_freezer_lots = { path = "aps/aps-commercial_freezer_lots" }
-aps-commercial_freezer_models = { path = "aps/aps-commercial_freezer_models" }
-aps-commercial_geopositioning_device_lots = { path = "aps/aps-commercial_geopositioning_device_lots" }
-aps-commercial_geopositioning_device_models = { path = "aps/aps-commercial_geopositioning_device_models" }
-aps-commercial_marker_lots = { path = "aps/aps-commercial_marker_lots" }
-aps-commercial_marker_models = { path = "aps/aps-commercial_marker_models" }
-aps-commercial_mass_spectrometer_lots = { path = "aps/aps-commercial_mass_spectrometer_lots" }
-aps-commercial_mass_spectrometer_models = { path = "aps/aps-commercial_mass_spectrometer_models" }
-aps-commercial_personal_protective_equipment_lots = { path = "aps/aps-commercial_personal_protective_equipment_lots" }
-aps-commercial_personal_protective_equipment_models = { path = "aps/aps-commercial_personal_protective_equipment_models" }
-aps-commercial_phone_device_lots = { path = "aps/aps-commercial_phone_device_lots" }
-aps-commercial_phone_device_models = { path = "aps/aps-commercial_phone_device_models" }
-aps-commercial_pipette_tip_lots = { path = "aps/aps-commercial_pipette_tip_lots" }
-aps-commercial_pipette_tip_models = { path = "aps/aps-commercial_pipette_tip_models" }
-aps-commercial_product_lots = { path = "aps/aps-commercial_product_lots" }
-aps-commercial_products = { path = "aps/aps-commercial_products" }
-aps-commercial_volume_measuring_device_lots = { path = "aps/aps-commercial_volume_measuring_device_lots" }
-aps-commercial_volume_measuring_device_models = { path = "aps/aps-commercial_volume_measuring_device_models" }
-aps-commercial_weighing_device_lots = { path = "aps/aps-commercial_weighing_device_lots" }
-aps-commercial_weighing_device_models = { path = "aps/aps-commercial_weighing_device_models" }
-aps-container_compatibility_rules = { path = "aps/aps-container_compatibility_rules" }
-aps-container_models = { path = "aps/aps-container_models" }
-aps-container_sealer_models = { path = "aps/aps-container_sealer_models" }
-aps-container_sealing_procedure_templates = { path = "aps/aps-container_sealing_procedure_templates" }
-aps-container_sealing_procedures = { path = "aps/aps-container_sealing_procedures" }
-aps-containers = { path = "aps/aps-containers" }
-aps-digital_asset_models = { path = "aps/aps-digital_asset_models" }
-aps-digital_assets = { path = "aps/aps-digital_assets" }
-aps-disposal_procedure_templates = { path = "aps/aps-disposal_procedure_templates" }
-aps-disposal_procedures = { path = "aps/aps-disposal_procedures" }
-aps-entities = { path = "aps/aps-entities" }
-aps-fractioning_procedure_templates = { path = "aps/aps-fractioning_procedure_templates" }
-aps-fractioning_procedures = { path = "aps/aps-fractioning_procedures" }
-aps-freeze_dryer_models = { path = "aps/aps-freeze_dryer_models" }
-aps-freeze_dryers = { path = "aps/aps-freeze_dryers" }
-aps-freeze_drying_procedure_templates = { path = "aps/aps-freeze_drying_procedure_templates" }
-aps-freeze_drying_procedures = { path = "aps/aps-freeze_drying_procedures" }
-aps-freezer_models = { path = "aps/aps-freezer_models" }
-aps-freezers = { path = "aps/aps-freezers" }
-aps-freezing_procedure_templates = { path = "aps/aps-freezing_procedure_templates" }
-aps-freezing_procedures = { path = "aps/aps-freezing_procedures" }
-aps-geopositioning_device_models = { path = "aps/aps-geopositioning_device_models" }
-aps-geopositioning_devices = { path = "aps/aps-geopositioning_devices" }
-aps-geopositioning_procedure_templates = { path = "aps/aps-geopositioning_procedure_templates" }
-aps-geopositioning_procedures = { path = "aps/aps-geopositioning_procedures" }
-aps-harvesting_procedure_templates = { path = "aps/aps-harvesting_procedure_templates" }
-aps-harvesting_procedures = { path = "aps/aps-harvesting_procedures" }
-aps-marker_models = { path = "aps/aps-marker_models" }
-aps-markers = { path = "aps/aps-markers" }
-aps-mass_spectrometer_models = { path = "aps/aps-mass_spectrometer_models" }
-aps-mass_spectrometers = { path = "aps/aps-mass_spectrometers" }
-aps-namespaced_ownables = { path = "aps/aps-namespaced_ownables" }
-aps-namespaces = { path = "aps/aps-namespaces" }
-aps-next_procedure_templates = { path = "aps/aps-next_procedure_templates" }
-aps-ownables = { path = "aps/aps-ownables" }
-aps-owner_grants = { path = "aps/aps-owner_grants" }
-aps-owners = { path = "aps/aps-owners" }
-aps-packaging_models = { path = "aps/aps-packaging_models" }
-aps-packaging_procedure_templates = { path = "aps/aps-packaging_procedure_templates" }
-aps-packaging_procedures = { path = "aps/aps-packaging_procedures" }
-aps-panel_models = { path = "aps/aps-panel_models" }
-aps-panels = { path = "aps/aps-panels" }
-aps-parent_procedure_templates = { path = "aps/aps-parent_procedure_templates" }
-aps-personal_protective_equipment_models = { path = "aps/aps-personal_protective_equipment_models" }
-aps-personal_protective_equipments = { path = "aps/aps-personal_protective_equipments" }
-aps-phone_device_models = { path = "aps/aps-phone_device_models" }
-aps-phone_devices = { path = "aps/aps-phone_devices" }
-aps-photograph_procedure_templates = { path = "aps/aps-photograph_procedure_templates" }
-aps-photograph_procedures = { path = "aps/aps-photograph_procedures" }
-aps-photographs = { path = "aps/aps-photographs" }
-aps-physical_asset_models = { path = "aps/aps-physical_asset_models" }
-aps-physical_assets = { path = "aps/aps-physical_assets" }
-aps-pipette_tip_models = { path = "aps/aps-pipette_tip_models" }
-aps-pipette_tips = { path = "aps/aps-pipette_tips" }
-aps-pouring_procedure_templates = { path = "aps/aps-pouring_procedure_templates" }
-aps-pouring_procedures = { path = "aps/aps-pouring_procedures" }
-aps-privacy_dependencies = { path = "aps/aps-privacy_dependencies" }
-aps-procedure_asset_models = { path = "aps/aps-procedure_asset_models" }
-aps-procedure_template_asset_models = { path = "aps/aps-procedure_template_asset_models" }
-aps-procedure_templates = { path = "aps/aps-procedure_templates" }
-aps-procedures = { path = "aps/aps-procedures" }
-aps-reused_procedure_template_asset_models = { path = "aps/aps-reused_procedure_template_asset_models" }
-aps-roles = { path = "aps/aps-roles" }
-aps-sample_models = { path = "aps/aps-sample_models" }
-aps-sample_source_models = { path = "aps/aps-sample_source_models" }
-aps-sample_sources = { path = "aps/aps-sample_sources" }
-aps-samples = { path = "aps/aps-samples" }
-aps-storage_procedure_templates = { path = "aps/aps-storage_procedure_templates" }
-aps-storage_procedures = { path = "aps/aps-storage_procedures" }
-aps-supernatant_procedure_templates = { path = "aps/aps-supernatant_procedure_templates" }
-aps-supernatant_procedures = { path = "aps/aps-supernatant_procedures" }
-aps-table_names = { path = "aps/aps-table_names" }
-aps-team_members = { path = "aps/aps-team_members" }
-aps-teams = { path = "aps/aps-teams" }
-aps-tombstones = { path = "aps/aps-tombstones" }
-aps-users = { path = "aps/aps-users" }
-aps-volume_measuring_device_models = { path = "aps/aps-volume_measuring_device_models" }
-aps-volume_measuring_devices = { path = "aps/aps-volume_measuring_devices" }
-aps-volumetric_container_models = { path = "aps/aps-volumetric_container_models" }
-aps-volumetric_containers = { path = "aps/aps-volumetric_containers" }
-aps-weighed_container_models = { path = "aps/aps-weighed_container_models" }
-aps-weighing_device_models = { path = "aps/aps-weighing_device_models" }
-aps-weighing_devices = { path = "aps/aps-weighing_devices" }
-aps-weighing_procedure_templates = { path = "aps/aps-weighing_procedure_templates" }
-aps-weighing_procedures = { path = "aps/aps-weighing_procedures" }
-rosetta-utc = { version = "0.1.0", git = "https://github.com/earth-metabolome-initiative/rosetta-utc", branch = "main", features = [
-  "diesel",
-  "serde",
+aps-sample_models = { version = "=0.1.0", path = "aps/aps-sample_models" }
+aps-grantees = { version = "=0.1.0", path = "aps/aps-grantees" }
+aps-resources = { version = "=0.1.0", path = "aps/aps-resources" }
+aps-assets = { version = "=0.1.0", path = "aps/aps-assets" }
+aps-audit_events = { version = "=0.1.0", path = "aps/aps-audit_events" }
+aps-ball_mill_machine_models = { version = "=0.1.0", path = "aps/aps-ball_mill_machine_models" }
+aps-commercial_products = { version = "=0.1.0", path = "aps/aps-commercial_products" }
+aps-geopositioning_devices = { version = "=0.1.0", path = "aps/aps-geopositioning_devices" }
+aps-centrifuge_models = { version = "=0.1.0", path = "aps/aps-centrifuge_models" }
+aps-commercial_freeze_dryer_models = { version = "=0.1.0", path = "aps/aps-commercial_freeze_dryer_models" }
+aps-commercial_freezer_models = { version = "=0.1.0", path = "aps/aps-commercial_freezer_models" }
+aps-physical_asset_models = { version = "=0.1.0", path = "aps/aps-physical_asset_models" }
+aps-procedures = { version = "=0.1.0", path = "aps/aps-procedures" }
+aps-weighing_device_models = { version = "=0.1.0", path = "aps/aps-weighing_device_models" }
+aps-photograph_procedure_templates = { version = "=0.1.0", path = "aps/aps-photograph_procedure_templates" }
+aps-platform_audit_events = { version = "=0.1.0", path = "aps/aps-platform_audit_events" }
+aps-authz-audit_operation = { version = "=0.1.0", path = "aps/aps-authz-audit_operation", features = [
   "sqlite",
 ] }
-chrono = { version = "0.4.42", features = ["serde"] }
-pgrx_validation = { git = "https://github.com/earth-metabolome-initiative/emi-monorepo", branch = "postgres-crate" }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0" }
-validation-errors = { git = "https://github.com/LucaCappelletti94/diesel-builders", branch = "main" }
-postgis_diesel = { git = "https://github.com/LucaCappelletti94/postgis-diesel", branch = "master", features = [
-  "serde",
+aps-authz-grantee_kind = { version = "=0.1.0", path = "aps/aps-authz-grantee_kind", features = [
+  "sqlite",
+] }
+aps-authz-membership_state = { version = "=0.1.0", path = "aps/aps-authz-membership_state", features = [
+  "sqlite",
+] }
+aps-authz-resource_kind = { version = "=0.1.0", path = "aps/aps-authz-resource_kind", features = [
+  "sqlite",
+] }
+aps-authz-role = { version = "=0.1.0", path = "aps/aps-authz-role", features = [
+  "sqlite",
+] }
+aps-authz-team_role = { version = "=0.1.0", path = "aps/aps-authz-team_role", features = [
+  "sqlite",
+] }
+sqlparser = { version = "0.64", git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
+sql-values = { version = "0.7", git = "https://github.com/connetto-rs/sql-values", branch = "main" }
+rosetta-utc = { version = "0.3.0", features = [
   "diesel",
+  "serde",
   "postgres",
   "sqlite",
 ] }
-diesel = { git = "https://github.com/LucaCappelletti94/diesel", branch = "future3", features = [
-  "extras",
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
+validation-errors = { version = "0.2.1" }
+sqlitegis = { version = "0.3.1", features = ["diesel-postgres", "serde"] }
+diesel = { version = "2.4.0", features = ["serde_json", "32-column-tables"] }
+diesel-builders = { version = "0.2.1", features = [
+  "postgres",
+  "sqlite",
+  "size-128",
 ] }
-diesel-builders = { git = "https://github.com/LucaCappelletti94/diesel-builders", branch = "main" }
-rosetta-uuid = { version = "0.1.2", git = "https://github.com/earth-metabolome-initiative/rosetta-uuid", branch = "main", features = [
+rosetta-uuid = { version = "0.2.0", features = [
   "diesel",
   "serde",
+  "postgres",
   "sqlite",
 ] }
 
+[patch.crates-io]
+sqlparser = { git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
+sql-values = { git = "https://github.com/connetto-rs/sql-values", branch = "main" }
+diesel = { git = "https://github.com/diesel-rs/diesel", branch = "upstream/sqlite-table-valued-functions-dynamic" }
+sqlstate = { git = "https://github.com/diesel-rs/diesel", branch = "upstream/sqlite-table-valued-functions-dynamic" }
+
 [workspace.lints.rust]
-missing_docs = "forbid"
 unused_macro_rules = "forbid"
 unused_doc_comments = "forbid"
 unconditional_recursion = "forbid"
@@ -330,7 +127,6 @@ broken_intra_doc_links = "forbid"
 bare_urls = "forbid"
 invalid_codeblock_attributes = "forbid"
 invalid_html_tags = "forbid"
-missing_crate_level_docs = "forbid"
 unescaped_backticks = "forbid"
 redundant_explicit_links = "forbid"
 invalid_rust_codeblocks = "forbid"

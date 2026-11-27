@@ -6,7 +6,11 @@ edition.workspace = true
 [dependencies]
 diesel.workspace = true
 diesel-builders.workspace = true
+rosetta-utc.workspace = true
 rosetta-uuid.workspace = true
+sqlitegis.workspace = true
+thiserror = "2.0"
+validation-errors.workspace = true
 
 [lints]
 workspace = true

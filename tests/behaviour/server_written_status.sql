@@ -1,0 +1,48 @@
+\set ON_ERROR_STOP 1
+SET search_path = public, test_tools;
+BEGIN;
+\ir ../fixture.sql
+SELECT no_plan();
+SELECT pg_temp.new_model('60000000-0000-7000-8000-000000000001', 'shared sample', NULL, 'sample_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001');
+SELECT pg_temp.new_model('60000000-0000-7000-8000-000000000002', 'shared balance', NULL, 'weighing_device_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001');
+SELECT pg_temp.new_model('60000000-0000-7000-8000-000000000003', 'shared tube', NULL, 'volumetric_container_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001');
+SELECT pg_temp.new_model('60000000-0000-7000-8000-000000000004', 'shared pipette', NULL, 'volume_measuring_device_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001');
+INSERT INTO weighing_device_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001');
+INSERT INTO container_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001');
+INSERT INTO volume_measuring_device_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001');
+INSERT INTO volumetric_container_models (id, organization_id, volume_l) VALUES ('60000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', 1.0);
+SELECT pg_temp.new_model('60000000-0000-7000-8000-000000000005', 'shared source', NULL, 'sample_source_models');
+INSERT INTO physical_asset_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001');
+INSERT INTO sample_source_models (id, organization_id) VALUES ('60000000-0000-7000-8000-000000000005', '20000000-0000-7000-8000-000000000001');
+INSERT INTO sample_models (id, organization_id, sample_source_model_id) VALUES ('60000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000005');
+SELECT pg_temp.new_template('60000000-0000-7000-8000-000000000010', 'shared weighing', 'weighing_procedure_templates');
+SELECT pg_temp.new_slot('60000000-0000-7000-8000-000000000020', '60000000-0000-7000-8000-000000000010', 'weighed_asset', '60000000-0000-7000-8000-000000000001', 'input', 1, 1);
+SELECT pg_temp.new_slot('60000000-0000-7000-8000-000000000021', '60000000-0000-7000-8000-000000000010', 'weighed_with', '60000000-0000-7000-8000-000000000002', 'instrument', 1, 1);
+SELECT pg_temp.new_slot('60000000-0000-7000-8000-000000000022', '60000000-0000-7000-8000-000000000010', 'wrong_role', '60000000-0000-7000-8000-000000000001', 'consumed', 0, 1);
+
+INSERT INTO weighing_procedure_templates (id, organization_id, weighed_asset_slot_id, weighed_asset_model_id, weighed_with_slot_id, weighed_with_model_id) VALUES ('60000000-0000-7000-8000-000000000010', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000020', '60000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000021', '60000000-0000-7000-8000-000000000002');
+INSERT INTO procedure_template_parameters (id, organization_id, procedure_template_id, name, value_kind_id) VALUES ('60000000-0000-7000-8000-000000000030', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000010', 'observed', 'text');
+UPDATE procedure_templates SET state_id = 'published' WHERE id = '60000000-0000-7000-8000-000000000010';
+SELECT pg_temp.new_asset('60000000-0000-7000-8000-000000000040', 'shared sample one', '60000000-0000-7000-8000-000000000001', 'samples');
+INSERT INTO physical_assets (id, organization_id, physical_asset_model_id) VALUES ('60000000-0000-7000-8000-000000000040', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000001');
+INSERT INTO samples (id, organization_id, sample_model_id, sample_source_model_id) VALUES ('60000000-0000-7000-8000-000000000040', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000005');
+SELECT pg_temp.new_asset('60000000-0000-7000-8000-000000000041', 'shared balance one', '60000000-0000-7000-8000-000000000002', 'weighing_devices');
+INSERT INTO physical_assets (id, organization_id, physical_asset_model_id) VALUES ('60000000-0000-7000-8000-000000000041', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000002');
+INSERT INTO weighing_devices (id, organization_id, weighing_device_model_id) VALUES ('60000000-0000-7000-8000-000000000041', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000002');
+SELECT pg_temp.new_procedure('60000000-0000-7000-8000-000000000050', '60000000-0000-7000-8000-000000000010', 'in_progress', NULL, NULL, NULL, 'weighing_procedures');
+UPDATE procedures SET started_at = '2026-01-01 00:00:00+00' WHERE id = '60000000-0000-7000-8000-000000000050';
+SELECT lives_ok($statement$INSERT INTO weighing_procedures (id, organization_id, weighing_procedure_template_id) VALUES ('60000000-0000-7000-8000-000000000050', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000010')$statement$, 'weighing_procedures inherits omitted status');
+SELECT is((SELECT status_id FROM weighing_procedures), 'in_progress', 'weighing_procedures inherits current parent status');
+SELECT throws_ok($statement$INSERT INTO weighing_procedures (id, organization_id, weighing_procedure_template_id, status_id) VALUES ('60000000-0000-7000-8000-000000000050', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000010', 'in_progress')$statement$, '42501', NULL, 'weighing_procedures refuses named status');
+SELECT lives_ok($statement$INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id) VALUES ('60000000-0000-7000-8000-000000000060', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000050', '60000000-0000-7000-8000-000000000010', '60000000-0000-7000-8000-000000000020', '60000000-0000-7000-8000-000000000001', 'input', '60000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000040')$statement$, 'procedure_assets inherits omitted status');
+SELECT is((SELECT status_id FROM procedure_assets), 'in_progress', 'procedure_assets inherits current parent status');
+SELECT throws_ok($statement$INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id, status_id) VALUES ('60000000-0000-7000-8000-000000000060', '20000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000050', '60000000-0000-7000-8000-000000000010', '60000000-0000-7000-8000-000000000020', '60000000-0000-7000-8000-000000000001', 'input', '60000000-0000-7000-8000-000000000001', '60000000-0000-7000-8000-000000000040', 'in_progress')$statement$, '42501', NULL, 'procedure_assets refuses named status');
+SELECT lives_ok($statement$INSERT INTO procedure_parameter_values (procedure_id, parameter_id, procedure_template_id, value_kind_id, organization_id, text_value) VALUES ('60000000-0000-7000-8000-000000000050', '60000000-0000-7000-8000-000000000030', '60000000-0000-7000-8000-000000000010', 'text', '20000000-0000-7000-8000-000000000001', 'observed')$statement$, 'procedure_parameter_values inherits omitted status');
+SELECT is((SELECT status_id FROM procedure_parameter_values), 'in_progress', 'procedure_parameter_values inherits current parent status');
+SELECT throws_ok($statement$INSERT INTO procedure_parameter_values (procedure_id, parameter_id, procedure_template_id, value_kind_id, organization_id, text_value, status_id) VALUES ('60000000-0000-7000-8000-000000000050', '60000000-0000-7000-8000-000000000030', '60000000-0000-7000-8000-000000000010', 'text', '20000000-0000-7000-8000-000000000001', 'observed', 'in_progress')$statement$, '42501', NULL, 'procedure_parameter_values refuses named status');
+SELECT * FROM finish();
+ROLLBACK;

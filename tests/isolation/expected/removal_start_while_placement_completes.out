@@ -1,0 +1,16 @@
+Parsed test spec with 3 sessions
+
+starting permutation: first_begin first_start second_begin second_complete first_finish second_finish exits
+step first_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step first_start: UPDATE procedures SET status_id = 'in_progress', started_at = '2026-01-01 12:00+00', performed_by_id = '10000000-0000-7000-8000-000000000001' WHERE id = 'f0000000-0000-7000-8000-000000000002'; SET CONSTRAINTS ALL IMMEDIATE;
+step second_begin: BEGIN ISOLATION LEVEL READ COMMITTED;
+step second_complete: UPDATE procedures SET status_id = 'completed', ended_at = '2026-01-01 11:00+00' WHERE id = 'f0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE; <waiting ...>
+step first_finish: COMMIT;
+step second_complete: <... completed>
+step second_finish: COMMIT;
+step exits: SELECT container_id, removal_procedure_id, left_at FROM move_exits;
+container_id                        |removal_procedure_id                |left_at                     
+------------------------------------+------------------------------------+----------------------------
+b0000000-0000-7000-8000-000000000003|f0000000-0000-7000-8000-000000000002|Thu Jan 01 04:00:00 2026 PST
+(1 row)
+

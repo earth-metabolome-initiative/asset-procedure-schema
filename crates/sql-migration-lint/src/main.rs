@@ -491,20 +491,13 @@ fn validate_shared_assets_documentation(
     errors: &mut Vec<String>,
 ) {
     validate_required_doc_sections(migration_label, sql, errors);
-    validate_statement_comments(migration_label, sql, errors);
+    validate_table_comments(migration_label, sql, errors);
     validate_column_comments(migration_label, sql, errors);
 }
 
 /// Validates required top-level documentation sections and ASCII placement art.
 fn validate_required_doc_sections(migration_label: &str, sql: &str, errors: &mut Vec<String>) {
-    let required_markers = [
-        "Migration:",
-        "Purpose:",
-        "APS placement",
-        "Security context",
-        "SQL/RLS semantics",
-        "Zanzibar semantics",
-    ];
+    let required_markers = ["Migration:", "Purpose:", "APS placement"];
 
     for marker in required_markers {
         if !sql.contains(marker) {
@@ -523,20 +516,19 @@ fn validate_required_doc_sections(migration_label: &str, sql: &str, errors: &mut
     }
 }
 
-/// Validates that each top-level SQL statement has a preceding comment.
-fn validate_statement_comments(migration_label: &str, sql: &str, errors: &mut Vec<String>) {
+/// Validates that each `CREATE TABLE` has a preceding comment, which becomes
+/// the documentation of the generated table struct.
+fn validate_table_comments(migration_label: &str, sql: &str, errors: &mut Vec<String>) {
     let lines = sql.lines().collect::<Vec<_>>();
 
     for (index, line) in lines.iter().enumerate() {
-        let trimmed = line.trim_start();
-        if !is_supported_statement_start(trimmed) {
+        let Some(table_name) = parse_create_table_name(line.trim_start()) else {
             continue;
-        }
+        };
 
         if !has_preceding_comment(&lines, index) {
             errors.push(format!(
-                "[{}] SQL statement '{}' is missing a preceding '--' comment",
-                migration_label, trimmed
+                "[{migration_label}] table '{table_name}' is missing a preceding '--' comment"
             ));
         }
     }
@@ -578,24 +570,6 @@ fn validate_column_comments(migration_label: &str, sql: &str, errors: &mut Vec<S
             ));
         }
     }
-}
-
-/// Returns true when the line starts one of the supported statement forms.
-fn is_supported_statement_start(trimmed_line: &str) -> bool {
-    [
-        "CREATE TABLE ",
-        "INSERT INTO ",
-        "ALTER TABLE ",
-        "CREATE UNIQUE INDEX ",
-        "CREATE INDEX ",
-        "CREATE POLICY ",
-        "CREATE OR REPLACE ",
-        "DROP TABLE ",
-        "UPDATE ",
-        "DELETE FROM ",
-    ]
-    .iter()
-    .any(|prefix| trimmed_line.starts_with(prefix))
 }
 
 /// Returns true when a table definition line terminates `CREATE TABLE (...)`.
@@ -936,11 +910,8 @@ INSERT INTO table_names (id) VALUES ('camera_models') ON CONFLICT DO NOTHING;
 -- Purpose:
 --   Example purpose.
 -- APS placement:
---   entities
---     +-- ownables
--- Security context:
--- SQL/RLS semantics:
--- Zanzibar semantics:
+--   ownables
+--     +-- examples
 -- Creates example table.
 CREATE TABLE examples (
     -- Stable identifier.
@@ -963,22 +934,19 @@ INSERT INTO table_names (id) VALUES ('examples') ON CONFLICT DO NOTHING;
 -- Migration: Shared Assets / Example
 -- Purpose:
 --   Example purpose.
--- APS placement:
+INSERT INTO table_names (id) VALUES ('examples');
 CREATE TABLE examples (
     id UUID PRIMARY KEY
 );
-INSERT INTO table_names (id) VALUES ('examples') ON CONFLICT DO NOTHING;
 "#;
 
         let mut errors = Vec::new();
         validate_shared_assets_documentation("example/up.sql", sql, &mut errors);
 
         assert!(!errors.is_empty());
-        assert!(errors.iter().any(|error| error.contains("Security context")));
+        assert!(errors.iter().any(|error| error.contains("APS placement")));
         assert!(errors.iter().any(|error| error.contains("ASCII placement diagram")));
-        assert!(
-            errors.iter().any(|error| error.contains("SQL statement 'INSERT INTO table_names"))
-        );
+        assert!(errors.iter().any(|error| error.contains("table 'examples' is missing")));
         assert!(errors.iter().any(|error| error.contains("column line 'id UUID PRIMARY KEY'")));
     }
 

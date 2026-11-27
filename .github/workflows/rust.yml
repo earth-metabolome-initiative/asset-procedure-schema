@@ -82,20 +82,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
           components: llvm-tools-preview, rustfmt
-      - name: Install tarpaulin
-        uses: taiki-e/install-action@cargo-tarpaulin
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@fe3acb53a98b62c772db35de75ce0e4595e7ca8c # v2.90.8
+        with:
+          tool: cargo-llvm-cov
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libfontconfig1-dev
+      # The instrumented release build peaks near 20 GiB, 13 GiB of it in
+      # pg2sqlite's rustc, past the runner's 16 GiB of memory.
+      - name: Enlarge swap
+        run: |
+          sudo swapoff -a
+          sudo rm -f /mnt/swapfile
+          sudo fallocate -l 16G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          free -h
       - name: Generate coverage
-        run: cargo tarpaulin --engine=llvm --out xml --workspace --run-types AllTargets --run-types Doctests
+        run: |
+          mkdir -p target/coverage
+          cargo llvm-cov --release --workspace --all-targets --no-report
+          cargo llvm-cov --release --workspace --doc --no-clean --lcov --output-path target/coverage/coverage.lcov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/coverage/coverage.lcov
           fail_ci_if_error: false

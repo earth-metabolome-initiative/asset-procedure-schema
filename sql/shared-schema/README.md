@@ -1,5 +1,7 @@
 # Shared Schema
 
-This directory contains APS compliant assets and procedures which are intended to be shared across multiple projects. The shared schema is designed to provide a common foundation for asset and procedure definitions, promoting consistency and reusability.
+![Domain layer](https://img.shields.io/badge/schema-domain_layer-blue)
 
-You may contribute to the shared schema by submitting pull requests with new or updated assets and procedures. Please ensure that any contributions adhere to the APS standards and include appropriate documentation.
+Reusable asset and procedure definitions extend `connetto-schema` projects and `resources` of kind `'ownable'`. Archive state follows resource and referenced-row keys. Apply connetto migrations first, then `sql/core-schema`, then shared migrations in path order.
+
+See [asset conventions](003-shared-assets/README.md) for subtype identities, authorization and migration headers.

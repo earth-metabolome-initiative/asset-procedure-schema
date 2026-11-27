@@ -1,0 +1,53 @@
+name: Schema lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-26.04
+    defaults:
+      run:
+        working-directory: builder
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install Rust
+        run: rustup toolchain install nightly --profile minimal --component clippy,rustfmt && rustup default nightly
+      - name: Install taplo
+        run: |
+          curl --fail --location --silent --show-error \
+            https://github.com/tamasfe/taplo/releases/download/0.10.0/taplo-linux-x86_64.gz \
+            | gunzip > "$RUNNER_TEMP/taplo"
+          chmod +x "$RUNNER_TEMP/taplo"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Cache cargo
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-builder-${{ hashFiles('Cargo.lock') }}
+      - name: SQLippy reports nothing, rls2fga translates every clause and the generated crates match the schema
+        run: cargo run --locked --release
+      - name: The generated files are committed
+        working-directory: .
+        run: |
+          drift=$(git status --porcelain -- . ':!builder/TIME_REQUIREMENTS.md')
+          if [[ -n $drift ]]; then
+            echo "$drift"
+            git diff -- . ':!builder/TIME_REQUIREMENTS.md'
+            exit 1
+          fi

@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-synql = { git = "https://github.com/earth-metabolome-initiative/synql", branch = "main" }
-sql-traits = { git = "https://github.com/earth-metabolome-initiative/sql-traits", branch = "main" }
-sql-rules = { git = "https://github.com/earth-metabolome-initiative/sql-rules", branch = "main" }
+synql = { git = "https://github.com/connetto-rs/synql", branch = "main" }
+sql-traits = { git = "https://github.com/connetto-rs/sql-traits", branch = "main" }
+sqlippy = { git = "https://github.com/connetto-rs/SQLippy", branch = "main" }
+connetto-schema-lint = { git = "https://github.com/connetto-rs/connetto-schema", rev = "04a428dfb5c87a0205affa26424547276c52d0e3" }
 time_requirements = "0.1.0"
 sql-procedure-rules = { path = "../crates/sql-procedure-rules" }
 mermaid-builder = "0.1.1"
-sqlparser = { version = "0.61", git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
+sqlparser = { version = "0.64", git = "https://github.com/apache/datafusion-sqlparser-rs", branch = "main" }
 quote = "1.0"
 proc-macro2 = "1.0"

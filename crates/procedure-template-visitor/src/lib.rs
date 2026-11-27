@@ -2,13 +2,16 @@
 
 mod guided_procedure;
 mod guided_procedure_pseudocode;
-mod procedure_template_graph;
-mod ptg_listener;
-mod ptg_visitor;
-mod structs;
+mod hierarchy;
+mod ownership;
+mod task_graph;
+mod visitor;
 
-pub use guided_procedure::GuidedProcedure;
+pub use guided_procedure::{
+    Complete, GuidedProcedure, GuidedProcedureError, ProcedureBuilder, Skip, Slots,
+};
 pub use guided_procedure_pseudocode::GuidedProcedurePseudocode;
-pub use procedure_template_graph::ProcedureTemplateGraph;
-pub use ptg_listener::PTGListener;
-pub use structs::{HierarchyLike, OwnershipLike};
+pub use hierarchy::{ProcedureTemplateGraph, TemplateNode};
+pub use ownership::SlotOwner;
+pub use task_graph::{StepNode, TaskGraph};
+pub use visitor::{Visitor, walk_step, walk_template};

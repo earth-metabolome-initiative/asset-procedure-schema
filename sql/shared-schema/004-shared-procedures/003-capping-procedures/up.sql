@@ -1,118 +1,227 @@
-CREATE TABLE container_sealing_procedure_templates (
-	-- Identifier of the capping procedure_id template, which is also a foreign key to the general procedure_id template.
-	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	-- The container to be capped.
-	sealable_container_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	-- The procedure_id template associated with the container model.
-	procedure_template_sealable_container_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The cap to be used for the container.
-	sealed_with_model_id UUID NOT NULL REFERENCES container_sealer_models(id),
-	-- The procedure_id template associated with the cap model.
-	procedure_template_sealed_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	-- We check that the `container_model` is indeed the trackable that is compatible with the procedure_id template.
-	FOREIGN KEY (
-		procedure_template_sealable_container_model_id,
-		sealable_container_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	-- We check that the `capped_with_model` is indeed a trackable that is compatible with the procedure_id template.
-	FOREIGN KEY (
-		procedure_template_sealed_with_model_id,
-		sealed_with_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	-- We check that the `capped_with_model` is indeed a cap that can be used with the `capped_container_model`.
-	FOREIGN KEY (sealable_container_model_id, sealed_with_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_sealable_container_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_sealed_with_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_capped_container_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_sealable_container_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_capped_with_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_sealed_with_model_id
-	)
-);
-CREATE OR REPLACE FUNCTION container_sealing_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_sealable_container_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_sealed_with_model_id) ON CONFLICT DO NOTHING;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Migration: 003-capping-procedures
+-- Purpose: Typed container sealing slots and execution records.
+-- APS placement
+-- `resources` of kind `'ownable'`
+-- +-- procedure_templates -- container_sealing_procedure_templates
+-- +-- procedures -- container_sealing_procedures
+-- Slot | Role | Meaning
+-- `sealable_container` | `input` | The container remains after sealing.
+-- `sealed_with` | `input` | The cap remains attached to the container.
 
-CREATE TRIGGER container_sealing_procedure_templates_rptam_insert_trigger
-AFTER INSERT ON container_sealing_procedure_templates
-FOR EACH ROW EXECUTE FUNCTION container_sealing_procedure_templates_rptam_insert_fn();
-CREATE TABLE container_sealing_procedures (
-	-- Identifier of the capping id, which is also a foreign key to the general procedure.
-	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
-	-- We enforce that the model of this procedure_id must be a capping procedure_id template.
-	capping_procedure_template_id UUID NOT NULL REFERENCES container_sealing_procedure_templates(id),
-	-- The container being capped, which must be a volumetric container.
-	capped_container_id UUID NOT NULL REFERENCES volumetric_containers(id),
-	-- The model of the container being capped.
-	sealable_container_model_id UUID NOT NULL REFERENCES volumetric_container_models(id),
-	-- The procedure_id template asset model describing the `capped_container`.
-	procedure_template_sealable_container_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset describing the `capped_container`.
-	procedure_capped_container_id UUID NOT NULL REFERENCES procedure_asset_models(id),
-	-- The cap being used, which must be a cap model.
-	sealed_with_model_id UUID NOT NULL REFERENCES container_sealer_models(id),
-	-- The procedure_id template asset model describing the `capped_with_model`.
-	procedure_template_sealed_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset describing the `capped_with_model`.
-	procedure_capped_with_id UUID NOT NULL REFERENCES procedure_asset_models(id),
-	-- The current procedure_id must be a capping procedure.
-	FOREIGN KEY (id, capping_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
-	-- The procedure_id template asset model describing the `capped_container` must be the same one
-	-- as the one in the procedure_id template.
-	FOREIGN KEY (
-		capping_procedure_template_id,
-		procedure_template_sealable_container_model_id
-	) REFERENCES container_sealing_procedure_templates(
-		id,
-		procedure_template_sealable_container_model_id
-	),
-	-- The procedure_id template asset model describing the `capped_with_model` must be the same one
-	-- as the one in the procedure_id template.
-	FOREIGN KEY (
-		capping_procedure_template_id,
-		procedure_template_sealed_with_model_id
-	) REFERENCES container_sealing_procedure_templates(
-		id,
-		procedure_template_sealed_with_model_id
-	),
-	-- The procedure_id template asset model and the procedure_id asset describing the `capped_container`
-	-- must be compatible.
-	FOREIGN KEY (
-		procedure_capped_container_id,
-		procedure_template_sealable_container_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- The procedure_id template asset model and the procedure_id asset describing the `capped_with_model`
-	-- must be compatible.
-	FOREIGN KEY (
-		procedure_capped_with_id,
-		procedure_template_sealed_with_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We ensure that the `procedure_capped_container` is associated with the `capped_container_model`.
-	FOREIGN KEY (
-		procedure_capped_container_id,
-		sealable_container_model_id
-	) REFERENCES procedure_asset_models(id, asset_model_id),
-	-- We ensure that the `procedure_capped_with` is associated with the `capped_with_model`.
-	FOREIGN KEY (procedure_capped_with_id, sealed_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	-- We ensure that the `procedure_capped_container` is associated with the `capped_container`.
-	FOREIGN KEY (capped_container_id, sealable_container_model_id) REFERENCES assets(id, model_id),
-	-- We check that the `capped_container_model` is compatible with the `capped_with_model`.
-	FOREIGN KEY (sealable_container_model_id, sealed_with_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id)
+-- Typed slots and parameters for container sealing.
+CREATE TABLE container_sealing_procedure_templates (
+    -- Identity shared with the parent template.
+    id UUID PRIMARY KEY REFERENCES procedure_templates (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Slot declaring the `sealable_container` assets.
+    sealable_container_slot_id UUID NOT NULL,
+    -- Admissible model for the `sealable_container` slot.
+    sealable_container_model_id UUID NOT NULL REFERENCES volumetric_container_models (id),
+    -- Required role of the `sealable_container` slot.
+    sealable_container_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    -- Slot declaring the `sealed_with` assets.
+    sealed_with_slot_id UUID NOT NULL,
+    -- Admissible model for the `sealed_with` slot.
+    sealed_with_model_id UUID NOT NULL REFERENCES container_sealer_models (id),
+    -- Required role of the `sealed_with` slot.
+    sealed_with_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    FOREIGN KEY (sealable_container_slot_id, id, sealable_container_model_id, sealable_container_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (sealed_with_slot_id, id, sealed_with_model_id, sealed_with_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    -- Archive state inherited from this resource.
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sealable_container_model_id`.
+    sealable_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sealed_with_model_id`.
+    sealed_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (sealable_container_model_id, sealable_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (sealed_with_model_id, sealed_with_model_archived) REFERENCES container_sealer_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
+CREATE INDEX ON container_sealing_procedure_templates (sealable_container_model_id);
+CREATE INDEX ON container_sealing_procedure_templates (sealed_with_model_id);
+INSERT INTO table_names (id) VALUES ('container_sealing_procedure_templates');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'container_sealing_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
+    UNION SELECT 'container_sealing_procedure_templates', 'container_sealing_procedure_templates';
+CREATE TRIGGER container_sealing_procedure_templates_guard AFTER INSERT ON container_sealing_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER container_sealing_procedure_templates_guard_update AFTER UPDATE OF id, sealable_container_slot_id, sealable_container_model_id, sealable_container_slot_role_id, sealed_with_slot_id, sealed_with_model_id, sealed_with_slot_role_id ON container_sealing_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.sealable_container_slot_id IS DISTINCT FROM NEW.sealable_container_slot_id
+        OR OLD.sealable_container_model_id IS DISTINCT FROM NEW.sealable_container_model_id
+        OR OLD.sealable_container_slot_role_id IS DISTINCT FROM NEW.sealable_container_slot_role_id
+        OR OLD.sealed_with_slot_id IS DISTINCT FROM NEW.sealed_with_slot_id
+        OR OLD.sealed_with_model_id IS DISTINCT FROM NEW.sealed_with_model_id
+        OR OLD.sealed_with_slot_role_id IS DISTINCT FROM NEW.sealed_with_slot_role_id) EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER container_sealing_procedure_templates_delete_guard BEFORE DELETE ON container_sealing_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+
+CREATE FUNCTION require_container_sealing_procedure_templates_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedure_templates root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'container_sealing_procedure_templates'
+    ) AND NOT EXISTS (SELECT 1 FROM public.container_sealing_procedure_templates row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'container_sealing_procedure_templates'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_container_sealing_procedure_templates_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_container_sealing_procedure_templates_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER container_sealing_procedure_templates_row AFTER INSERT ON procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'container_sealing_procedure_templates')
+    EXECUTE FUNCTION require_container_sealing_procedure_templates_row();
+CREATE CONSTRAINT TRIGGER container_sealing_procedure_templates_kept AFTER DELETE ON container_sealing_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_container_sealing_procedure_templates_row();
+
+REVOKE ALL ON container_sealing_procedure_templates FROM PUBLIC, app, identity_writer;
+GRANT SELECT, INSERT, DELETE ON container_sealing_procedure_templates TO app;
+ALTER TABLE container_sealing_procedure_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE container_sealing_procedure_templates FORCE ROW LEVEL SECURITY;
+CREATE POLICY container_sealing_procedure_templates_select ON container_sealing_procedure_templates FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY container_sealing_procedure_templates_insert ON container_sealing_procedure_templates FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND sealable_container_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND sealed_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY container_sealing_procedure_templates_delete ON container_sealing_procedure_templates FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY container_sealing_procedure_templates_archived_insert ON container_sealing_procedure_templates AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT archived AND NOT sealable_container_model_archived AND NOT sealed_with_model_archived);
+CREATE POLICY container_sealing_procedure_templates_archived_delete ON container_sealing_procedure_templates AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT archived);
+CREATE POLICY container_sealing_procedure_templates_blocked ON container_sealing_procedure_templates AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Recorded execution of a container sealing template.
+CREATE TABLE container_sealing_procedures (
+    -- Identity shared with the parent procedure.
+    id UUID PRIMARY KEY REFERENCES procedures (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Typed template executed by this procedure.
+    container_sealing_procedure_template_id UUID NOT NULL REFERENCES container_sealing_procedure_templates (id),
+    -- Execution status copied from the parent procedure.
+    status_id TEXT NOT NULL DEFAULT 'planned',
+    FOREIGN KEY (id, container_sealing_procedure_template_id, status_id, organization_id)
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `container_sealing_procedure_template_id`.
+    container_sealing_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (container_sealing_procedure_template_id, container_sealing_procedure_template_archived) REFERENCES container_sealing_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE INDEX ON container_sealing_procedures (container_sealing_procedure_template_id);
+INSERT INTO table_names (id) VALUES ('container_sealing_procedures');
+UPDATE table_names SET instance_table_name_id = 'container_sealing_procedures'
+    WHERE id = 'container_sealing_procedure_templates';
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'container_sealing_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
+    UNION SELECT 'container_sealing_procedures', 'container_sealing_procedures';
+CREATE TRIGGER container_sealing_procedures_guard AFTER INSERT ON container_sealing_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER container_sealing_procedures_guard_update AFTER UPDATE OF id, container_sealing_procedure_template_id, status_id ON container_sealing_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.container_sealing_procedure_template_id IS DISTINCT FROM NEW.container_sealing_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER container_sealing_procedures_delete_guard BEFORE DELETE ON container_sealing_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `container_sealing_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_container_sealing_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.container_sealing_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+REVOKE ALL ON container_sealing_procedures FROM PUBLIC, app, identity_writer;
+GRANT UPDATE (status_id) ON container_sealing_procedures TO aps_writer;
+ALTER FUNCTION copy_container_sealing_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_container_sealing_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_container_sealing_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_container_sealing_procedures_status();
+
+CREATE FUNCTION require_container_sealing_procedures_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedures root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'container_sealing_procedures'
+    ) AND NOT EXISTS (SELECT 1 FROM public.container_sealing_procedures row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'container_sealing_procedures'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_container_sealing_procedures_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_container_sealing_procedures_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER container_sealing_procedures_row AFTER INSERT ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'container_sealing_procedures')
+    EXECUTE FUNCTION require_container_sealing_procedures_row();
+CREATE CONSTRAINT TRIGGER container_sealing_procedures_kept AFTER DELETE ON container_sealing_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_container_sealing_procedures_row();
+
+CREATE FUNCTION initialize_container_sealing_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
+BEGIN
+    SELECT procedure.status_id INTO parent_status
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.container_sealing_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_container_sealing_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_container_sealing_procedures_status() FROM PUBLIC;
+CREATE TRIGGER container_sealing_procedures_status_initialize BEFORE INSERT ON container_sealing_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_container_sealing_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, container_sealing_procedure_template_id, archived, container_sealing_procedure_template_archived), DELETE ON container_sealing_procedures TO app;
+ALTER TABLE container_sealing_procedures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE container_sealing_procedures FORCE ROW LEVEL SECURITY;
+CREATE POLICY container_sealing_procedures_select ON container_sealing_procedures FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY container_sealing_procedures_insert ON container_sealing_procedures FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND container_sealing_procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY container_sealing_procedures_delete ON container_sealing_procedures FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY container_sealing_procedures_archived_insert ON container_sealing_procedures AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT archived AND NOT container_sealing_procedure_template_archived);
+CREATE POLICY container_sealing_procedures_archived_delete ON container_sealing_procedures AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT archived);
+CREATE POLICY container_sealing_procedures_blocked ON container_sealing_procedures AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER container_sealing_procedure_templates_audit AFTER INSERT OR DELETE ON container_sealing_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER container_sealing_procedure_templates_update_audit AFTER UPDATE ON container_sealing_procedure_templates
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER container_sealing_procedures_audit AFTER INSERT OR DELETE ON container_sealing_procedures
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER container_sealing_procedures_update_audit AFTER UPDATE ON container_sealing_procedures
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();

@@ -1,0 +1,3 @@
+[submodule "connetto-schema"]
+	path = connetto-schema
+	url = https://github.com/connetto-rs/connetto-schema.git

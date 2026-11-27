@@ -1,109 +1,227 @@
-CREATE TABLE packaging_procedure_templates (
-	id UUID PRIMARY KEY REFERENCES procedure_templates(id) ON DELETE CASCADE,
-	packaged_with_model_id UUID NOT NULL REFERENCES packaging_models(id),
-	procedure_template_packaged_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	sample_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	procedure_template_sample_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id) ON DELETE CASCADE,
-	-- We check that the `packaged_with_model` is indeed an asset model that is compatible with the procedure_id template asset model.
-	FOREIGN KEY (
-		procedure_template_packaged_with_model_id,
-		packaged_with_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	-- We check that the `sample_model` is indeed an asset model that is compatible with the procedure_id template asset model.
-	FOREIGN KEY (
-		procedure_template_sample_model_id,
-		sample_model_id
-	) REFERENCES procedure_template_asset_models(id, asset_model_id),
-	-- The `sample_model` must be compatible with the `packaged_with_model`.
-	FOREIGN KEY (packaged_with_model_id, sample_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_packaged_with_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	FOREIGN KEY (
-		id,
-		procedure_template_sample_model_id
-	) REFERENCES reused_procedure_template_asset_models(procedure_template_id, procedure_template_asset_model_id),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_packaged_with_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_packaged_with_model_id
-	),
-	-- We create a unique index to allow for foreign keys checking that there exist a `procedure_template_sample_model`
-	-- for the current `procedure_template`.
-	UNIQUE (
-		id,
-		procedure_template_sample_model_id
-	)
-);
-INSERT INTO table_names (id) VALUES ('packaging_procedure_templates') ON CONFLICT DO NOTHING;
-CREATE OR REPLACE FUNCTION packaging_procedure_templates_rptam_insert_fn() RETURNS TRIGGER AS $$
-BEGIN
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_packaged_with_model_id) ON CONFLICT DO NOTHING;
-	INSERT INTO reused_procedure_template_asset_models (procedure_template_id, procedure_template_asset_model_id) VALUES (NEW.id, NEW.procedure_template_sample_model_id) ON CONFLICT DO NOTHING;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Migration: 005-packaging-procedures
+-- Purpose: Typed packaging slots and execution records.
+-- APS placement
+-- `resources` of kind `'ownable'`
+-- +-- procedure_templates -- packaging_procedure_templates
+-- +-- procedures -- packaging_procedures
+-- Slot | Role | Meaning
+-- `packaged_with` | `input` | The packaging remains around the sample.
+-- `sample` | `input` | The sample survives packaging.
 
-CREATE TRIGGER packaging_procedure_templates_rptam_insert_trigger
-AFTER INSERT ON packaging_procedure_templates
-FOR EACH ROW EXECUTE FUNCTION packaging_procedure_templates_rptam_insert_fn();
-CREATE TABLE packaging_procedures (
-	-- The extended `procedure`.
-	id UUID PRIMARY KEY REFERENCES procedures(id) ON DELETE CASCADE,
-	-- The procedure_id template of the extended `procedure`.
-	packaging_procedure_template_id UUID NOT NULL REFERENCES packaging_procedure_templates(id),
-	-- The sample being packaged, which must be a physical asset.
-	sample_id UUID NOT NULL REFERENCES physical_assets(id),
-	-- The model of the sample being packaged, which must be a physical asset model.
-	sample_model_id UUID NOT NULL REFERENCES physical_asset_models(id),
-	-- The procedure_id template asset model associated to the `sample`.
-	procedure_template_sample_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `sample`.
-	procedure_sample_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- The packaging used for packaging, which must be a packaging model.
-	packaged_with_model_id UUID NOT NULL REFERENCES packaging_models(id),
-	-- The procedure_id template asset model associated to the `packaged_with_model`.
-	procedure_template_packaged_with_model_id UUID NOT NULL REFERENCES procedure_template_asset_models(id),
-	-- The procedure_id asset associated to the `packaged_with_model`.
-	procedure_packaged_with_id UUID NOT NULL REFERENCES procedure_asset_models(id) ON DELETE CASCADE,
-	-- We enforce that the extended `procedure` has indeed the same `procedure_template`, making
-	-- sure that the procedure_id is a packaging procedure.
-	FOREIGN KEY (id, packaging_procedure_template_id) REFERENCES procedures(id, procedure_template_id),
-	-- The `procedure_template_packaged_with_model` must be the same as in the `packaging_procedure_templates`.
-	FOREIGN KEY (
-		packaging_procedure_template_id,
-		procedure_template_packaged_with_model_id
-	) REFERENCES packaging_procedure_templates(
-		id,
-		procedure_template_packaged_with_model_id
-	),
-	-- The `procedure_template_sample_model` must be the same as in the `packaging_procedure_templates`.
-	FOREIGN KEY (
-		packaging_procedure_template_id,
-		procedure_template_sample_model_id
-	) REFERENCES packaging_procedure_templates(
-		id,
-		procedure_template_sample_model_id
-	),
-	-- We check that the `procedure_sample` is associated to the `sample`.
-	FOREIGN KEY (sample_id, sample_model_id) REFERENCES assets(id, model_id),
-	-- We check that the `procedure_packaged_with` is associated to the `packaged_with_model`.
-	FOREIGN KEY (procedure_packaged_with_id, packaged_with_model_id) REFERENCES procedure_asset_models(id, asset_model_id),
-	-- We check that the `procedure_sample` is indeed associated to the `procedure_template_sample_model`.
-	FOREIGN KEY (
-		procedure_sample_id,
-		procedure_template_sample_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `procedure_packaged_with` is indeed associated to the `procedure_template_packaged_with_model`.
-	FOREIGN KEY (
-		procedure_packaged_with_id,
-		procedure_template_packaged_with_model_id
-	) REFERENCES procedure_asset_models(id, procedure_template_asset_model_id),
-	-- We check that the `sample` is indeed compatible with the `packaged_with_model`.
-	FOREIGN KEY (packaged_with_model_id, sample_model_id) REFERENCES asset_compatibility_rules(left_asset_model_id, right_asset_model_id),
-	-- We check that the `procedure_sample` is associated to the `sample_model`.
-	FOREIGN KEY (procedure_sample_id, sample_model_id) REFERENCES procedure_asset_models(id, asset_model_id)
+-- Typed slots and parameters for packaging.
+CREATE TABLE packaging_procedure_templates (
+    -- Identity shared with the parent template.
+    id UUID PRIMARY KEY REFERENCES procedure_templates (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Slot declaring the `packaged_with` assets.
+    packaged_with_slot_id UUID NOT NULL,
+    -- Admissible model for the `packaged_with` slot.
+    packaged_with_model_id UUID NOT NULL REFERENCES packaging_models (id),
+    -- Required role of the `packaged_with` slot.
+    packaged_with_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    -- Slot declaring the `sample` assets.
+    sample_slot_id UUID NOT NULL,
+    -- Admissible model for the `sample` slot.
+    sample_model_id UUID NOT NULL REFERENCES sample_models (id),
+    -- Required role of the `sample` slot.
+    sample_slot_role_id TEXT GENERATED ALWAYS AS ('input') STORED NOT NULL,
+    FOREIGN KEY (packaged_with_slot_id, id, packaged_with_model_id, packaged_with_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    FOREIGN KEY (sample_slot_id, id, sample_model_id, sample_slot_role_id, organization_id)
+        REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    -- Archive state inherited from this resource.
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `packaged_with_model_id`.
+    packaged_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sample_model_id`.
+    sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (id, archived),
+    FOREIGN KEY (packaged_with_model_id, packaged_with_model_archived) REFERENCES packaging_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (sample_model_id, sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
-INSERT INTO table_names (id) VALUES ('packaging_procedures') ON CONFLICT DO NOTHING;
+CREATE INDEX ON packaging_procedure_templates (packaged_with_model_id);
+CREATE INDEX ON packaging_procedure_templates (sample_model_id);
+INSERT INTO table_names (id) VALUES ('packaging_procedure_templates');
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'packaging_procedure_templates', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedure_templates'
+    UNION SELECT 'packaging_procedure_templates', 'packaging_procedure_templates';
+CREATE TRIGGER packaging_procedure_templates_guard AFTER INSERT ON packaging_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER packaging_procedure_templates_guard_update AFTER UPDATE OF id, packaged_with_slot_id, packaged_with_model_id, packaged_with_slot_role_id, sample_slot_id, sample_model_id, sample_slot_role_id ON packaging_procedure_templates
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.packaged_with_slot_id IS DISTINCT FROM NEW.packaged_with_slot_id
+        OR OLD.packaged_with_model_id IS DISTINCT FROM NEW.packaged_with_model_id
+        OR OLD.packaged_with_slot_role_id IS DISTINCT FROM NEW.packaged_with_slot_role_id
+        OR OLD.sample_slot_id IS DISTINCT FROM NEW.sample_slot_id
+        OR OLD.sample_model_id IS DISTINCT FROM NEW.sample_model_id
+        OR OLD.sample_slot_role_id IS DISTINCT FROM NEW.sample_slot_role_id) EXECUTE FUNCTION guard_procedure_template_subtype();
+CREATE TRIGGER packaging_procedure_templates_delete_guard BEFORE DELETE ON packaging_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_template_subtype();
+
+CREATE FUNCTION require_packaging_procedure_templates_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedure_templates root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'packaging_procedure_templates'
+    ) AND NOT EXISTS (SELECT 1 FROM public.packaging_procedure_templates row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'packaging_procedure_templates'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_packaging_procedure_templates_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_packaging_procedure_templates_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER packaging_procedure_templates_row AFTER INSERT ON procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'packaging_procedure_templates')
+    EXECUTE FUNCTION require_packaging_procedure_templates_row();
+CREATE CONSTRAINT TRIGGER packaging_procedure_templates_kept AFTER DELETE ON packaging_procedure_templates
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_packaging_procedure_templates_row();
+
+REVOKE ALL ON packaging_procedure_templates FROM PUBLIC, app, identity_writer;
+GRANT SELECT, INSERT, DELETE ON packaging_procedure_templates TO app;
+ALTER TABLE packaging_procedure_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE packaging_procedure_templates FORCE ROW LEVEL SECURITY;
+CREATE POLICY packaging_procedure_templates_select ON packaging_procedure_templates FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY packaging_procedure_templates_insert ON packaging_procedure_templates FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND packaged_with_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))) AND sample_model_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY packaging_procedure_templates_delete ON packaging_procedure_templates FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY packaging_procedure_templates_archived_insert ON packaging_procedure_templates AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT archived AND NOT packaged_with_model_archived AND NOT sample_model_archived);
+CREATE POLICY packaging_procedure_templates_archived_delete ON packaging_procedure_templates AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT archived);
+CREATE POLICY packaging_procedure_templates_blocked ON packaging_procedure_templates AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Recorded execution of a packaging template.
+CREATE TABLE packaging_procedures (
+    -- Identity shared with the parent procedure.
+    id UUID PRIMARY KEY REFERENCES procedures (id) ON DELETE CASCADE,
+    -- Organization containing the parent resource.
+    organization_id UUID NOT NULL,
+    -- Typed template executed by this procedure.
+    packaging_procedure_template_id UUID NOT NULL REFERENCES packaging_procedure_templates (id),
+    -- Execution status copied from the parent procedure.
+    status_id TEXT NOT NULL DEFAULT 'planned',
+    FOREIGN KEY (id, packaging_procedure_template_id, status_id, organization_id)
+        REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
+        DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `packaging_procedure_template_id`.
+    packaging_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (packaging_procedure_template_id, packaging_procedure_template_archived) REFERENCES packaging_procedure_templates (id, archived) ON UPDATE CASCADE,
+    FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE INDEX ON packaging_procedures (packaging_procedure_template_id);
+INSERT INTO table_names (id) VALUES ('packaging_procedures');
+UPDATE table_names SET instance_table_name_id = 'packaging_procedures'
+    WHERE id = 'packaging_procedure_templates';
+INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
+    SELECT 'packaging_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
+    UNION SELECT 'packaging_procedures', 'packaging_procedures';
+CREATE TRIGGER packaging_procedures_guard AFTER INSERT ON packaging_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER packaging_procedures_guard_update AFTER UPDATE OF id, packaging_procedure_template_id, status_id ON packaging_procedures
+    FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id
+        OR OLD.packaging_procedure_template_id IS DISTINCT FROM NEW.packaging_procedure_template_id
+        OR OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION guard_procedure_subtype();
+CREATE TRIGGER packaging_procedures_delete_guard BEFORE DELETE ON packaging_procedures
+    FOR EACH ROW EXECUTE FUNCTION guard_procedure_subtype();
+
+-- Writes a procedure's new status into its `packaging_procedures` row, whose deferred
+-- foreign key holds it equal to the procedure at commit.
+CREATE FUNCTION copy_packaging_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    UPDATE public.packaging_procedures SET status_id = NEW.status_id WHERE id = NEW.id;
+    RETURN NULL;
+END;
+$$;
+REVOKE ALL ON packaging_procedures FROM PUBLIC, app, identity_writer;
+GRANT UPDATE (status_id) ON packaging_procedures TO aps_writer;
+ALTER FUNCTION copy_packaging_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION copy_packaging_procedures_status() FROM PUBLIC;
+CREATE TRIGGER procedures_status_copy_packaging_procedures AFTER UPDATE OF status_id ON procedures
+    FOR EACH ROW WHEN (OLD.status_id IS DISTINCT FROM NEW.status_id) EXECUTE FUNCTION copy_packaging_procedures_status();
+
+CREATE FUNCTION require_packaging_procedures_row() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    row_id UUID := CASE TG_OP WHEN 'DELETE' THEN OLD.id ELSE NEW.id END;
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM public.procedures root
+        JOIN public.table_name_ancestors path ON path.descendant_table_name_id = root.table_name_id
+        WHERE root.id = row_id AND path.ancestor_table_name_id = 'packaging_procedures'
+    ) AND NOT EXISTS (SELECT 1 FROM public.packaging_procedures row WHERE row.id = row_id) THEN
+        RAISE EXCEPTION '% names a table extending % but has no row there', row_id, 'packaging_procedures'
+            USING ERRCODE = 'foreign_key_violation';
+    END IF;
+    RETURN NULL;
+END;
+$$;
+ALTER FUNCTION require_packaging_procedures_row() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION require_packaging_procedures_row() FROM PUBLIC;
+CREATE CONSTRAINT TRIGGER packaging_procedures_row AFTER INSERT ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (NEW.table_name_id = 'packaging_procedures')
+    EXECUTE FUNCTION require_packaging_procedures_row();
+CREATE CONSTRAINT TRIGGER packaging_procedures_kept AFTER DELETE ON packaging_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION require_packaging_procedures_row();
+
+CREATE FUNCTION initialize_packaging_procedures_status() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
+BEGIN
+    SELECT procedure.status_id INTO parent_status
+    FROM public.procedures procedure
+    WHERE procedure.id = NEW.id
+        AND procedure.procedure_template_id = NEW.packaging_procedure_template_id
+        AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION initialize_packaging_procedures_status() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION initialize_packaging_procedures_status() FROM PUBLIC;
+CREATE TRIGGER packaging_procedures_status_initialize BEFORE INSERT ON packaging_procedures
+    FOR EACH ROW EXECUTE FUNCTION initialize_packaging_procedures_status();
+
+GRANT SELECT, INSERT (id, organization_id, packaging_procedure_template_id, archived, packaging_procedure_template_archived), DELETE ON packaging_procedures TO app;
+ALTER TABLE packaging_procedures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE packaging_procedures FORCE ROW LEVEL SECURITY;
+CREATE POLICY packaging_procedures_select ON packaging_procedures FOR SELECT TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY packaging_procedures_insert ON packaging_procedures FOR INSERT TO app
+    WITH CHECK (id = ANY (ARRAY(SELECT authz.resources_with('writer'))) AND packaging_procedure_template_id = ANY (ARRAY(SELECT authz.resources_with('reader'))));
+CREATE POLICY packaging_procedures_delete ON packaging_procedures FOR DELETE TO app
+    USING (id = ANY (ARRAY(SELECT authz.resources_with('admin'))));
+CREATE POLICY packaging_procedures_archived_insert ON packaging_procedures AS RESTRICTIVE FOR INSERT TO app
+    WITH CHECK (NOT archived AND NOT packaging_procedure_template_archived);
+CREATE POLICY packaging_procedures_archived_delete ON packaging_procedures AS RESTRICTIVE FOR DELETE TO app
+    USING (NOT archived);
+CREATE POLICY packaging_procedures_blocked ON packaging_procedures AS RESTRICTIVE FOR ALL TO app
+    USING (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))))
+    WITH CHECK (NOT (organization_id = ANY (ARRAY(SELECT authz.blocking_organizations()))));
+
+-- Records every change in connetto's `audit_events`.
+CREATE TRIGGER packaging_procedure_templates_audit AFTER INSERT OR DELETE ON packaging_procedure_templates
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER packaging_procedure_templates_update_audit AFTER UPDATE ON packaging_procedure_templates
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER packaging_procedures_audit AFTER INSERT OR DELETE ON packaging_procedures
+    FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
+CREATE TRIGGER packaging_procedures_update_audit AFTER UPDATE ON packaging_procedures
+    FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();

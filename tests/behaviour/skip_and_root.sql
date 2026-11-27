@@ -1,0 +1,150 @@
+\set ON_ERROR_STOP 1
+SET search_path = public, test_tools;
+BEGIN;
+\ir ../fixture.sql
+SELECT plan(19);
+SELECT pg_temp.new_model('a2000000-0000-7000-8000-000000000001', 'tube', NULL);
+SELECT pg_temp.new_asset('b2000000-0000-7000-8000-000000000001', 'tube one', 'a2000000-0000-7000-8000-000000000001');
+SELECT pg_temp.new_asset('b2000000-0000-7000-8000-000000000002', 'tube two', 'a2000000-0000-7000-8000-000000000001');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+
+SELECT pg_temp.new_template('c2000000-0000-7000-8000-000000000001', 'label');
+SELECT pg_temp.new_slot('d2000000-0000-7000-8000-000000000001', 'c2000000-0000-7000-8000-000000000001', 'tube', 'a2000000-0000-7000-8000-000000000001', 'input', 1, 1);
+SELECT pg_temp.new_template('c2000000-0000-7000-8000-000000000002', 'mint');
+SELECT pg_temp.new_slot('d2000000-0000-7000-8000-000000000002', 'c2000000-0000-7000-8000-000000000002', 'tube', 'a2000000-0000-7000-8000-000000000001', 'produced', 1, 1);
+UPDATE procedure_templates SET state_id = 'published' WHERE id IN ('c2000000-0000-7000-8000-000000000001', 'c2000000-0000-7000-8000-000000000002');
+SELECT pg_temp.new_template('c2000000-0000-7000-8000-000000000010', 'routine');
+SELECT pg_temp.new_slot('d2000000-0000-7000-8000-000000000010', 'c2000000-0000-7000-8000-000000000010', 'tube', 'a2000000-0000-7000-8000-000000000001', 'input', 1, 1);
+SELECT pg_temp.new_step('e2000000-0000-7000-8000-000000000010', 'c2000000-0000-7000-8000-000000000010', 'c2000000-0000-7000-8000-000000000001', 'optional label', 0);
+SELECT pg_temp.new_step('e2000000-0000-7000-8000-000000000011', 'c2000000-0000-7000-8000-000000000010', 'c2000000-0000-7000-8000-000000000001', 'required label', 1);
+SELECT pg_temp.new_step('e2000000-0000-7000-8000-000000000012', 'c2000000-0000-7000-8000-000000000010', 'c2000000-0000-7000-8000-000000000002', 'optional mint', 2);
+UPDATE procedure_template_steps SET optional = TRUE
+  WHERE id IN ('e2000000-0000-7000-8000-000000000010', 'e2000000-0000-7000-8000-000000000012');
+SELECT pg_temp.new_edge('e2000000-0000-7000-8000-000000000010', 'e2000000-0000-7000-8000-000000000011');
+SELECT pg_temp.new_edge('e2000000-0000-7000-8000-000000000011', 'e2000000-0000-7000-8000-000000000012');
+SELECT pg_temp.new_binding('e2000000-0000-7000-8000-000000000010', 'd2000000-0000-7000-8000-000000000001', 'd2000000-0000-7000-8000-000000000010');
+SELECT pg_temp.new_binding('e2000000-0000-7000-8000-000000000011', 'd2000000-0000-7000-8000-000000000001', 'd2000000-0000-7000-8000-000000000010');
+UPDATE procedure_templates SET state_id = 'published' WHERE id = 'c2000000-0000-7000-8000-000000000010';
+SELECT pg_temp.new_template('c2000000-0000-7000-8000-000000000020', 'campaign');
+SELECT pg_temp.new_slot('d2000000-0000-7000-8000-000000000020', 'c2000000-0000-7000-8000-000000000020', 'tube', 'a2000000-0000-7000-8000-000000000001', 'input', 1, 1);
+SELECT pg_temp.new_step('e2000000-0000-7000-8000-000000000020', 'c2000000-0000-7000-8000-000000000020', 'c2000000-0000-7000-8000-000000000010', 'optional routine', 0);
+UPDATE procedure_template_steps SET optional = TRUE WHERE id = 'e2000000-0000-7000-8000-000000000020';
+SELECT pg_temp.new_binding('e2000000-0000-7000-8000-000000000020', 'd2000000-0000-7000-8000-000000000010', 'd2000000-0000-7000-8000-000000000020');
+UPDATE procedure_templates SET state_id = 'published' WHERE id = 'c2000000-0000-7000-8000-000000000020';
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+
+SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000020', 'c2000000-0000-7000-8000-000000000020', 'in_progress', NULL, NULL);
+SELECT pg_temp.bind('92000000-0000-7000-8000-000000000020', 'f2000000-0000-7000-8000-000000000020', 'd2000000-0000-7000-8000-000000000020', 'b2000000-0000-7000-8000-000000000001');
+SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000021', 'c2000000-0000-7000-8000-000000000010', 'in_progress', 'f2000000-0000-7000-8000-000000000020', 'e2000000-0000-7000-8000-000000000020');
+SELECT pg_temp.bind('92000000-0000-7000-8000-000000000021', 'f2000000-0000-7000-8000-000000000021', 'd2000000-0000-7000-8000-000000000010', 'b2000000-0000-7000-8000-000000000001');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+
+SELECT throws_ok($statement$SELECT pg_temp.create_ownable('f2000000-0000-7000-8000-000000000022');
+    INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, parent_procedure_id,
+        parent_template_id, step_id, root_procedure_id)
+      VALUES ('f2000000-0000-7000-8000-000000000022', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001',
+        'procedures', 'c2000000-0000-7000-8000-000000000001', 'f2000000-0000-7000-8000-000000000021',
+        'c2000000-0000-7000-8000-000000000010', 'e2000000-0000-7000-8000-000000000010', 'f2000000-0000-7000-8000-000000000021'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23503', 'insert or update on table "procedures" violates foreign key constraint "procedures_parent_procedure_id_root_procedure_id_organizat_fkey"', 'a step naming another root than its parent''s is rejected');
+
+SELECT throws_ok($statement$SELECT pg_temp.create_ownable('f2000000-0000-7000-8000-000000000030');
+    INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, root_procedure_id)
+      VALUES ('f2000000-0000-7000-8000-000000000030', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001',
+        'procedures', 'c2000000-0000-7000-8000-000000000001', 'f2000000-0000-7000-8000-000000000020'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'new row for relation "procedures" violates check constraint "procedures_check9"', 'a run root naming another procedure as its root is rejected');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000023', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000011');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000023'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000023 skips a required step without a reason in its note', 'required step skipped without a reason is rejected');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000022', 'c2000000-0000-7000-8000-000000000001', 'in_progress', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000010');
+    UPDATE procedures SET status_id = 'skipped', started_at = NULL, ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000022'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000022 is in_progress, and only a planned step can be skipped', 'step in progress cannot be skipped');
+
+SELECT throws_ok($statement$SELECT pg_temp.create_ownable('f2000000-0000-7000-8000-000000000022');
+    INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, status_id, parent_procedure_id,
+        parent_template_id, step_id, root_procedure_id, ended_at)
+      VALUES ('f2000000-0000-7000-8000-000000000022', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001',
+        'procedures', 'c2000000-0000-7000-8000-000000000001', 'skipped', 'f2000000-0000-7000-8000-000000000021',
+        'c2000000-0000-7000-8000-000000000010', 'e2000000-0000-7000-8000-000000000010', 'f2000000-0000-7000-8000-000000000020', now()); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000022 must be inserted as planned or in_progress', 'step cannot be inserted as skipped');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000022', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000010');
+    UPDATE procedures SET status_id = 'skipped' WHERE id = 'f2000000-0000-7000-8000-000000000022'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'new row for relation "procedures" violates check constraint "procedures_check8"', 'skipping needs the time of the decision');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000030', 'c2000000-0000-7000-8000-000000000001', 'planned', NULL, NULL);
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000030'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'new row for relation "procedures" violates check constraint "procedures_check8"', 'a run root cannot be skipped');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000022', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000010');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000022';
+    UPDATE procedures SET status_id = 'planned', ended_at = NULL WHERE id = 'f2000000-0000-7000-8000-000000000022'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000022 is skipped, so only its note can change', 'skipped step cannot be reopened');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000022', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000010');
+    SELECT pg_temp.bind('92000000-0000-7000-8000-000000000022', 'f2000000-0000-7000-8000-000000000022', 'd2000000-0000-7000-8000-000000000001', 'b2000000-0000-7000-8000-000000000001');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000022';
+    DELETE FROM procedure_assets WHERE id = '92000000-0000-7000-8000-000000000022'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000022 is skipped, so its assets cannot change', 'skipped step keeps its bindings');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000023', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000011');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now(), note = 'label printer broken'
+      WHERE id = 'f2000000-0000-7000-8000-000000000023';
+    UPDATE procedures SET note = NULL WHERE id = 'f2000000-0000-7000-8000-000000000023'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000023 skips a required step without a reason in its note', 'reason of a skipped required step cannot be cleared');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000040', 'c2000000-0000-7000-8000-000000000020', 'in_progress', NULL, NULL);
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000041', 'c2000000-0000-7000-8000-000000000010', 'planned', 'f2000000-0000-7000-8000-000000000040', 'e2000000-0000-7000-8000-000000000020');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000041';
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000042', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000041', 'e2000000-0000-7000-8000-000000000010'); SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000042 cannot be planned under a parent that is skipped', 'skipped step takes no steps');
+
+SELECT throws_ok($statement$SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000040', 'c2000000-0000-7000-8000-000000000020', 'in_progress', NULL, NULL);
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000041', 'c2000000-0000-7000-8000-000000000010', 'planned', 'f2000000-0000-7000-8000-000000000040', 'e2000000-0000-7000-8000-000000000020');
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000042', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000041', 'e2000000-0000-7000-8000-000000000010');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000041'; SET CONSTRAINTS ALL IMMEDIATE$statement$, '23514', 'procedure f2000000-0000-7000-8000-000000000041 has children that are still open', 'step with open steps cannot be skipped');
+
+SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000022', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000010');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT is((SELECT count(*) FROM procedures
+    WHERE id IN ('f2000000-0000-7000-8000-000000000020', 'f2000000-0000-7000-8000-000000000021', 'f2000000-0000-7000-8000-000000000022')
+      AND root_procedure_id = 'f2000000-0000-7000-8000-000000000020'), 3::bigint, 'every procedure of a run names its root');
+UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000022';
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT is((SELECT status_id FROM procedures WHERE id = 'f2000000-0000-7000-8000-000000000022'), 'skipped'::text, 'optional step is skipped without a reason');
+UPDATE procedures SET note = 'tube already labelled' WHERE id = 'f2000000-0000-7000-8000-000000000022';
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT is((SELECT note FROM procedures WHERE id = 'f2000000-0000-7000-8000-000000000022'), 'tube already labelled'::text, 'skipped step takes a note');
+SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000060', 'c2000000-0000-7000-8000-000000000010', 'in_progress', NULL, NULL);
+UPDATE procedures SET started_at = now() - interval '2 hours' WHERE id = 'f2000000-0000-7000-8000-000000000060';
+SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000063', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000060', 'e2000000-0000-7000-8000-000000000011');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() - interval '1 hour', note = 'label printer broken'
+      WHERE id = 'f2000000-0000-7000-8000-000000000063';
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000064', 'c2000000-0000-7000-8000-000000000002', 'in_progress', 'f2000000-0000-7000-8000-000000000060', 'e2000000-0000-7000-8000-000000000012');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT isnt_empty($query$SELECT 1 FROM procedures WHERE id = 'f2000000-0000-7000-8000-000000000064'$query$, 'successor starts after a required step skipped with a reason');
+SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000040', 'c2000000-0000-7000-8000-000000000020', 'in_progress', NULL, NULL);
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000041', 'c2000000-0000-7000-8000-000000000010', 'planned', 'f2000000-0000-7000-8000-000000000040', 'e2000000-0000-7000-8000-000000000020');
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000042', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000041', 'e2000000-0000-7000-8000-000000000010');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000042';
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000041';
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT is((SELECT status_id FROM procedures WHERE id = 'f2000000-0000-7000-8000-000000000041'), 'skipped'::text, 'step whose steps are closed is skipped');
+SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000024', 'c2000000-0000-7000-8000-000000000002', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000012');
+    SELECT pg_temp.bind('92000000-0000-7000-8000-000000000024', 'f2000000-0000-7000-8000-000000000024', 'd2000000-0000-7000-8000-000000000002', 'b2000000-0000-7000-8000-000000000002');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now() - interval '1 hour' WHERE id = 'f2000000-0000-7000-8000-000000000024';
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000050', 'c2000000-0000-7000-8000-000000000002', 'in_progress', NULL, NULL);
+    SELECT pg_temp.bind('92000000-0000-7000-8000-000000000050', 'f2000000-0000-7000-8000-000000000050', 'd2000000-0000-7000-8000-000000000002', 'b2000000-0000-7000-8000-000000000002');
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT isnt_empty($query$SELECT 1 FROM procedure_assets WHERE id = '92000000-0000-7000-8000-000000000050'$query$, 'tube a skipped step would have minted is minted elsewhere');
+
+    SELECT pg_temp.new_procedure('f2000000-0000-7000-8000-000000000023', 'c2000000-0000-7000-8000-000000000001', 'planned', 'f2000000-0000-7000-8000-000000000021', 'e2000000-0000-7000-8000-000000000011');
+    UPDATE procedures SET status_id = 'skipped', ended_at = now(), note = 'label printer broken'
+      WHERE id = 'f2000000-0000-7000-8000-000000000023';
+    UPDATE procedures SET status_id = 'completed', ended_at = now() WHERE id = 'f2000000-0000-7000-8000-000000000021';
+SET CONSTRAINTS ALL IMMEDIATE;
+SET CONSTRAINTS ALL DEFERRED;
+SELECT is((SELECT status_id FROM procedures WHERE id = 'f2000000-0000-7000-8000-000000000021'), 'completed'::text, 'run completes with a required step skipped');
+
+RESET ROLE;
+SELECT * FROM finish();
+ROLLBACK;

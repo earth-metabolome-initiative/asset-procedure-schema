@@ -5,7 +5,7 @@ use sql_traits::prelude::*;
 
 /// Visualizes the DAG structures present in the given database.
 pub fn visualize_dags(db: &ParserDB) -> Result<(), Box<dyn std::error::Error>> {
-    for root in db.root_tables() {
+    for root in db.root_tables()? {
         visualize_dag(root, db)?;
     }
     Ok(())
@@ -22,7 +22,7 @@ fn visualize_dag(
             .title(root.table_name())?,
     )?;
 
-    let tables = root.extending_tables(db).chain(std::iter::once(root)).collect::<Vec<_>>();
+    let tables = root.extending_tables(db)?.chain(std::iter::once(root)).collect::<Vec<_>>();
 
     for table in tables.iter() {
         builder.node(
@@ -35,15 +35,16 @@ fn visualize_dag(
     }
 
     for (table_id, table) in tables.iter().enumerate() {
-        let source = builder.get_node_by_id(table_id as u64).expect("Node should exist");
-        for referenced_table in table.referenced_tables(db) {
-            let Some(referenced_table_id) = tables.iter().position(|t| t == &referenced_table)
+        let source = builder.get_node_by_id(u64::try_from(table_id)?).expect("Node should exist");
+        for referenced_table in table.referenced_tables(db)? {
+            let Some(referenced_table_id) = tables.iter().position(|t| *t == referenced_table)
             else {
                 continue;
             };
 
-            let destination =
-                builder.get_node_by_id(referenced_table_id as u64).expect("Node should exist");
+            let destination = builder
+                .get_node_by_id(u64::try_from(referenced_table_id)?)
+                .expect("Node should exist");
 
             builder.edge(
                 FlowchartEdgeBuilder::default()

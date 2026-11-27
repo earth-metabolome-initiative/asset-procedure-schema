@@ -1,0 +1,75 @@
+setup
+{
+  INSERT INTO users (id) VALUES ('10000000-0000-7000-8000-000000000001');
+  SET app.user_id = '10000000-0000-7000-8000-000000000001';
+  BEGIN;
+  INSERT INTO organizations (id, created_by_id) VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001');
+  INSERT INTO resources (id, kind, organization_id) VALUES ('20000000-0000-7000-8000-000000000001', 'organization', '20000000-0000-7000-8000-000000000001');
+  INSERT INTO memberships (organization_id, user_id, state) VALUES ('20000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'active');
+  COMMIT;
+  BEGIN;
+  INSERT INTO resources (organization_id, id, kind, parent_id, parent_kind)
+  VALUES ('20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'project', '20000000-0000-7000-8000-000000000001', 'organization');
+  COMMIT;
+  BEGIN;
+  INSERT INTO resources (id, organization_id, parent_id, created_by_id, kind, parent_kind)
+  VALUES ('a0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('a0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('a0000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('b0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('b0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('b0000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('c0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('90000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('f0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project'),
+    ('f0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', '10000000-0000-7000-8000-000000000001', 'ownable', 'project');
+  INSERT INTO asset_models (id, organization_id, project_id, table_name_id, name)
+  VALUES ('a0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'sample_models', 'sample'),
+    ('a0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_models', 'container'),
+    ('a0000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'sample_source_models', 'source');
+  INSERT INTO asset_model_ancestors (descendant_model_id, ancestor_model_id, organization_id, parent_model_id) SELECT id, id, organization_id, NULL FROM asset_models;
+  INSERT INTO physical_asset_models (id, organization_id) SELECT id, organization_id FROM asset_models;
+  INSERT INTO sample_source_models (id, organization_id) VALUES ('a0000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001');
+  INSERT INTO sample_models (id, organization_id, sample_source_model_id) VALUES ('a0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000003');
+  INSERT INTO container_models (id, organization_id) VALUES ('a0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001');
+  INSERT INTO container_compatibility_rules (id, organization_id, project_id, table_name_id, container_model_id, contained_asset_model_id, quantity) VALUES ('90000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'container_compatibility_rules', 'a0000000-0000-7000-8000-000000000002', 'a0000000-0000-7000-8000-000000000001', 1);
+  INSERT INTO assets (id, organization_id, project_id, table_name_id, model_id, name)
+  VALUES ('b0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'samples', 'a0000000-0000-7000-8000-000000000001', 'asset 0'),
+    ('b0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'containers', 'a0000000-0000-7000-8000-000000000002', 'asset 1'),
+    ('b0000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'containers', 'a0000000-0000-7000-8000-000000000002', 'asset 2');
+  INSERT INTO physical_assets (id, organization_id, physical_asset_model_id) SELECT id, organization_id, model_id FROM assets;
+  INSERT INTO samples (id, organization_id, sample_model_id, sample_source_model_id) SELECT id, organization_id, model_id, 'a0000000-0000-7000-8000-000000000003' FROM assets WHERE table_name_id = 'samples';
+  INSERT INTO containers (id, organization_id, container_model_id) SELECT id, organization_id, model_id FROM assets WHERE table_name_id = 'containers';
+  INSERT INTO procedure_templates (id, organization_id, project_id, table_name_id, name) VALUES ('c0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'storage_procedure_templates', 'storage');
+  INSERT INTO procedure_template_slots (id, organization_id, procedure_template_id, name, asset_model_id, role_id, minimum_count, maximum_count)
+  VALUES ('d0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 'stored_asset', 'a0000000-0000-7000-8000-000000000001', 'input', 1, 1),
+    ('d0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 'stored_into', 'a0000000-0000-7000-8000-000000000002', 'input', 1, 1);
+  UPDATE procedure_template_slots SET placed_into_slot_id = 'd0000000-0000-7000-8000-000000000002' WHERE id = 'd0000000-0000-7000-8000-000000000001'; INSERT INTO storage_procedure_templates (id, organization_id, stored_asset_slot_id, stored_asset_model_id, stored_into_slot_id, stored_into_model_id) VALUES ('c0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', 'd0000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000001', 'd0000000-0000-7000-8000-000000000002', 'a0000000-0000-7000-8000-000000000002');
+  UPDATE procedure_templates SET state_id = 'published' WHERE id = 'c0000000-0000-7000-8000-000000000001';
+  INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, status_id, root_procedure_id, started_at, performed_by_id) VALUES ('f0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'storage_procedures', 'c0000000-0000-7000-8000-000000000001', 'in_progress', 'f0000000-0000-7000-8000-000000000001', '2026-01-01 10:00+00', '10000000-0000-7000-8000-000000000001');
+  INSERT INTO storage_procedures (id, organization_id, storage_procedure_template_id, temperature_k) VALUES ('f0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 293.15);
+  INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id) VALUES ('e0000000-0000-7000-8000-000000000001', '20000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 'd0000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000001', 'input', 'a0000000-0000-7000-8000-000000000001', 'b0000000-0000-7000-8000-000000000001');
+  INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id) VALUES ('e0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 'd0000000-0000-7000-8000-000000000002', 'a0000000-0000-7000-8000-000000000002', 'input', 'a0000000-0000-7000-8000-000000000002', 'b0000000-0000-7000-8000-000000000003');
+  INSERT INTO procedures (id, organization_id, project_id, table_name_id, procedure_template_id, status_id, root_procedure_id) VALUES ('f0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', '50000000-0000-7000-8000-000000000001', 'storage_procedures', 'c0000000-0000-7000-8000-000000000001', 'planned', 'f0000000-0000-7000-8000-000000000002');
+  INSERT INTO storage_procedures (id, organization_id, storage_procedure_template_id, temperature_k) VALUES ('f0000000-0000-7000-8000-000000000002', '20000000-0000-7000-8000-000000000001', 'c0000000-0000-7000-8000-000000000001', 293.15);
+  INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id) VALUES ('e0000000-0000-7000-8000-000000000003', '20000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000002', 'c0000000-0000-7000-8000-000000000001', 'd0000000-0000-7000-8000-000000000001', 'a0000000-0000-7000-8000-000000000001', 'input', 'a0000000-0000-7000-8000-000000000001', 'b0000000-0000-7000-8000-000000000001');
+  INSERT INTO procedure_assets (id, organization_id, procedure_id, procedure_template_id, slot_id, slot_asset_model_id, slot_role_id, asset_model_id, asset_id) VALUES ('e0000000-0000-7000-8000-000000000004', '20000000-0000-7000-8000-000000000001', 'f0000000-0000-7000-8000-000000000002', 'c0000000-0000-7000-8000-000000000001', 'd0000000-0000-7000-8000-000000000002', 'a0000000-0000-7000-8000-000000000002', 'input', 'a0000000-0000-7000-8000-000000000002', 'b0000000-0000-7000-8000-000000000002');
+  COMMIT;
+}
+
+session first
+setup { SET statement_timeout = '20s'; SET app.user_id = '10000000-0000-7000-8000-000000000001'; SET ROLE app; }
+step first_begin { BEGIN ISOLATION LEVEL READ COMMITTED; }
+step first_start { UPDATE procedures SET status_id = 'in_progress', started_at = '2026-01-01 12:00+00', performed_by_id = '10000000-0000-7000-8000-000000000001' WHERE id = 'f0000000-0000-7000-8000-000000000002'; SET CONSTRAINTS ALL IMMEDIATE; }
+step first_finish { COMMIT; }
+
+session second
+setup { SET statement_timeout = '20s'; SET app.user_id = '10000000-0000-7000-8000-000000000001'; SET ROLE app; }
+step second_begin { BEGIN ISOLATION LEVEL READ COMMITTED; }
+step second_complete { UPDATE procedures SET status_id = 'completed', ended_at = '2026-01-01 11:00+00' WHERE id = 'f0000000-0000-7000-8000-000000000001'; SET CONSTRAINTS ALL IMMEDIATE; }
+step second_finish { COMMIT; }
+
+session observer
+step exits { SELECT container_id, removal_procedure_id, left_at FROM move_exits; }
+
+permutation first_begin first_start second_begin second_complete first_finish second_finish exits
