@@ -36,8 +36,11 @@ CREATE TABLE storage_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (stored_asset_slot_id, id, stored_into_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `stored_into_model_id`.
     stored_into_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `stored_asset_model_id`.
     stored_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (stored_into_model_id, stored_into_model_archived) REFERENCES container_models (id, archived) ON UPDATE CASCADE,
@@ -121,14 +124,16 @@ CREATE TABLE storage_procedures (
     -- Typed template executed by this procedure.
     storage_procedure_template_id UUID NOT NULL REFERENCES storage_procedure_templates (id),
     -- Execution status copied from the parent procedure.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     -- Measured temperature k.
     temperature_k DOUBLE PRECISION CHECK (temperature_k > 0.0 AND temperature_k < 'Infinity'::double precision),
     CHECK (status_id <> 'completed' OR temperature_k IS NOT NULL),
     FOREIGN KEY (id, storage_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `storage_procedure_template_id`.
     storage_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (storage_procedure_template_id, storage_procedure_template_archived) REFERENCES storage_procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -192,13 +197,17 @@ CREATE CONSTRAINT TRIGGER storage_procedures_kept AFTER DELETE ON storage_proced
 
 CREATE FUNCTION initialize_storage_procedures_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.id
         AND procedure.procedure_template_id = NEW.storage_procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;
@@ -270,7 +279,7 @@ END;
 $$;
 ALTER FUNCTION public.check_storage_slot_cardinality() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_storage_slot_cardinality() FROM PUBLIC;
-CREATE CONSTRAINT TRIGGER storage_template_slots AFTER INSERT OR UPDATE ON storage_procedure_templates
+CREATE CONSTRAINT TRIGGER storage_template_slots AFTER INSERT OR UPDATE OF id, stored_into_slot_id, stored_into_model_id, stored_into_slot_role_id, stored_asset_slot_id, stored_asset_model_id, stored_asset_slot_role_id, temperature_k, temperature_tolerance_percentage ON storage_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_storage_slots();
-CREATE CONSTRAINT TRIGGER storage_slot_counts AFTER UPDATE ON procedure_template_slots
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_storage_slot_cardinality();
+CREATE CONSTRAINT TRIGGER storage_slot_counts AFTER UPDATE OF minimum_count, maximum_count ON procedure_template_slots
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count) EXECUTE FUNCTION public.check_storage_slot_cardinality();

@@ -21,6 +21,7 @@ CREATE TABLE container_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -60,7 +61,7 @@ CREATE CONSTRAINT TRIGGER container_models_kept AFTER DELETE ON container_models
 
 -- Rule set that defines which physical asset models can be contained by a specific container model and in what quantity.
 CREATE TABLE container_compatibility_rules (
-    -- Stable rule identifier inherited from ``resources` of kind `'ownable'``.
+    -- Stable rule identifier inherited from its `resources` row of kind `'ownable'`.
     id UUID PRIMARY KEY REFERENCES resources (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
@@ -85,9 +86,13 @@ CREATE TABLE container_compatibility_rules (
     -- Moving a container model moves its rules in the same transaction.
     FOREIGN KEY (container_model_id, project_id) REFERENCES asset_models (id, project_id) DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (organization_id, container_model_id, container_model_archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Resource kind fixed to `'ownable'`.
     kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    -- Archive state of the row named by `container_model_id`.
     container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `contained_asset_model_id`.
     contained_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (container_model_id, container_model_archived) REFERENCES container_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (contained_asset_model_id, contained_asset_model_archived) REFERENCES physical_asset_models (id, archived) ON UPDATE CASCADE,
@@ -125,6 +130,7 @@ CREATE TABLE weighed_container_models (
     organization_id UUID NOT NULL,
     -- Empty container mass.
     mass_kg DOUBLE PRECISION NOT NULL CHECK (mass_kg > 0.0 AND mass_kg < 'Infinity'::double precision),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -172,6 +178,7 @@ CREATE TABLE volumetric_container_models (
     -- Whether a transfer template or a run relies on the volume, which then
     -- stays as it is.
     in_use BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -222,6 +229,7 @@ CREATE TABLE weighed_volumetric_container_models (
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
     FOREIGN KEY (id) REFERENCES volumetric_container_models (id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -267,7 +275,9 @@ CREATE TABLE containers (
     -- Container model instantiated by this physical container.
     container_model_id UUID NOT NULL REFERENCES container_models (id),
     FOREIGN KEY (id, container_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `container_model_id`.
     container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (container_model_id, container_model_archived) REFERENCES container_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -317,7 +327,9 @@ CREATE TABLE volumetric_containers (
     -- Volumetric model instantiated by this container.
     volumetric_container_model_id UUID NOT NULL REFERENCES volumetric_container_models (id),
     FOREIGN KEY (id, volumetric_container_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `volumetric_container_model_id`.
     volumetric_container_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (volumetric_container_model_id, volumetric_container_model_archived) REFERENCES volumetric_container_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -364,6 +376,7 @@ CREATE TABLE container_sealer_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

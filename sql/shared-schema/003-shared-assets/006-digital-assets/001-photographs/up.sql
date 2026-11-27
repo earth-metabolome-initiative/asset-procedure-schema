@@ -16,6 +16,7 @@ CREATE TABLE photograph_models (
     -- Image media type pinned to the digital model.
     mime_type TEXT NOT NULL CHECK (mime_type LIKE 'image/%'),
     FOREIGN KEY (id, mime_type, organization_id) REFERENCES digital_asset_models (id, mime_type, organization_id) ON UPDATE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -62,7 +63,9 @@ CREATE TABLE photographs (
     -- Image model instantiated by this photograph.
     photograph_model_id UUID NOT NULL REFERENCES photograph_models (id),
     FOREIGN KEY (id, photograph_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `photograph_model_id`.
     photograph_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (photograph_model_id, photograph_model_archived) REFERENCES photograph_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

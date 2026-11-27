@@ -19,6 +19,7 @@ CREATE TABLE mass_spectrometer_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -66,7 +67,9 @@ CREATE TABLE commercial_mass_spectrometer_models (
     mass_spectrometer_model_id UUID NOT NULL REFERENCES mass_spectrometer_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, mass_spectrometer_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `mass_spectrometer_model_id`.
     mass_spectrometer_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (mass_spectrometer_model_id, mass_spectrometer_model_archived) REFERENCES mass_spectrometer_models (id, archived) ON UPDATE CASCADE,
@@ -116,7 +119,9 @@ CREATE TABLE commercial_mass_spectrometer_lots (
     -- Commercial model from which this lot-level model descends.
     commercial_mass_spectrometer_model_id UUID NOT NULL REFERENCES commercial_mass_spectrometer_models (id),
     FOREIGN KEY (id, commercial_mass_spectrometer_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `commercial_mass_spectrometer_model_id`.
     commercial_mass_spectrometer_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (commercial_mass_spectrometer_model_id, commercial_mass_spectrometer_model_archived) REFERENCES commercial_mass_spectrometer_models (id, archived) ON UPDATE CASCADE,
@@ -167,7 +172,9 @@ CREATE TABLE mass_spectrometers (
     -- Commercial lot model instantiated by this physical instrument.
     commercial_mass_spectrometer_lot_id UUID NOT NULL REFERENCES commercial_mass_spectrometer_lots (id),
     FOREIGN KEY (id, commercial_mass_spectrometer_lot_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `commercial_mass_spectrometer_lot_id`.
     commercial_mass_spectrometer_lot_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (commercial_mass_spectrometer_lot_id, commercial_mass_spectrometer_lot_archived) REFERENCES commercial_mass_spectrometer_lots (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

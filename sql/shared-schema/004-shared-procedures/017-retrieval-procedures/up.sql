@@ -33,8 +33,11 @@ CREATE TABLE retrieval_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (retrieved_asset_slot_id, id, retrieved_from_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, retrieved_from_slot_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `retrieved_from_model_id`.
     retrieved_from_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `retrieved_asset_model_id`.
     retrieved_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (retrieved_from_model_id, retrieved_from_model_archived) REFERENCES container_models (id, archived) ON UPDATE CASCADE,
@@ -111,11 +114,13 @@ CREATE TABLE retrieval_procedures (
     -- Typed template executed by this procedure.
     retrieval_procedure_template_id UUID NOT NULL REFERENCES retrieval_procedure_templates (id),
     -- Execution status copied from the parent procedure.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     FOREIGN KEY (id, retrieval_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `retrieval_procedure_template_id`.
     retrieval_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (retrieval_procedure_template_id, retrieval_procedure_template_archived) REFERENCES retrieval_procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -178,13 +183,17 @@ CREATE CONSTRAINT TRIGGER retrieval_procedures_kept AFTER DELETE ON retrieval_pr
 
 CREATE FUNCTION initialize_retrieval_procedures_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.id
         AND procedure.procedure_template_id = NEW.retrieval_procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;
@@ -256,9 +265,9 @@ $$;
 ALTER FUNCTION public.check_retrieval_slot_cardinality() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_retrieval_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.retrieval_procedure_templates, public.retrieval_procedures TO aps_writer;
-CREATE CONSTRAINT TRIGGER retrieval_template_slots AFTER INSERT OR UPDATE ON public.retrieval_procedure_templates
+CREATE CONSTRAINT TRIGGER retrieval_template_slots AFTER INSERT OR UPDATE OF id, retrieved_from_slot_id, retrieved_from_model_id, retrieved_from_slot_role_id, retrieved_asset_slot_id, retrieved_asset_model_id, retrieved_asset_slot_role_id ON public.retrieval_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_retrieval_slots();
-CREATE CONSTRAINT TRIGGER retrieval_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
+CREATE CONSTRAINT TRIGGER retrieval_slot_cardinality AFTER UPDATE OF minimum_count, maximum_count ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
     EXECUTE FUNCTION public.check_retrieval_slot_cardinality();

@@ -15,6 +15,7 @@ CREATE TABLE bead_models (
     organization_id UUID NOT NULL,
     -- Bead diameter in meters.
     diameter_m DOUBLE PRECISION NOT NULL CHECK (diameter_m > 0.0 AND diameter_m < 'Infinity'::double precision),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

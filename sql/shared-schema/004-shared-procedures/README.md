@@ -6,7 +6,7 @@ Weighing, fraction mass, transfer destinations and retrieval containers use sing
 
 Typed procedure rows hold measurements and inherit `status_id` from `procedures`. Completion requires measured setpoints and a `note` explaining deviations returned by `procedure_deviations`, including transfer volume outside `volume_l_tolerance_percentage` (default 5%). Duration comes from `started_at` and `ended_at`.
 
-Each subtype extends a connetto `ownables` resource and uses its organization's authorization policies.
+Each subtype extends a connetto `resources` row of kind `'ownable'` and uses its organization's authorization policies.
 
 Storage and transfers place tracked assets at completion until a relocation, consumption or retrieval starts. `retrieval_procedures` binds `retrieved_asset` and `retrieved_from` input slots. Deferred checks enforce compatibility quantities across overlapping occupancy intervals and require a tracked `source_sample` in its tracked source container when a transfer starts.
 

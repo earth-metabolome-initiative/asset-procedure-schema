@@ -30,8 +30,11 @@ CREATE TABLE weighing_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (weighed_with_slot_id, id, weighed_with_model_id, weighed_with_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `weighed_asset_model_id`.
     weighed_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `weighed_with_model_id`.
     weighed_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (weighed_asset_model_id, weighed_asset_model_archived) REFERENCES physical_asset_models (id, archived) ON UPDATE CASCADE,
@@ -108,14 +111,16 @@ CREATE TABLE weighing_procedures (
     -- Typed template executed by this procedure.
     weighing_procedure_template_id UUID NOT NULL REFERENCES weighing_procedure_templates (id),
     -- Execution status copied from the parent procedure.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     -- Mass in kilograms.
     mass_kg DOUBLE PRECISION CHECK (mass_kg > 0.0 AND mass_kg < 'Infinity'::double precision),
     FOREIGN KEY (id, weighing_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
     CHECK (status_id <> 'completed' OR mass_kg IS NOT NULL),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `weighing_procedure_template_id`.
     weighing_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (weighing_procedure_template_id, weighing_procedure_template_archived) REFERENCES weighing_procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -179,13 +184,17 @@ CREATE CONSTRAINT TRIGGER weighing_procedures_kept AFTER DELETE ON weighing_proc
 
 CREATE FUNCTION initialize_weighing_procedures_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.id
         AND procedure.procedure_template_id = NEW.weighing_procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;
@@ -275,9 +284,9 @@ $$;
 ALTER FUNCTION public.check_weighing_slot_cardinality() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_weighing_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.weighing_procedure_templates TO aps_writer;
-CREATE CONSTRAINT TRIGGER weighing_template_slots AFTER INSERT OR UPDATE ON public.weighing_procedure_templates
+CREATE CONSTRAINT TRIGGER weighing_template_slots AFTER INSERT OR UPDATE OF id, weighed_asset_slot_id, weighed_asset_model_id, weighed_asset_slot_role_id, weighed_with_slot_id, weighed_with_model_id, weighed_with_slot_role_id ON public.weighing_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_weighing_slots();
-CREATE CONSTRAINT TRIGGER weighing_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
+CREATE CONSTRAINT TRIGGER weighing_slot_cardinality AFTER UPDATE OF minimum_count, maximum_count ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
     EXECUTE FUNCTION public.check_weighing_slot_cardinality();

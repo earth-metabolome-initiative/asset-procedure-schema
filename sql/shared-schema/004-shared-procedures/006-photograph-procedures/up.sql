@@ -39,9 +39,13 @@ CREATE TABLE photograph_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (photograph_slot_id, id, photograph_model_id, photograph_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `photographed_with_model_id`.
     photographed_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `photographed_asset_model_id`.
     photographed_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `photograph_model_id`.
     photograph_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (photographed_with_model_id, photographed_with_model_archived) REFERENCES camera_models (id, archived) ON UPDATE CASCADE,
@@ -123,11 +127,13 @@ CREATE TABLE photograph_procedures (
     -- Typed template executed by this procedure.
     photograph_procedure_template_id UUID NOT NULL REFERENCES photograph_procedure_templates (id),
     -- Execution status copied from the parent procedure.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     FOREIGN KEY (id, photograph_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `photograph_procedure_template_id`.
     photograph_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (photograph_procedure_template_id, photograph_procedure_template_archived) REFERENCES photograph_procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -190,13 +196,17 @@ CREATE CONSTRAINT TRIGGER photograph_procedures_kept AFTER DELETE ON photograph_
 
 CREATE FUNCTION initialize_photograph_procedures_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.id
         AND procedure.procedure_template_id = NEW.photograph_procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;

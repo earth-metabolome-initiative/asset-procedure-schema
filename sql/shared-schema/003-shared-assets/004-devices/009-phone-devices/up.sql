@@ -25,6 +25,7 @@ CREATE TABLE phone_device_models (
     organization_id UUID NOT NULL,
     CONSTRAINT phone_device_models_geopositioning
     FOREIGN KEY (id) REFERENCES geopositioning_device_models (id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -68,6 +69,7 @@ CREATE TABLE commercial_phone_device_models (
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
     FOREIGN KEY (id) REFERENCES commercial_geopositioning_device_models (id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -112,6 +114,7 @@ CREATE TABLE commercial_phone_device_lots (
     organization_id UUID NOT NULL,
     CONSTRAINT commercial_phone_device_lots_geopositioning
     FOREIGN KEY (id) REFERENCES commercial_geopositioning_device_lots (id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -162,7 +165,9 @@ CREATE TABLE phone_devices (
     CONSTRAINT phone_devices_geopositioning
     FOREIGN KEY (id) REFERENCES geopositioning_devices (id) ON DELETE CASCADE,
     FOREIGN KEY (id, commercial_phone_device_lot_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `commercial_phone_device_lot_id`.
     commercial_phone_device_lot_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (commercial_phone_device_lot_id, commercial_phone_device_lot_archived) REFERENCES commercial_phone_device_lots (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

@@ -4,10 +4,8 @@
 use std::fmt::Debug;
 
 use aps_asset_model_ancestors::*;
-use aps_authz_grantee_kind::GranteeKind;
 use aps_authz_membership_state::MembershipState;
 use aps_authz_resource_kind::ResourceKind;
-use aps_authz_role::Role;
 use aps_grantees::*;
 use aps_physical_asset_models::*;
 use aps_procedure_templates::*;
@@ -40,7 +38,6 @@ impl Tenant {
         TableBuilder<organizations::table>: Insert<C, ValidationError: Debug>,
         TableBuilder<resources::table>: Insert<C, ValidationError: Debug>,
         TableBuilder<memberships::table>: Insert<C, ValidationError: Debug>,
-        TableBuilder<grants::table>: Insert<C, ValidationError: Debug>,
     {
         let tenant =
             Self { user: Uuid::new_v4(), organization: Uuid::new_v4(), project: Uuid::new_v4() };
@@ -61,14 +58,6 @@ impl Tenant {
             .state(MembershipState::Active)
             .insert(conn)
             .expect("membership");
-        grants::table::builder()
-            .resource_id(tenant.organization)
-            .organization_id(tenant.organization)
-            .grantee_id(tenant.user)
-            .grantee_kind(GranteeKind::User)
-            .role(Role::Admin)
-            .insert(conn)
-            .expect("admin grant");
         resources::table::builder()
             .id(tenant.project)
             .kind(ResourceKind::Project)

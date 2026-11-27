@@ -33,8 +33,11 @@ CREATE TABLE procedure_templates (
     FOREIGN KEY (previous_version_id, project_id, name, previous_version, organization_id)
         REFERENCES procedure_templates (id, project_id, name, version, organization_id),
     FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Resource kind fixed to `'ownable'`.
     kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    -- Archive state of the row named by `previous_version_id`.
     previous_version_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (previous_version_id, previous_version_archived) REFERENCES procedure_templates (id, archived) ON UPDATE CASCADE,
@@ -84,7 +87,9 @@ CREATE TABLE procedure_template_slots (
         REFERENCES procedure_template_slots (id, procedure_template_id, organization_id),
     FOREIGN KEY (retrieved_from_slot_id, procedure_template_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `asset_model_id`.
     asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (asset_model_id, asset_model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, procedure_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -126,7 +131,9 @@ CREATE TABLE procedure_template_steps (
     UNIQUE (id, parent_template_id, child_template_id, organization_id),
     FOREIGN KEY (repeat_slot_id, parent_template_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `child_template_id`.
     child_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (child_template_id, child_template_archived) REFERENCES procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -157,6 +164,7 @@ CREATE TABLE procedure_template_step_edges (
         REFERENCES procedure_template_steps (id, parent_template_id, position, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (successor_step_id, parent_template_id, successor_position, organization_id)
         REFERENCES procedure_template_steps (id, parent_template_id, position, organization_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -201,6 +209,7 @@ CREATE TABLE procedure_template_slot_bindings (
     FOREIGN KEY (parent_asset_model_id, child_asset_model_id)
         REFERENCES asset_model_ancestors (descendant_model_id, ancestor_model_id),
     FOREIGN KEY (child_role_id, parent_role_id) REFERENCES slot_role_pairs (child_role_id, parent_role_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -273,6 +282,7 @@ CREATE TABLE procedure_template_parameters (
     CHECK (default_boolean IS NULL OR value_kind_id = 'boolean'),
     UNIQUE (procedure_template_id, name),
     UNIQUE (id, procedure_template_id, value_kind_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, procedure_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -309,6 +319,7 @@ CREATE TABLE procedure_template_step_parameters (
         REFERENCES procedure_template_steps (id, parent_template_id, child_template_id, organization_id) ON DELETE CASCADE,
     FOREIGN KEY (parameter_id, child_template_id, value_kind_id)
         REFERENCES procedure_template_parameters (id, procedure_template_id, value_kind_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, parent_template_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -454,7 +465,7 @@ END;
 $$;
 ALTER FUNCTION guard_procedure_template() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure_template() FROM PUBLIC;
-CREATE TRIGGER procedure_templates_guard AFTER INSERT OR UPDATE ON procedure_templates
+CREATE TRIGGER procedure_templates_guard AFTER INSERT OR UPDATE OF id, table_name_id, name, description, instruction, state_id, version, previous_version_id, previous_version ON procedure_templates
     FOR EACH ROW EXECUTE FUNCTION guard_procedure_template();
 
 -- Locks a template row, so a change to the template's definition and its
@@ -836,3 +847,15 @@ CREATE TRIGGER procedure_template_step_parameters_audit AFTER INSERT OR DELETE O
     FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
 CREATE TRIGGER procedure_template_step_parameters_update_audit AFTER UPDATE ON procedure_template_step_parameters
     FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+
+CREATE FUNCTION reset_asset_model_archived() RETURNS TRIGGER
+LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    NEW.asset_model_archived := FALSE;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION reset_asset_model_archived() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION reset_asset_model_archived() FROM PUBLIC;
+CREATE TRIGGER procedure_template_slots_asset_model_archive_reset BEFORE UPDATE OF asset_model_id ON procedure_template_slots
+    FOR EACH ROW WHEN (OLD.asset_model_id IS DISTINCT FROM NEW.asset_model_id) EXECUTE FUNCTION reset_asset_model_archived();

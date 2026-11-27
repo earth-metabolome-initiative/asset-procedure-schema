@@ -21,7 +21,9 @@ CREATE TABLE disposal_procedure_templates (
     disposed_asset_slot_role_id TEXT GENERATED ALWAYS AS ('consumed') STORED NOT NULL,
     FOREIGN KEY (disposed_asset_slot_id, id, disposed_asset_model_id, disposed_asset_slot_role_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `disposed_asset_model_id`.
     disposed_asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (disposed_asset_model_id, disposed_asset_model_archived) REFERENCES physical_asset_models (id, archived) ON UPDATE CASCADE,
@@ -93,11 +95,13 @@ CREATE TABLE disposal_procedures (
     -- Typed template executed by this procedure.
     disposal_procedure_template_id UUID NOT NULL REFERENCES disposal_procedure_templates (id),
     -- Execution status copied from the parent procedure.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     FOREIGN KEY (id, disposal_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `disposal_procedure_template_id`.
     disposal_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (disposal_procedure_template_id, disposal_procedure_template_archived) REFERENCES disposal_procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -160,13 +164,17 @@ CREATE CONSTRAINT TRIGGER disposal_procedures_kept AFTER DELETE ON disposal_proc
 
 CREATE FUNCTION initialize_disposal_procedures_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.id
         AND procedure.procedure_template_id = NEW.disposal_procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;

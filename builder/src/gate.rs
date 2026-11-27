@@ -14,7 +14,7 @@ use sql_traits::{
 };
 use sqlippy::prelude::{Constrainer, DefaultConstrainer, Error, TargetName};
 use sqlparser::{
-    ast::{CreateTable, FunctionSecurity},
+    ast::{CreateTable, FunctionSecurity, ReferentialAction},
     dialect::PostgreSqlDialect,
 };
 
@@ -640,11 +640,15 @@ impl Schema {
                 for root in &roots {
                     shared |= referenced.is_descendant_of(database, root)?;
                 }
-                let mut archive_key = true;
+                let resource_key = referenced.table_name() == "resources";
+                let mut archive_key =
+                    resource_key || foreign_key.on_delete(database) != ReferentialAction::Cascade;
+                let mut archive_prefix = None;
+                let mut identifier_prefix = None;
                 let mut has_archive = false;
                 let mut has_identifier = false;
                 let mut needs_copy_allowance = false;
-                let mut project_key = referenced.table_name() == "resources";
+                let mut project_key = resource_key;
                 let mut column_count = 0;
                 let mut tenant_local = false;
                 for (column, target) in foreign_key
@@ -656,7 +660,14 @@ impl Schema {
                     let target = target.column_name();
                     column_count += 1;
                     let archive_pair = target == "archived"
-                        && (column == "archived" || column.ends_with("_archived"));
+                        && ((resource_key && column == "archived")
+                            || column.ends_with("_archived"));
+                    if archive_pair {
+                        archive_prefix = column.strip_suffix("_archived");
+                    }
+                    if target == "id" {
+                        identifier_prefix = column.strip_suffix("_id");
+                    }
                     if archive_pair || (column == "organization_id" && target == "organization_id")
                     {
                         let mut independently_keyed =
@@ -684,7 +695,10 @@ impl Schema {
                             && pinned_to_resource(referenced, target, database)?;
                     }
                 }
-                archive_key &= has_archive && has_identifier;
+                archive_key &= has_archive
+                    && has_identifier
+                    && (resource_key
+                        || (archive_prefix.is_some() && archive_prefix == identifier_prefix));
                 project_key =
                     project_key && column_count == 2 && pinned_to_resource(host, "id", database)?;
                 if !archive_key && !project_key && (!shared || tenant_local) {
@@ -1071,5 +1085,106 @@ mod tests {
         }
         let table = named(&database, "unpinned").expect("the unpinned table exists");
         assert!(!pinned_to_resource(table, "id", &database).expect("the key resolves"));
+    }
+
+    #[test]
+    fn archive_key_allowances_match_reference_shapes() {
+        let cases = [
+            (
+                "reference_copy",
+                "FOREIGN KEY (model_id, model_archived) REFERENCES targets (id, archived) ON UPDATE CASCADE",
+                true,
+            ),
+            (
+                "resource_copy",
+                "FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE",
+                true,
+            ),
+            (
+                "resource_kind_copy",
+                "FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE",
+                true,
+            ),
+            (
+                "resource_reference_copy",
+                "FOREIGN KEY (organization_id, model_id, model_archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE",
+                true,
+            ),
+            (
+                "resource_parent_copy",
+                "FOREIGN KEY (organization_id, procedure_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE",
+                true,
+            ),
+            (
+                "mismatched_prefix",
+                "FOREIGN KEY (asset_id, model_archived) REFERENCES targets (id, archived) ON UPDATE CASCADE",
+                false,
+            ),
+            (
+                "bare_archive",
+                "FOREIGN KEY (id, archived) REFERENCES targets (id, archived) ON UPDATE CASCADE",
+                false,
+            ),
+            (
+                "delete_cascade",
+                "FOREIGN KEY (model_id, model_archived) REFERENCES targets (id, archived) ON UPDATE CASCADE ON DELETE CASCADE",
+                false,
+            ),
+            (
+                "missing_identifier",
+                "FOREIGN KEY (model_archived) REFERENCES targets (archived) ON UPDATE CASCADE",
+                false,
+            ),
+        ];
+        let mut mismatches = Vec::new();
+        for (case, foreign_key, allowed) in cases {
+            let mut sql = String::from(
+                "CREATE TABLE resources (
+                    id UUID PRIMARY KEY, organization_id UUID NOT NULL,
+                    kind TEXT NOT NULL, archived BOOLEAN NOT NULL,
+                    UNIQUE (organization_id, id, archived),
+                    UNIQUE (organization_id, id, kind, archived)
+                );
+                CREATE TABLE targets (
+                    id UUID PRIMARY KEY, archived BOOLEAN NOT NULL UNIQUE,
+                    UNIQUE (id, archived)
+                );",
+            );
+            for (table, _) in SHARED {
+                sql.push_str(&format!("CREATE TABLE {table} (id UUID PRIMARY KEY);"));
+            }
+            sql.push_str(&format!(
+                "CREATE TABLE copies (
+                    id UUID PRIMARY KEY, organization_id UUID NOT NULL,
+                    kind TEXT NOT NULL, archived BOOLEAN NOT NULL,
+                    model_id UUID, asset_id UUID, procedure_id UUID,
+                    model_archived BOOLEAN NOT NULL,
+                    CONSTRAINT archive_copy {foreign_key}
+                );
+                ALTER TABLE copies ENABLE ROW LEVEL SECURITY;
+                CREATE POLICY copies_update ON copies FOR UPDATE USING (false);
+                CREATE POLICY copies_delete ON copies FOR DELETE USING (false);"
+            ));
+            let schema = Schema {
+                cluster: ParserDB::parse::<PostgreSqlDialect>("").expect("the cluster parses"),
+                database: ParserDB::parse::<PostgreSqlDialect>(&sql)
+                    .expect("the key schema parses"),
+                connetto_tables: HashSet::new(),
+            };
+            let mut constrainer = DefaultConstrainer::default();
+            constrainer.set_group_level(
+                sqlippy::prelude::LintGroup::Pedantic,
+                sqlippy::prelude::Level::Warn,
+            );
+            schema.allow_references(&mut constrainer).expect("the references resolve");
+            let reports_cascade = constrainer.diagnostics(&schema.database).iter().any(|error| {
+                matches!(error, Error::Violation(violation)
+                    if violation.rule().name == "cascade_into_row_level_security_table")
+            });
+            if reports_cascade == allowed {
+                mismatches.push(case);
+            }
+        }
+        assert!(mismatches.is_empty(), "unexpected archive allowances for {mismatches:?}");
     }
 }

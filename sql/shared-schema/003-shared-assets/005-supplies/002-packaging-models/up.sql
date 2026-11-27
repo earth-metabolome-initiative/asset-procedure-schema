@@ -13,6 +13,7 @@ CREATE TABLE packaging_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

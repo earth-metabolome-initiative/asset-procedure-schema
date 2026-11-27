@@ -76,8 +76,8 @@ ALTER FUNCTION check_slot_holders() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_slot_holders() FROM PUBLIC;
 CREATE CONSTRAINT TRIGGER procedure_template_slot_holders AFTER INSERT ON procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_slot_holders();
-CREATE CONSTRAINT TRIGGER procedure_template_slot_holders_update AFTER UPDATE ON procedure_template_slots
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_slot_holders();
+CREATE CONSTRAINT TRIGGER procedure_template_slot_holders_update AFTER UPDATE OF asset_model_id, placed_into_slot_id, retrieved_from_slot_id ON procedure_template_slots
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.asset_model_id IS DISTINCT FROM NEW.asset_model_id OR OLD.placed_into_slot_id IS DISTINCT FROM NEW.placed_into_slot_id OR OLD.retrieved_from_slot_id IS DISTINCT FROM NEW.retrieved_from_slot_id) EXECUTE FUNCTION check_slot_holders();
 
 -- How one bound asset moves relative to another bound in the same procedure.
 CREATE TABLE asset_move_kinds (
@@ -405,13 +405,13 @@ END;
 $$;
 ALTER FUNCTION record_transfer_moves() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION record_transfer_moves() FROM PUBLIC;
-CREATE TRIGGER pouring_whereabouts AFTER INSERT OR UPDATE OR DELETE ON pouring_procedures
+CREATE TRIGGER pouring_whereabouts AFTER INSERT OR UPDATE OF id, pouring_procedure_template_id, status_id, volume_l OR DELETE ON pouring_procedures
     FOR EACH ROW EXECUTE FUNCTION record_transfer_moves();
-CREATE TRIGGER aliquoting_whereabouts AFTER INSERT OR UPDATE OR DELETE ON aliquoting_procedures
+CREATE TRIGGER aliquoting_whereabouts AFTER INSERT OR UPDATE OF id, aliquoting_procedure_template_id, status_id, volume_l OR DELETE ON aliquoting_procedures
     FOR EACH ROW EXECUTE FUNCTION record_transfer_moves();
-CREATE TRIGGER supernatant_whereabouts AFTER INSERT OR UPDATE OR DELETE ON supernatant_procedures
+CREATE TRIGGER supernatant_whereabouts AFTER INSERT OR UPDATE OF id, supernatant_procedure_template_id, status_id, volume_l OR DELETE ON supernatant_procedures
     FOR EACH ROW EXECUTE FUNCTION record_transfer_moves();
-CREATE TRIGGER fractioning_whereabouts AFTER INSERT OR UPDATE OR DELETE ON fractioning_procedures
+CREATE TRIGGER fractioning_whereabouts AFTER INSERT OR UPDATE OF id, fractioning_procedure_template_id, status_id, mass_kg OR DELETE ON fractioning_procedures
     FOR EACH ROW EXECUTE FUNCTION record_transfer_moves();
 
 -- Copies a procedure's status and times into its moves, records the exits

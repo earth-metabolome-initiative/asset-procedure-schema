@@ -65,11 +65,17 @@ CREATE TABLE pouring_procedure_templates (
         REFERENCES procedure_template_slots (id, procedure_template_id, asset_model_id, role_id, organization_id),
     FOREIGN KEY (poured_sample_slot_id, id, poured_into_slot_id, organization_id)
         REFERENCES procedure_template_slots (id, procedure_template_id, placed_into_slot_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `measured_with_model_id`.
     measured_with_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `poured_from_model_id`.
     poured_from_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `poured_into_model_id`.
     poured_into_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `poured_sample_model_id`.
     poured_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `source_sample_model_id`.
     source_sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (measured_with_model_id, measured_with_model_archived) REFERENCES volume_measuring_device_models (id, archived) ON UPDATE CASCADE,
@@ -167,14 +173,16 @@ CREATE TABLE pouring_procedures (
     -- Typed template executed by this procedure.
     pouring_procedure_template_id UUID NOT NULL REFERENCES pouring_procedure_templates (id),
     -- Execution status copied from the parent procedure.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     -- Measured volume l.
     volume_l DOUBLE PRECISION CHECK (volume_l > 0.0 AND volume_l < 'Infinity'::double precision),
     CHECK (status_id <> 'completed' OR volume_l IS NOT NULL),
     FOREIGN KEY (id, pouring_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `pouring_procedure_template_id`.
     pouring_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (pouring_procedure_template_id, pouring_procedure_template_archived) REFERENCES pouring_procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -238,13 +246,17 @@ CREATE CONSTRAINT TRIGGER pouring_procedures_kept AFTER DELETE ON pouring_proced
 
 CREATE FUNCTION initialize_pouring_procedures_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.id
         AND procedure.procedure_template_id = NEW.pouring_procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;
@@ -320,9 +332,9 @@ $$;
 ALTER FUNCTION public.check_pouring_slot_cardinality() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION public.check_pouring_slot_cardinality() FROM PUBLIC;
 GRANT SELECT ON public.pouring_procedure_templates TO aps_writer;
-CREATE CONSTRAINT TRIGGER pouring_template_slots AFTER INSERT OR UPDATE ON public.pouring_procedure_templates
+CREATE CONSTRAINT TRIGGER pouring_template_slots AFTER INSERT OR UPDATE OF id, source_sample_slot_id, source_sample_model_id, source_sample_slot_role_id, measured_with_slot_id, measured_with_model_id, measured_with_slot_role_id, poured_from_slot_id, poured_from_model_id, poured_from_slot_role_id, poured_into_slot_id, poured_into_model_id, poured_into_slot_role_id, poured_sample_slot_id, poured_sample_model_id, poured_sample_slot_role_id, volume_l, volume_l_tolerance_percentage ON public.pouring_procedure_templates
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.check_pouring_slots();
-CREATE CONSTRAINT TRIGGER pouring_slot_cardinality AFTER UPDATE ON public.procedure_template_slots
+CREATE CONSTRAINT TRIGGER pouring_slot_cardinality AFTER UPDATE OF minimum_count, maximum_count ON public.procedure_template_slots
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW
     WHEN (OLD.minimum_count IS DISTINCT FROM NEW.minimum_count OR OLD.maximum_count IS DISTINCT FROM NEW.maximum_count)
     EXECUTE FUNCTION public.check_pouring_slot_cardinality();

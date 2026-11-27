@@ -67,9 +67,13 @@ CREATE TABLE procedures (
     FOREIGN KEY (step_id, parent_template_id, procedure_template_id)
         REFERENCES procedure_template_steps (id, parent_template_id, child_template_id),
     FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Resource kind fixed to `'ownable'`.
     kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    -- Archive state of the row named by `procedure_template_id`.
     procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `parent_procedure_id`.
     parent_procedure_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     UNIQUE (organization_id, id, archived),
@@ -112,7 +116,7 @@ CREATE TABLE procedure_assets (
     -- Template of the procedure.
     procedure_template_id UUID NOT NULL,
     -- Status of the procedure, kept equal by the cascade.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     -- Slot the asset fills.
     slot_id UUID NOT NULL,
     -- Model of the slot.
@@ -143,8 +147,11 @@ CREATE TABLE procedure_assets (
     FOREIGN KEY (procedure_id, parent_procedure_id, organization_id) REFERENCES procedures (id, parent_procedure_id, organization_id),
     FOREIGN KEY (parent_procedure_asset_id, parent_procedure_id, asset_model_id, organization_id)
         REFERENCES procedure_assets (id, procedure_id, asset_model_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `asset_id`.
     asset_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `asset_model_id`.
     asset_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (asset_id, asset_archived) REFERENCES assets (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (asset_model_id, asset_model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
@@ -172,7 +179,7 @@ CREATE TABLE procedure_parameter_values (
     -- Template of the procedure.
     procedure_template_id UUID NOT NULL,
     -- Status of the procedure, kept equal by the cascade.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     -- Kind of the parameter's value.
     value_kind_id TEXT NOT NULL,
     -- connetto organization owning the procedure.
@@ -192,6 +199,7 @@ CREATE TABLE procedure_parameter_values (
         DEFERRABLE INITIALLY DEFERRED,
     FOREIGN KEY (parameter_id, procedure_template_id, value_kind_id)
         REFERENCES procedure_template_parameters (id, procedure_template_id, value_kind_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, procedure_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -496,7 +504,7 @@ END;
 $$;
 ALTER FUNCTION guard_procedure() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION guard_procedure() FROM PUBLIC;
-CREATE TRIGGER procedures_guard AFTER INSERT OR UPDATE OR DELETE ON procedures
+CREATE TRIGGER procedures_guard AFTER INSERT OR UPDATE OF id, table_name_id, procedure_template_id, status_id, parent_procedure_id, parent_template_id, step_id, root_procedure_id, repeat_procedure_asset_id, planned_for, started_at, ended_at, performed_by_id, note OR DELETE ON procedures
     FOR EACH ROW EXECUTE FUNCTION guard_procedure();
 CREATE TRIGGER procedures_performer BEFORE UPDATE OF performed_by_id, status_id ON procedures
     FOR EACH ROW WHEN ((NEW.performed_by_id IS DISTINCT FROM OLD.performed_by_id AND NEW.performed_by_id IS NOT NULL)
@@ -937,7 +945,7 @@ END;
 $$;
 ALTER FUNCTION check_procedure_parameter_deviations() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_procedure_parameter_deviations() FROM PUBLIC;
-CREATE CONSTRAINT TRIGGER procedures_parameter_deviations AFTER INSERT OR UPDATE ON procedures
+CREATE CONSTRAINT TRIGGER procedures_parameter_deviations AFTER INSERT OR UPDATE OF id, table_name_id, procedure_template_id, status_id, parent_procedure_id, parent_template_id, step_id, root_procedure_id, repeat_procedure_asset_id, planned_for, started_at, ended_at, performed_by_id, note ON procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_parameter_deviations();
 
 GRANT SELECT, INSERT, UPDATE (status_id, planned_for, started_at, ended_at, performed_by_id, note), DELETE
@@ -975,13 +983,17 @@ CREATE POLICY procedures_blocked ON procedures AS RESTRICTIVE FOR ALL TO app
 
 CREATE FUNCTION initialize_procedure_assets_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.procedure_id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.procedure_id
         AND procedure.procedure_template_id = NEW.procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;
@@ -1024,13 +1036,17 @@ CREATE POLICY procedure_assets_blocked ON procedure_assets AS RESTRICTIVE FOR AL
 
 CREATE FUNCTION initialize_procedure_parameter_values_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.procedure_id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.procedure_id
         AND procedure.procedure_template_id = NEW.procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;
@@ -1121,3 +1137,17 @@ CREATE TRIGGER procedure_parameter_values_audit AFTER INSERT OR DELETE ON proced
     FOR EACH ROW EXECUTE FUNCTION authz_write.record_audit_event();
 CREATE TRIGGER procedure_parameter_values_update_audit AFTER UPDATE ON procedure_parameter_values
     FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION authz_write.record_audit_event();
+
+CREATE FUNCTION reset_asset_archived() RETURNS TRIGGER
+LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
+BEGIN
+    NEW.asset_archived := FALSE;
+    RETURN NEW;
+END;
+$$;
+ALTER FUNCTION reset_asset_archived() OWNER TO aps_writer;
+REVOKE EXECUTE ON FUNCTION reset_asset_archived() FROM PUBLIC;
+CREATE TRIGGER procedure_assets_asset_archive_reset BEFORE UPDATE OF asset_id ON procedure_assets
+    FOR EACH ROW WHEN (OLD.asset_id IS DISTINCT FROM NEW.asset_id) EXECUTE FUNCTION reset_asset_archived();
+CREATE TRIGGER procedure_assets_asset_model_archive_reset BEFORE UPDATE OF asset_model_id ON procedure_assets
+    FOR EACH ROW WHEN (OLD.asset_model_id IS DISTINCT FROM NEW.asset_model_id) EXECUTE FUNCTION reset_asset_model_archived();

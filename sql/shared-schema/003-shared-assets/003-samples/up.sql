@@ -18,6 +18,7 @@ CREATE TABLE sample_source_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -64,7 +65,9 @@ CREATE TABLE sample_sources (
     -- Source model instantiated by this physical source asset.
     sample_source_model_id UUID NOT NULL REFERENCES sample_source_models (id),
     FOREIGN KEY (id, sample_source_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sample_source_model_id`.
     sample_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (sample_source_model_id, sample_source_model_archived) REFERENCES sample_source_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -114,7 +117,9 @@ CREATE TABLE sample_models (
     -- Source-model family that sample instances of this model must reference.
     sample_source_model_id UUID NOT NULL REFERENCES sample_source_models (id),
     UNIQUE (id, sample_source_model_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sample_source_model_id`.
     sample_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (sample_source_model_id, sample_source_model_archived) REFERENCES sample_source_models (id, archived) ON UPDATE CASCADE,
@@ -179,7 +184,7 @@ $$;
 ALTER FUNCTION check_sample_model_family() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_sample_model_family() FROM PUBLIC;
 GRANT SELECT ON sample_models TO aps_writer;
-CREATE CONSTRAINT TRIGGER sample_models_family AFTER INSERT OR UPDATE ON sample_models
+CREATE CONSTRAINT TRIGGER sample_models_family AFTER INSERT OR UPDATE OF id, sample_source_model_id ON sample_models
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_sample_model_family();
 
 -- Physical samples with their model's required source family.
@@ -194,8 +199,11 @@ CREATE TABLE samples (
     sample_source_model_id UUID NOT NULL REFERENCES sample_source_models (id),
     FOREIGN KEY (id, sample_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
     FOREIGN KEY (sample_model_id, sample_source_model_id) REFERENCES sample_models (id, sample_source_model_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sample_model_id`.
     sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sample_source_model_id`.
     sample_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (sample_model_id, sample_model_archived) REFERENCES sample_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (sample_source_model_id, sample_source_model_archived) REFERENCES sample_source_models (id, archived) ON UPDATE CASCADE,

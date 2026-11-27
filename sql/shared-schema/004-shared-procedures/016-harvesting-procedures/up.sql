@@ -35,9 +35,13 @@ CREATE TABLE harvesting_procedure_templates (
     FOREIGN KEY (sample_model_id, source_family_model_id) REFERENCES sample_models (id, sample_source_model_id),
     FOREIGN KEY (sample_source_model_id, source_family_model_id)
         REFERENCES asset_model_ancestors (descendant_model_id, ancestor_model_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sample_source_model_id`.
     sample_source_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `sample_model_id`.
     sample_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `source_family_model_id`.
     source_family_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (sample_source_model_id, sample_source_model_archived) REFERENCES sample_source_models (id, archived) ON UPDATE CASCADE,
@@ -117,11 +121,13 @@ CREATE TABLE harvesting_procedures (
     -- Typed template executed by this procedure.
     harvesting_procedure_template_id UUID NOT NULL REFERENCES harvesting_procedure_templates (id),
     -- Execution status copied from the parent procedure.
-    status_id TEXT NOT NULL,
+    status_id TEXT NOT NULL DEFAULT 'planned',
     FOREIGN KEY (id, harvesting_procedure_template_id, status_id, organization_id)
         REFERENCES procedures (id, procedure_template_id, status_id, organization_id) ON DELETE CASCADE
         DEFERRABLE INITIALLY DEFERRED,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `harvesting_procedure_template_id`.
     harvesting_procedure_template_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (harvesting_procedure_template_id, harvesting_procedure_template_archived) REFERENCES harvesting_procedure_templates (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -184,13 +190,17 @@ CREATE CONSTRAINT TRIGGER harvesting_procedures_kept AFTER DELETE ON harvesting_
 
 CREATE FUNCTION initialize_harvesting_procedures_status() RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+DECLARE
+    parent_status TEXT;
 BEGIN
-    PERFORM public.lock_procedure(NEW.id);
-    SELECT procedure.status_id INTO NEW.status_id
+    SELECT procedure.status_id INTO parent_status
     FROM public.procedures procedure
     WHERE procedure.id = NEW.id
         AND procedure.procedure_template_id = NEW.harvesting_procedure_template_id
         AND procedure.organization_id = NEW.organization_id;
+    IF FOUND THEN
+        NEW.status_id := parent_status;
+    END IF;
     RETURN NEW;
 END;
 $$;

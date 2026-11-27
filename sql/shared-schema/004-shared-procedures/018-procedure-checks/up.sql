@@ -78,40 +78,40 @@ ALTER FUNCTION check_procedure_deviations() OWNER TO aps_writer;
 REVOKE EXECUTE ON FUNCTION check_procedure_deviations() FROM PUBLIC;
 CREATE CONSTRAINT TRIGGER storage_deviations AFTER INSERT ON storage_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER storage_deviations_update AFTER UPDATE ON storage_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER storage_deviations_update AFTER UPDATE OF id, storage_procedure_template_id, status_id, temperature_k ON storage_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.storage_procedure_template_id IS DISTINCT FROM NEW.storage_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER freezing_deviations AFTER INSERT ON freezing_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER freezing_deviations_update AFTER UPDATE ON freezing_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER freezing_deviations_update AFTER UPDATE OF id, freezing_procedure_template_id, status_id, temperature_k ON freezing_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.freezing_procedure_template_id IS DISTINCT FROM NEW.freezing_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER freeze_drying_deviations AFTER INSERT ON freeze_drying_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER freeze_drying_deviations_update AFTER UPDATE ON freeze_drying_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER freeze_drying_deviations_update AFTER UPDATE OF id, freeze_drying_procedure_template_id, status_id, temperature_k, pressure_pa ON freeze_drying_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.freeze_drying_procedure_template_id IS DISTINCT FROM NEW.freeze_drying_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k OR OLD.pressure_pa IS DISTINCT FROM NEW.pressure_pa) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER centrifuge_deviations AFTER INSERT ON centrifuge_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER centrifuge_deviations_update AFTER UPDATE ON centrifuge_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER centrifuge_deviations_update AFTER UPDATE OF id, centrifuge_procedure_template_id, status_id, temperature_k, speed_rpm ON centrifuge_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.centrifuge_procedure_template_id IS DISTINCT FROM NEW.centrifuge_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k OR OLD.speed_rpm IS DISTINCT FROM NEW.speed_rpm) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER ball_mill_deviations AFTER INSERT ON ball_mill_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER ball_mill_deviations_update AFTER UPDATE ON ball_mill_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER ball_mill_deviations_update AFTER UPDATE OF id, ball_mill_procedure_template_id, status_id, temperature_k, frequency_hz ON ball_mill_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.ball_mill_procedure_template_id IS DISTINCT FROM NEW.ball_mill_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.temperature_k IS DISTINCT FROM NEW.temperature_k OR OLD.frequency_hz IS DISTINCT FROM NEW.frequency_hz) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER pouring_deviations AFTER INSERT ON pouring_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER pouring_deviations_update AFTER UPDATE ON pouring_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER pouring_deviations_update AFTER UPDATE OF id, pouring_procedure_template_id, status_id, volume_l ON pouring_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.pouring_procedure_template_id IS DISTINCT FROM NEW.pouring_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER aliquoting_deviations AFTER INSERT ON aliquoting_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER aliquoting_deviations_update AFTER UPDATE ON aliquoting_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER aliquoting_deviations_update AFTER UPDATE OF id, aliquoting_procedure_template_id, status_id, volume_l ON aliquoting_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.aliquoting_procedure_template_id IS DISTINCT FROM NEW.aliquoting_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER supernatant_deviations AFTER INSERT ON supernatant_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER supernatant_deviations_update AFTER UPDATE ON supernatant_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER supernatant_deviations_update AFTER UPDATE OF id, supernatant_procedure_template_id, status_id, volume_l ON supernatant_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.supernatant_procedure_template_id IS DISTINCT FROM NEW.supernatant_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.volume_l IS DISTINCT FROM NEW.volume_l) EXECUTE FUNCTION check_procedure_deviations();
 CREATE CONSTRAINT TRIGGER fractioning_deviations AFTER INSERT ON fractioning_procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER fractioning_deviations_update AFTER UPDATE ON fractioning_procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER fractioning_deviations_update AFTER UPDATE OF id, fractioning_procedure_template_id, status_id, mass_kg ON fractioning_procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.fractioning_procedure_template_id IS DISTINCT FROM NEW.fractioning_procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.mass_kg IS DISTINCT FROM NEW.mass_kg) EXECUTE FUNCTION check_procedure_deviations();
 
 -- Rejects a transfer setpoint exceeding the destination model's capacity.
 CREATE FUNCTION check_pouring_volume() RETURNS TRIGGER
@@ -170,5 +170,5 @@ GRANT SELECT ON weighing_procedure_templates, weighing_procedures, storage_proce
 
 CREATE CONSTRAINT TRIGGER procedures_measured_deviations AFTER INSERT ON procedures
     DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION check_procedure_deviations();
-CREATE CONSTRAINT TRIGGER procedures_measured_deviations_update AFTER UPDATE ON procedures
-    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD IS DISTINCT FROM NEW) EXECUTE FUNCTION check_procedure_deviations();
+CREATE CONSTRAINT TRIGGER procedures_measured_deviations_update AFTER UPDATE OF id, table_name_id, procedure_template_id, status_id, parent_procedure_id, parent_template_id, step_id, root_procedure_id, repeat_procedure_asset_id, planned_for, started_at, ended_at, performed_by_id, note ON procedures
+    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN (OLD.id IS DISTINCT FROM NEW.id OR OLD.table_name_id IS DISTINCT FROM NEW.table_name_id OR OLD.procedure_template_id IS DISTINCT FROM NEW.procedure_template_id OR OLD.status_id IS DISTINCT FROM NEW.status_id OR OLD.parent_procedure_id IS DISTINCT FROM NEW.parent_procedure_id OR OLD.parent_template_id IS DISTINCT FROM NEW.parent_template_id OR OLD.step_id IS DISTINCT FROM NEW.step_id OR OLD.root_procedure_id IS DISTINCT FROM NEW.root_procedure_id OR OLD.repeat_procedure_asset_id IS DISTINCT FROM NEW.repeat_procedure_asset_id OR OLD.planned_for IS DISTINCT FROM NEW.planned_for OR OLD.started_at IS DISTINCT FROM NEW.started_at OR OLD.ended_at IS DISTINCT FROM NEW.ended_at OR OLD.performed_by_id IS DISTINCT FROM NEW.performed_by_id OR OLD.note IS DISTINCT FROM NEW.note) EXECUTE FUNCTION check_procedure_deviations();

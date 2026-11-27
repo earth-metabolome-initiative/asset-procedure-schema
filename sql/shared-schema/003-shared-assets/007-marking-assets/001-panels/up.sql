@@ -16,6 +16,7 @@ CREATE TABLE panel_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -62,7 +63,9 @@ CREATE TABLE panels (
     -- Panel model instantiated by this physical asset.
     panel_model_id UUID NOT NULL REFERENCES panel_models (id),
     FOREIGN KEY (id, panel_model_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `panel_model_id`.
     panel_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (panel_model_id, panel_model_archived) REFERENCES panel_models (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

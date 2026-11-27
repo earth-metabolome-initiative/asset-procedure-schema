@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 * Introduced the core tables for assets and procedures previously used internally in EMI projects.
 
-* Rebuilt the core schema on the connetto ownables of `connetto-schema`, with row level security on every asset, template and procedure table.
+* Rebuilt the core schema on the `resources` of `connetto-schema`, with row level security on every asset, template and procedure table.
 * Procedure templates are versioned blueprints that freeze on publish and declare slots, composite steps, slot bindings with child and parent roles, repeated steps and typed parameters.
 * Procedures run a published template, record the assets filling each slot, parameter values and step runs, and check that an asset exists for the whole time a procedure uses it.
 * A step of a run can be skipped, and skipping a required step records the deviation with its reason. Every procedure names the root procedure of its run.
@@ -17,4 +17,4 @@ All notable changes to this project will be documented in this file.
 * A compatibility rule or volumetric container model is frozen once a template or run relies on it.
 * Whoever reads a model reads its ancestors and their rules, and whoever reads a template reads the child templates its steps run.
 * The compatibility rules of an organization neither admit a holder slot nor count a placement of a caller it blocks.
-* APS rows follow their `resources` project parent and archive state through cascading keys, and write policies reject archived rows and references.
+* APS rows follow their `resources` project parent and archive state through cascading keys.

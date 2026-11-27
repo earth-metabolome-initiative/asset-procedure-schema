@@ -19,6 +19,7 @@ CREATE TABLE freeze_dryer_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -66,7 +67,9 @@ CREATE TABLE commercial_freeze_dryer_models (
     freeze_dryer_model_id UUID NOT NULL REFERENCES freeze_dryer_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, freeze_dryer_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `freeze_dryer_model_id`.
     freeze_dryer_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (freeze_dryer_model_id, freeze_dryer_model_archived) REFERENCES freeze_dryer_models (id, archived) ON UPDATE CASCADE,
@@ -116,7 +119,9 @@ CREATE TABLE commercial_freeze_dryer_lots (
     -- Commercial freeze dryer model from which this lot derives.
     commercial_freeze_dryer_model_id UUID NOT NULL REFERENCES commercial_freeze_dryer_models (id),
     FOREIGN KEY (id, commercial_freeze_dryer_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `commercial_freeze_dryer_model_id`.
     commercial_freeze_dryer_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (commercial_freeze_dryer_model_id, commercial_freeze_dryer_model_archived) REFERENCES commercial_freeze_dryer_models (id, archived) ON UPDATE CASCADE,
@@ -167,7 +172,9 @@ CREATE TABLE freeze_dryers (
     -- Commercial lot model instantiated by this physical asset.
     commercial_freeze_dryer_lot_id UUID NOT NULL REFERENCES commercial_freeze_dryer_lots (id),
     FOREIGN KEY (id, commercial_freeze_dryer_lot_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `commercial_freeze_dryer_lot_id`.
     commercial_freeze_dryer_lot_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (commercial_freeze_dryer_lot_id, commercial_freeze_dryer_lot_archived) REFERENCES commercial_freeze_dryer_lots (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

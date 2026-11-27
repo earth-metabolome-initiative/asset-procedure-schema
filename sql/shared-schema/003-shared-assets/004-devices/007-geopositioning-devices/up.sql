@@ -19,6 +19,7 @@ CREATE TABLE geopositioning_device_models (
     id UUID PRIMARY KEY REFERENCES physical_asset_models (id) ON DELETE CASCADE,
     -- Organization containing this resource.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -66,7 +67,9 @@ CREATE TABLE commercial_geopositioning_device_models (
     geopositioning_device_model_id UUID NOT NULL REFERENCES geopositioning_device_models (id) ON DELETE RESTRICT,
     FOREIGN KEY (id) REFERENCES commercial_products (id) ON DELETE CASCADE,
     FOREIGN KEY (id, geopositioning_device_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `geopositioning_device_model_id`.
     geopositioning_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (geopositioning_device_model_id, geopositioning_device_model_archived) REFERENCES geopositioning_device_models (id, archived) ON UPDATE CASCADE,
@@ -116,7 +119,9 @@ CREATE TABLE commercial_geopositioning_device_lots (
     -- Commercial geopositioning device model from which this lot derives.
     commercial_geopositioning_device_model_id UUID NOT NULL REFERENCES commercial_geopositioning_device_models (id),
     FOREIGN KEY (id, commercial_geopositioning_device_model_id) REFERENCES asset_models (id, parent_model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `commercial_geopositioning_device_model_id`.
     commercial_geopositioning_device_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (commercial_geopositioning_device_model_id, commercial_geopositioning_device_model_archived) REFERENCES commercial_geopositioning_device_models (id, archived) ON UPDATE CASCADE,
@@ -167,7 +172,9 @@ CREATE TABLE geopositioning_devices (
     -- Commercial lot model instantiated by this physical asset.
     commercial_geopositioning_device_lot_id UUID NOT NULL REFERENCES commercial_geopositioning_device_lots (id),
     FOREIGN KEY (id, commercial_geopositioning_device_lot_id) REFERENCES assets (id, model_id) ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Archive state of the row named by `commercial_geopositioning_device_lot_id`.
     commercial_geopositioning_device_lot_archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (commercial_geopositioning_device_lot_id, commercial_geopositioning_device_lot_archived) REFERENCES commercial_geopositioning_device_lots (id, archived) ON UPDATE CASCADE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE

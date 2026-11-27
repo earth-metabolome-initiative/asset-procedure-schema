@@ -22,8 +22,11 @@ CREATE TABLE asset_models (
     UNIQUE (id, parent_model_id),
     UNIQUE (id, parent_model_id, organization_id),
     FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Resource kind fixed to `'ownable'`.
     kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    -- Archive state of the row named by `parent_model_id`.
     parent_model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (parent_model_id, parent_model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
@@ -51,6 +54,7 @@ CREATE TABLE asset_model_ancestors (
     parent_model_id UUID,
     PRIMARY KEY (descendant_model_id, ancestor_model_id),
     CHECK ((parent_model_id IS NULL) = (descendant_model_id = ancestor_model_id)),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, descendant_model_id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (descendant_model_id, parent_model_id, organization_id)
@@ -149,6 +153,7 @@ CREATE TABLE physical_asset_models (
     id UUID PRIMARY KEY REFERENCES asset_models (id) ON DELETE CASCADE,
     -- connetto organization owning the row.
     organization_id UUID NOT NULL,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
@@ -194,6 +199,7 @@ CREATE TABLE digital_asset_models (
     -- Media type of the files this model describes.
     mime_type TEXT NOT NULL CHECK (mime_type <> '' AND length(mime_type) <= 255),
     UNIQUE (id, mime_type, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -250,8 +256,11 @@ CREATE TABLE assets (
     UNIQUE (id, model_id),
     UNIQUE (id, model_id, organization_id),
     FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Resource kind fixed to `'ownable'`.
     kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
+    -- Archive state of the row named by `model_id`.
     model_archived BOOLEAN NOT NULL DEFAULT FALSE,
     UNIQUE (id, archived),
     FOREIGN KEY (model_id, model_archived) REFERENCES asset_models (id, archived) ON UPDATE CASCADE,
@@ -324,6 +333,7 @@ CREATE TABLE physical_assets (
     -- Model of the asset, which must be a physical asset model.
     physical_asset_model_id UUID NOT NULL REFERENCES physical_asset_models (id),
     FOREIGN KEY (id, physical_asset_model_id, organization_id) REFERENCES assets (id, model_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -370,6 +380,7 @@ CREATE TABLE digital_assets (
     -- Model of the asset, which must be a digital asset model.
     digital_asset_model_id UUID NOT NULL REFERENCES digital_asset_models (id),
     FOREIGN KEY (id, digital_asset_model_id, organization_id) REFERENCES assets (id, model_id, organization_id),
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (organization_id, id, archived) REFERENCES resources (organization_id, id, archived) ON UPDATE CASCADE ON DELETE CASCADE
 );

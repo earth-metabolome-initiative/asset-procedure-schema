@@ -22,7 +22,9 @@ CREATE TABLE brands (
     ),
     UNIQUE (project_id, name),
     FOREIGN KEY (id, project_id) REFERENCES resources (id, parent_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    -- Archive state inherited from this resource.
     archived BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Resource kind fixed to `'ownable'`.
     kind authz.resource_kind NOT NULL DEFAULT 'ownable' CHECK (kind = 'ownable'),
     UNIQUE (id, archived),
     FOREIGN KEY (organization_id, id, kind, archived) REFERENCES resources (organization_id, id, kind, archived) ON UPDATE CASCADE ON DELETE CASCADE

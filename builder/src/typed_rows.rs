@@ -228,9 +228,7 @@ fn asset_table<'db>(
     Ok(AssetTable { table, setters, values })
 }
 
-/// The setters of the columns `table` copies from `procedures` through its
-/// key into it, which `same_as` fills on `procedures` from the copy and
-/// never on the copy from `procedures`.
+/// Sets `same_as` copies and leaves `status_id` to the server.
 fn procedure_copy_setters(
     table: &CreateTable,
     database: &ParserDB,
