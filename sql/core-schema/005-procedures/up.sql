@@ -98,7 +98,7 @@ CREATE INDEX ON procedures (step_id, parent_template_id, procedure_template_id);
 CREATE INDEX ON procedures (table_name_id);
 INSERT INTO table_names (id) VALUES ('procedures');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id) VALUES ('procedures', 'procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id) VALUES ('procedure_templates', 'procedures');
+UPDATE table_names SET instance_table_name_id = 'procedures' WHERE id = 'procedure_templates';
 
 -- The only place a procedure names an asset. `asset_id` stays NULL when the
 -- asset's model is known but its identity is not tracked. The status is a

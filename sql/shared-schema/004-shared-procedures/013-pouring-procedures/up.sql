@@ -189,8 +189,8 @@ CREATE TABLE pouring_procedures (
 );
 CREATE INDEX ON pouring_procedures (pouring_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('pouring_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('pouring_procedure_templates', 'pouring_procedures');
+UPDATE table_names SET instance_table_name_id = 'pouring_procedures'
+    WHERE id = 'pouring_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'pouring_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'pouring_procedures', 'pouring_procedures';

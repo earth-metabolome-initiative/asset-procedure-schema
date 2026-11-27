@@ -127,8 +127,8 @@ CREATE TABLE weighing_procedures (
 );
 CREATE INDEX ON weighing_procedures (weighing_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('weighing_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('weighing_procedure_templates', 'weighing_procedures');
+UPDATE table_names SET instance_table_name_id = 'weighing_procedures'
+    WHERE id = 'weighing_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'weighing_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'weighing_procedures', 'weighing_procedures';

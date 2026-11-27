@@ -140,8 +140,8 @@ CREATE TABLE photograph_procedures (
 );
 CREATE INDEX ON photograph_procedures (photograph_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('photograph_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('photograph_procedure_templates', 'photograph_procedures');
+UPDATE table_names SET instance_table_name_id = 'photograph_procedures'
+    WHERE id = 'photograph_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'photograph_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'photograph_procedures', 'photograph_procedures';

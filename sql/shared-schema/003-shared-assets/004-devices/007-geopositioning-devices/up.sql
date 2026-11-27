@@ -181,8 +181,8 @@ CREATE TABLE geopositioning_devices (
 );
 CREATE INDEX ON geopositioning_devices (commercial_geopositioning_device_lot_id);
 INSERT INTO table_names (id) VALUES ('geopositioning_devices');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_geopositioning_device_lots', 'geopositioning_devices');
+UPDATE table_names SET instance_table_name_id = 'geopositioning_devices'
+    WHERE id = 'commercial_geopositioning_device_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'geopositioning_devices', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'geopositioning_devices', 'geopositioning_devices';

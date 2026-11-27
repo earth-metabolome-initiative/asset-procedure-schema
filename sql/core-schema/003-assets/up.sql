@@ -270,7 +270,7 @@ CREATE INDEX ON assets (model_id);
 CREATE INDEX ON assets (table_name_id);
 INSERT INTO table_names (id) VALUES ('assets');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id) VALUES ('assets', 'assets');
-INSERT INTO table_name_instances (id, instance_table_name_id) VALUES ('asset_models', 'assets');
+UPDATE table_names SET instance_table_name_id = 'assets' WHERE id = 'asset_models';
 
 -- Rejects an asset whose table is not an asset table, or not the instance
 -- table of its model's table.
@@ -342,7 +342,7 @@ INSERT INTO table_names (id) VALUES ('physical_assets');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'physical_assets', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'assets'
     UNION SELECT 'physical_assets', 'physical_assets';
-INSERT INTO table_name_instances (id, instance_table_name_id) VALUES ('physical_asset_models', 'physical_assets');
+UPDATE table_names SET instance_table_name_id = 'physical_assets' WHERE id = 'physical_asset_models';
 CREATE TRIGGER physical_assets_path AFTER INSERT ON physical_assets
     FOR EACH ROW EXECUTE FUNCTION check_asset_subtype();
 
@@ -389,7 +389,7 @@ INSERT INTO table_names (id) VALUES ('digital_assets');
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'digital_assets', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'assets'
     UNION SELECT 'digital_assets', 'digital_assets';
-INSERT INTO table_name_instances (id, instance_table_name_id) VALUES ('digital_asset_models', 'digital_assets');
+UPDATE table_names SET instance_table_name_id = 'digital_assets' WHERE id = 'digital_asset_models';
 CREATE TRIGGER digital_assets_path AFTER INSERT ON digital_assets
     FOR EACH ROW EXECUTE FUNCTION check_asset_subtype();
 

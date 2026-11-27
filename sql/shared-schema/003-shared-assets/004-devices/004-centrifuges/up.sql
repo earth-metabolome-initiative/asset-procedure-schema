@@ -181,8 +181,8 @@ CREATE TABLE centrifuges (
 );
 CREATE INDEX ON centrifuges (commercial_centrifuge_lot_id);
 INSERT INTO table_names (id) VALUES ('centrifuges');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_centrifuge_lots', 'centrifuges');
+UPDATE table_names SET instance_table_name_id = 'centrifuges'
+    WHERE id = 'commercial_centrifuge_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'centrifuges', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'centrifuges', 'centrifuges';

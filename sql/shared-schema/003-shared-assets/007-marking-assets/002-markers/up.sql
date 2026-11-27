@@ -180,8 +180,8 @@ CREATE TABLE markers (
 );
 CREATE INDEX ON markers (marker_model_id);
 INSERT INTO table_names (id) VALUES ('markers');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('marker_models', 'markers');
+UPDATE table_names SET instance_table_name_id = 'markers'
+    WHERE id = 'marker_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'markers', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'markers', 'markers';

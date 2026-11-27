@@ -188,8 +188,8 @@ CREATE TABLE fractioning_procedures (
 );
 CREATE INDEX ON fractioning_procedures (fractioning_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('fractioning_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('fractioning_procedure_templates', 'fractioning_procedures');
+UPDATE table_names SET instance_table_name_id = 'fractioning_procedures'
+    WHERE id = 'fractioning_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'fractioning_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'fractioning_procedures', 'fractioning_procedures';

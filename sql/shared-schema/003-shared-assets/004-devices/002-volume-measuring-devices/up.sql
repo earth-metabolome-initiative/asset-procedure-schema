@@ -180,8 +180,8 @@ CREATE TABLE volume_measuring_devices (
 );
 CREATE INDEX ON volume_measuring_devices (volume_measuring_device_model_id);
 INSERT INTO table_names (id) VALUES ('volume_measuring_devices');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('volume_measuring_device_models', 'volume_measuring_devices');
+UPDATE table_names SET instance_table_name_id = 'volume_measuring_devices'
+    WHERE id = 'volume_measuring_device_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'volume_measuring_devices', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'volume_measuring_devices', 'volume_measuring_devices';

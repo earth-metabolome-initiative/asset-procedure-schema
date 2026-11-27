@@ -144,8 +144,8 @@ CREATE TABLE freezing_procedures (
 );
 CREATE INDEX ON freezing_procedures (freezing_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('freezing_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('freezing_procedure_templates', 'freezing_procedures');
+UPDATE table_names SET instance_table_name_id = 'freezing_procedures'
+    WHERE id = 'freezing_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freezing_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'freezing_procedures', 'freezing_procedures';

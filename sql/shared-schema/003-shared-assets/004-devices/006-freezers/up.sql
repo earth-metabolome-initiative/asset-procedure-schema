@@ -181,8 +181,8 @@ CREATE TABLE freezers (
 );
 CREATE INDEX ON freezers (commercial_freezer_lot_id);
 INSERT INTO table_names (id) VALUES ('freezers');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_freezer_lots', 'freezers');
+UPDATE table_names SET instance_table_name_id = 'freezers'
+    WHERE id = 'commercial_freezer_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freezers', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'freezers', 'freezers';

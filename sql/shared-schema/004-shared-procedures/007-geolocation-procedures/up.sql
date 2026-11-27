@@ -127,8 +127,8 @@ CREATE TABLE geopositioning_procedures (
 );
 CREATE INDEX ON geopositioning_procedures (geopositioning_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('geopositioning_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('geopositioning_procedure_templates', 'geopositioning_procedures');
+UPDATE table_names SET instance_table_name_id = 'geopositioning_procedures'
+    WHERE id = 'geopositioning_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'geopositioning_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'geopositioning_procedures', 'geopositioning_procedures';

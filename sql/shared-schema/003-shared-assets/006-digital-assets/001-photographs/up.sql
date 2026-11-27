@@ -72,8 +72,8 @@ CREATE TABLE photographs (
 );
 CREATE INDEX ON photographs (photograph_model_id);
 INSERT INTO table_names (id) VALUES ('photographs');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('photograph_models', 'photographs');
+UPDATE table_names SET instance_table_name_id = 'photographs'
+    WHERE id = 'photograph_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'photographs', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('digital_assets')
     UNION SELECT 'photographs', 'photographs';

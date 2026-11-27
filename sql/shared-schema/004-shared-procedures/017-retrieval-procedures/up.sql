@@ -127,8 +127,8 @@ CREATE TABLE retrieval_procedures (
 );
 CREATE INDEX ON retrieval_procedures (retrieval_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('retrieval_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('retrieval_procedure_templates', 'retrieval_procedures');
+UPDATE table_names SET instance_table_name_id = 'retrieval_procedures'
+    WHERE id = 'retrieval_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'retrieval_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'retrieval_procedures', 'retrieval_procedures';

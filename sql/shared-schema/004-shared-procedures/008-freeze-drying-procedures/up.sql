@@ -153,8 +153,8 @@ CREATE TABLE freeze_drying_procedures (
 );
 CREATE INDEX ON freeze_drying_procedures (freeze_drying_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('freeze_drying_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('freeze_drying_procedure_templates', 'freeze_drying_procedures');
+UPDATE table_names SET instance_table_name_id = 'freeze_drying_procedures'
+    WHERE id = 'freeze_drying_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freeze_drying_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'freeze_drying_procedures', 'freeze_drying_procedures';

@@ -108,8 +108,8 @@ CREATE TABLE disposal_procedures (
 );
 CREATE INDEX ON disposal_procedures (disposal_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('disposal_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('disposal_procedure_templates', 'disposal_procedures');
+UPDATE table_names SET instance_table_name_id = 'disposal_procedures'
+    WHERE id = 'disposal_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'disposal_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'disposal_procedures', 'disposal_procedures';

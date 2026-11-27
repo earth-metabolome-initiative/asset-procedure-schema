@@ -284,8 +284,8 @@ CREATE TABLE containers (
 );
 CREATE INDEX ON containers (container_model_id);
 INSERT INTO table_names (id) VALUES ('containers');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('container_models', 'containers');
+UPDATE table_names SET instance_table_name_id = 'containers'
+    WHERE id = 'container_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'containers', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'containers', 'containers';
@@ -336,8 +336,8 @@ CREATE TABLE volumetric_containers (
 );
 CREATE INDEX ON volumetric_containers (volumetric_container_model_id);
 INSERT INTO table_names (id) VALUES ('volumetric_containers');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('volumetric_container_models', 'volumetric_containers');
+UPDATE table_names SET instance_table_name_id = 'volumetric_containers'
+    WHERE id = 'volumetric_container_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'volumetric_containers', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('containers')
     UNION SELECT 'volumetric_containers', 'volumetric_containers';

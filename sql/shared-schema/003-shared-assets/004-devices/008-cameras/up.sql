@@ -181,8 +181,8 @@ CREATE TABLE cameras (
 );
 CREATE INDEX ON cameras (commercial_camera_lot_id);
 INSERT INTO table_names (id) VALUES ('cameras');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_camera_lots', 'cameras');
+UPDATE table_names SET instance_table_name_id = 'cameras'
+    WHERE id = 'commercial_camera_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'cameras', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'cameras', 'cameras';

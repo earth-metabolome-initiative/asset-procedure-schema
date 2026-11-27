@@ -180,8 +180,8 @@ CREATE TABLE weighing_devices (
 );
 CREATE INDEX ON weighing_devices (weighing_device_model_id);
 INSERT INTO table_names (id) VALUES ('weighing_devices');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('weighing_device_models', 'weighing_devices');
+UPDATE table_names SET instance_table_name_id = 'weighing_devices'
+    WHERE id = 'weighing_device_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'weighing_devices', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'weighing_devices', 'weighing_devices';

@@ -181,8 +181,8 @@ CREATE TABLE mass_spectrometers (
 );
 CREATE INDEX ON mass_spectrometers (commercial_mass_spectrometer_lot_id);
 INSERT INTO table_names (id) VALUES ('mass_spectrometers');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_mass_spectrometer_lots', 'mass_spectrometers');
+UPDATE table_names SET instance_table_name_id = 'mass_spectrometers'
+    WHERE id = 'commercial_mass_spectrometer_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'mass_spectrometers', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'mass_spectrometers', 'mass_spectrometers';

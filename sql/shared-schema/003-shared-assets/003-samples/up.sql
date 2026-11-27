@@ -74,8 +74,8 @@ CREATE TABLE sample_sources (
 );
 CREATE INDEX ON sample_sources (sample_source_model_id);
 INSERT INTO table_names (id) VALUES ('sample_sources');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('sample_source_models', 'sample_sources');
+UPDATE table_names SET instance_table_name_id = 'sample_sources'
+    WHERE id = 'sample_source_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'sample_sources', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'sample_sources', 'sample_sources';
@@ -212,8 +212,8 @@ CREATE TABLE samples (
 CREATE INDEX ON samples (sample_model_id, sample_source_model_id);
 CREATE INDEX ON samples (sample_source_model_id);
 INSERT INTO table_names (id) VALUES ('samples');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('sample_models', 'samples');
+UPDATE table_names SET instance_table_name_id = 'samples'
+    WHERE id = 'sample_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'samples', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'samples', 'samples';

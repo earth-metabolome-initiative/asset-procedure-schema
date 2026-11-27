@@ -174,8 +174,8 @@ CREATE TABLE phone_devices (
 );
 CREATE INDEX ON phone_devices (commercial_phone_device_lot_id);
 INSERT INTO table_names (id) VALUES ('phone_devices');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_phone_device_lots', 'phone_devices');
+UPDATE table_names SET instance_table_name_id = 'phone_devices'
+    WHERE id = 'commercial_phone_device_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'phone_devices', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('cameras', 'geopositioning_devices')
     UNION SELECT 'phone_devices', 'phone_devices';

@@ -140,8 +140,8 @@ CREATE TABLE storage_procedures (
 );
 CREATE INDEX ON storage_procedures (storage_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('storage_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('storage_procedure_templates', 'storage_procedures');
+UPDATE table_names SET instance_table_name_id = 'storage_procedures'
+    WHERE id = 'storage_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'storage_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'storage_procedures', 'storage_procedures';

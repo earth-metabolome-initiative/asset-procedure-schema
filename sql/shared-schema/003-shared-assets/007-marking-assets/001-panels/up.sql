@@ -72,8 +72,8 @@ CREATE TABLE panels (
 );
 CREATE INDEX ON panels (panel_model_id);
 INSERT INTO table_names (id) VALUES ('panels');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('panel_models', 'panels');
+UPDATE table_names SET instance_table_name_id = 'panels'
+    WHERE id = 'panel_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'panels', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'panels', 'panels';

@@ -3,11 +3,17 @@
 ALTER DEFAULT PRIVILEGES FOR ROLE aps_writer REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
 
 -- Registry of APS tables, named by the `table_name_id` column of every root row
--- so a client can resolve the most concrete table holding an ownable `resource`.
+-- so a client can resolve the most concrete table holding a `resource`.
 CREATE TABLE table_names (
     -- Name of the APS table.
-    id TEXT PRIMARY KEY CHECK (id <> '' AND length(id) <= 63)
+    id TEXT PRIMARY KEY CHECK (id <> '' AND length(id) <= 63),
+    -- Table holding the instances of an asset model or procedure template
+    -- table's rows, the asset table whose model column references the model
+    -- table or the procedure table of a procedure template table. NULL for
+    -- every other table. The slice creating the instance table seeds it.
+    instance_table_name_id TEXT REFERENCES table_names (id)
 );
+CREATE INDEX ON table_names (instance_table_name_id);
 
 -- Reflexive transitive closure of the APS table tree, one row for a table and
 -- every table it extends, so a row of a subtype table can be checked against
@@ -36,18 +42,6 @@ CREATE TABLE table_name_admitted_parents (
 );
 CREATE INDEX ON table_name_admitted_parents (parent_table_name_id);
 
--- The table holding the instances of a model or template table's rows, the
--- asset table whose model column references the model table and the
--- procedure table of a procedure template table. Each slice seeds the rows
--- of the tables it creates.
-CREATE TABLE table_name_instances (
-    -- Asset model or procedure template table.
-    id TEXT PRIMARY KEY REFERENCES table_names (id) ON DELETE CASCADE,
-    -- Asset or procedure table holding the instances.
-    instance_table_name_id TEXT NOT NULL REFERENCES table_names (id)
-);
-CREATE INDEX ON table_name_instances (instance_table_name_id);
-
 -- The table an asset or procedure of a row of `model_table` names, the most
 -- concrete instance table of `model_table` or a table it extends, since the
 -- foreign key of an instance table admits models of every table extending
@@ -61,10 +55,10 @@ BEGIN
     SELECT count(DISTINCT candidate.instance_table_name_id), min(candidate.instance_table_name_id)
     INTO candidate_count, candidate_table
     FROM public.table_name_ancestors path
-    JOIN public.table_name_instances candidate ON candidate.id = path.ancestor_table_name_id
-    WHERE path.descendant_table_name_id = model_table AND NOT EXISTS (
+    JOIN public.table_names candidate ON candidate.id = path.ancestor_table_name_id
+    WHERE path.descendant_table_name_id = model_table AND candidate.instance_table_name_id IS NOT NULL AND NOT EXISTS (
         SELECT 1 FROM public.table_name_ancestors other_path
-        JOIN public.table_name_instances other ON other.id = other_path.ancestor_table_name_id
+        JOIN public.table_names other ON other.id = other_path.ancestor_table_name_id
         JOIN public.table_name_ancestors deeper ON deeper.descendant_table_name_id = other.instance_table_name_id
         WHERE other_path.descendant_table_name_id = model_table
             AND deeper.ancestor_table_name_id = candidate.instance_table_name_id
@@ -171,19 +165,15 @@ CREATE POLICY table_name_ancestors_select ON table_name_ancestors FOR SELECT TO 
 ALTER TABLE table_name_admitted_parents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE table_name_admitted_parents FORCE ROW LEVEL SECURITY;
 CREATE POLICY table_name_admitted_parents_select ON table_name_admitted_parents FOR SELECT TO app USING (true);
-ALTER TABLE table_name_instances ENABLE ROW LEVEL SECURITY;
-ALTER TABLE table_name_instances FORCE ROW LEVEL SECURITY;
-CREATE POLICY table_name_instances_select ON table_name_instances FOR SELECT TO app USING (true);
 
 REVOKE ALL ON table_names FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON table_name_ancestors FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON table_name_admitted_parents FROM PUBLIC, app, identity_writer;
-REVOKE ALL ON table_name_instances FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON slot_roles FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON slot_role_pairs FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON parameter_value_kinds FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON procedure_template_states FROM PUBLIC, app, identity_writer;
 REVOKE ALL ON procedure_statuses FROM PUBLIC, app, identity_writer;
-GRANT SELECT ON table_names, table_name_ancestors, table_name_admitted_parents, table_name_instances, slot_roles, slot_role_pairs,
+GRANT SELECT ON table_names, table_name_ancestors, table_name_admitted_parents, slot_roles, slot_role_pairs,
     parameter_value_kinds, procedure_template_states, procedure_statuses TO app;
-GRANT SELECT ON table_name_ancestors, table_name_admitted_parents, table_name_instances TO aps_writer;
+GRANT SELECT ON table_names, table_name_ancestors, table_name_admitted_parents TO aps_writer;

@@ -189,8 +189,8 @@ CREATE TABLE supernatant_procedures (
 );
 CREATE INDEX ON supernatant_procedures (supernatant_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('supernatant_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('supernatant_procedure_templates', 'supernatant_procedures');
+UPDATE table_names SET instance_table_name_id = 'supernatant_procedures'
+    WHERE id = 'supernatant_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'supernatant_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'supernatant_procedures', 'supernatant_procedures';

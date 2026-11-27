@@ -180,8 +180,8 @@ CREATE TABLE personal_protective_equipments (
 );
 CREATE INDEX ON personal_protective_equipments (personal_protective_equipment_model_id);
 INSERT INTO table_names (id) VALUES ('personal_protective_equipments');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('personal_protective_equipment_models', 'personal_protective_equipments');
+UPDATE table_names SET instance_table_name_id = 'personal_protective_equipments'
+    WHERE id = 'personal_protective_equipment_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'personal_protective_equipments', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'personal_protective_equipments', 'personal_protective_equipments';

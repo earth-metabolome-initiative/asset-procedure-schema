@@ -181,8 +181,8 @@ CREATE TABLE ball_mill_machines (
 );
 CREATE INDEX ON ball_mill_machines (commercial_ball_mill_machine_lot_id);
 INSERT INTO table_names (id) VALUES ('ball_mill_machines');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_ball_mill_machine_lots', 'ball_mill_machines');
+UPDATE table_names SET instance_table_name_id = 'ball_mill_machines'
+    WHERE id = 'commercial_ball_mill_machine_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'ball_mill_machines', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'ball_mill_machines', 'ball_mill_machines';

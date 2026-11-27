@@ -181,8 +181,8 @@ CREATE TABLE freeze_dryers (
 );
 CREATE INDEX ON freeze_dryers (commercial_freeze_dryer_lot_id);
 INSERT INTO table_names (id) VALUES ('freeze_dryers');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('commercial_freeze_dryer_lots', 'freeze_dryers');
+UPDATE table_names SET instance_table_name_id = 'freeze_dryers'
+    WHERE id = 'commercial_freeze_dryer_lots';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'freeze_dryers', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'freeze_dryers', 'freeze_dryers';

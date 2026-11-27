@@ -180,8 +180,8 @@ CREATE TABLE pipette_tips (
 );
 CREATE INDEX ON pipette_tips (pipette_tip_model_id);
 INSERT INTO table_names (id) VALUES ('pipette_tips');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('pipette_tip_models', 'pipette_tips');
+UPDATE table_names SET instance_table_name_id = 'pipette_tips'
+    WHERE id = 'pipette_tip_models';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'pipette_tips', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id IN ('physical_assets')
     UNION SELECT 'pipette_tips', 'pipette_tips';

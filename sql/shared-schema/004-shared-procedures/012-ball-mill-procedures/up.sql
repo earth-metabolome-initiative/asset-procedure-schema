@@ -172,8 +172,8 @@ CREATE TABLE ball_mill_procedures (
 );
 CREATE INDEX ON ball_mill_procedures (ball_mill_procedure_template_id);
 INSERT INTO table_names (id) VALUES ('ball_mill_procedures');
-INSERT INTO table_name_instances (id, instance_table_name_id)
-    VALUES ('ball_mill_procedure_templates', 'ball_mill_procedures');
+UPDATE table_names SET instance_table_name_id = 'ball_mill_procedures'
+    WHERE id = 'ball_mill_procedure_templates';
 INSERT INTO table_name_ancestors (descendant_table_name_id, ancestor_table_name_id)
     SELECT 'ball_mill_procedures', ancestor_table_name_id FROM table_name_ancestors WHERE descendant_table_name_id = 'procedures'
     UNION SELECT 'ball_mill_procedures', 'ball_mill_procedures';
